@@ -1,22 +1,36 @@
 #!/usr/bin/env python
 #------------------------------
-""" CalibPars - abstract class with interface description.
+""" CalibPars - abstract interface for access to calibration parameters.
 
-Methods of this class should be re-implemented in derived classes with name pattern CalibPars<Detector> 
-for different type of detectore.
-For example, CSPAD is implemented in class :py:class:`PSCalib.CalibParsCspadV1` etc.
-Access to all implemented sensors is available through the factory method in class :py:class:`PSCalib.CalibParsStore`.
+Methods of this class should be re-implemented in derived classes with name pattern CalibPars<Detector>
+for different type of detectore. For example, CSPAD can be implemented in class :py:class:`PSCalib.CalibParsCspadV1`
+which enherits from :py:class:`PSCalib.CalibPars`, etc.
+Currently implementation of this interface for all detectors is done in class :py:class:`PSCalib.GenericCalibPars`.
+Access to all detectors is available through the factory method in class :py:class:`PSCalib.CalibParsStore`.
 
-
-Usage::
+Usage of (implemented) interface methods::
 
     from PSCalib.CalibPars import CalibPars
+    import PSCalib.GlobalUtils as gu
 
     cp = CalibPars()
     cp.print_attrs()
-    size = cp.size()
 
-@see :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsCspad2x1V1`, :py:class:`PSCalib.CalibParsStore`
+    size = cp.pedestals()
+    size = cp.pixel_status()
+    size = cp.pixel_rms()
+    size = cp.pixel_gain()
+    size = cp.pixel_mask()
+    size = cp.pixel_bkgd()
+    size = cp.common_mode()
+
+    ctype = gu.PEDESTALS # ex.: gu.PIXEL_STATUS, gu.PIXEL_RMS, gu.PIXEL_MASK, etc.
+    size = cp.ndim(ctype)
+    size = cp.size(ctype)
+    size = cp.shape(ctype)
+    size = cp.status(ctype)
+
+@see :py:class:`GenericCalibPars`, :py:class:`PSCalib.CalibParsStore`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
@@ -148,6 +162,8 @@ if __name__ == "__main__" :
     cp = CalibPars()
     cp.print_attrs()
     size = cp.size()
+    size = cp.shape()
+    size = cp.status()
     sys.exit ('End of %s' % sys.argv[0])
 
 #------------------------------

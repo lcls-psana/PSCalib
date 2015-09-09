@@ -18,10 +18,11 @@ Revision: $Revision$
 class CalibParsBasePnccdV1 :
 
     ndim = 2 
-    rows = 0 # VARIABLE SHAPE DATA PARAMETERS WILL BE TAKEN FROM FILE METADATA
-    cols = 0 # VARIABLE SHAPE DATA PARAMETERS WILL BE TAKEN FROM FILE METADATA
-    size = rows*cols
-    shape = (rows, cols)
+    segs = 4
+    rows = 512
+    cols = 512
+    size = segs*rows*cols
+    shape = (segs, rows, cols)
     size_cm = 7 
     shape_cm = (size_cm,)
     cmod = (1,50,50,100,1,size,1)

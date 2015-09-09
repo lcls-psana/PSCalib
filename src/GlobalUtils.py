@@ -132,26 +132,75 @@ dic_det_type_to_calib_group = dict(zip(list_of_det_type, list_of_calib_groups))
 
 #------------------------------
 
-def det_src_to_type(source) :
+
+def det_type_from_source(source) :
     """ Returns enumerated detector type for string source
     """
-    if   source.find(':Cspad.')     : return CSPAD
-    elif source.find(':Cspad2x2.')  : return CSPAD2X2
-    elif source.find(':pnCCD.')     : return PNCCD
-    elif source.find(':Princeton.') : return PRINCETON
-    elif source.find(':Andor.')     : return ANDOR
-    elif source.find(':Epix100a.')  : return EPIX100A
-    elif source.find(':Opal1000.')  : return OPAL1000
-    elif source.find(':Opal2000.')  : return OPAL2000
-    elif source.find(':Opal4000.')  : return OPAL4000
-    elif source.find(':Opal8000.')  : return OPAL8000
-    elif source.find(':Tm6740.')    : return ORCAFL40
-    elif source.find(':OrcaFl40.')  : return ORCAFL40
-    elif source.find(':Fccd960.')   : return FCCD960
-    elif source.find(':Acqiris.')   : return ACQIRIS
-    else                            : return UNDEFINED
+    str_src = str(source)
+    if   ':Cspad.'     in str_src : return CSPAD
+    elif ':Cspad2x2.'  in str_src : return CSPAD2X2
+    elif ':pnCCD.'     in str_src : return PNCCD
+    elif ':Princeton.' in str_src : return PRINCETON
+    elif ':Andor.'     in str_src : return ANDOR
+    elif ':Epix100a.'  in str_src : return EPIX100A
+    elif ':Opal1000.'  in str_src : return OPAL1000
+    elif ':Opal2000.'  in str_src : return OPAL2000
+    elif ':Opal4000.'  in str_src : return OPAL4000
+    elif ':Opal8000.'  in str_src : return OPAL8000
+    elif ':Tm6740.'    in str_src : return ORCAFL40
+    elif ':OrcaFl40.'  in str_src : return ORCAFL40
+    elif ':Fccd960.'   in str_src : return FCCD960
+    elif ':Acqiris.'   in str_src : return ACQIRIS
+    else                          : return UNDEFINED
 
 #------------------------------
+##-----------------------------
+#------------------------------
+
+def string_from_source(source) :
+  """Returns string like "CxiDs2.0:Cspad.0" from "Source('DetInfo(CxiDs2.0:Cspad.0)')" or "Source('DsaCsPad')"
+  """
+  str_in_quots = str(source).split('"')[1]
+  str_split = str_in_quots.split('(') 
+  return str_split[1].rstrip(')') if len(str_split)>1 else str_in_quots
+
+#------------------------------
+
+def merge_masks(mask1=None, mask2=None) :
+    """Merging masks using rule: (0,1,0,1)^(0,0,1,1) = (0,0,0,1) 
+    """
+    if mask1 is None : return mask2
+    if mask2 is None : return mask1
+
+    shape1 = mask1.shape
+    shape2 = mask2.shape
+
+    if shape1 != shape2 :
+        if len(shape1) > len(shape2) : mask2.shape = shape1
+        else                         : mask1.shape = shape2
+
+    return np.logical_and(mask1, mask2)
+
+##-----------------------------
+
+def reshape_nda_to_2d(arr) :
+    """Reshape np.array to 2-d
+    """
+    sh = arr.shape
+    if len(sh)<3 : return arr
+    arr.shape = (arr.size/sh[-1], sh[-1])
+    return arr
+
+##-----------------------------
+
+def reshape_nda_to_3d(arr) :
+    """Reshape np.array to 3-d
+    """
+    sh = arr.shape
+    if len(sh)<4 : return arr
+    arr.shape = (arr.size/sh[-1]/sh[-2], sh[-2], sh[-1])
+    return arr
+
 #------------------------------
 #------------------------------
 #------------------------------

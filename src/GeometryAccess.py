@@ -71,7 +71,9 @@ class GeometryAccess :
         """  Constructor of the class :py:class:`GeometryAccess`      
         """        
         if not os.path.exists(path) :
-            sys.exit ('file %s does not exist' % path)
+            if pbits : print '%s: geometry file "%s" does not exist' % (self.__class__.__name__, path)
+            self.valid = False
+            return
 
         self.path = path
         self.pbits = pbits
@@ -80,7 +82,8 @@ class GeometryAccess :
         if self.pbits & 1 : self.print_list_of_geos()
         if self.pbits & 2 : self.print_list_of_geos_children()
         if self.pbits & 4 : self.print_comments_from_dict()
-
+        self.valid = True
+    
     #------------------------------
 
     def load_pars_from_file(self, path=None) :
@@ -113,6 +116,7 @@ class GeometryAccess :
     def save_pars_in_file(self, path) :
         """Save "geometry" file with current content
         """        
+        if not self.valid : return
 
         if self.pbits & 32 : print 'Save file: %s' % path
 
@@ -228,6 +232,8 @@ class GeometryAccess :
     def get_geo(self, oname, oindex) :
         """Returns specified geometry object
         """
+        if not self.valid : return None
+
         for geo in self.list_of_geos :
             if  geo.oindex == oindex \
             and geo.oname  == oname :
@@ -239,6 +245,7 @@ class GeometryAccess :
     def get_top_geo(self) :
         """Returns top geometry object
         """
+        if not self.valid : return None
         return self.list_of_geos[-1]
     
     #------------------------------
@@ -246,6 +253,7 @@ class GeometryAccess :
     def get_pixel_coords(self, oname=None, oindex=0, do_tilt=True) :
         """Returns three pixel X,Y,Z coordinate arrays for top or specified geometry object 
         """
+        if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
         if self.pbits & 8 :
             print 'get_pixel_coords(...) for geo:',
@@ -258,6 +266,7 @@ class GeometryAccess :
     def get_pixel_areas(self, oname=None, oindex=0) :
         """Returns pixel areas array for top or specified geometry object 
         """
+        if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
         return geo.get_pixel_areas()
 
@@ -270,6 +279,7 @@ class GeometryAccess :
                   +4 - non-bounded pixels
                   +8 - neighbours of non-bounded pixels
         """
+        if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
         return geo.get_pixel_mask(mbits)
 
@@ -278,6 +288,7 @@ class GeometryAccess :
     def get_pixel_scale_size(self, oname=None, oindex=0) :
         """Returns pixel scale size for top or specified geometry object 
         """
+        if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)        
         return geo.get_pixel_scale_size()
 
@@ -286,6 +297,7 @@ class GeometryAccess :
     def get_dict_of_comments(self) :
         """Returns dictionary of comments
         """
+        if not self.valid : return None
         return self.dict_of_comments
 
     #------------------------------
@@ -293,6 +305,7 @@ class GeometryAccess :
     def set_geo_pars(self, oname=None, oindex=0, x0=0, y0=0, z0=0, rot_z=0, rot_y=0, rot_x=0, tilt_z=0, tilt_y=0, tilt_x=0) :
         """Sets geometry parameters for specified or top geometry object
         """
+        if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
         return geo.set_geo_pars(x0, y0, z0, rot_z, rot_y, rot_x, tilt_z, tilt_y, tilt_x)
 
@@ -301,6 +314,7 @@ class GeometryAccess :
     def move_geo(self, oname=None, oindex=0, dx=0, dy=0, dz=0) :
         """Moves specified or top geometry object by dx, dy, dz
         """
+        if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
         return geo.move_geo(dx, dy, dz)
 
@@ -309,6 +323,7 @@ class GeometryAccess :
     def tilt_geo(self, oname=None, oindex=0, dt_x=0, dt_y=0, dt_z=0) :
         """Tilts specified or top geometry object by dt_x, dt_y, dt_z
         """
+        if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
         return geo.tilt_geo(dt_x, dt_y, dt_z)
 
@@ -317,6 +332,7 @@ class GeometryAccess :
     def print_list_of_geos(self) :
         ss = '\nprint_list_of_geos():'
         if len(self.list_of_geos) == 0 : print '%s List_of_geos is empty...' % ss
+        if not self.valid : return
         for geo in self.list_of_geos : geo.print_geo()
 
     #------------------------------
@@ -324,12 +340,14 @@ class GeometryAccess :
     def print_list_of_geos_children(self) :
         ss = '\nprint_list_of_geos_children():'
         if len(self.list_of_geos) == 0 : print '%s List_of_geos is empty...' % ss
+        if not self.valid : return
         for geo in self.list_of_geos : geo.print_geo_children()
 
     #------------------------------
     
     def print_comments_from_dict(self) :
         print '\nprint_comments_from_dict():'
+        if not self.valid : return
         #for k,v in self.dict_of_comments.iteritems():
         for k in sorted(self.dict_of_comments):
             print 'key: %s  val: %s' % (k.ljust(10), self.dict_of_comments[k])
@@ -339,6 +357,7 @@ class GeometryAccess :
     def print_pixel_coords(self, oname=None, oindex=0) :
         """Partial print of pixel coordinate X,Y,Z arrays for selected or top(by default) geo
         """
+        if not self.valid : return
         X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt=True)
 
         print 'size=', X.size
@@ -351,6 +370,7 @@ class GeometryAccess :
     def get_pixel_coord_indexes(self, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True) :
         """Returns three pixel X,Y,Z coordinate index arrays for top or specified geometry object 
         """
+        if not self.valid : return None, None
         X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt)
 
         pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
@@ -386,6 +406,7 @@ class GeometryAccess :
     def get_psf(self) :
         """Returns array of vectors in TJ format (psf stands for position-slow-fast vectors)
         """
+        if not self.valid : return None
         X, Y, Z = self.get_pixel_coords() # pixel positions for top level object
         if X.size != 32*185*388 : return None
         # For now it works for CSPAD only
@@ -415,6 +436,7 @@ class GeometryAccess :
     def print_psf(self) :
         """ Gets and prints psf array for test purpose
         """
+        if not self.valid : return None
         psf = np.array( geometry.get_psf() )
         print 'print_psf(): psf.shape: %s \npsf vectors:' % (str(psf.shape)) 
         for (px,py,pz), (sx,xy,xz), (fx,fy,fz) in psf:
@@ -444,12 +466,15 @@ def img_from_pixel_arrays(iX, iY, W=None, dtype=np.float32, vbase=0) :
         print msg
         return img_default()
 
-    xsize = iX.max()+1 
-    ysize = iY.max()+1
+    iXfl = iX.flatten()
+    iYfl = iY.flatten()
 
-    weight = W if W is not None else np.ones_like(iX)
+    xsize = iXfl.max()+1 
+    ysize = iYfl.max()+1
+
+    weight = W.flatten() if W is not None else np.ones_like(iXfl)
     img = vbase*np.ones((xsize,ysize), dtype=dtype)
-    img[iX,iY] = weight # Fill image array with data 
+    img[iXfl,iYfl] = weight # Fill image array with data 
     return img
 
 #------------------------------

@@ -46,12 +46,14 @@ class CalibFile :
         basename = os.path.splitext(fname)[0]
 
         if not ('-' in basename) :
-            if self.pbits & 1  : print 'WARNING! MISSING DASH IN FILENAME "%s"' % basename
+            if self.pbits : print 'WARNING! FILE NAME "%s" IS NOT VALID - MISSING DASH' % basename
+            self.valid = False
             return
             
         begin, end = basename.split('-')
         self.begin = int(begin)
         self.end   = int(end) if end != 'end' else self.rnum_max
+        self.valid = True
 
     def get_path(self) :
         return self.path
@@ -108,8 +110,7 @@ class CalibFileFinder :
     def selectCalibFile(self, files, rnum) :
         """Selects calibration file from a list of file names
         """
-
-        if self.pbits & 2 : print '\nUnsorted list of *.data files in the calib directory:'
+        if self.pbits & 1024 : print '\nUnsorted list of *.data files in the calib directory:'
         list_cf = []
         for path in files : 
            fname = os.path.basename(path)
@@ -118,8 +119,9 @@ class CalibFileFinder :
            if os.path.splitext(fname)[1] != '.data' : continue
 
            cf = CalibFile(path)
-           if self.pbits & 2 : print cf.str_attrs()
-           list_cf.append(cf)
+           if cf.valid :
+               if self.pbits & 1024 : print cf.str_attrs()
+               list_cf.append(cf)
            
         # sotr list
         list_cf_ord = sorted(list_cf)

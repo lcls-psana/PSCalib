@@ -11,10 +11,20 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-49
+2015-09-09 Mikhail S. Dubrovin
+- GenericCalibPars.py - fix logic of ndim, shape, size and other misc. changes.
+- CalibFileFinder.py - add protection in case of non-recognized calib file name.
+- CalibParsBasePnccdV1.py - for pnccd use fixed size array parameters; segs = 4, rows=cols=512.
+- CalibPars.py - update self-doc.
+- CalibParsStore.py  - use gu.det_type_from_source
+- GeometryAccess.py - add protection if calibration file is missing.
+- GlobalUtils.py - fix det_type_from_source, add string_from_source, merge_masks, reshape_nda_to_2(3)d
+
 Tag: V00-02-48
 2015-08-27 Mikhail S. Dubrovin
 - minor corrections of auto-doc.
-- add bunch of modules src/CalibPars*.py, src/GenericCalibPars.py, src/GlobalUtils.py
+- add src/CalibPars*.py, src/GenericCalibPars.py, src/GlobalUtils.py
 	- to access calibration constants from python (PSAS-139)
 2015-08-24 Mikhail S. Dubrovin
 - SegGeometryCspad2x1V1::pixel_mask_array - fix filling 2x1 last row of zeros.

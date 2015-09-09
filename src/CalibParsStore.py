@@ -99,7 +99,7 @@ class CalibParsStore() :
             @param pbits=0  - [int] print control bits, ex: 255
         """        
 
-        dettype = gu.det_src_to_type(source)
+        dettype = gu.det_type_from_source(source)
         grp = group if group is not None else gu.dic_det_type_to_calib_group[dettype]
 
         if pbits : print '%s: Detector type = %d: %s' % (self.name, dettype, gu.dic_det_type_to_name[dettype])
