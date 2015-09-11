@@ -75,6 +75,8 @@ class GeometryAccess :
             self.valid = False
             return
 
+        self.valid = True
+
         self.path = path
         self.pbits = pbits
         self.load_pars_from_file()
@@ -82,7 +84,6 @@ class GeometryAccess :
         if self.pbits & 1 : self.print_list_of_geos()
         if self.pbits & 2 : self.print_list_of_geos_children()
         if self.pbits & 4 : self.print_comments_from_dict()
-        self.valid = True
     
     #------------------------------
 

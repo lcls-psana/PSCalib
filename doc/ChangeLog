@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-50
+2015-09-11 Mikhail S. Dubrovin
+- GeometryAccess.py - define self.valid before self.load_pars_from_file().
+	
 Tag: V00-02-49
 2015-09-09 Mikhail S. Dubrovin
 - GenericCalibPars.py - fix logic of ndim, shape, size and other misc. changes.
