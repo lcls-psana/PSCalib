@@ -75,6 +75,7 @@ from PSCalib.CalibParsBaseEpix100aV1  import CalibParsBaseEpix100aV1
 from PSCalib.CalibParsBasePnccdV1     import CalibParsBasePnccdV1    
 from PSCalib.CalibParsBasePrincetonV1 import CalibParsBasePrincetonV1
 from PSCalib.CalibParsBaseAcqirisV1   import CalibParsBaseAcqirisV1
+from PSCalib.CalibParsBaseImpV1       import CalibParsBaseImpV1
 
 #------------------------------
 
@@ -112,6 +113,7 @@ class CalibParsStore() :
         elif dettype == gu.ANDOR     : cbase = CalibParsBaseAndorV1()    
         elif dettype == gu.EPIX100A  : cbase = CalibParsBaseEpix100aV1() 
         elif dettype == gu.ACQIRIS   : cbase = CalibParsBaseAcqirisV1() 
+        elif dettype == gu.IMP       : cbase = CalibParsBaseImpV1() 
         else :
             for det in (gu.OPAL1000, gu.OPAL2000, gu.OPAL4000, gu.OPAL8000, gu.TM6740, gu.ORCAFL40, gu.FCCD960) :
                 if dettype == det : cbase = CalibParsBaseCameraV1()

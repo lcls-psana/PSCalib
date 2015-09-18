@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-51
+2015-09-18 Mikhail S. Dubrovin
+- add CalibParsBaseImpV1.py, add Imp in GlobalUtils.py and CalibParsStore.py (PSAS-139)
+
 Tag: V00-02-50
 2015-09-11 Mikhail S. Dubrovin
 - GeometryAccess.py - define self.valid before self.load_pars_from_file().

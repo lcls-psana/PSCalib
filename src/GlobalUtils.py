@@ -93,16 +93,17 @@ EPIX100A  = 13
 FCCD960   = 14
 ANDOR     = 15
 ACQIRIS   = 16
+IMP       = 17
 """ Enumetated detector types"""
 
 list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740, \
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000, \
-                    ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS)
+                    ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP)
 """ List of enumetated detector types"""
 
 list_of_det_names = ('UNDEFINED', 'CSPAD', 'CSPAD2x2', 'Princeton', 'pnCCD', 'Tm6740', \
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
-                     'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris')
+                     'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp')
 """ List of enumetated detector names"""
 
 list_of_calib_groups = ('UNDEFINED',
@@ -121,7 +122,8 @@ list_of_calib_groups = ('UNDEFINED',
                         'Epix100a::CalibV1',
                         'Camera::CalibV1',
                         'Andor::CalibV1',
-                        'Acqiris::CalibV1')
+                        'Acqiris::CalibV1',
+                        'Imp::CalibV1')
 """ List of enumetated detector calibration groups"""
 
 dic_det_type_to_name = dict(zip(list_of_det_type, list_of_det_names))
@@ -151,6 +153,7 @@ def det_type_from_source(source) :
     elif ':OrcaFl40.'  in str_src : return ORCAFL40
     elif ':Fccd960.'   in str_src : return FCCD960
     elif ':Acqiris.'   in str_src : return ACQIRIS
+    elif ':Imp.'       in str_src : return IMP
     else                          : return UNDEFINED
 
 #------------------------------
