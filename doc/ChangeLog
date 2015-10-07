@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-52
+2015-10-06 Mikhail S. Dubrovin
+- GlobalUtils.py - add Quartz4A150 detector
+- CalibParsStore.py - add QUARTZ4A150 as CalibParsBaseCameraV1()
+	
 Tag: V00-02-51
 2015-09-18 Mikhail S. Dubrovin
 - add CalibParsBaseImpV1.py, add Imp in GlobalUtils.py and CalibParsStore.py (PSAS-139)

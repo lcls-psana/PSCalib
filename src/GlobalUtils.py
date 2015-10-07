@@ -76,34 +76,35 @@ dic_calib_status_name_to_value = dict(zip(calib_statnames,  calib_statvalues))
 #------------------------------
 #------------------------------
 
-UNDEFINED = 0
-CSPAD     = 1 
-CSPAD2X2  = 2 
-PRINCETON = 3 
-PNCCD     = 4 
-TM6740    = 5 
-OPAL1000  = 6 
-OPAL2000  = 7 
-OPAL4000  = 8 
-OPAL8000  = 9 
-ORCAFL40  = 10
-EPIX      = 11
-EPIX10K   = 12
-EPIX100A  = 13
-FCCD960   = 14
-ANDOR     = 15
-ACQIRIS   = 16
-IMP       = 17
+UNDEFINED   = 0
+CSPAD       = 1 
+CSPAD2X2    = 2 
+PRINCETON   = 3 
+PNCCD       = 4 
+TM6740      = 5 
+OPAL1000    = 6 
+OPAL2000    = 7 
+OPAL4000    = 8 
+OPAL8000    = 9 
+ORCAFL40    = 10
+EPIX        = 11
+EPIX10K     = 12
+EPIX100A    = 13
+FCCD960     = 14
+ANDOR       = 15
+ACQIRIS     = 16
+IMP         = 17
+QUARTZ4A150 = 18
 """ Enumetated detector types"""
 
 list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740, \
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000, \
-                    ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP)
+                    ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150)
 """ List of enumetated detector types"""
 
 list_of_det_names = ('UNDEFINED', 'CSPAD', 'CSPAD2x2', 'Princeton', 'pnCCD', 'Tm6740', \
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
-                     'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp')
+                     'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150')
 """ List of enumetated detector names"""
 
 list_of_calib_groups = ('UNDEFINED',
@@ -123,7 +124,9 @@ list_of_calib_groups = ('UNDEFINED',
                         'Camera::CalibV1',
                         'Andor::CalibV1',
                         'Acqiris::CalibV1',
-                        'Imp::CalibV1')
+                        'Imp::CalibV1',
+                        'Camera::CalibV1')
+
 """ List of enumetated detector calibration groups"""
 
 dic_det_type_to_name = dict(zip(list_of_det_type, list_of_det_names))
@@ -139,22 +142,23 @@ def det_type_from_source(source) :
     """ Returns enumerated detector type for string source
     """
     str_src = str(source)
-    if   ':Cspad.'     in str_src : return CSPAD
-    elif ':Cspad2x2.'  in str_src : return CSPAD2X2
-    elif ':pnCCD.'     in str_src : return PNCCD
-    elif ':Princeton.' in str_src : return PRINCETON
-    elif ':Andor.'     in str_src : return ANDOR
-    elif ':Epix100a.'  in str_src : return EPIX100A
-    elif ':Opal1000.'  in str_src : return OPAL1000
-    elif ':Opal2000.'  in str_src : return OPAL2000
-    elif ':Opal4000.'  in str_src : return OPAL4000
-    elif ':Opal8000.'  in str_src : return OPAL8000
-    elif ':Tm6740.'    in str_src : return ORCAFL40
-    elif ':OrcaFl40.'  in str_src : return ORCAFL40
-    elif ':Fccd960.'   in str_src : return FCCD960
-    elif ':Acqiris.'   in str_src : return ACQIRIS
-    elif ':Imp.'       in str_src : return IMP
-    else                          : return UNDEFINED
+    if   ':Cspad.'      in str_src : return CSPAD
+    elif ':Cspad2x2.'   in str_src : return CSPAD2X2
+    elif ':pnCCD.'      in str_src : return PNCCD
+    elif ':Princeton.'  in str_src : return PRINCETON
+    elif ':Andor.'      in str_src : return ANDOR
+    elif ':Epix100a.'   in str_src : return EPIX100A
+    elif ':Opal1000.'   in str_src : return OPAL1000
+    elif ':Opal2000.'   in str_src : return OPAL2000
+    elif ':Opal4000.'   in str_src : return OPAL4000
+    elif ':Opal8000.'   in str_src : return OPAL8000
+    elif ':Tm6740.'     in str_src : return ORCAFL40
+    elif ':OrcaFl40.'   in str_src : return ORCAFL40
+    elif ':Fccd960.'    in str_src : return FCCD960
+    elif ':Acqiris.'    in str_src : return ACQIRIS
+    elif ':Imp.'        in str_src : return IMP
+    elif ':Quartz4A150' in str_src : return QUARTZ4A150
+    else                           : return UNDEFINED
 
 #------------------------------
 ##-----------------------------
