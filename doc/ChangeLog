@@ -13,7 +13,7 @@ reverse time order.
 
 Tag: V00-02-52
 2015-10-06 Mikhail S. Dubrovin
-- GlobalUtils.py - add Quartz4A150 detector
+- GlobalUtils.py - add Quartz4A150 detector (PSAS-139)
 - CalibParsStore.py - add QUARTZ4A150 as CalibParsBaseCameraV1()
 	
 Tag: V00-02-51
