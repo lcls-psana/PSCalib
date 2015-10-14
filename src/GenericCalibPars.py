@@ -73,20 +73,19 @@ class GenericCalibPars (CalibPars) :
         """
         CalibPars.__init__(self)
 
-        self.cbase    = cbase    # ex.: PSCalib.CalibParsBaseAndorV1
+        self.cbase    = cbase    # ex.: PSCalib.CalibParsBaseAndorV1 or None
         self.calibdir = calibdir # ex.: '/reg/d/psdm/CXI/cxif5315/calib'
         self.group    = group    # ex.: 'PNCCD::CalibV1'
         self.source   = source   # ex.: 'CxiDs2.0:Cspad.0' 
         self.runnum   = runnum   # ex.: 10
         self.pbits    = pbits    # ex.: 255 
 
-        self.cff      = CalibFileFinder(calibdir, group, 0377 if pbits else 0)   
-
-        self._ndim  = cbase.ndim
-        self._size  = cbase.size # it might be 0 for variable size cameras
-        self._shape = cbase.shape
-
         self.reset_dicts()
+
+        self.cff    = None if self.cbase is None else CalibFileFinder(calibdir, group, 0377 if pbits else 0)
+        self._ndim  = None if self.cbase is None else cbase.ndim                                            
+        self._size  = None if self.cbase is None else cbase.size # it might be 0 for variable size cameras  
+        self._shape = None if self.cbase is None else cbase.shape                                           
 
 #------------------------------
 
@@ -130,13 +129,15 @@ class GenericCalibPars (CalibPars) :
         """ Returns numpy array with default constants
 
         Logic:
+        0) if detector is undefined and base constants are missing - return None
         1) if constants for common mode - return default numpy array
         2) if base size of calibration constants is 0 (for variable image size cameras)
            - return None (they can be loaded from file only!
         3) for PEDESTALS, PIXEL_STATUS, PIXEL_BKGD return numpy array of **zeros** for base shape and dtype
         4) for all other calibration types return numpy array of **ones** for base shape and dtype
-
         """
+
+        if self.cbase is None : return None
 
         tname = gu.dic_calib_type_to_name[ctype]
         if self.pbits : print 'INFO %s: load default constants of type %s' % (self.msgh(3), tname)
@@ -167,6 +168,7 @@ class GenericCalibPars (CalibPars) :
         """ Returns numpy array with calibration constants for specified type
 
         Logic:
+        a) if detector is undefined and base constants are missing - return None
         0) if constants are available in cash (self.dic_constants) - return them
         1) if calib file is not found:
            - return result from constants_default(ctype)
@@ -177,8 +179,9 @@ class GenericCalibPars (CalibPars) :
         5) if base size>0 and loaded size is not equal to the base size
            - return result from constants_default(ctype)
         6) reshape numpy array to the base shape and return.
-
         """
+
+        if self.cbase is None : return None
 
         if self.dic_constants[ctype] is not None :
             return self.dic_constants[ctype]

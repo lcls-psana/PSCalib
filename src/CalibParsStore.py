@@ -119,11 +119,11 @@ class CalibParsStore() :
                         gu.QUARTZ4A150, gu.RAYONIX) :
                 if dettype == det : cbase = CalibParsBaseCameraV1()
 
-        if cbase is not None :
-            return GenericCalibPars(cbase, calibdir, grp, source, runnum, pbits)
+        if cbase is None :
+            print 'Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__)
+            #raise IOError('Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__))
 
-        print 'Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__)
-        return None
+        return GenericCalibPars(cbase, calibdir, grp, source, runnum, pbits)
 
 #------------------------------
 

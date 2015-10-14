@@ -11,6 +11,12 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-54
+2015-10-14 Mikhail S. Dubrovin
+- Fix crash if detector source is missing in data (PSAS-139)
+   - CalibParsStore.py - method Create now returns object even if the detector source is missing.
+   - GenericCalibPars.py - sets self.cbase = None if detector source is missing. Returns None for missing constants.	
+
 Tag: V00-02-53
 2015-10-14 Mikhail S. Dubrovin
 - Add support for Rayonix (PSAS-139)
