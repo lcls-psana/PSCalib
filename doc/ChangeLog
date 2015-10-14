@@ -11,10 +11,15 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-53
+2015-10-14 Mikhail S. Dubrovin
+- Add support for Rayonix (PSAS-139)
+
 Tag: V00-02-52
 2015-10-06 Mikhail S. Dubrovin
-- GlobalUtils.py - add Quartz4A150 detector (PSAS-139)
-- CalibParsStore.py - add QUARTZ4A150 as CalibParsBaseCameraV1()
+- Add support for Quartz4A150 (PSAS-139)
+  GlobalUtils.py - add Quartz4A150 detector
+  CalibParsStore.py - add QUARTZ4A150 as CalibParsBaseCameraV1()
 	
 Tag: V00-02-51
 2015-09-18 Mikhail S. Dubrovin

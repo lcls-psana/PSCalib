@@ -95,16 +95,17 @@ ANDOR       = 15
 ACQIRIS     = 16
 IMP         = 17
 QUARTZ4A150 = 18
+RAYONIX     = 19
 """ Enumetated detector types"""
 
 list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740, \
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000, \
-                    ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150)
+                    ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX)
 """ List of enumetated detector types"""
 
 list_of_det_names = ('UNDEFINED', 'CSPAD', 'CSPAD2x2', 'Princeton', 'pnCCD', 'Tm6740', \
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
-                     'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150')
+                     'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150', 'Rayonix')
 """ List of enumetated detector names"""
 
 list_of_calib_groups = ('UNDEFINED',
@@ -125,8 +126,8 @@ list_of_calib_groups = ('UNDEFINED',
                         'Andor::CalibV1',
                         'Acqiris::CalibV1',
                         'Imp::CalibV1',
+                        'Camera::CalibV1',
                         'Camera::CalibV1')
-
 """ List of enumetated detector calibration groups"""
 
 dic_det_type_to_name = dict(zip(list_of_det_type, list_of_det_names))
@@ -136,7 +137,6 @@ dic_det_type_to_calib_group = dict(zip(list_of_det_type, list_of_calib_groups))
 """ Dictionary for detector type : group"""
 
 #------------------------------
-
 
 def det_type_from_source(source) :
     """ Returns enumerated detector type for string source
@@ -158,6 +158,7 @@ def det_type_from_source(source) :
     elif ':Acqiris.'    in str_src : return ACQIRIS
     elif ':Imp.'        in str_src : return IMP
     elif ':Quartz4A150' in str_src : return QUARTZ4A150
+    elif ':Rayonix'     in str_src : return RAYONIX
     else                           : return UNDEFINED
 
 #------------------------------
