@@ -96,16 +96,18 @@ ACQIRIS     = 16
 IMP         = 17
 QUARTZ4A150 = 18
 RAYONIX     = 19
+EVR         = 20
 """ Enumetated detector types"""
 
 list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740, \
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000, \
-                    ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX)
+                    ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX,
+                    EVR)
 """ List of enumetated detector types"""
 
 list_of_det_names = ('UNDEFINED', 'CSPAD', 'CSPAD2x2', 'Princeton', 'pnCCD', 'Tm6740', \
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
-                     'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150', 'Rayonix')
+                     'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150', 'Rayonix', 'Evr')
 """ List of enumetated detector names"""
 
 list_of_calib_groups = ('UNDEFINED',
@@ -137,6 +139,72 @@ dic_det_type_to_calib_group = dict(zip(list_of_det_type, list_of_calib_groups))
 """ Dictionary for detector type : group"""
 
 #------------------------------
+bld_names = \
+['EBeam',
+'PhaseCavity',
+'FEEGasDetEnergy',
+'Nh2Sb1Ipm01',
+'HxxUm6Imb01',
+'HxxUm6Imb02',
+'HfxDg2Imb01',
+'HfxDg2Imb02',
+'XcsDg3Imb03',
+'XcsDg3Imb04',
+'HfxDg3Imb01',
+'HfxDg3Imb02',
+'HxxDg1Cam',
+'HfxDg2Cam',
+'HfxDg3Cam',
+'XcsDg3Cam',
+'HfxMonCam',
+'HfxMonImb01',
+'HfxMonImb02',
+'HfxMonImb03',
+'MecLasEm01',
+'MecTctrPip01',
+'MecTcTrDio01',
+'MecXt2Ipm02',
+'MecXt2Ipm03',
+'MecHxmIpm01',
+'GMD',
+'CxiDg1Imb01',
+'CxiDg2Imb01',
+'CxiDg2Imb02',
+'CxiDg4Imb01',
+'CxiDg1Pim',
+'CxiDg2Pim',
+'CxiDg4Pim',
+'XppMonPim0',
+'XppMonPim1',
+'XppSb2Ipm',
+'XppSb3Ipm',
+'XppSb3Pim',
+'XppSb4Pim',
+'XppEndstation0',
+'XppEndstation1',
+'MecXt2Pim02',
+'MecXt2Pim03',
+'CxiDg3Spec',
+'Nh2Sb1Ipm02',
+'FeeSpec0',
+'SxrSpec0',
+'XppSpec0',
+'XcsUsrIpm01',
+'XcsUsrIpm02',
+'XcsUsrIpm03',
+'XcsUsrIpm04',
+'XcsSb1Ipm01',
+'XcsSb1Ipm02',
+'XcsSb2Ipm01',
+'XcsSb2Ipm02',
+'XcsGonIpm01',
+'XcsLamIpm01',
+'XppAin01',
+'XcsAin01',
+'AmoAin01']
+
+
+#------------------------------
 
 def det_type_from_source(source) :
     """ Returns enumerated detector type for string source
@@ -159,6 +227,7 @@ def det_type_from_source(source) :
     elif ':Imp.'        in str_src : return IMP
     elif ':Quartz4A150' in str_src : return QUARTZ4A150
     elif ':Rayonix'     in str_src : return RAYONIX
+    elif ':Evr.'        in str_src : return EVR
     else                           : return UNDEFINED
 
 #------------------------------

@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-55
+2015-11-09 TJ Lane
+- Added explicit list of BldInfo names to GlobalUtils.py
+
 Tag: V00-02-54
 2015-10-14 Mikhail S. Dubrovin
 - Fix crash if detector source is missing in data (PSAS-139)
