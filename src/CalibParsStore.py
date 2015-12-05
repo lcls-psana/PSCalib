@@ -116,7 +116,7 @@ class CalibParsStore() :
         elif dettype == gu.IMP       : cbase = CalibParsBaseImpV1() 
         else :
             for det in (gu.OPAL1000, gu.OPAL2000, gu.OPAL4000, gu.OPAL8000, gu.TM6740, gu.ORCAFL40, gu.FCCD960,\
-                        gu.QUARTZ4A150, gu.RAYONIX) :
+                        gu.QUARTZ4A150, gu.RAYONIX, gu.FCCD) :
                 if dettype == det : cbase = CalibParsBaseCameraV1()
 
         if cbase is None :
