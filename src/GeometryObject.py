@@ -4,14 +4,13 @@
 
 Usage::
 
-    Methods of this class are used internally in PSCalib.GeometryAccess
-    and are not supposed to be used directly...
+    # Methods of this class are used internally in PSCalib.GeometryAccess
+    # and are not supposed to be used directly...
 
     from PSCalib.GeometryObject import GeometryObject
-    ...
 
     # Instatiation of the geometry object
-    d = <dictionary-of-input-parameters>
+    # d = <dictionary-of-input-parameters>
     geo = GeometryObject(**d)
 
     # test print methods:
@@ -37,7 +36,10 @@ Usage::
     #mbits = +1-edges, +2-wide pixels, +4-non-bounded pixels, +8-neighbours of non-bounded
     mask   = geo.get_pixel_mask(mbits=0377)
     npixels= geo.get_size_geo_array()
-    pixsize= geo.get_pixel_scale_size(self)
+    pixsize= geo.get_pixel_scale_size()
+    x0, y0, z0             = geo.get_origin()
+    rot_z, rot_y, rot_x    = geo.get_rot()
+    tilt_z, tilt_y, tilt_x = geo.get_tilt()
     
     # private methods for internal consumption:
     geo.set_parent(parent)
@@ -55,11 +57,12 @@ Usage::
 
 @see :py:class:`PSCalib.GeometryAccess`
 
+For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.
 
-Revision: $Revision$
+$Revision$
 
 @version $Id$
 
@@ -380,6 +383,27 @@ class GeometryObject :
             return child.get_pixel_scale_size()
 
 #------------------------------
+        
+    def get_origin(self) :
+        """ Returns object origin x, y, z coordinates [um] relative to parent frame
+        """
+        return  self.x0, self.y0, self.z0
+
+#------------------------------
+        
+    def get_rot(self) :
+        """ Returns object tilt angles [degree] around z, y, and x axes, respectively
+        """
+        return self.rot_z, self.rot_y, self.rot_x
+
+#------------------------------
+        
+    def get_tilt(self) :
+        """ Returns object rotation angles [degree] around z, y, and x axes, respectively
+        """
+        return self.tilt_z, self.tilt_y, self.tilt_x
+
+#------------------------------
 #------------------------------
 # Additional to interface 2-d methods
 #------------------------------
@@ -413,8 +437,6 @@ class GeometryObject :
         X, Y = self.transform_2d_geo_coord_arrays(np.array(xac), np.array(yac), do_tilt)
         return self.det_shape(X), self.det_shape(Y) 
 
-
-#------------------------------
 #------------------------------
 
     def det_shape(self, arr) :
@@ -425,7 +447,6 @@ class GeometryObject :
             # shaffle array for cspad2x2
             return two2x1ToData2x2(arr)
         return arr
-
 
 #------------------------------
 #------ Global Method(s) ------
@@ -447,7 +468,6 @@ def two2x1ToData2x2(arrTwo2x1) :
     arr2x2.shape = (185,388,2)
     return arr2x2
 
-#------------------------------
 #------------------------------
 #------------------------------
 #------------------------------

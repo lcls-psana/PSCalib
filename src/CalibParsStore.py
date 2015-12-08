@@ -39,8 +39,7 @@ Usage::
     size   = gcp.size(ctype)
     ndim   = gcp.ndim(ctype)
 
-@see other interface methods in :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib..CalibParsStore`
-
+@see other interface methods in :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`
 
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.
@@ -106,20 +105,29 @@ class CalibParsStore() :
         if pbits : print '%s: Detector type = %d: %s' % (self.name, dettype, gu.dic_det_type_to_name[dettype])
 
         cbase = None
-        if   dettype == gu.CSPAD     : cbase = CalibParsBaseCSPadV1()
-        elif dettype == gu.CSPAD2X2  : cbase = CalibParsBaseCSPad2x2V1() 
-        elif dettype == gu.PNCCD     : cbase = CalibParsBasePnccdV1()    
-        elif dettype == gu.PRINCETON : cbase = CalibParsBasePrincetonV1()
-        elif dettype == gu.ANDOR     : cbase = CalibParsBaseAndorV1()    
-        elif dettype == gu.EPIX100A  : cbase = CalibParsBaseEpix100aV1() 
-        elif dettype == gu.ACQIRIS   : cbase = CalibParsBaseAcqirisV1() 
-        elif dettype == gu.IMP       : cbase = CalibParsBaseImpV1() 
-        else :
-            for det in (gu.OPAL1000, gu.OPAL2000, gu.OPAL4000, gu.OPAL8000, gu.TM6740, gu.ORCAFL40, gu.FCCD960,\
-                        gu.QUARTZ4A150, gu.RAYONIX, gu.FCCD) :
-                if dettype == det : cbase = CalibParsBaseCameraV1()
+        if   dettype ==  gu.CSPAD     : cbase = CalibParsBaseCSPadV1()
+        elif dettype ==  gu.CSPAD2X2  : cbase = CalibParsBaseCSPad2x2V1() 
+        elif dettype ==  gu.PNCCD     : cbase = CalibParsBasePnccdV1()    
+        elif dettype ==  gu.PRINCETON : cbase = CalibParsBasePrincetonV1()
+        elif dettype ==  gu.ANDOR     : cbase = CalibParsBaseAndorV1()    
+        elif dettype ==  gu.EPIX100A  : cbase = CalibParsBaseEpix100aV1() 
+        elif dettype ==  gu.ACQIRIS   : cbase = CalibParsBaseAcqirisV1() 
+        elif dettype ==  gu.IMP       : cbase = CalibParsBaseImpV1() 
+        elif dettype in (gu.OPAL1000,\
+                         gu.OPAL2000,\
+                         gu.OPAL4000,\
+                         gu.OPAL8000,\
+                         gu.TM6740,\
+                         gu.ORCAFL40,\
+                         gu.FCCD960,\
+                         gu.QUARTZ4A150,\
+                         gu.RAYONIX,\
+                         gu.FCCD,\
+                         gu.TIMEPIX,\
+                         gu.FLI,\
+                         gu.PIMAX) : cbase = CalibParsBaseCameraV1()
 
-        if cbase is None :
+        else :
             print 'Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__)
             #raise IOError('Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__))
 

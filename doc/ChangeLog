@@ -11,6 +11,12 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-57
+2015-12-07 Mikhail S. Dubrovin
+- CalibParsStore.py - add calibration support for Timepix, Fli, Pimax (PSAS-139)
+- GeometryObject.py - add get_origin, get_rot, get_tilt methods
+- GeometryAccess.py, GeometryObject.py - update sphinx documentation
+	
 Tag: V00-02-56
 2015-12-04 Mikhail S. Dubrovin
 - GlobalUtils.py - add support for Fccd, Timepix, Fli, Pimax (PSAS-139)

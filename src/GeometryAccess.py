@@ -29,23 +29,25 @@ Usage::
     img = img_from_pixel_arrays(iX,iY,W=arr)
 
     # modify currect geometry objects' parameters
-    geometry.set_geo_pars('QUAD:V1', 1, x0, y0, z0, rot_z,...<entire-list-of-9-parameters>);
-    geometry.move_geo('QUAD:V1', 1, 10, 20, 0);
-    geometry.tilt_geo('QUAD:V1', 1, 0.01, 0, 0);
+    geometry.set_geo_pars('QUAD:V1', 1, x0, y0, z0, rot_z, rot_y, rot_x, tilt_z, tilt_y, tilt_x)
+    geometry.move_geo('QUAD:V1', 1, 10, 20, 0)
+    geometry.tilt_geo('QUAD:V1', 1, 0.01, 0, 0)
 
     # save current geometry parameters in file
     geometry.save_pars_in_file(fname_geometry_new)
 
-    # return geometry parameters in "psf" format for TJ as a tuple psf[32][3][3]
+    # return geometry parameters in "psf" format as a tuple psf[32][3][3]
     psf = geometry.get_psf()
     geometry.print_psf()
 
 @see :py:class:`PSCalib.GeometryObject`, :py:class:`PSCalib.SegGeometry`, :py:class:`PSCalib.SegGeometryCspad2x1V1`, :py:class:`PSCalib.SegGeometryStore`
 
+For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
+
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.
 
-Revision: $Revision$
+$Revision$
 
 @version $Id$
 
