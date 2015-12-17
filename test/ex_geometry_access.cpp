@@ -36,7 +36,7 @@ using namespace std;
 void test_cspad2x2 (int argc, char* argv[])
 {
   //MecTargetChamber.0:Cspad2x2.1 
-    string basedir = "/reg/neh/home1/dubrovin/LCLS/CSPad2x2Alignment/calib-cspad2x2-01-2013-02-13/";  
+    string basedir = "/reg/g/psdm/detector/alignment/cspad2x2/calib-cspad2x2-01-2013-02-13/";  
     string fname_geometry = basedir + "calib/CsPad2x2::CalibV1/MecTargetChamber.0:Cspad2x2.1/geometry/0-end.data";
     string fname_data     = basedir + "cspad2x2.1-ndarr-ave-meca6113-r0028.dat";
 
@@ -107,11 +107,11 @@ int main (int argc, char* argv[])
   //-----------------
   cout << "\n\nTest of PSCalib::GeometryAccess\n";     
 
-  //string basedir = "/reg/neh/home1/dubrovin/LCLS/CSPadAlignment-v01/calib-cxi-ds1-2014-03-19/";
+  //string basedir = "/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-03-19/";
   //string fname_geometry = basedir + "calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data";
   //string fname_data     = basedir + "cspad-ndarr-ave-cxii0114-r0227.dat";
 
-  string basedir = "/reg/neh/home1/dubrovin/LCLS/CSPadAlignment-v01/calib-cxi-ds1-2014-05-15/";
+  string basedir = "/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-05-15/";
   string fname_geometry = basedir + "calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/2-end.data";
   string fname_data     = basedir + "cspad-arr-cxid2714-r0023-lysozyme-rings.txt";
  
@@ -225,8 +225,9 @@ int main (int argc, char* argv[])
  
   //-----------------
   cout << "\n\nTest of get_dict_of_comments():\n";
-  std::map<std::string, std::string>& dict = geometry.get_dict_of_comments();
-  cout << "dict['HDR'] = " << dict["HDR"] << '\n';
+  std::map<int, std::string>& dict = geometry.get_dict_of_comments();
+  cout << "dict[0] = " << dict[0] << '\n';
+  //cout << "dict['HDR'] = " << dict["HDR"] << '\n';
 
   //-----------------
   cout << "\n\nTest of save_pars_in_file(path):\n";

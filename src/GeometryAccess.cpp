@@ -112,10 +112,10 @@ void GeometryAccess::save_pars_in_file(const std::string& path)
   std::stringstream ss;
 
   // Save comments
-  std::map<std::string, std::string>::iterator iter;
+  std::map<int, std::string>::iterator iter;
   for (iter = m_dict_of_comments.begin(); iter != m_dict_of_comments.end(); ++iter) {
-    ss << "# " << std::setw(10) << std::left << iter->first;
-    ss << "  " << iter->second << '\n';
+    //ss << "# " << std::setw(10) << std::left << iter->first;
+    ss << "# " << iter->second << '\n';
   }
 
   ss << '\n';
@@ -136,6 +136,33 @@ void GeometryAccess::save_pars_in_file(const std::string& path)
 
 //-------------------
 
+void GeometryAccess::add_comment_to_dict(const std::string& line)
+{ 
+  std::size_t p1 = line.find_first_not_of("#");
+  std::size_t p2 = line.find_first_not_of(" ", p1);
+  //std::size_t p2 = line.find_first_of(" ", p1);
+
+  //std::cout << "  p1:" << p1 << "  p2:" << p2 << '\n';
+  //if (p1 == std::string::npos) ...
+  //std::cout << "comment: " << line << '\n'; 
+  //std::cout << "   split line: [" << beginline << "] = " << endline << '\n'; 
+
+  if (p1 == std::string::npos) return; // available # but missing keyword
+
+  int ind = m_dict_of_comments.size();
+
+  if (p2 == std::string::npos) { // keyword is available but comment is missing
+    m_dict_of_comments[ind] = std::string();
+    return;
+  }
+
+  std::string endline(line, p2);
+  m_dict_of_comments[ind] = endline;
+}
+
+//-------------------
+
+/*
 void GeometryAccess::add_comment_to_dict(const std::string& line)
 { 
   std::size_t p1 = line.find_first_not_of("# ");
@@ -160,6 +187,7 @@ void GeometryAccess::add_comment_to_dict(const std::string& line)
   std::string endline(line, p3);
   m_dict_of_comments[beginline] = endline;
 }
+*/
 
 //-------------------
 
@@ -439,11 +467,11 @@ void GeometryAccess::print_comments_from_dict()
 { 
   std::stringstream ss; ss << "print_comments_from_dict():\n"; 
 
-  std::map<std::string, std::string>::iterator iter;
+  std::map<int, std::string>::iterator iter;
 
   for (iter = m_dict_of_comments.begin(); iter != m_dict_of_comments.end(); ++iter) {
-    ss << "  key: " << std::setw(10) << std::left << iter->first;
-    ss << "  val: " << iter->second << '\n';
+    ss << "  key:" << std::setw(4) << std::left << iter->first;
+    ss << "  val:" << iter->second << '\n';
   }
   //std::cout << ss.str();
   MsgLog(name(), info, ss.str());

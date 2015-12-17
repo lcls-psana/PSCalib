@@ -652,7 +652,7 @@ def test_load_pars_from_file(geometry) :
 def test_cspad2x2() :
     """ Test cspad2x2 geometry table
     """
-    ## MecTargetChamber.0:Cspad2x2.1 
+    ## MecTargetChamber.0:Cspad2x2.1
     basedir = '/reg/neh/home1/dubrovin/LCLS/CSPad2x2Alignment/calib-cspad2x2-01-2013-02-13/'    
     fname_geometry = basedir + 'calib/CsPad2x2::CalibV1/MecTargetChamber.0:Cspad2x2.1/geometry/0-end.data'
     fname_data     = basedir + 'cspad2x2.1-ndarr-ave-meca6113-r0028.dat'    
@@ -687,9 +687,13 @@ def test_cspad2x2() :
 def test_epix100a() :
     """ Test test_epix100a geometry table
     """
-    basedir = '/reg/neh/home1/dubrovin/LCLS/GeometryCalib/calib-xpp-Epix100a-2014-11-05/'    
-    fname_geometry = basedir + 'calib/Epix100a::CalibV1/NoDetector.0:Epix100a.0/geometry/0-end.data'
-    fname_data     = basedir + 'epix100a-ndarr-ave-clb-xppi0614-r0073.dat'    
+    basedir = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-05-15/'    
+    fname_geometry = basedir + 'calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/2-end.data'
+    fname_data     = basedir + 'cspad-arr-cxid2714-r0023-lysozyme-rings.txt'    
+
+    #basedir = '/reg/neh/home1/dubrovin/LCLS/GeometryCalib/calib-xpp-Epix100a-2014-11-05/'    
+    #fname_geometry = basedir + 'calib/Epix100a::CalibV1/NoDetector.0:Epix100a.0/geometry/0-end.data'
+    #fname_data     = basedir + 'epix100a-ndarr-ave-clb-xppi0614-r0073.dat'    
 
     geometry = GeometryAccess(fname_geometry, 0177777)
     amp_range = (-4,10)

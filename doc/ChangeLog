@@ -11,11 +11,17 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-59
+2015-12-17 Mikhail S. Dubrovin
+- GeometryAccess.(h,cpp) - change m_dict_of_comments map[string]=string to map[int]=string (PSAS-11)
+- GeometryObject.(py,cpp) - adjust geo output string format to be the same
+- ex_geometry_access.cpp - change file directory
+
 Tag: V00-02-58
 2015-12-16 Mikhail S. Dubrovin
-- GeometryAccess.py - change dictionary of comments key to integer index (to order comments)
-- GeometryObject.py - change format for output geo string
-
+- GeometryAccess.py - change dictionary of comments key to integer index (to order comments) (PSAS-11)
+- GeometryObject.py - change format for output geo string 
+	
 Tag: V00-02-57
 2015-12-07 Mikhail S. Dubrovin
 - CalibParsStore.py - add calibration support for Timepix, Fli, Pimax (PSAS-139)

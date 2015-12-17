@@ -175,10 +175,10 @@ class GeometryObject :
     def str_data(self) :
         """ Returns a string of data to save in file
         """
-        return '%s %2d  %s %2d' % (self.pname.ljust(11), self.pindex, self.oname.ljust(11), self.oindex) + \
-               '   %7.0f %7.0f %7.0f' % (self.x0, self.y0, self.z0) + \
-               '   %5.0f %5.0f %5.0f' % (self.rot_z, self.rot_y, self.rot_x) + \
-               '   %8.5f %8.5f %8.5f' % (self.tilt_z, self.tilt_y, self.tilt_x)
+        return '%s %3d %s %3d' % (self.pname.ljust(11), self.pindex, self.oname.ljust(11), self.oindex) + \
+               '  %8.0f %8.0f %8.0f' % (self.x0, self.y0, self.z0) + \
+               '  %6.1f %6.1f %6.1f' % (self.rot_z, self.rot_y, self.rot_x) + \
+               '  %8.5f %8.5f %8.5f' % (self.tilt_z, self.tilt_y, self.tilt_x)
 
 #------------------------------
 

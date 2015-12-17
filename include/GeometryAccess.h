@@ -125,7 +125,7 @@ namespace PSCalib {
  *                PSCalib::GeometryAccess::img_from_pixel_arrays(iX, iY, 0, isize);
  *    
  *    // Access and print comments from the calibration "geometry" file:
- *        std::map<std::string, std::string>& dict = geometry.get_dict_of_comments ();
+ *        std::map<int, std::string>& dict = geometry.get_dict_of_comments ();
  *        cout << "dict[0] = " << dict[0] << '\n';
  *  @endcode
  * 
@@ -246,8 +246,8 @@ public:
                               const unsigned& oindex = 0);
 
   /// Returns dictionary of comments
-  std::map<std::string, std::string>& get_dict_of_comments() {return m_dict_of_comments;}
-  //std::map<int, std::string>& get_dict_of_comments() {return m_dict_of_comments;}
+  //std::map<std::string, std::string>& get_dict_of_comments() {return m_dict_of_comments;}
+  std::map<int, std::string>& get_dict_of_comments() {return m_dict_of_comments;}
 
   /// Prints the list of geometry objects
   void print_list_of_geos();
@@ -373,8 +373,8 @@ private:
   std::vector<shpGO> v_list_of_geos;
 
   /// map/dictionary of comments from calibration "geometry" file 
-  std::map<std::string, std::string> m_dict_of_comments;
-  //std::map<int, std::string> m_dict_of_comments;
+  //std::map<std::string, std::string> m_dict_of_comments;
+  std::map<int, std::string> m_dict_of_comments;
 
   /// Adds comment to the dictionary
   void add_comment_to_dict(const std::string& line);
