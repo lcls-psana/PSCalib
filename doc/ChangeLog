@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-58
+2015-12-16 Mikhail S. Dubrovin
+- GeometryAccess.py - change dictionary of comments key to integer index (to order comments)
+- GeometryObject.py - change format for output geo string
+
 Tag: V00-02-57
 2015-12-07 Mikhail S. Dubrovin
 - CalibParsStore.py - add calibration support for Timepix, Fli, Pimax (PSAS-139)

@@ -126,7 +126,8 @@ class GeometryAccess :
         txt = ''
         # save comments
         for k in sorted(self.dict_of_comments) :
-            txt += '# %10s  %s\n' % (k.ljust(10), self.dict_of_comments[k])
+            #txt += '# %10s  %s\n' % (k.ljust(10), self.dict_of_comments[k])
+            txt += '# %s\n' % (self.dict_of_comments[k])
 
         txt += '\n'        
 
@@ -146,18 +147,21 @@ class GeometryAccess :
     def _add_comment_to_dict(self, line) :
         """Splits the line of comments for keyward and value and store it in the dictionary
         """
-        lst = line.lstrip('# ').split(' ', 1)
-        if len(lst)<1 : return
-        if len(lst)==1 :
-            self.dict_of_comments[lst[0]] = ''
+        #cmt = line.lstrip('# ').split(' ', 1)
+        cmt = line.lstrip('#').lstrip(' ')
+        if len(cmt)<1 : return
+        ind = len(self.dict_of_comments)
+        if len(cmt)==1 :
+            #self.dict_of_comments[cmt[0]] = ''
+            self.dict_of_comments[ind] = ''
             return
 
-        beginline, endline = lst
-        #print '  lst      : "%s"' % lst
-        #print '  len(lst) : %d' % len(lst)        
+        #beginline, endline = cmt
+        #print '  cmt      : "%s"' % cmt
+        #print '  len(cmt) : %d' % len(cmt)        
         #print '  line     : "%s"' % line
 
-        self.dict_of_comments[beginline] = endline.strip()
+        self.dict_of_comments[ind] = cmt.strip()
 
     #------------------------------
     
@@ -353,7 +357,7 @@ class GeometryAccess :
         if not self.valid : return
         #for k,v in self.dict_of_comments.iteritems():
         for k in sorted(self.dict_of_comments):
-            print 'key: %s  val: %s' % (k.ljust(10), self.dict_of_comments[k])
+            print 'key: %3d  val: %s' % (k, self.dict_of_comments[k])
 
     #------------------------------
 
@@ -440,7 +444,7 @@ class GeometryAccess :
         """ Gets and prints psf array for test purpose
         """
         if not self.valid : return None
-        psf = np.array( geometry.get_psf() )
+        psf = np.array(self.get_psf())
         print 'print_psf(): psf.shape: %s \npsf vectors:' % (str(psf.shape)) 
         for (px,py,pz), (sx,xy,xz), (fx,fy,fz) in psf:
             print '    p=(%12.2f, %12.2f, %12.2f),    s=(%8.2f, %8.2f, %8.2f)   f=(%8.2f, %8.2f, %8.2f)' \
@@ -543,7 +547,7 @@ def test_access(geometry) :
 
     print '\nTest of get_dict_of_comments():'
     d = geometry.get_dict_of_comments()
-    print "d['HDR'] = %s" % d['HDR']
+    print "d[0] = %s" % d[0]
 
 #------------------------------
 
@@ -716,12 +720,10 @@ if __name__ == "__main__" :
     #amp_range = (0,0.5)
 
     # CXI
-    basedir = '/reg/neh/home1/dubrovin/LCLS/CSPadAlignment-v01/calib-cxi-ds1-2014-03-19/'
+    basedir = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-03-19/'
     fname_data     = basedir + 'cspad-ndarr-ave-cxii0114-r0227.dat'
-    #fname_geometry = basedir + 'calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
-    #fname_geometry = '/reg/d/psdm/cxi/cxii0114/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
-    fname_geometry = '/reg/d/psdm/CXI/cxitut13/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
-    #fname_geometry = '/reg/neh/home1/dubrovin/LCLS/PSANA-V01/koglin-geometry-0-end.data'
+    fname_geometry = basedir + 'calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
+    #fname_geometry = '/reg/d/psdm/CXI/cxitut13/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
     amp_range = (0,500)
 
     ## XPP
@@ -743,6 +745,8 @@ if __name__ == "__main__" :
     #fname_data     = basedir + 'cspad-arr-cxid2714-r0023-lysozyme-rings.npy'
     #amp_range = (0,500)
 
+    print '%s\nfname_geometry: %s\nfname_data%s' %(120*'_', fname_geometry, fname_geometry)
+
     geometry = GeometryAccess(fname_geometry, 0)
 
     msg = 'Use command: sys.argv[0] <num>, wher num=1,2,3,...,10'
@@ -762,6 +766,7 @@ if __name__ == "__main__" :
     elif sys.argv[1]=='10': geometry.print_psf()
     elif sys.argv[1]=='11': test_cspad2x2()
     elif sys.argv[1]=='12': test_epix100a()
+    elif sys.argv[1]=='13': geometry.print_comments_from_dict()
     else : print 'Wrong input parameter.' + msg
 
     sys.exit ('End of %s' % sys.argv[0])
