@@ -11,6 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-60
+2015-02-08 Mikhail S. Dubrovin
+- add support for Andor3d (PSAS-139)
+  update modules GlobalUtils.py, CalibParsStore.py, SegGeometryMatrixV1.py, SegGeometryStore.py 
+  update modules CalibParsStore.h, GenericCalibPars.cpp
+- add src/CalibParsBaseAndor3dV1.py
+	
 Tag: V00-02-59
 2015-12-17 Mikhail S. Dubrovin
 - GeometryAccess.(h,cpp) - change m_dict_of_comments map[string]=string to map[int]=string (PSAS-11)

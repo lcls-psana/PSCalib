@@ -101,6 +101,7 @@ FCCD        = 21
 TIMEPIX     = 22
 FLI         = 23
 PIMAX       = 24
+ANDOR3D     = 25
 
 #XAMPS    # N/A data
 #FEXAMP   # N/A data
@@ -113,13 +114,13 @@ PIMAX       = 24
 list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740, \
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000, \
                     ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX,
-                    EVR, FCCD, TIMEPIX, FLI, PIMAX)
+                    EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D)
 """ List of enumetated detector types"""
 
 list_of_det_names = ('UNDEFINED', 'Cspad', 'Cspad2x2', 'Princeton', 'pnCCD', 'Tm6740', \
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
                      'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150', 'Rayonix',\
-                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax')
+                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d')
 """ List of enumetated detector names"""
 
 list_of_calib_groups = ('UNDEFINED',
@@ -146,7 +147,8 @@ list_of_calib_groups = ('UNDEFINED',
                         'Camera::CalibV1',
                         'Timepix::CalibV1',
                         'Fli::CalibV1',
-                        'Pimax::CalibV1'
+                        'Pimax::CalibV1',
+                        'Andor3d::CalibV1'
                         )
 """ List of enumetated detector calibration groups"""
 
@@ -252,6 +254,7 @@ def det_type_from_source(source) :
     elif ':Timepix.'     in str_src : return TIMEPIX
     elif ':Fli.'         in str_src : return FLI
     elif ':Pimax.'       in str_src : return PIMAX
+    elif ':DualAndor.'   in str_src : return ANDOR3D
     else                            : return UNDEFINED
 
 #------------------------------

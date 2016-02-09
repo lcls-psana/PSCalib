@@ -362,6 +362,7 @@ class SegGeometryMatrixV1(SegGeometry) :
 #------------------------------
 
 segment_one = SegGeometryMatrixV1()
+seg_andor3d = SegGeometryMatrixV1(rows=2048, cols=2048, pix_size_rows=13.5, pix_size_cols=13.5, pix_size_depth=50, pix_scale_size=13.5)
 
 #------------------------------
 #------------------------------

@@ -67,6 +67,7 @@ import PSCalib.GlobalUtils            as gu
 from PSCalib.GenericCalibPars         import GenericCalibPars
 
 from PSCalib.CalibParsBaseAndorV1     import CalibParsBaseAndorV1    
+from PSCalib.CalibParsBaseAndor3dV1   import CalibParsBaseAndor3dV1    
 from PSCalib.CalibParsBaseCameraV1    import CalibParsBaseCameraV1   
 from PSCalib.CalibParsBaseCSPad2x2V1  import CalibParsBaseCSPad2x2V1 
 from PSCalib.CalibParsBaseCSPadV1     import CalibParsBaseCSPadV1    
@@ -109,6 +110,7 @@ class CalibParsStore() :
         elif dettype ==  gu.CSPAD2X2  : cbase = CalibParsBaseCSPad2x2V1() 
         elif dettype ==  gu.PNCCD     : cbase = CalibParsBasePnccdV1()    
         elif dettype ==  gu.PRINCETON : cbase = CalibParsBasePrincetonV1()
+        elif dettype ==  gu.ANDOR3D   : cbase = CalibParsBaseAndor3dV1()    
         elif dettype ==  gu.ANDOR     : cbase = CalibParsBaseAndorV1()    
         elif dettype ==  gu.EPIX100A  : cbase = CalibParsBaseEpix100aV1() 
         elif dettype ==  gu.ACQIRIS   : cbase = CalibParsBaseAcqirisV1() 
@@ -130,7 +132,6 @@ class CalibParsStore() :
         else :
             print 'Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__)
             #raise IOError('Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__))
-
         return GenericCalibPars(cbase, calibdir, grp, source, runnum, pbits)
 
 #------------------------------

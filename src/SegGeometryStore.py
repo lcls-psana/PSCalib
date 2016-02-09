@@ -18,6 +18,7 @@ Usage::
     sg = sgs.Create('SENS2X1:V1', pbits=0377)
     sg2= sgs.Create('EPIX100:V1', pbits=0377)
     sg3= sgs.Create('PNCCD:V1',   pbits=0377)
+    sg4= sgs.Create('ANDOR3D:V1', pbits=0377)
 
     sg.print_seg_info(pbits=0377)
     size_arr = sg.size()
@@ -37,9 +38,7 @@ Usage::
     xmax, ymax, zmax = sg.pixel_coord_mas()
     ...
 
-
 @see other interface methods in :py:class:`PSCalib.SegGeometry`, :py:class:`PSCalib.SegGeometryCspad2x1V1`
-
 
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.
@@ -50,31 +49,17 @@ part of it, please give an appropriate acknowledgment.
 """
 
 #--------------------------------
-#  Module's version from CVS --
-#--------------------------------
 __version__ = "$Revision$"
-# $Source$
 #--------------------------------
 
-import sys
-#import math
-#import numpy as np
-#from time import time
-
-#from PSCalib.SegGeometry import *
-#import PSCalib.GlobalGraphics as gg # For test purpose in main only
+from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one
+from PSCalib.SegGeometryEpix100V1  import epix2x2_one
+from PSCalib.SegGeometryMatrixV1   import segment_one, seg_andor3d
 
 #------------------------------
 
-from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one # SegGeometryCspad2x1V1 
-#from PSCalib.SegGeometryCspad2x1V2 import SegGeometryCspad2x1V2 
-#from PSCalib.SegGeometryCspad2x1V3 import SegGeometryCspad2x1V3 
-from PSCalib.SegGeometryEpix100V1 import epix2x2_one # SegGeometryEpix100V1 
-from PSCalib.SegGeometryMatrixV1 import segment_one # SegGeometryMatrixV1 
-
-#------------------------------
 class SegGeometryStore() :
-    """Factory class for SegGeometry objects of different detectors"""
+    """Factory class for SegGeometry-base objects of different detectors"""
 
 #------------------------------
 
@@ -87,10 +72,9 @@ class SegGeometryStore() :
         """ Factory method returns device dependent SINGLETON object with interface implementation  
         """        
         if segname=='SENS2X1:V1' : return cspad2x1_one # SegGeometryCspad2x1V1(use_wide_pix_center=False)
-        #if segname=='SENS2X1:V2' : return SegGeometryCspad2x1V2(use_wide_pix_center=False)
-        #if segname=='SENS2X1:V3' : return SegGeometryCspad2x1V3(use_wide_pix_center=False)
-        if segname=='EPIX100:V1' : return epix2x2_one # SegGeometryEpix100V1(use_wide_pix_center=False)
-        if segname=='PNCCD:V1' :   return segment_one # SegGeometryMatrixV1()
+        if segname=='EPIX100:V1' : return epix2x2_one  # SegGeometryEpix100V1(use_wide_pix_center=False)
+        if segname=='PNCCD:V1'   : return segment_one  # SegGeometryMatrixV1()
+        if segname=='ANDOR3D:V1' : return seg_andor3d  # SegGeometryMatrixV1(rows=2048, cols=2048, ...)
         return None
 
 #------------------------------
@@ -98,14 +82,15 @@ class SegGeometryStore() :
 sgs = SegGeometryStore()
 
 #------------------------------
-#------------------------------
-#------------------------------
 #----------- TEST -------------
-#------------------------------
-#------------------------------
 #------------------------------
 
 def test_seggeom() :
+
+    import sys
+
+    from time import time
+    t0_sec = time()
 
     if len(sys.argv)==1   : print 'For test(s) use command: python', sys.argv[0], '<test-number=1-3>'
 
@@ -121,12 +106,17 @@ def test_seggeom() :
         sg2 = sgs.Create('PNCCD:V1', pbits=0377)
         sg2.print_seg_info(pbits=0377)
 
+    elif(sys.argv[1]=='4') :
+        sg2 = sgs.Create('ANDOR3D:V1', pbits=0377)
+        print 'Consumed time for ANDOR3D:V1 (sec) =', time()-t0_sec
+        sg2.print_seg_info(pbits=0377)
+    
     else : print 'Non-expected arguments: sys.argv=', sys.argv, ' use 0,1,2,...'
 
 #------------------------------
 
 if __name__ == "__main__" :
     test_seggeom()
-    sys.exit( 'End of test.' )
+    print 'End of test.'
 
 #------------------------------

@@ -39,6 +39,7 @@
 #include "pdscalibdata/PnccdBaseV1.h"
 #include "pdscalibdata/PrincetonBaseV1.h"
 #include "pdscalibdata/AndorBaseV1.h"
+#include "pdscalibdata/Andor3dBaseV1.h"
 #include "pdscalibdata/Epix100aBaseV1.h"
 #include "pdscalibdata/VarShapeCameraBaseV1.h"
 //#include "pdscalibdata/Opal1000BaseV1.h"
@@ -187,6 +188,12 @@ public:
            if (print_bits & 1) MsgLog("CalibParsStore", info, "Get access to calibration store for Princeton source: " << str_src);
 	   std::string type_group = (group==std::string()) ? "Princeton::CalibV1" : group;
 	   return new PSCalib::GenericCalibPars<pdscalibdata::PrincetonBaseV1>(calibdir, type_group, str_src, runnum, prbits);
+	}
+
+        if ( str_src.find(":DualAndor.") != std::string::npos ) {
+           if (print_bits & 1) MsgLog("CalibParsStore", info, "Get access to calibration store for Andor source: " << str_src);
+	   std::string type_group = (group==std::string()) ? "Andor3d::CalibV1" : group;
+	   return new PSCalib::GenericCalibPars<pdscalibdata::Andor3dBaseV1>(calibdir, type_group, str_src, runnum, prbits);
 	}
 
         if ( str_src.find(":Andor.") != std::string::npos ) {
