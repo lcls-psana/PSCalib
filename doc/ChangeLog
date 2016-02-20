@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-62
+2015-02-19 Mikhail S. Dubrovin
+- add NDArrIO.py, in GlobalUtils.py add str_tstamp, get_enviroment.
+- GeometryAccess.py - add point_coord_indexes, improve caching of parameters, update documentation
+	
 Tag: V00-02-61
 2015-02-09 Mikhail S. Dubrovin
 - add src/CalibParsBaseAndor3dV1.py - which was forgotten at last commit 

@@ -19,11 +19,16 @@ Usage::
     # mbits = +1-mask edges, +2-wide pixels, +4-non-bounded pixels, +8-non-bounded pixel neighbours
     mask = geometry.get_pixel_mask(oname=None, oindex=0, mbits=0377)
 
-    # get index arrays for entire CSPAD
+    # get index arrays for entire detector
     iX, iY = geometry.get_pixel_coord_indexes(do_tilt=True)
 
     # get index arrays for specified quad with offset
     iX, iY = geometry.get_pixel_coord_indexes('QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=(1000,1000), do_tilt=True)
+
+    # get ix and iy indexes for specified point in [um]. By default p_um=(0,0) - detector origin coordinates (center).
+    ix, iy = geometry.point_coord_indexes(p_um=(0,0))
+    # all other parameters should be the same as in get_pixel_coord_indexes method
+    ix, iy = geometry.point_coord_indexes(p_um=(0,0), 'QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=(1000,1000), do_tilt=True)
 
     # get 2-d image from index arrays
     img = img_from_pixel_arrays(iX,iY,W=arr)
@@ -62,6 +67,7 @@ import sys
 from PSCalib.GeometryObject import GeometryObject
 
 import numpy as np
+from math import floor
 
 #------------------------------
 
@@ -82,6 +88,20 @@ class GeometryAccess :
         self.path = path
         self.pbits = pbits
         self.load_pars_from_file()
+
+        # Parameters for caching
+        self.geo_old    = None
+        self.oname_old  = None
+        self.oindex_old = None
+        self.tilt_old   = None
+        self.X_old      = None
+        self.Y_old      = None
+        self.Z_old      = None
+        self.iX_old     = None
+        self.iY_old     = None
+        self.ipx_old    = None
+        self.ipy_old    = None
+        self.p_um_old   = None
 
         if self.pbits & 1 : self.print_list_of_geos()
         if self.pbits & 2 : self.print_list_of_geos_children()
@@ -241,9 +261,14 @@ class GeometryAccess :
         """
         if not self.valid : return None
 
+        if oindex == self.oindex_old and oname == self.oname_old : return self.geo_old
+
         for geo in self.list_of_geos :
             if  geo.oindex == oindex \
             and geo.oname  == oname :
+                self.oindex_old = oindex
+                self.oname_old  = oname
+                self.geo_old    = geo
                 return geo
         return None
     
@@ -261,12 +286,21 @@ class GeometryAccess :
         """Returns three pixel X,Y,Z coordinate arrays for top or specified geometry object 
         """
         if not self.valid : return None
+
+        if  oindex  == self.oindex_old\
+        and oname   == self.oname_old\
+        and do_tilt == self.tilt_old :
+            return self.X_old, self.Y_old, self.Z_old
+
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
         if self.pbits & 8 :
             print 'get_pixel_coords(...) for geo:',
             geo.print_geo_children();
         
-        return geo.get_pixel_coords(do_tilt) 
+        self.X_old, self.Y_old, self.Z_old = geo.get_pixel_coords(do_tilt) 
+        self.tilt = do_tilt
+
+        return self.X_old, self.Y_old, self.Z_old
 
     #------------------------------
 
@@ -375,31 +409,83 @@ class GeometryAccess :
     #------------------------------
 
     def get_pixel_coord_indexes(self, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True) :
-        """Returns three pixel X,Y,Z coordinate index arrays for top or specified geometry object 
+        """Returns two pixel X,Y coordinate index arrays for top or specified geometry object 
         """
         if not self.valid : return None, None
+
+        if  oindex  == self.oindex_old\
+        and oname   == self.oname_old\
+        and do_tilt == self.tilt_old\
+        and pix_scale_size_um is None\
+        and xy0_off_pix is None\
+        and self.iX_old is not None:
+            return self.iX_old, self.iY_old
+
         X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt)
 
         pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
-        pix_half = pix_size/2
+        pix_half = 0.5*pix_size
+
+        xmin, ymin = X.min()-pix_half, Y.min()-pix_half 
 
         if xy0_off_pix is not None :
             # Offset in pix -> um
             x_off_um = xy0_off_pix[0] * pix_size
             y_off_um = xy0_off_pix[1] * pix_size
             # Protection against wrong offset bringing negative indexes
-            xmin = (X+x_off_um).min()
-            ymin = (Y+y_off_um).min()
-            x_off_um = x_off_um + pix_half if xmin>0 else x_off_um - xmin + pix_half
-            y_off_um = y_off_um + pix_half if ymin>0 else y_off_um - ymin + pix_half
+            xmin += x_off_um
+            ymin += y_off_um
+            x_off_um = x_off_um + pix_half if xmin>0 else x_off_um - xmin
+            y_off_um = y_off_um + pix_half if ymin>0 else y_off_um - ymin
+            self.iX_old, self.iY_old = np.array((X+x_off_um)/pix_size, dtype=np.uint), np.array((Y+y_off_um)/pix_size, dtype=np.uint)
 
-            iX, iY = np.array((X+x_off_um)/pix_size, dtype=np.uint), np.array((Y+y_off_um)/pix_size, dtype=np.uint)
-            return iX, iY
         else :
-            # Find coordinate min values
-            xmin, ymin = X.min()-pix_size/2, Y.min()-pix_size/2 
-            iX, iY = np.array((X-xmin)/pix_size, dtype=np.uint), np.array((Y-ymin)/pix_size, dtype=np.uint)
-            return iX, iY
+            self.iX_old, self.iY_old = np.array((X-xmin)/pix_size, dtype=np.uint), np.array((Y-ymin)/pix_size, dtype=np.uint)
+
+        return self.iX_old, self.iY_old
+
+    #------------------------------
+
+    def point_coord_indexes(self, p_um=(0,0), oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True) :
+        """Converts point (x_um, y_um) corrdinates [um] to pixel (ix, iy) indexes.
+           All other parameters are the same as in get_pixel_coord_indexes.
+           WARNING: indexes are not required to be inside the image. They are integer, may be negative or exceed pixel maximal index.
+        """
+        if not self.valid : return None, None
+
+        if  oindex  == self.oindex_old\
+        and oname   == self.oname_old\
+        and do_tilt == self.tilt_old\
+        and p_um    == self.p_um_old\
+        and pix_scale_size_um is None\
+        and xy0_off_pix is None\
+        and self.ipx_old is not None:
+            return self.ipx_old, self.ipy_old
+
+        X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt)
+
+        pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
+        pix_half = 0.5*pix_size
+
+        xmin, ymin = X.min()-pix_half, Y.min()-pix_half 
+        x_um, y_um = self.p_um_old = p_um
+
+        if xy0_off_pix is not None :
+            # Offset in pix -> um
+            x_off_um = xy0_off_pix[0] * pix_size
+            y_off_um = xy0_off_pix[1] * pix_size
+            # Protection against wrong offset bringing negative indexes
+            xmin += x_off_um
+            ymin += y_off_um
+            x_off_um = x_off_um + pix_half if xmin>0 else x_off_um - xmin
+            y_off_um = y_off_um + pix_half if ymin>0 else y_off_um - ymin
+
+            self.ipx_old, self.ipy_old = int(floor((x_um+x_off_um)/pix_size)), int(floor((y_um+y_off_um)/pix_size))
+
+        else : 
+            self.ipx_old, self.ipy_old = int(floor((x_um-xmin)/pix_size)), int(floor((y_um-ymin)/pix_size))
+
+        return self.ipx_old, self.ipy_old
 
     #------------------------------
 
@@ -600,9 +686,14 @@ def test_plot_cspad(geometry, fname_data, amp_range=(0,0.5)) :
     rad2 = 670
 
     # get pixel coordinate index arrays:
-    xyc = xc, yc = 1000, 1000
+    xc, yc = 1000, 1000
+    xyc = xc, yc # None 
+
     #iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=None)
     iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc, do_tilt=True)
+
+    ixo, iyo = geometry.point_coord_indexes(xy0_off_pix=xyc, do_tilt=True)
+    print 'Detector origin indexes ixo, iyo:', ixo, iyo
 
     root, ext = os.path.splitext(fname_data)
     arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float) 
@@ -749,7 +840,7 @@ if __name__ == "__main__" :
     #fname_data     = basedir + 'cspad-arr-cxid2714-r0023-lysozyme-rings.npy'
     #amp_range = (0,500)
 
-    print '%s\nfname_geometry: %s\nfname_data%s' %(120*'_', fname_geometry, fname_geometry)
+    print '%s\nfname_geometry: %s\nfname_data: %s' %(120*'_', fname_geometry, fname_geometry)
 
     geometry = GeometryAccess(fname_geometry, 0)
 

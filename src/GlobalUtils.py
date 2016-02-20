@@ -18,6 +18,9 @@ Usage::
     # Initialization
     resp = gu.<method(pars)>
 
+    # Get string with time stamp, ex: 2016-01-26T10:40:53
+    ts = str_tstamp(fmt='%Y-%m-%dT%H:%M:%S', time_sec=None)
+ 
 @see other interface methods in :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`
 
 This software was developed for the SIT project.
@@ -305,6 +308,21 @@ def reshape_nda_to_3d(arr) :
     arr.shape = (arr.size/sh[-1]/sh[-2], sh[-2], sh[-1])
     return arr
 
+##-----------------------------
+
+def str_tstamp(fmt='%Y-%m-%dT%H:%M:%S', time_sec=None) :
+    """Returns string timestamp for specified format and time in sec or current time by default
+    """
+    from time import localtime, strftime
+    return strftime(fmt, localtime(time_sec))
+
 #------------------------------
+
+def get_enviroment(env='USER') :
+    """Returns the value of specified by string name environment variable
+    """
+    from os import environ
+    return environ[env]
+
 #------------------------------
 #------------------------------
