@@ -98,6 +98,19 @@ from PSCalib.SegGeometry import *
 
 #------------------------------
 
+def matrix_pars(segname) :
+    """Returns the matrix sensor parameters from its string-name, ex: MTRX:512:512:54:54
+    """
+    fields = segname.split(':')
+    if len(fields)<5 :
+        raise IOError('Matrix-sensor specification %s has less than 4 numeric fields' % segname)
+
+    rows, cols, psize_row, psize_col = int(fields[1]), int(fields[2]), float(fields[3]), float(fields[4])
+    #print 'matrix sensor %s parameters:' % (segname), rows, cols, psize_row, psize_col
+    return rows, cols, psize_row, psize_col
+
+#------------------------------
+
 class SegGeometryMatrixV1(SegGeometry) :
     """Self-sufficient class for generation of CSPad 2x1 sensor pixel coordinate array"""
 
@@ -362,7 +375,7 @@ class SegGeometryMatrixV1(SegGeometry) :
 #------------------------------
 
 segment_one = SegGeometryMatrixV1()
-seg_andor3d = SegGeometryMatrixV1(rows=2048, cols=2048, pix_size_rows=13.5, pix_size_cols=13.5, pix_size_depth=50, pix_scale_size=13.5)
+#seg_andor3d = SegGeometryMatrixV1(rows=2048, cols=2048, pix_size_rows=13.5, pix_size_cols=13.5, pix_size_depth=50, pix_scale_size=13.5)
 
 #------------------------------
 #------------------------------

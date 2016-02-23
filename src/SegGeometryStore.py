@@ -54,7 +54,7 @@ __version__ = "$Revision$"
 
 from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one
 from PSCalib.SegGeometryEpix100V1  import epix2x2_one
-from PSCalib.SegGeometryMatrixV1   import segment_one, seg_andor3d
+from PSCalib.SegGeometryMatrixV1   import SegGeometryMatrixV1, segment_one, matrix_pars
 
 #------------------------------
 
@@ -74,7 +74,12 @@ class SegGeometryStore() :
         if segname=='SENS2X1:V1' : return cspad2x1_one # SegGeometryCspad2x1V1(use_wide_pix_center=False)
         if segname=='EPIX100:V1' : return epix2x2_one  # SegGeometryEpix100V1(use_wide_pix_center=False)
         if segname=='PNCCD:V1'   : return segment_one  # SegGeometryMatrixV1()
-        if segname=='ANDOR3D:V1' : return seg_andor3d  # SegGeometryMatrixV1(rows=2048, cols=2048, ...)
+        #if segname=='ANDOR3D:V1' : return seg_andor3d  # SegGeometryMatrixV1(rows=2048, cols=2048, ...)
+        if segname[:4]=='MTRX'   :
+            rows, cols, psize_row, psize_col = matrix_pars(segname)
+            return SegGeometryMatrixV1(rows, cols, psize_row, psize_col,\
+                                       pix_size_depth=100,\
+                                       pix_scale_size=min(psize_row, psize_col))
         return None
 
 #------------------------------
@@ -95,22 +100,22 @@ def test_seggeom() :
     if len(sys.argv)==1   : print 'For test(s) use command: python', sys.argv[0], '<test-number=1-3>'
 
     elif(sys.argv[1]=='1') :
-        sg1 = sgs.Create('SENS2X1:V1', pbits=0377)
-        sg1.print_seg_info(pbits=0377)
+        sg = sgs.Create('SENS2X1:V1', pbits=0377)
+        sg.print_seg_info(pbits=0377)
         
     elif(sys.argv[1]=='2') :
-        sg2 = sgs.Create('EPIX100:V1', pbits=0377)
-        sg2.print_seg_info(pbits=0377)
+        sg = sgs.Create('EPIX100:V1', pbits=0377)
+        sg.print_seg_info(pbits=0377)
 
     elif(sys.argv[1]=='3') :
-        sg2 = sgs.Create('PNCCD:V1', pbits=0377)
-        sg2.print_seg_info(pbits=0377)
+        sg = sgs.Create('PNCCD:V1', pbits=0377)
+        sg.print_seg_info(pbits=0377)
 
     elif(sys.argv[1]=='4') :
-        sg2 = sgs.Create('ANDOR3D:V1', pbits=0377)
-        print 'Consumed time for ANDOR3D:V1 (sec) =', time()-t0_sec
-        sg2.print_seg_info(pbits=0377)
-    
+        sg = sgs.Create('MTRX:512:512:54:54', pbits=0377)
+        print 'Consumed time for MTRX:512:512:54:54 (sec) =', time()-t0_sec
+        sg.print_seg_info(pbits=0377)
+  
     else : print 'Non-expected arguments: sys.argv=', sys.argv, ' use 0,1,2,...'
 
 #------------------------------

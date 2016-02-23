@@ -19,8 +19,8 @@ class CalibParsBaseAndor3dV1 :
 
     ndim = 3 
     segs = 2
-    rows = 2048
-    cols = 2048
+    rows = 0 # 512, 2048 - variable size array due to re-binning
+    cols = 0 # 512, 2048
     size = segs*rows*cols
     shape = (segs, rows, cols)
     size_cm = 16 

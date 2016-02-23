@@ -11,6 +11,15 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-63
+2015-02-22 Mikhail S. Dubrovin
+- Support of geometry for matrix-sensors of variable shape. 
+	Assuming that sensor name contains paramaters, ex: MTRX:512:512:54:54
+- CalibParsBaseAndor3dV1.py - set rows=cols=0 - for variable size arrays
+- GenericCalibPars.py - switch to NDArrIO.load_txt in stead of np.loadtxt
+- SegGeometryMatrixV1.py - Remove singleton seg_andor3d, addn method matrix_pars(segname)
+- SegGeometryStore.py use MTRX:512:512:54:54 in stead of ANDOR3D:V1
+
 Tag: V00-02-62
 2015-02-19 Mikhail S. Dubrovin
 - add NDArrIO.py, in GlobalUtils.py add str_tstamp, get_enviroment.

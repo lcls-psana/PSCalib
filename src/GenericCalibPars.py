@@ -61,6 +61,7 @@ from PSCalib.CalibPars import CalibPars
 from PSCalib.CalibFileFinder import CalibFileFinder
 
 import PSCalib.GlobalUtils as gu
+from PSCalib.NDArrIO import load_txt # , save_txt, list_of_comments
 
 #------------------------------
 
@@ -202,7 +203,8 @@ class GenericCalibPars (CalibPars) :
 
         nda = None 
         try :
-            nda = np.loadtxt(fname, dtype=gu.dic_calib_type_to_dtype[ctype])
+            #nda = np.loadtxt(fname, dtype=gu.dic_calib_type_to_dtype[ctype])
+            nda = np.array(load_txt(fname), dtype=gu.dic_calib_type_to_dtype[ctype])
         except :
             if self.pbits : print 'WARNING %s: calibration file for type %s is unreadable.' % (self.msgh(3), tname)
             self.dic_status[ctype] = gu.UNREADABLE
