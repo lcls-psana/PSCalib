@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-64
+2015-02-25 Mikhail S. Dubrovin
+- NDArrIO.py - cosmetic improvement in print statement.
+	
 Tag: V00-02-63
 2015-02-22 Mikhail S. Dubrovin
 - Support of geometry for matrix-sensors of variable shape. 

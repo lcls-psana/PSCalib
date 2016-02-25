@@ -91,7 +91,7 @@ def save_txt(fname='nda.txt', arr=None, cmts=(), fmt='%.1f', verbos=False) :
     #print hdr
 
     np.savetxt(fname, arr, fmt, delimiter=' ', newline=nline, header=hdr, comments='') #, footer='\n') #, comments='# ')
-    if verbos : print 'Numpy array is saved in the text file %s' % fname
+    if verbos : print 'File %s is saved' % fname
 
 #------------------------------
 
