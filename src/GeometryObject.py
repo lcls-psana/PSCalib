@@ -456,14 +456,28 @@ def data2x2ToTwo2x1(arr2x2) :
     """Converts array shaped as CSPAD2x2 data (185,388,2)
     to two 2x1 arrays with shape=(2,185,388)
     """
+    if arr2x2.size != 2*185*388 :
+        raise ValueError('Expected n-d array size=185*388*2, input size=%d' % arr2x2.size)
+
+    if arr2x2.shape[-1] != 2 :
+        raise ValueError('Expected n-d array shape=(185,388,2), input shape=%s' % str(arr2x2.shape))
+
+    arr2x2.shape = (185,388,2) 
     return np.array([arr2x2[:,:,0], arr2x2[:,:,1]])
 
 #------------------------------
 
 def two2x1ToData2x2(arrTwo2x1) :
-    """Converts array shaped as two 2x1 arrays (2,185,388)
+    """Converts array shaped as two 2x1 arrays (2,185,388) or (2*185,388)
     to CSPAD2x2 data shape=(185,388,2)
     """
+    if arrTwo2x1.size != 2*185*388 :
+        raise ValueError('Expected n-d array size=2*185*388, input size=%d' % arrTwo2x1.size)
+
+    if arrTwo2x1.shape[-1] != 388 :
+        raise ValueError('Expected n-d array shape=(2,185,388), input shape=%s' % str(arrTwo2x1.shape))
+
+    arrTwo2x1.shape = (2,185,388)
     arr2x2 = np.array(zip(arrTwo2x1[0].flatten(), arrTwo2x1[1].flatten()))
     arr2x2.shape = (185,388,2)
     return arr2x2

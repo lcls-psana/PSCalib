@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-65
+2015-03-05 Mikhail S. Dubrovin
+- GeometryObject.py add protection for wrong size and shape 
+	in two2x1ToData2x2 and data2x2ToTwo2x1
+	
 Tag: V00-02-64
 2015-02-25 Mikhail S. Dubrovin
 - NDArrIO.py - cosmetic improvement in print statement.
