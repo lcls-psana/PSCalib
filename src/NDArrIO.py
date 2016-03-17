@@ -63,23 +63,26 @@ import numpy as np
 import PSCalib.GlobalUtils as gu
 
   
-def save_txt(fname='nda.txt', arr=None, cmts=(), fmt='%.1f', verbos=False) :
+def save_txt(fname='nda.txt', arr=None, cmts=(), fmt='%.1f', verbos=False, addmetad=True) :
     """Save n-dimensional numpy array to text file with metadata.
        - fname - file name for text file,
        - arr - numpy array,
        - cmts -list of comments which will be saved in the file header.
     """
-    recs = ['# %03d %s' % (i,cmt) for i, cmt in enumerate(cmts)]
+    #recs = ['# %03d %s' % (i,cmt) for i, cmt in enumerate(cmts)]
+    recs = ['# %s' % cmt for cmt in cmts]
     recs.append('\n# HOST        %s' % gu.get_enviroment(env='HOST'))
     recs.append('# WORK_DIR    %s' % gu.get_enviroment(env='PWD'))
     recs.append('# FILE_NAME   %s' % fname)
     recs.append('# DATE_TIME   %s' % gu.str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'))
-    recs.append('# AUTHOR      %s'   % gu.get_enviroment(env='USER'))
-    recs.append('\n# DTYPE       %s' % str(arr.dtype))
-    recs.append('# NDIM        %s' % len(arr.shape))
+    recs.append('# UID         %s' % gu.get_enviroment(env='USER'))
 
-    for i in range(len(arr.shape)) :
-        recs.append('# DIM:%d       %s'   % (i, arr.shape[i]))
+    if addmetad :
+        recs.append('\n# DTYPE       %s' % str(arr.dtype))
+        recs.append('# NDIM        %s' % len(arr.shape))
+
+        for i in range(len(arr.shape)) :
+            recs.append('# DIM:%d       %s'   % (i, arr.shape[i]))
 
     arr2d = gu.reshape_nda_to_2d(arr)
 
