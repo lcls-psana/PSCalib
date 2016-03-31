@@ -71,11 +71,11 @@ def save_txt(fname='nda.txt', arr=None, cmts=(), fmt='%.1f', verbos=False, addme
     """
     #recs = ['# %03d %s' % (i,cmt) for i, cmt in enumerate(cmts)]
     recs = ['# %s' % cmt for cmt in cmts]
-    recs.append('\n# HOST        %s' % gu.get_enviroment(env='HOST'))
-    recs.append('# WORK_DIR    %s' % gu.get_enviroment(env='PWD'))
+    recs.append('\n# HOST        %s' % gu.get_hostname())
+    recs.append('# WORK_DIR    %s' % gu.get_cwd())
     recs.append('# FILE_NAME   %s' % fname)
     recs.append('# DATE_TIME   %s' % gu.str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'))
-    recs.append('# UID         %s' % gu.get_enviroment(env='USER'))
+    recs.append('# UID         %s' % gu.get_login())
 
     if addmetad :
         recs.append('\n# DTYPE       %s' % str(arr.dtype))

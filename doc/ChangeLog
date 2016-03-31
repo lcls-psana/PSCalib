@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-67
+2016-03-31 Mikhail S. Dubrovin
+- GlobalUtils.py, NDArrIO.py - get rid of calls to get_enviroment(...)
+
 Tag: V00-02-66
 2016-03-17 Mikhail S. Dubrovin
 - NDArrIO.py - add parameter "addmetad" to save_txt

@@ -15,12 +15,24 @@ Usage::
     # Import
     import PSCalib.GlobalUtils as gu
 
-    # Initialization
+    # Methods
     resp = gu.<method(pars)>
 
+    dettype = gu.det_type_from_source(source)
+    detname = gu.string_from_source(source)
+
+    mmask = gu.merge_masks(mask1=None, mask2=None)
+    arr2d = gu.reshape_nda_to_2d(nda)
+    arr3d = gu.reshape_nda_to_3d(nda)
+
     # Get string with time stamp, ex: 2016-01-26T10:40:53
-    ts = str_tstamp(fmt='%Y-%m-%dT%H:%M:%S', time_sec=None)
- 
+    ts    = gu.str_tstamp(fmt='%Y-%m-%dT%H:%M:%S', time_sec=None)
+
+    usr   = gu.get_enviroment(env='USER')
+    usr   = gu.get_login()
+    host  = gu.get_hostname()
+    cwd   = gu.get_cwd()
+
 @see other interface methods in :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`
 
 This software was developed for the SIT project.
@@ -35,9 +47,11 @@ If you use all or part of it, please give an appropriate acknowledgment.
 __version__ = "$Revision$"
 #--------------------------------
 
-import numpy as np
-
 #import sys
+import os
+import numpy as np
+from time import localtime, strftime
+
 #------------------------------
 #------------------------------
 
@@ -313,7 +327,6 @@ def reshape_nda_to_3d(arr) :
 def str_tstamp(fmt='%Y-%m-%dT%H:%M:%S', time_sec=None) :
     """Returns string timestamp for specified format and time in sec or current time by default
     """
-    from time import localtime, strftime
     return strftime(fmt, localtime(time_sec))
 
 #------------------------------
@@ -321,8 +334,44 @@ def str_tstamp(fmt='%Y-%m-%dT%H:%M:%S', time_sec=None) :
 def get_enviroment(env='USER') :
     """Returns the value of specified by string name environment variable
     """
-    from os import environ
-    return environ[env]
+    return os.environ[env]
 
 #------------------------------
+
+def get_login() :
+    """Returns login name
+    """
+    return os.getlogin()
+
+#------------------------------
+
+def get_hostname() :
+    """Returns login name
+    """
+    return os.uname()[1]
+
+#------------------------------
+
+def get_cwd() :
+    """Returns current working directory
+    """
+    return os.getcwd()
+
+#------------------------------
+#------------------------------
+#------------------------------
+#------------------------------
+
+def do_test() :
+    print 'get_enviroment(USER) : %s' % get_enviroment()
+    print 'get_login()          : %s' % get_login()
+    print 'get_hostname()       : %s' % get_hostname()
+    print 'get_cwd()            : %s' % get_cwd()
+    #print ': %s' % 
+
+#------------------------------
+
+if __name__ == "__main__" :
+    do_test()
+
 #------------------------------
