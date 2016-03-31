@@ -49,6 +49,8 @@ __version__ = "$Revision$"
 
 #import sys
 import os
+import getpass
+import socket
 import numpy as np
 from time import localtime, strftime
 
@@ -341,14 +343,16 @@ def get_enviroment(env='USER') :
 def get_login() :
     """Returns login name
     """
-    return os.getlogin()
+    #return os.getlogin()
+    return getpass.getuser()
 
 #------------------------------
 
 def get_hostname() :
     """Returns login name
     """
-    return os.uname()[1]
+    #return os.uname()[1]
+    return socket.gethostname()
 
 #------------------------------
 
