@@ -24,7 +24,7 @@ class CalibParsBaseEpix100aV1 :
     shape = (rows, cols)
     size_cm = 16 
     shape_cm = (size_cm,)
-    cmod = (4,1,20,0, 0,0,0,0, 0,0,0,0, 0,0,0,0)
+    cmod = (4,6,30,10, 0,0,0,0, 0,0,0,0, 0,0,0,0)
     # 4-Epix100a, 1-median for 16 352x96 banks, 20-maximal allowed correction
          
     def __init__(self) : pass

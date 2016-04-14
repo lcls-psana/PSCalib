@@ -10,6 +10,9 @@ Package author: Mikhail S. Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+Tag: V00-02-69
+2016-04-14 Mikhail S. Dubrovin
+- CalibParsBaseEpix100aV1 - change default common mode parameters from (4,1,20,0) to (4,6,30,30) PSAS-147
 
 Tag: V00-02-68
 2016-03-31 Mikhail S. Dubrovin
