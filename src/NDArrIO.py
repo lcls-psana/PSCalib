@@ -76,6 +76,8 @@ def save_txt(fname='nda.txt', arr=None, cmts=(), fmt='%.1f', verbos=False, addme
     recs.append('# FILE_NAME   %s' % fname)
     recs.append('# DATE_TIME   %s' % gu.str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'))
     recs.append('# UID         %s' % gu.get_login())
+    recs.append('# SHAPE       %s' % str(arr.shape).replace(' ',''))
+    recs.append('# NUMPYDTYPE  %s' % str(arr.dtype))
 
     if addmetad :
         recs.append('\n# DTYPE       %s' % str(arr.dtype))

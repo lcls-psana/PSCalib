@@ -10,6 +10,10 @@ Package author: Mikhail S. Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+Tag: V00-02-70
+2016-04-25 Mikhail S. Dubrovin
+- in NDArrIO.save_txt add SHAPE and NUMPYDTYPE.
+	
 Tag: V00-02-69
 2016-04-14 Mikhail S. Dubrovin
 - CalibParsBaseEpix100aV1 - change default common mode parameters from (4,1,20,0) to (4,6,30,30) PSAS-147
