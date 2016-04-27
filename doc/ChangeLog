@@ -10,9 +10,14 @@ Package author: Mikhail S. Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+
+Tag: V00-02-71
+2016-04-27 Mikhail S. Dubrovin
+- GeometryObject.py change format for angles from %6.1f to %8.3f and test in GeometryAccess
+	
 Tag: V00-02-70
 2016-04-25 Mikhail S. Dubrovin
-- in NDArrIO.save_txt add SHAPE and NUMPYDTYPE.
+- in NDArrIO.save_txt add SHAPE and DATATYPE.
 	
 Tag: V00-02-69
 2016-04-14 Mikhail S. Dubrovin

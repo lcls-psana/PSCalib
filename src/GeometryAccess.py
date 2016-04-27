@@ -726,6 +726,10 @@ def test_img_default() :
 def test_save_pars_in_file(geometry) :
     """ Test default image
     """
+    # change one line of parameters
+    x0, y0, z0, rot_z, rot_y, rot_x, tilt_z, tilt_y, tilt_x = -3500, 5800, 0, 0.123, 0.123, 0.123, 1, 2, 3
+    geometry.set_geo_pars('QUAD:V1', 1, x0, y0, z0, rot_z, rot_y, rot_x, tilt_z, tilt_y, tilt_x)
+
     geometry.set_print_bits(32)
     geometry.save_pars_in_file('./test.txt')
 

@@ -167,7 +167,7 @@ class GeometryObject :
         """
         print 'parent:%10s %2d   geo: %10s %2d' % (self.pname, self.pindex, self.oname, self.oindex) + \
               '  x0:%8.0f  y0:%8.0f  z0:%8.0f' % (self.x0, self.y0, self.z0) + \
-              '  rot_z:%6.1f  rot_y:%6.1f  rot_x:%6.1f' % (self.rot_z, self.rot_y, self.rot_x) + \
+              '  rot_z:%8.3f  rot_y:%8.3f  rot_x:%8.3f' % (self.rot_z, self.rot_y, self.rot_x) + \
               '  tilt_z:%8.5f  tilt_y:%8.5f  tilt_x:%8.5f' % (self.tilt_z, self.tilt_y, self.tilt_x)
 
 #------------------------------
@@ -175,9 +175,12 @@ class GeometryObject :
     def str_data(self) :
         """ Returns a string of data to save in file
         """
+        s_rot_x = ('%8.3f' % self.rot_x).rstrip('0').rstrip('.')
+        s_rot_y = ('%8.3f' % self.rot_y).rstrip('0').rstrip('.')
+        s_rot_z = ('%8.3f' % self.rot_z).rstrip('0').rstrip('.')
         return '%s %3d %s %3d' % (self.pname.ljust(11), self.pindex, self.oname.ljust(11), self.oindex) + \
                '  %8.0f %8.0f %8.0f' % (self.x0, self.y0, self.z0) + \
-               '  %6.1f %6.1f %6.1f' % (self.rot_z, self.rot_y, self.rot_x) + \
+               '  %8s   %8s   %8s  ' % (s_rot_z, s_rot_y, s_rot_x) + \
                '  %8.5f %8.5f %8.5f' % (self.tilt_z, self.tilt_y, self.tilt_x)
 
 #------------------------------
