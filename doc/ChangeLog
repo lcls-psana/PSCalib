@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-72
+2016-05-05 Mikhail S. Dubrovin
+- CalibFileFinder.py - add methods makeCalibFileName, find_calib_file and make_calib_file_name PSAS-148
+
 Tag: V00-02-71
 2016-04-27 Mikhail S. Dubrovin
 - GeometryObject.py change format for angles from %6.1f to %8.3f and test in GeometryAccess

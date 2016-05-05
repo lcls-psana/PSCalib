@@ -7,14 +7,25 @@ Usage::
     from PSCalib.CalibFileFinder import CalibFileFinder
 
     cdir  = '/reg/d/psdm/CXI/cxi83714/calib/'
-    group = 'CsPad::CalibV1'
+    group = 'CsPad::CalibV1'   # optional parameter, if not available will be set for src from dict 
     src   = 'CxiDs1.0:Cspad.0'
     type  = 'pedestals'
     rnum  = 137
 
     cff = CalibFileFinder(cdir, group, pbits=0377)
+    #OR
+    cff = CalibFileFinder(cdir)
     fname = cff.findCalibFile(src, type, rnum)
 
+    fname_new = cff.makeCalibFileName(src, type, run_range='0-end')
+
+    #-----------------------------------------------
+    # ALTERNATIVE usage of direct access methods
+
+    from PSCalib.CalibFileFinder import find_calib_file, make_calib_file_name
+
+    fname_existing = find_calib_file(cdir, src, type, rnum, pbits=1)
+    fname_new      = make_calib_file_name(cdir, src, type, run_range='0-end', pbits=1)
 
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.
@@ -31,6 +42,7 @@ __version__ = "$Revision$"
 
 import os
 import sys
+import PSCalib.GlobalUtils as gu
 
 #------------------------------
 
@@ -80,6 +92,16 @@ class CalibFile :
 
 #------------------------------
 
+def find_calib_file(cdir, src, type, rnum, pbits=1) :
+    return CalibFileFinder(cdir, pbits=pbits).findCalibFile(src, type, rnum)
+
+#------------------------------
+
+def make_calib_file_name(cdir, src, type, run_range='0-end', pbits=1) :
+    return CalibFileFinder(cdir, pbits=pbits).makeCalibFileName(src, type, run_range)
+
+#------------------------------
+
 class CalibFileFinder :
 
     def __init__(self, cdir='', group='', pbits=1) :
@@ -88,14 +110,39 @@ class CalibFileFinder :
         self.pbits = pbits
 
 
+    def _setGroup(self, src) :
+        """If not available, sets group from source.
+        """
+        if self.group == '' or self.group is None :
+            dettype = gu.det_type_from_source(src)
+            self.group = gu.dic_det_type_to_calib_group.get(dettype)
+            if self.group is None :
+                if self.pbits & 1 : print 'WARNING! CALIBRATION GROUP IS NOT FOUND FOR SOURCE %s' % src
+                return False
+        return True
+
+
+    def makeCalibFileName(self, src, type, run_range='0-end') :
+        """Returns calibration file name.
+        """
+        if self.cdir == '' :
+            if self.pbits & 1 : print 'WARNING! CALIBRATION DIRECTORY IS EMPTY'
+            return ''
+
+        if not self._setGroup(src) : return ''
+        return  os.path.join(self.cdir, self.group, src, type, '%s.data' % run_range)
+
+
     def findCalibFile(self, src, type, rnum0) :
-        """Find calibration file
+        """Find calibration file.
         """
         rnum = rnum0 if rnum0 <= CalibFile.rnum_max else CalibFile.rnum_max
 
         if self.cdir == '' :
             if self.pbits & 1 : print 'WARNING! CALIBRATION DIRECTORY IS EMPTY'
             return ''
+
+        if not self._setGroup(src) : return ''
 
         dir_name = os.path.join(self.cdir, self.group, src, type)
         if not os.path.exists(dir_name) :
@@ -155,14 +202,22 @@ if __name__ == "__main__" :
     group = 'CsPad::CalibV1'
     src   = 'CxiDs1.0:Cspad.0'
     type  = 'pedestals'
-    #rnum  = 137
-    rnum  = 123456789
+    rnum  = 137
+    #rnum  = 123456789
 
     print 'Finding calib file for\n  dir = %s\n  grp = %s\n  src = %s\n  type= %s\n  run = %d' % \
           (cdir, group, src, type, rnum)
 
-    cff = CalibFileFinder(cdir, group, 0377) # 0377)
+    cff = CalibFileFinder(cdir, group, 0377)
     fname = cff.findCalibFile(src, type, rnum)
+
+    #--------------------------
+
+    print 'Test methods find_calib_file and make_calib_file_name'
+    fname_existing = find_calib_file(cdir, src, type, rnum, pbits=1)
+    fname_new      = make_calib_file_name(cdir, src, type, run_range='123-456', pbits=1)
+    print '  fname_existing : %s' % fname_existing
+    print '  fname_new      : %s' % fname_new
 
     sys.exit('End of %s' % sys.argv[0])
 
