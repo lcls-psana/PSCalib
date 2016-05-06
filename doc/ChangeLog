@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-73
+2016-05-05 Mikhail S. Dubrovin
+- CalibFileFinder.make_calib_file_name - add protection, create subdirectory, change signature PSAS-148
+- GlobalUtils.py - add method create_directory
+	
 Tag: V00-02-72
 2016-05-05 Mikhail S. Dubrovin
 - CalibFileFinder.py - add methods makeCalibFileName, find_calib_file and make_calib_file_name PSAS-148

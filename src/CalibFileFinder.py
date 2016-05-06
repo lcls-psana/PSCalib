@@ -17,7 +17,7 @@ Usage::
     cff = CalibFileFinder(cdir)
     fname = cff.findCalibFile(src, type, rnum)
 
-    fname_new = cff.makeCalibFileName(src, type, run_range='0-end')
+    fname_new = cff.makeCalibFileName(src, type, run_start, run_end=None)
 
     #-----------------------------------------------
     # ALTERNATIVE usage of direct access methods
@@ -25,7 +25,7 @@ Usage::
     from PSCalib.CalibFileFinder import find_calib_file, make_calib_file_name
 
     fname_existing = find_calib_file(cdir, src, type, rnum, pbits=1)
-    fname_new      = make_calib_file_name(cdir, src, type, run_range='0-end', pbits=1)
+    fname_new      = make_calib_file_name(cdir, src, type, run_start, run_end=None, pbits=1)
 
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.
@@ -97,8 +97,8 @@ def find_calib_file(cdir, src, type, rnum, pbits=1) :
 
 #------------------------------
 
-def make_calib_file_name(cdir, src, type, run_range='0-end', pbits=1) :
-    return CalibFileFinder(cdir, pbits=pbits).makeCalibFileName(src, type, run_range)
+def make_calib_file_name(cdir, src, type, run_start, run_end=None, pbits=1) :
+    return CalibFileFinder(cdir, pbits=pbits).makeCalibFileName(src, type, run_start, run_end=None)
 
 #------------------------------
 
@@ -122,15 +122,53 @@ class CalibFileFinder :
         return True
 
 
-    def makeCalibFileName(self, src, type, run_range='0-end') :
+    def makeCalibFileName(self, src, type, run_start, run_end=None) :
         """Returns calibration file name.
         """
-        if self.cdir == '' :
-            if self.pbits & 1 : print 'WARNING! CALIBRATION DIRECTORY IS EMPTY'
-            return ''
+        if os.path.basename(self.cdir.rstrip('/')) != 'calib' :
+            if self.pbits & 1  : print 'WARNING! NOT calib DIRECTORY: %s' % self.cdir
+            return None
 
-        if not self._setGroup(src) : return ''
-        return  os.path.join(self.cdir, self.group, src, type, '%s.data' % run_range)
+        if not os.path.exists(self.cdir) :
+            if self.pbits & 1  : print 'WARNING! NON-EXISTENT DIRECTORY: %s' % self.cdir
+            return None        
+
+        if not self._setGroup(src) :
+            return None
+
+        if run_start < 0 :
+            if self.pbits & 1  : print 'WARNING! START RUN NUMBER IS NEGATIVE: %d' % run_start
+            return None
+
+        if run_start > 9999 :
+            if self.pbits & 1  : print 'WARNING! START RUN NUMBER EXCEEDS 4-DIGITS: %d' % run_start
+            return None
+
+        if run_end is None :
+            self.cfname = '%d-end.data' % (run_start)
+            
+        else :
+
+          if run_end < 0 :
+            if self.pbits & 1  : print 'WARNING! END RUN NUMBER IS NEGATIVE: %d' % run_end
+            return None
+
+          if run_end > 9999 :
+            if self.pbits & 1  : print 'WARNING! END RUN NUMBER IS TOO BIG: %d' % run_end
+            return None
+
+          if run_end < run_start :
+            if self.pbits & 1  : print 'WARNING! END RUN:%d < START RUN:%d' % (run_end, run_start)
+            return None
+
+          self.cfname = '%d-%d.data' % (run_start, run_end) 
+
+        dir = self.cdir
+        for subdir in (self.group, src, type) :
+            dir = os.path.join(dir, subdir)
+            gu.create_directory(dir, self.pbits)
+
+        return os.path.join(dir, self.cfname)
 
 
     def findCalibFile(self, src, type, rnum0) :
@@ -215,8 +253,12 @@ if __name__ == "__main__" :
 
     print 'Test methods find_calib_file and make_calib_file_name'
     fname_existing = find_calib_file(cdir, src, type, rnum, pbits=1)
-    fname_new      = make_calib_file_name(cdir, src, type, run_range='123-456', pbits=1)
     print '  fname_existing : %s' % fname_existing
+
+    cdir = './calib'
+    run_start = 134
+    gu.create_directory(cdir, True)
+    fname_new      = make_calib_file_name(cdir, src, type, run_start, run_end=None, pbits=0)
     print '  fname_new      : %s' % fname_new
 
     sys.exit('End of %s' % sys.argv[0])
