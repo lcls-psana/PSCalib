@@ -16,7 +16,7 @@ Usage::
     area = geometry.get_pixel_areas(oname=None, oindex=0)
 
     # get pixel mask array;
-    # mbits = +1-mask edges, +2-wide pixels, +4-non-bounded pixels, +8-non-bounded pixel neighbours
+    # mbits = +1-mask edges, +2-wide pixels, +4-non-bounded pixels, +8/+16 - four/eight neighbours of non-bounded
     mask = geometry.get_pixel_mask(oname=None, oindex=0, mbits=0377)
 
     # get index arrays for entire detector
@@ -318,7 +318,8 @@ class GeometryAccess :
            mbits =+1 - mask edges
                   +2 - two wide-pixel central columns
                   +4 - non-bounded pixels
-                  +8 - neighbours of non-bounded pixels
+                  +8 - four nearest neighbours of non-bounded pixels
+                  +16- eight neighbours of non-bounded pixels
         """
         if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
@@ -657,14 +658,14 @@ def test_plot_quad(geometry) :
 
 #------------------------------
 
-def test_mask_quad(geometry) :
+def test_mask_quad(geometry, mbits) :
     """ Tests geometry acess methods of the class GeometryAccess object for CSPAD quad
     """
     ## get index arrays
     iX, iY = geometry.get_pixel_coord_indexes('QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)
 
     # get intensity array
-    arr = geometry.get_pixel_mask('QUAD:V1', 1, 1+2+4+8)
+    arr = geometry.get_pixel_mask('QUAD:V1', 1, mbits)
     arr.shape = (8,185,388)
     amp_range = (-1,2)
  
@@ -861,7 +862,7 @@ if __name__ == "__main__" :
     elif sys.argv[1]=='6' : ga0377 = GeometryAccess(fname_geometry, 0377)
     elif sys.argv[1]=='7' : test_save_pars_in_file(geometry)
     elif sys.argv[1]=='8' : test_load_pars_from_file(geometry)
-    elif sys.argv[1]=='9' : test_mask_quad(geometry)
+    elif sys.argv[1]=='9' : test_mask_quad(geometry, 1+2+8) #+16
     elif sys.argv[1]=='10': geometry.print_psf()
     elif sys.argv[1]=='11': test_cspad2x2()
     elif sys.argv[1]=='12': test_epix100a()

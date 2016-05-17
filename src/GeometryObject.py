@@ -33,7 +33,7 @@ Usage::
     X,Y,Z  = geo.get_pixel_coords(do_tilt=true)
     X,Y    = geo.get_2d_pixel_coords(do_tilt=true)
     area   = geo.get_pixel_area()
-    #mbits = +1-edges, +2-wide pixels, +4-non-bounded pixels, +8-neighbours of non-bounded
+    #mbits = +1-edges, +2-wide pixels, +4-non-bounded pixels, +8/+16 - four/eight neighbours of non-bounded
     mask   = geo.get_pixel_mask(mbits=0377)
     npixels= geo.get_size_geo_array()
     pixsize= geo.get_pixel_scale_size()
@@ -339,7 +339,8 @@ class GeometryObject :
         mbits =+1 - mask edges
                +2 - two wide-pixel central columns
                +4 - non-bounded pixels
-               +8 - neighbours of non-bounded pixels
+               +8 - nearest four neighbours of non-bounded pixels
+               +16- eight neighbours of non-bounded pixels
         """
 
         if self.algo is not None :

@@ -45,7 +45,11 @@ Usage of interface methods::
 
     area  = sg.pixel_area_array()
     mask = sg.pixel_mask_array(mbits=0377)
-    # where mbits = +1-edges, +2-wide pixels, +4-non-bounded pixels, +8-neighbours of non-bounded
+    # where mbits = +1  - edges,
+    #               +2  - wide pixels,
+    #               +4  - non-bounded pixels,
+    #               +8  - nearest four neighbours of non-bounded
+    #               +16 - eight neighbours of non-bounded
 
     sizeX = sg.pixel_size_array('X')
     sizeX, sizeY, sizeZ = sg.pixel_size_array()
@@ -345,7 +349,8 @@ class SegGeometryCspad2x1V1(SegGeometry) :
             mbits=1 - mask edges
                  +2 - mask two central columns 
                  +4 - mask non-bounded pixels
-                 +8 - mask nearest neighbours of nonbonded pixels
+                 +8 - mask nearest four neighbours of nonbonded pixels
+                 +16- mask eight neighbours of nonbonded pixels
         """
         zero_col = np.zeros(sp._rows,dtype=np.int)
         zero_row = np.zeros(sp._cols,dtype=np.int)
@@ -363,15 +368,22 @@ class SegGeometryCspad2x1V1(SegGeometry) :
             mask[:,sp._colsh-1] = zero_col # mask central-left  column
             mask[:,sp._colsh]   = zero_col # mask central-right column
 
-        if mbits & 4 : 
+        if mbits & 4 or mbits & 8 or mbits & 16 : 
         # mask non-bounded pixels
-            for p in range(0, sp._rows, 10):
+            for p in range(0, sp._rows, 10) :
                 h = sp._colsh
-                mask[p,p] = 0
-                mask[p,p+h] = 0
                 
-                if mbits & 8 :
-                # mask nearest neighbours of nonbonded pixels
+                if mbits & 16 :
+                # mask eight neighbours of nonbonded pixels
+                    if p==0 :
+                        mask[0:2,0:2] = 0
+                        mask[0:2,h:2+h] = 0
+                    else :
+                        mask[p-1:p+2,p-1:p+2] = 0
+                        mask[p-1:p+2,p-1+h:p+2+h] = 0
+
+                elif mbits & 8 :
+                # mask nearest four neighbours of nonbonded pixels
                     if p==0 :
                         mask[1,0] = 0
                         mask[0,1] = 0
@@ -382,6 +394,11 @@ class SegGeometryCspad2x1V1(SegGeometry) :
                         mask[p,p-1:p+2] = 0                        
                         mask[p-1:p+2,p+h] = 0
                         mask[p,p+h-1:p+h+2] = 0                        
+
+                elif mbits & 4 :
+                # mask nonbonded pixels
+                    mask[p,p] = 0
+                    mask[p,p+h] = 0
 
         return mask
 
@@ -509,6 +526,7 @@ if __name__ == "__main__" :
     elif sys.argv[1]=='3' : test_2x1_img_easy()
     elif sys.argv[1]=='4' : test_pix_sizes()
     elif sys.argv[1]=='5' : test_2x1_mask(mbits=1+2+4+8)
+    elif sys.argv[1]=='6' : test_2x1_mask(mbits=16)
     else : print 'Non-expected arguments: sys.argv=', sys.argv
 
     sys.exit( 'End of test.' )
