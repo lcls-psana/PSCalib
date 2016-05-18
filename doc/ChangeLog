@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-75
+2016-05-18 Mikhail S. Dubrovin
+- GlobalUtils.py - add methods mask_neighbors, mask_edges and associated tests.
+
 Tag: V00-02-74
 2016-05-17 Mikhail S. Dubrovin
 - Add mask of eight neighbours of unbound pixel if mbits += 16 

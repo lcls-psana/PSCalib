@@ -22,6 +22,8 @@ Usage::
     detname = gu.string_from_source(source)
 
     mmask = gu.merge_masks(mask1=None, mask2=None)
+    mask  = gu.mask_neighbors(mask_in, allnbrs=True)
+
     arr2d = gu.reshape_nda_to_2d(nda)
     arr3d = gu.reshape_nda_to_3d(nda)
 
@@ -287,22 +289,23 @@ def string_from_source(source) :
   str_split = str_in_quots.split('(') 
   return str_split[1].rstrip(')') if len(str_split)>1 else str_in_quots
 
-#------------------------------
+##-----------------------------
 
-def merge_masks(mask1=None, mask2=None) :
-    """Merging masks using rule: (0,1,0,1)^(0,0,1,1) = (0,0,0,1) 
+def shape_nda_to_2d(arr) :
+    """Return shape of np.array to reshape to 2-d
     """
-    if mask1 is None : return mask2
-    if mask2 is None : return mask1
+    sh = arr.shape
+    if len(sh)<3 : return sh
+    return (arr.size/sh[-1], sh[-1])
 
-    shape1 = mask1.shape
-    shape2 = mask2.shape
+##-----------------------------
 
-    if shape1 != shape2 :
-        if len(shape1) > len(shape2) : mask2.shape = shape1
-        else                         : mask1.shape = shape2
-
-    return np.logical_and(mask1, mask2)
+def shape_nda_to_3d(arr) :
+    """Return shape of np.array to reshape to 3-d
+    """
+    sh = arr.shape
+    if len(sh)<4 : return sh
+    return (arr.size/sh[-1]/sh[-2], sh[-2], sh[-1])
 
 ##-----------------------------
 
@@ -323,6 +326,134 @@ def reshape_nda_to_3d(arr) :
     if len(sh)<4 : return arr
     arr.shape = (arr.size/sh[-1]/sh[-2], sh[-2], sh[-1])
     return arr
+
+#------------------------------
+
+def merge_masks(mask1=None, mask2=None) :
+    """Merging masks using np.logical_and rule: (0,1,0,1)^(0,0,1,1) = (0,0,0,1) 
+    """
+    if mask1 is None : return mask2
+    if mask2 is None : return mask1
+
+    shape1 = mask1.shape
+    shape2 = mask2.shape
+
+    if shape1 != shape2 :
+        if len(shape1) > len(shape2) : mask2.shape = shape1
+        else                         : mask1.shape = shape2
+
+    return np.logical_and(mask1, mask2)
+
+#------------------------------
+
+def mask_neighbors(mask, allnbrs=True) :
+    """Return mask with masked eight neighbor pixels around each 0-bad pixel in input mask.
+
+       mask    : int - n-dimensional (n>1) array with input mask
+       allnbrs : bool - False/True - masks 4/8 neighbor pixels.
+    """
+    shape_in = mask.shape
+    if len(shape_in) < 2 :
+        raise ValueError('Input mask has less then 2-d, shape = %s' % str(shape_in))
+
+    mask_out = np.array(mask, copy=True)
+
+    if len(shape_in) == 2 :
+        # mask nearest neighbors
+        mask_out[0:-1,:] = np.logical_and(mask_out[0:-1,:], mask[1:,  :])
+        mask_out[1:,  :] = np.logical_and(mask_out[1:,  :], mask[0:-1,:])
+        mask_out[:,0:-1] = np.logical_and(mask_out[:,0:-1], mask[:,1:  ])
+        mask_out[:,1:  ] = np.logical_and(mask_out[:,1:  ], mask[:,0:-1])
+        if allnbrs :
+          # mask diagonal neighbors
+          mask_out[0:-1,0:-1] = np.logical_and(mask_out[0:-1,0:-1], mask[1:  ,1:  ])
+          mask_out[1:  ,0:-1] = np.logical_and(mask_out[1:  ,0:-1], mask[0:-1,1:  ])
+          mask_out[0:-1,1:  ] = np.logical_and(mask_out[0:-1,1:  ], mask[1:  ,0:-1])
+          mask_out[1:  ,1:  ] = np.logical_and(mask_out[1:  ,1:  ], mask[0:-1,0:-1])
+
+    else : # shape>2
+
+        mask_out.shape = mask.shape = shape_nda_to_3d(mask)       
+
+        # mask nearest neighbors
+        mask_out[:, 0:-1,:] = np.logical_and(mask_out[:, 0:-1,:], mask[:, 1:,  :])
+        mask_out[:, 1:,  :] = np.logical_and(mask_out[:, 1:,  :], mask[:, 0:-1,:])
+        mask_out[:, :,0:-1] = np.logical_and(mask_out[:, :,0:-1], mask[:, :,1:  ])
+        mask_out[:, :,1:  ] = np.logical_and(mask_out[:, :,1:  ], mask[:, :,0:-1])
+        if allnbrs :
+          # mask diagonal neighbors
+          mask_out[:, 0:-1,0:-1] = np.logical_and(mask_out[:, 0:-1,0:-1], mask[:, 1:  ,1:  ])
+          mask_out[:, 1:  ,0:-1] = np.logical_and(mask_out[:, 1:  ,0:-1], mask[:, 0:-1,1:  ])
+          mask_out[:, 0:-1,1:  ] = np.logical_and(mask_out[:, 0:-1,1:  ], mask[:, 1:  ,0:-1])
+          mask_out[:, 1:  ,1:  ] = np.logical_and(mask_out[:, 1:  ,1:  ], mask[:, 0:-1,0:-1])
+
+        mask_out.shape = mask.shape = shape_in
+
+    return mask_out
+
+#------------------------------
+
+def mask_edges(mask, mrows=1, mcols=1) :
+    """Return mask with a requested number of row and column pixels masked - set to 0.
+       mask  : int - n-dimensional (n>1) array with input mask
+       mrows : int - number of edge rows to mask
+       mcols : int - number of edge columns to mask
+    """
+    sh = mask.shape
+    if len(sh) < 2 :
+        raise ValueError('Input mask has less then 2-d, shape = %s' % str(sh))
+
+    mask_out = np.array(mask, copy=True)
+
+    # print 'shape:', sh
+
+    if len(sh) == 2 :
+        rows, cols = sh
+
+        if mrows > rows : 
+          raise ValueError('Requested number of edge rows=%d to mask exceeds 2-d, shape=%s' % (mrows, str(sh)))
+
+        if mcols > cols : 
+          raise ValueError('Requested number of edge columns=%d to mask exceeds 2-d, shape=%s' % (mcols, str(sh)))
+
+        if mrows>0 :
+          # mask edge rows
+          mask_rows = np.zeros((mrows,cols), dtype=mask.dtype)
+          mask_out[:mrows ,:] = mask_rows
+          mask_out[-mrows:,:] = mask_rows
+
+        if mcols>0 :
+          # mask edge colss
+          mask_cols = np.zeros((rows,mcols), dtype=mask.dtype)
+          mask_out[:,:mcols ] = mask_cols
+          mask_out[:,-mcols:] = mask_cols
+
+    else : # shape>2
+        mask_out.shape = shape_nda_to_3d(mask)       
+
+        segs, rows, cols = mask_out.shape
+
+        if mrows > rows : 
+          raise ValueError('Requested number of edge rows=%d to mask exceeds 2-d, shape=%s' % (mrows, str(sh)))
+
+        if mcols > cols : 
+          raise ValueError('Requested number of edge columns=%d to mask exceeds 2-d, shape=%s' % (mcols, str(sh)))
+
+        if mrows>0 :
+          # mask edge rows
+          mask_rows = np.zeros((segs,mrows,cols), dtype=mask.dtype)
+          mask_out[:, :mrows ,:] = mask_rows
+          mask_out[:, -mrows:,:] = mask_rows
+
+        if mcols>0 :
+          # mask edge colss
+          mask_cols = np.zeros((segs,rows,mcols), dtype=mask.dtype)
+          mask_out[:, :,:mcols ] = mask_cols
+          mask_out[:, :,-mcols:] = mask_cols
+
+        mask_out.shape = sh
+
+    return mask_out
 
 ##-----------------------------
 
@@ -375,12 +506,113 @@ def create_directory(dir, verb=False) :
 #------------------------------
 #------------------------------
 
+def test_mask_neighbors_2d(allnbrs=True) :
+    from pyimgalgos.NDArrGenerators import random_exponential
+    import pyimgalgos.Graphics as gr
+
+    randexp = random_exponential(shape=(40,60), a0=1)
+    fig  = gr.figure(figsize=(16,6), title='Random 2-d mask')
+    axim1 = gr.add_axes(fig, axwin=(0.05,  0.05, 0.40, 0.91))
+    axcb1 = gr.add_axes(fig, axwin=(0.452, 0.05, 0.01, 0.91))
+
+    axim2 = gr.add_axes(fig, axwin=(0.55,  0.05, 0.40, 0.91))
+    axcb2 = gr.add_axes(fig, axwin=(0.952, 0.05, 0.01, 0.91))
+
+    mask = np.select((randexp>6,), (0,), default=1)
+    mask_nbrs = mask_neighbors(mask, allnbrs)
+    img1 = mask # mask # randexp
+    img2 = mask_nbrs # mask # randexp
+    
+    imsh1, cbar1 = gr.imshow_cbar(fig, axim1, axcb1, img1, amin=0, amax=10, orientation='vertical')
+    imsh2, cbar2 = gr.imshow_cbar(fig, axim2, axcb2, img2,  amin=0, amax=10, orientation='vertical')
+    gr.show(mode=None)
+    
+#------------------------------
+
+def test_mask_neighbors_3d(allnbrs=True) :
+    from pyimgalgos.NDArrGenerators import random_exponential
+    import pyimgalgos.Graphics as gr
+
+    #randexp = random_exponential(shape=(2,2,30,80), a0=1)
+    randexp = random_exponential(shape=(2,30,80), a0=1)
+
+    fig  = gr.figure(figsize=(16,6), title='Random > 2-d mask')
+    axim1 = gr.add_axes(fig, axwin=(0.05,  0.05, 0.40, 0.91))
+    axcb1 = gr.add_axes(fig, axwin=(0.452, 0.05, 0.01, 0.91))
+
+    axim2 = gr.add_axes(fig, axwin=(0.55,  0.05, 0.40, 0.91))
+    axcb2 = gr.add_axes(fig, axwin=(0.952, 0.05, 0.01, 0.91))
+
+    mask = np.select((randexp>6,), (0,), default=1)
+    mask_nbrs = mask_neighbors(mask, allnbrs)
+
+    img1 = reshape_nda_to_2d(mask)
+    img2 = reshape_nda_to_2d(mask_nbrs)
+    
+    imsh1, cbar1 = gr.imshow_cbar(fig, axim1, axcb1, img1, amin=0, amax=10, orientation='vertical')
+    imsh2, cbar2 = gr.imshow_cbar(fig, axim2, axcb2, img2, amin=0, amax=10, orientation='vertical')
+    gr.show(mode=None)
+    
+#------------------------------
+
+def test_mask_edges_2d(mrows=1, mcols=1) :
+    from pyimgalgos.NDArrGenerators import random_exponential
+    import pyimgalgos.Graphics as gr
+
+    fig  = gr.figure(figsize=(8,6), title='Mask edges 2-d')
+    axim1 = gr.add_axes(fig, axwin=(0.05,  0.05, 0.87, 0.91))
+    axcb1 = gr.add_axes(fig, axwin=(0.922, 0.05, 0.01, 0.91))
+
+    mask = np.ones((20,30))
+    mask_out = mask_edges(mask, mrows, mcols)
+
+    img1 = mask_out
+    imsh1, cbar1 = gr.imshow_cbar(fig, axim1, axcb1, img1, amin=0, amax=10, orientation='vertical')
+    gr.show(mode=None)
+    
+#------------------------------
+
+def test_mask_edges_3d(mrows=1, mcols=1) :
+    from pyimgalgos.NDArrGenerators import random_exponential
+    import pyimgalgos.Graphics as gr
+
+    fig  = gr.figure(figsize=(8,6), title='Mask edges 2-d')
+    axim1 = gr.add_axes(fig, axwin=(0.05,  0.05, 0.87, 0.91))
+    axcb1 = gr.add_axes(fig, axwin=(0.922, 0.05, 0.01, 0.91))
+
+    #mask = np.ones((2,2,20,30))
+    mask = np.ones((2,20,30))
+    mask_out = mask_edges(mask, mrows, mcols)
+
+    img1 = reshape_nda_to_2d(mask_out)
+    imsh1, cbar1 = gr.imshow_cbar(fig, axim1, axcb1, img1, amin=0, amax=10, orientation='vertical')
+    gr.show(mode=None)
+    
+#------------------------------
+#------------------------------
+#------------------------------
+#------------------------------
+
 def do_test() :
+
+    import sys
+
     print 'get_enviroment(USER) : %s' % get_enviroment()
     print 'get_login()          : %s' % get_login()
     print 'get_hostname()       : %s' % get_hostname()
     print 'get_cwd()            : %s' % get_cwd()
     #print ': %s' % 
+
+    if len(sys.argv) > 1 :
+
+      if sys.argv[1] == '1' : test_mask_neighbors_2d(allnbrs = False)
+      if sys.argv[1] == '2' : test_mask_neighbors_2d(allnbrs = True)
+      if sys.argv[1] == '3' : test_mask_neighbors_3d(allnbrs = False)
+      if sys.argv[1] == '4' : test_mask_neighbors_3d(allnbrs = True)
+      if sys.argv[1] == '5' : test_mask_edges_2d(mrows=5, mcols=1)
+      if sys.argv[1] == '6' : test_mask_edges_2d(mrows=0, mcols=5)
+      if sys.argv[1] == '7' : test_mask_edges_3d(mrows=1, mcols=2)
+      if sys.argv[1] == '8' : test_mask_edges_3d(mrows=5, mcols=0)
 
 #------------------------------
 
