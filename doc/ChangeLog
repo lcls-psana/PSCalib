@@ -11,9 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-76
+2016-05-18 Mikhail S. Dubrovin
+- correct comments for word "bond"
+	
 Tag: V00-02-75
 2016-05-18 Mikhail S. Dubrovin
-- GlobalUtils.py - add methods mask_neighbors, mask_edges and associated tests.
+- GlobalUtils.py - add methods mask_neighbors, mask_edges and their tests.
 
 Tag: V00-02-74
 2016-05-17 Mikhail S. Dubrovin

@@ -53,7 +53,7 @@ Usage of interface methods::
 
     area  = sg.pixel_area_array()
     mask = sg.pixel_mask_array(mbits=0377)
-    # where mbits = +1-edges, +2-wide pixels, +4-non-bounded pixels, +8-neighbours of non-bounded
+    # where mbits = +1-edges, +2-wide pixels, +4-non-bonded pixels, +8-neighbours of non-bonded
 
     sizeX = sg.pixel_size_array('X')
     sizeX, sizeY, sizeZ = sg.pixel_size_array()
@@ -354,7 +354,7 @@ class SegGeometryMatrixV1(SegGeometry) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
             mbits=1 - mask edges
                  +2 - mask two central columns 
-                 +4 - mask non-bounded pixels
+                 +4 - mask non-bonded pixels
                  +8 - mask nearest neighbours of nonbonded pixels
         """
         zero_col = np.zeros(sp._rows,dtype=np.int)

@@ -47,9 +47,9 @@ Usage of interface methods::
     mask = sg.pixel_mask_array(mbits=0377)
     # where mbits = +1  - edges,
     #               +2  - wide pixels,
-    #               +4  - non-bounded pixels,
-    #               +8  - nearest four neighbours of non-bounded
-    #               +16 - eight neighbours of non-bounded
+    #               +4  - non-bonded pixels,
+    #               +8  - nearest four neighbours of non-bonded
+    #               +16 - eight neighbours of non-bonded
 
     sizeX = sg.pixel_size_array('X')
     sizeX, sizeY, sizeZ = sg.pixel_size_array()
@@ -348,7 +348,7 @@ class SegGeometryCspad2x1V1(SegGeometry) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
             mbits=1 - mask edges
                  +2 - mask two central columns 
-                 +4 - mask non-bounded pixels
+                 +4 - mask non-bonded pixels
                  +8 - mask nearest four neighbours of nonbonded pixels
                  +16- mask eight neighbours of nonbonded pixels
         """
@@ -369,7 +369,7 @@ class SegGeometryCspad2x1V1(SegGeometry) :
             mask[:,sp._colsh]   = zero_col # mask central-right column
 
         if mbits & 4 or mbits & 8 or mbits & 16 : 
-        # mask non-bounded pixels
+        # mask non-bonded pixels
             for p in range(0, sp._rows, 10) :
                 h = sp._colsh
                 

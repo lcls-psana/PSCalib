@@ -16,7 +16,7 @@ Usage::
     area = geometry.get_pixel_areas(oname=None, oindex=0)
 
     # get pixel mask array;
-    # mbits = +1-mask edges, +2-wide pixels, +4-non-bounded pixels, +8/+16 - four/eight neighbours of non-bounded
+    # mbits = +1-mask edges, +2-wide pixels, +4-non-bonded pixels, +8/+16 - four/eight neighbours of non-bonded
     mask = geometry.get_pixel_mask(oname=None, oindex=0, mbits=0377)
 
     # get index arrays for entire detector
@@ -317,9 +317,9 @@ class GeometryAccess :
         """Returns pixel mask array for top or specified geometry object.
            mbits =+1 - mask edges
                   +2 - two wide-pixel central columns
-                  +4 - non-bounded pixels
-                  +8 - four nearest neighbours of non-bounded pixels
-                  +16- eight neighbours of non-bounded pixels
+                  +4 - non-bonded pixels
+                  +8 - four nearest neighbours of non-bonded pixels
+                  +16- eight neighbours of non-bonded pixels
         """
         if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
