@@ -12,6 +12,9 @@ Usage::
     # get pixel coordinate [um] arrays
     X, Y, Z = geometry.get_pixel_coords(oname=None, oindex=0, do_tilt=True)
 
+    # get pixel x,y coordinate [um] arrays projected toward origin on specified zplane, if zplane=None then zplane=Z.mean()
+    X, Y = geometry.get_pixel_xy_at_z(zplane=None, oname=None, oindex=0, do_tilt=True)
+
     # get pixel area array; A=1 for regular pixels, =2.5 for wide.
     area = geometry.get_pixel_areas(oname=None, oindex=0)
 
@@ -24,6 +27,9 @@ Usage::
 
     # get index arrays for specified quad with offset
     iX, iY = geometry.get_pixel_coord_indexes('QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=(1000,1000), do_tilt=True)
+
+    # get index arrays for pixel coordinates projected toward origin on specified zplane
+    iX, iY = geometry.get_pixel_xy_inds_at_z(zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)
 
     # get ix and iy indexes for specified point in [um]. By default p_um=(0,0) - detector origin coordinates (center).
     ix, iy = geometry.point_coord_indexes(p_um=(0,0))
@@ -67,7 +73,16 @@ import sys
 from PSCalib.GeometryObject import GeometryObject
 
 import numpy as np
-from math import floor
+from math import floor, fabs
+
+#------------------------------
+
+def divide_protected(num, den, vsub_zero=0) :
+    """Returns result of devision of numpy arrays num/den with substitution of value vsub_zero for zero den elements.
+    """
+    pro_num = np.select((den!=0,), (num,), default=vsub_zero)
+    pro_den = np.select((den!=0,), (den,), default=1)
+    return pro_num / pro_den
 
 #------------------------------
 
@@ -304,6 +319,25 @@ class GeometryAccess :
 
     #------------------------------
 
+    def get_pixel_xy_at_z(self, zplane=None, oname=None, oindex=0, do_tilt=True) :
+        """Returns pixel coordinate arrays XatZ, YatZ, for specified zplane and geometry object.
+
+           This method projects pixel X, Y coordinates in 3-D
+           on the specified Z plane along direction to origin.
+        """
+        if not self.valid : return None, None
+
+        X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt)
+        if X is None : return None, None
+        Z0 = Z.mean() if zplane is None else zplane
+        if fabs(Z0) < 1000 : return X, Y
+
+        XatZ = Z0 * divide_protected(X,Z)
+        YatZ = Z0 * divide_protected(Y,Z)
+        return XatZ, YatZ
+
+    #------------------------------
+
     def get_pixel_areas(self, oname=None, oindex=0) :
         """Returns pixel areas array for top or specified geometry object 
         """
@@ -423,6 +457,38 @@ class GeometryAccess :
             return self.iX_old, self.iY_old
 
         X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt)
+
+        pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
+        pix_half = 0.5*pix_size
+
+        xmin, ymin = X.min()-pix_half, Y.min()-pix_half 
+
+        if xy0_off_pix is not None :
+            # Offset in pix -> um
+            x_off_um = xy0_off_pix[0] * pix_size
+            y_off_um = xy0_off_pix[1] * pix_size
+            # Protection against wrong offset bringing negative indexes
+            xmin += x_off_um
+            ymin += y_off_um
+            x_off_um = x_off_um + pix_half if xmin>0 else x_off_um - xmin
+            y_off_um = y_off_um + pix_half if ymin>0 else y_off_um - ymin
+            self.iX_old, self.iY_old = np.array((X+x_off_um)/pix_size, dtype=np.uint), np.array((Y+y_off_um)/pix_size, dtype=np.uint)
+
+        else :
+            self.iX_old, self.iY_old = np.array((X-xmin)/pix_size, dtype=np.uint), np.array((Y-ymin)/pix_size, dtype=np.uint)
+
+        return self.iX_old, self.iY_old
+
+    #------------------------------
+
+    def get_pixel_xy_inds_at_z(self, zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True) :
+        """Returns pixel coordinate index arrays iX, iY of size for specified zplane and geometry object  
+        """
+        if not self.valid : return None, None
+
+        X, Y = self.get_pixel_xy_at_z(zplane, oname, oindex, do_tilt)
+
+        if X is None : return None, None
 
         pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
         pix_half = 0.5*pix_size
@@ -807,6 +873,43 @@ def test_epix100a() :
     gg.show()
 
 #------------------------------
+
+def test_cspad_xy_at_z() :
+    """ Test cspad geometry table
+    """
+    ## 'CxiDs1.0:Cspad.0)' or 'DscCsPad' 
+    basedir = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-camera1-2014-09-24/'    
+    fname_geometry = basedir + '2016-06-03-geometry-cxi06216-r25-camera1-z175mm.txt'
+    fname_data     = basedir + '2016-06-03-chun-cxi06216-0025-DscCsPad-max.txt'    
+
+    geometry = GeometryAccess(fname_geometry, 0377)
+
+    # get pixel coordinate index arrays:
+    xyc = xc, yc = 1000, 1000
+    #iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc)
+    #iX, iY = geometry.get_pixel_coord_indexes(do_tilt=True)
+    #iX, iY = geometry.get_pixel_xy_inds_at_z(zplane=None, xy0_off_pix=xyc)
+    iX, iY = geometry.get_pixel_xy_inds_at_z(zplane=150000)
+
+    root, ext = os.path.splitext(fname_data)
+    arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float) 
+
+    #print 'arr.shape=', arr.shape
+    arr.shape= (32,185,388)
+
+    #ave, rms = arr.mean(), arr.std()
+    #amp_range = (ave-rms, ave+3*rms)
+    amp_range = (0, 1000)
+    print 'amp_range', amp_range
+
+    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
+    img = img_from_pixel_arrays(iX,iY,W=arr)
+
+    axim = gg.plotImageLarge(img,amp_range=amp_range)
+    gg.move(500,10)
+    gg.show()
+
+#------------------------------
 #------------------------------
 #------------------------------
 #------------------------------
@@ -867,6 +970,7 @@ if __name__ == "__main__" :
     elif sys.argv[1]=='11': test_cspad2x2()
     elif sys.argv[1]=='12': test_epix100a()
     elif sys.argv[1]=='13': geometry.print_comments_from_dict()
+    elif sys.argv[1]=='14': test_cspad_xy_at_z()
     else : print 'Wrong input parameter.' + msg
 
     sys.exit ('End of %s' % sys.argv[0])

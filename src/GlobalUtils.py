@@ -16,7 +16,7 @@ Usage::
     import PSCalib.GlobalUtils as gu
 
     # Methods
-    resp = gu.<method(pars)>
+    #resp = gu.<method(pars)>
 
     dettype = gu.det_type_from_source(source)
     detname = gu.string_from_source(source)

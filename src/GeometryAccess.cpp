@@ -51,6 +51,8 @@ GeometryAccess::GeometryAccess (const std::string& path, unsigned pbits)
   , p_iX(0)
   , p_iY(0)
   , p_image(0)
+  , p_XatZ(0)
+  , p_YatZ(0)
 {
   if(m_pbits & 1) MsgLog(name(), info, "m_pbits = " << m_pbits); 
 
@@ -70,6 +72,8 @@ GeometryAccess::~GeometryAccess ()
   delete [] p_iX;
   delete [] p_iY;
   delete p_image;
+  delete [] p_XatZ;
+  delete [] p_YatZ;
 }
 
 //-------------------
@@ -321,14 +325,14 @@ GeometryAccess::shpGO GeometryAccess::get_top_geo()
 //-------------------
 
 void
-GeometryAccess::get_pixel_coords( const double*& X, 
-                                  const double*& Y, 
-                                  const double*& Z, 
-				  unsigned& size,
-                                  const std::string& oname, 
-                                  const unsigned& oindex,
-                                  const bool do_tilt,
-                                  const bool do_eval)
+GeometryAccess::get_pixel_coords(const double*& X, 
+                                 const double*& Y, 
+                                 const double*& Z, 
+				 unsigned& size,
+                                 const std::string& oname, 
+                                 const unsigned& oindex,
+                                 const bool do_tilt,
+                                 const bool do_eval)
 {
   GeometryAccess::shpGO geo = (oname.empty()) ? get_top_geo() : get_geo(oname, oindex);
   if(m_pbits & 32) {
@@ -342,10 +346,68 @@ GeometryAccess::get_pixel_coords( const double*& X,
 //-------------------
 
 void
-GeometryAccess::get_pixel_areas( const double*& A, 
-				 unsigned& size,
-                                 const std::string& oname, 
-                                 const unsigned& oindex)
+GeometryAccess::get_pixel_xy_at_z(const double*& XatZ, 
+                                  const double*& YatZ, 
+				  unsigned& size,
+                                  const double& Zplain, 
+                                  const std::string& oname, 
+                                  const unsigned& oindex)
+{
+  const double* X;
+  const double* Y;
+  const double* Z;
+  //unsigned   size;
+  const bool do_tilt=true;
+  const bool do_eval=true;
+  get_pixel_coords(X,Y,Z,size,oname,oindex,do_tilt,do_eval);
+
+  if (!size) {
+    MsgLog(name(), error, "get_pixel_coords returns ZERO size coordinate array...");
+    abort(); 
+  }
+
+  if (p_XatZ) delete [] p_XatZ;
+  if (p_YatZ) delete [] p_YatZ;
+
+  p_XatZ = new double[size];
+  p_YatZ = new double[size];
+
+  // find Z0 as average Z if Zplain is not specified
+  double Z0 = 0;
+  if (Zplain) Z0 = Zplain;
+  else {
+    for(unsigned i=0; i<size; ++i) Z0 += Z[i]; 
+    Z0 = Z0/size;
+  }
+
+  if(fabs(Z0) < 1000) {  
+    XatZ = X;
+    YatZ = Y;
+    return;
+  }  
+
+  double R;
+  for(unsigned i=0; i<size; ++i) {
+    if (Z[i]) {
+      R = Z0/Z[i];
+      p_XatZ[i] = X[i]*R;
+      p_YatZ[i] = Y[i]*R;
+    } else {
+      p_XatZ[i] = X[i];
+      p_YatZ[i] = Y[i];
+    }
+  }
+  XatZ = p_XatZ;
+  YatZ = p_YatZ;
+}
+
+//-------------------
+
+void
+GeometryAccess::get_pixel_areas(const double*& A, 
+				unsigned& size,
+                                const std::string& oname, 
+                                const unsigned& oindex)
 {
   GeometryAccess::shpGO geo = (oname.empty()) ? get_top_geo() : get_geo(oname, oindex);
   if(m_pbits & 32) {
@@ -358,11 +420,11 @@ GeometryAccess::get_pixel_areas( const double*& A,
 //-------------------
 
 void
-GeometryAccess::get_pixel_mask( const int*& mask, 
-				unsigned& size,
-                                const std::string& oname, 
-                                const unsigned& oindex,
-                                const unsigned& mbits)
+GeometryAccess::get_pixel_mask(const int*& mask, 
+			       unsigned& size,
+                               const std::string& oname, 
+                               const unsigned& oindex,
+                               const unsigned& mbits)
 {
   //cout << "GeometryAccess::get_pixel_mask(): mbits =" << mbits << '\n';   
 
@@ -377,8 +439,8 @@ GeometryAccess::get_pixel_mask( const int*& mask,
 //-------------------
 
 double
-GeometryAccess::get_pixel_scale_size( const std::string& oname, 
-                                      const unsigned& oindex)
+GeometryAccess::get_pixel_scale_size(const std::string& oname, 
+                                     const unsigned& oindex)
 {
   GeometryAccess::shpGO geo = (oname.empty()) ? get_top_geo() : get_geo(oname, oindex);
   return geo -> get_pixel_scale_size();
@@ -387,18 +449,18 @@ GeometryAccess::get_pixel_scale_size( const std::string& oname,
 //-------------------
 
 void
-GeometryAccess::set_geo_pars( const std::string& oname, 
-		              const unsigned& oindex,
-                              const double& x0,
-                              const double& y0,
-                              const double& z0,
-                              const double& rot_z,
-                              const double& rot_y,
-                              const double& rot_x,                  
-                              const double& tilt_z,
-                              const double& tilt_y,
-                              const double& tilt_x 
-		              )
+GeometryAccess::set_geo_pars(const std::string& oname, 
+		             const unsigned& oindex,
+                             const double& x0,
+                             const double& y0,
+                             const double& z0,
+                             const double& rot_z,
+                             const double& rot_y,
+                             const double& rot_x,                  
+                             const double& tilt_z,
+                             const double& tilt_y,
+                             const double& tilt_x 
+		             )
 {
   GeometryAccess::shpGO geo = (oname.empty()) ? get_top_geo() : get_geo(oname, oindex);
   geo -> set_geo_pars(x0, y0, z0, rot_z, rot_y, rot_x, tilt_z, tilt_y, tilt_x);
@@ -407,12 +469,12 @@ GeometryAccess::set_geo_pars( const std::string& oname,
 //-------------------
 
 void
-GeometryAccess::move_geo( const std::string& oname, 
-		          const unsigned& oindex,
-                          const double& dx,
-                          const double& dy,
-                          const double& dz
-			  )
+GeometryAccess::move_geo(const std::string& oname, 
+		         const unsigned& oindex,
+                         const double& dx,
+                         const double& dy,
+                         const double& dz
+			 )
 {
   GeometryAccess::shpGO geo = (oname.empty()) ? get_top_geo() : get_geo(oname, oindex);
   geo -> move_geo(dx, dy, dz);
@@ -421,12 +483,12 @@ GeometryAccess::move_geo( const std::string& oname,
 //-------------------
 
 void
-GeometryAccess::tilt_geo( const std::string& oname, 
-		          const unsigned& oindex,
-                          const double& dt_x,
-                          const double& dt_y,
-                          const double& dt_z
-			  )
+GeometryAccess::tilt_geo(const std::string& oname, 
+		         const unsigned& oindex,
+                         const double& dt_x,
+                         const double& dt_y,
+                         const double& dt_z
+			 )
 {
   GeometryAccess::shpGO geo = (oname.empty()) ? get_top_geo() : get_geo(oname, oindex);
   geo -> tilt_geo(dt_x, dt_y, dt_z);
@@ -479,8 +541,8 @@ void GeometryAccess::print_comments_from_dict()
 //-------------------
 
 void
-GeometryAccess::print_pixel_coords( const std::string& oname, 
-                                    const unsigned& oindex)
+GeometryAccess::print_pixel_coords(const std::string& oname, 
+                                   const unsigned& oindex)
 {
   const double* X;
   const double* Y;
@@ -502,14 +564,14 @@ GeometryAccess::print_pixel_coords( const std::string& oname,
 //-------------------
 
 void
-GeometryAccess::get_pixel_coord_indexes( const unsigned *& iX, 
-                                         const unsigned *& iY, 
-				         unsigned& size,
-                                         const std::string& oname, 
-					 const unsigned& oindex, 
-                                         const double& pix_scale_size_um, 
-                                         const int* xy0_off_pix,
-                                         const bool do_tilt )
+GeometryAccess::get_pixel_coord_indexes(const unsigned *& iX, 
+                                        const unsigned *& iY, 
+				        unsigned& size,
+                                        const std::string& oname, 
+					const unsigned& oindex, 
+                                        const double& pix_scale_size_um, 
+                                        const int* xy0_off_pix,
+                                        const bool do_tilt)
 {
   const double* X;
   const double* Y;
@@ -554,11 +616,64 @@ GeometryAccess::get_pixel_coord_indexes( const unsigned *& iX,
 
 //-------------------
 
+void
+GeometryAccess::get_pixel_xy_inds_at_z(const unsigned *& iX, 
+                                       const unsigned *& iY, 
+				       unsigned& size,
+                                       const double& Zplain, 
+                                       const std::string& oname, 
+				       const unsigned& oindex, 
+                                       const double& pix_scale_size_um, 
+                                       const int* xy0_off_pix)
+{
+  const double* X;
+  const double* Y;
+
+  get_pixel_xy_at_z(X,Y,size,Zplain,oname,oindex);
+  
+  double pix_size = (pix_scale_size_um) ? pix_scale_size_um : get_pixel_scale_size(oname, oindex);
+
+  if (p_iX) delete [] p_iX;
+  if (p_iY) delete [] p_iY;
+
+  p_iX = new unsigned[size];
+  p_iY = new unsigned[size];
+
+  if (xy0_off_pix) {
+    // Offset in pix -> um
+    double x_off_um = xy0_off_pix[0] * pix_size;
+    double y_off_um = xy0_off_pix[1] * pix_size;
+    // Protection against wrong offset bringing negative indexes
+    double x_min=0; for(unsigned i=0; i<size; ++i) { if (X[i] + x_off_um < x_min) x_min = X[i] + x_off_um; } x_off_um -= x_min - pix_size/2;
+    double y_min=0; for(unsigned i=0; i<size; ++i) { if (Y[i] + y_off_um < y_min) y_min = Y[i] + y_off_um; } y_off_um -= y_min - pix_size/2;
+
+    for(unsigned i=0; i<size; ++i) { 
+      p_iX[i] = (unsigned)((X[i] + x_off_um) / pix_size);
+      p_iY[i] = (unsigned)((Y[i] + y_off_um) / pix_size);
+    }
+  } 
+  else {
+    // Find coordinate min values
+    double x_min=X[0]; for(unsigned i=0; i<size; ++i) { if (X[i] < x_min) x_min = X[i]; } x_min -= pix_size/2;
+    double y_min=Y[0]; for(unsigned i=0; i<size; ++i) { if (Y[i] < y_min) y_min = Y[i]; } y_min -= pix_size/2;
+    for(unsigned i=0; i<size; ++i) { 
+      p_iX[i] = (unsigned)((X[i] - x_min) / pix_size);
+      p_iY[i] = (unsigned)((Y[i] - y_min) / pix_size);
+    }
+  }
+
+  iX = p_iX;
+  iY = p_iY;
+}
+
+//-------------------
+//-------------------
+
 ndarray<GeometryAccess::image_t, 2> &
-GeometryAccess::ref_img_from_pixel_arrays( const unsigned*& iX, 
-                                           const unsigned*& iY, 
-                                           const double*    W,
-                                           const unsigned&  size)
+GeometryAccess::ref_img_from_pixel_arrays(const unsigned*& iX, 
+                                          const unsigned*& iY, 
+                                          const double*    W,
+                                          const unsigned&  size)
 {
     unsigned ix_max=iX[0]; for(unsigned i=0; i<size; ++i) { if (iX[i] > ix_max) ix_max = iX[i]; } ix_max++;
     unsigned iy_max=iY[0]; for(unsigned i=0; i<size; ++i) { if (iY[i] > iy_max) iy_max = iY[i]; } iy_max++;
@@ -583,10 +698,10 @@ GeometryAccess::ref_img_from_pixel_arrays( const unsigned*& iX,
 //-------------------
 
 ndarray<GeometryAccess::image_t, 2>
-GeometryAccess::img_from_pixel_arrays( const unsigned*& iX, 
-                                       const unsigned*& iY, 
-                                       const double*    W,
-                                       const unsigned&  size)
+GeometryAccess::img_from_pixel_arrays(const unsigned*& iX, 
+                                      const unsigned*& iY, 
+                                      const double*    W,
+                                      const unsigned&  size)
 {
     unsigned ix_max=iX[0]; for(unsigned i=0; i<size; ++i) { if (iX[i] > ix_max) ix_max = iX[i]; } ix_max++;
     unsigned iy_max=iY[0]; for(unsigned i=0; i<size; ++i) { if (iY[i] > iy_max) iy_max = iY[i]; } iy_max++;

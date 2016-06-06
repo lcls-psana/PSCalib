@@ -87,6 +87,10 @@ namespace PSCalib {
  *        geometry.get_pixel_coords(X,Y,Z,size, "QUAD:V1", 1, do_tilt);
  *        // then use X, Y, Z, size
  *    
+ *    // Access pixel X,Y coordinate [um] arrays projected toward origin on specified zplane, if zplane=0 then zplane is averaged Z:
+ *        const double Zplane=12345; //[um] or 0
+ *        geometry.get_pixel_xy_at_z(X,Y,size,Zplane);
+ *    
  *    // Access pixel areas:
  *        const double* A;
  *        unsigned   size;
@@ -119,6 +123,10 @@ namespace PSCalib {
  *        // this call returns index arrays for entire detector with auto generated minimal offset
  *        geometry.get_pixel_coord_indexes(iX, iY, isize);
  *        // then use iX, iY, isize, for example make image as follows.   
+ *        
+ *    // Access pixel iX, iY indexes for projected to specified z-plane coordinates:
+ *        const double Zplane=12345; //[um] or 0
+ *        geometry.get_pixel_xy_inds_at_z(iX, iY, isize, Zplane);
  *
  *    // Make image from index, iX, iY, and intensity, W, arrays
  *        ndarray<PSCalib::GeometryAccess::image_t, 2> img = 
@@ -176,7 +184,7 @@ public:
    *  \n         +16 info about setting relations between geometry objects, 
    *  \n         +32 info about pixel coordinate reconstruction
    */ 
-  GeometryAccess (const std::string& path, unsigned pbits=0) ;
+  GeometryAccess(const std::string& path, unsigned pbits=0) ;
 
   // Destructor
   virtual ~GeometryAccess () ;
@@ -207,6 +215,22 @@ public:
                          const bool do_tilt=true,
                          const bool do_eval=false);
 
+  /// Returns pixel coordinate arrays XatZ, YatZ, of size for specified Zplane and geometry object 
+  /**
+   *  @param[out] XatZ - pointer to x pixel coordinate array at specified Zplane
+   *  @param[out] YatZ - pointer to y pixel coordinate array
+   *  @param[out] size - size of the pixel coordinate array (number of pixels)
+   *  @param[in]  Zplane - z-coordinate of the plane for projection
+   *  @param[in]  oname - object name
+   *  @param[in]  oindex - object index
+   */
+  void get_pixel_xy_at_z(const double*& XatZ, 
+                         const double*& YatZ, 
+                         unsigned& size,
+        		 const double& Zplane = 0,
+			 const std::string& oname = std::string(), 
+			 const unsigned& oindex = 0);
+
   /// Returns pixel areas array A, of size for specified geometry object 
   /**
    *  @param[out] A - pointer to pixel areas array
@@ -214,10 +238,10 @@ public:
    *  @param[in]  oname - object name
    *  @param[in]  oindex - object index
    */
-  void  get_pixel_areas (const double*& A, 
-                         unsigned& size,
-			 const std::string& oname = std::string(), 
-			 const unsigned& oindex = 0);
+  void  get_pixel_areas(const double*& A, 
+                        unsigned& size,
+		        const std::string& oname = std::string(), 
+		        const unsigned& oindex = 0);
 
   /// Returns pixel mask array of size for specified geometry object 
   /**
@@ -231,11 +255,11 @@ public:
    *              +4-non-bounded, 
    *              +8-non-bounded neighbours.
    */
-  void  get_pixel_mask (const int*& mask, 
-                        unsigned& size,
-		        const std::string& oname = std::string(),
- 		        const unsigned& oindex = 0,
-		        const unsigned& mbits = 0377);
+  void  get_pixel_mask(const int*& mask, 
+                       unsigned& size,
+		       const std::string& oname = std::string(),
+ 		       const unsigned& oindex = 0,
+		       const unsigned& mbits = 0377);
 
   /// Returns pixel scale size for specified geometry object through its children segment
   /**
@@ -259,8 +283,8 @@ public:
   void print_comments_from_dict();
 
   /// Prints beginning of pixel coordinate arrays for specified geometry object (top object by default)
-  void print_pixel_coords( const std::string& oname= std::string(), 
-			   const unsigned& oindex = 0);
+  void print_pixel_coords(const std::string& oname= std::string(), 
+			  const unsigned& oindex = 0);
 
   /// Returns pixel coordinate index arrays iX, iY of size for specified geometry object 
  /**
@@ -273,14 +297,34 @@ public:
    *  @param[in]  xy0_off_pix - array containing X and Y coordinates of the offset (default - use xmin, ymin)
    *  @param[in]  do_tilt - on/off tilt angle correction
    */
-  void get_pixel_coord_indexes( const unsigned *& iX, 
-                                const unsigned *& iY, 
-				unsigned& size,
-                                const std::string& oname = std::string(), 
-				const unsigned& oindex = 0, 
-                                const double& pix_scale_size_um = 0, 
-                                const int* xy0_off_pix = 0,
-                                const bool do_tilt=true );
+  void get_pixel_coord_indexes(const unsigned *& iX, 
+                               const unsigned *& iY, 
+			       unsigned& size,
+                               const std::string& oname = std::string(), 
+			       const unsigned& oindex = 0, 
+                               const double& pix_scale_size_um = 0, 
+                               const int* xy0_off_pix = 0,
+                               const bool do_tilt=true );
+
+  /// Returns pixel coordinate index arrays iX, iY of size for specified Zplane and geometry object 
+ /**
+   *  @param[out] iX - pointer to x pixel index coordinate array
+   *  @param[out] iY - pointer to y pixel index coordinate array
+   *  @param[out] size - size of the pixel coordinate array (number of pixels)
+   *  @param[in]  Zplane - z-coordinate of the plane for projection (default=0 - evaluated as average z ovetr all pixels)
+   *  @param[in]  oname - object name (deafault - top object)
+   *  @param[in]  oindex - object index (default = 0)
+   *  @param[in]  pix_scale_size_um - ex.: 109.92 (default - search for the first segment pixel size)
+   *  @param[in]  xy0_off_pix - array containing X and Y coordinates of the offset (default - use xmin, ymin)
+   */
+  void get_pixel_xy_inds_at_z(const unsigned *& iX, 
+                              const unsigned *& iY, 
+			      unsigned& size,
+        		      const double& Zplane = 0,
+                              const std::string& oname = std::string(), 
+			      const unsigned& oindex = 0, 
+                              const double& pix_scale_size_um = 0, 
+                              const int* xy0_off_pix = 0);
 
   /// Static method returns image as ndarray<image_t, 2> object
  /**
@@ -321,34 +365,34 @@ public:
   void set_print_bits(unsigned pbits=0) {m_pbits=pbits;}
 
   /// Sets self object geometry parameters
-  void set_geo_pars( const std::string& oname = std::string(), 
-		     const unsigned& oindex = 0,
-                     const double& x0 = 0,
-                     const double& y0 = 0,
-                     const double& z0 = 0,
-                     const double& rot_z = 0,
-                     const double& rot_y = 0,
-                     const double& rot_x = 0,                  
-                     const double& tilt_z = 0,
-                     const double& tilt_y = 0,
-                     const double& tilt_x = 0 
-		     );
+  void set_geo_pars(const std::string& oname = std::string(), 
+		    const unsigned& oindex = 0,
+                    const double& x0 = 0,
+                    const double& y0 = 0,
+                    const double& z0 = 0,
+                    const double& rot_z = 0,
+                    const double& rot_y = 0,
+                    const double& rot_x = 0,                  
+                    const double& tilt_z = 0,
+                    const double& tilt_y = 0,
+                    const double& tilt_x = 0 
+		    );
 
   /// Adds offset for origin of the self object w.r.t. current position
-  void move_geo( const std::string& oname = std::string(), 
-		 const unsigned& oindex = 0,
-                 const double& dx = 0,
-                 const double& dy = 0,
-                 const double& dz = 0
-		 );
+  void move_geo(const std::string& oname = std::string(), 
+		const unsigned& oindex = 0,
+                const double& dx = 0,
+                const double& dy = 0,
+                const double& dz = 0
+		);
 
   /// Adds tilts to the self object w.r.t. current orientation
-  void tilt_geo( const std::string& oname = std::string(), 
-		 const unsigned& oindex = 0,
-                 const double& dt_x = 0,
-                 const double& dt_y = 0,
-                 const double& dt_z = 0 
-		 );
+  void tilt_geo(const std::string& oname = std::string(), 
+		const unsigned& oindex = 0,
+                const double& dt_x = 0,
+                const double& dt_y = 0,
+                const double& dt_z = 0 
+		);
 
 protected:
 
@@ -363,12 +407,18 @@ private:
   /// pointer to x pixel coordinate index array
   unsigned* p_iX;
 
-  /// pointer to x pixel coordinate index array
+  /// pointer to y pixel coordinate index array
   unsigned* p_iY;
  
   /// Pointer to image, which is created as a member data of GeometryAccess object
   ndarray<image_t, 2>* p_image;
 
+  /// pointer to array of x pixel coordinates centrally projected to specified z plane
+  double* p_XatZ;
+
+  /// pointer to array of y pixel coordinates centrally projected to specified z plane
+  double* p_YatZ;
+ 
   /// vector/list of shared pointers to geometry objects
   std::vector<shpGO> v_list_of_geos;
 
@@ -392,8 +442,8 @@ private:
   static const std::string name() {return "PSCalib";}
 
   // Copy constructor and assignment are disabled by default
-  GeometryAccess ( const GeometryAccess& ) ;
-  GeometryAccess& operator = ( const GeometryAccess& ) ;
+  GeometryAccess(const GeometryAccess&) ;
+  GeometryAccess& operator = (const GeometryAccess&) ;
 
 //-----------------------------
 };
