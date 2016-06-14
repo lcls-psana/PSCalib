@@ -11,6 +11,14 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-78
+2016-06-13 Mikhail S. Dubrovin
+- force all methods to return mask of dtype=np.uint8
+M       src/GlobalUtils.py
+M       src/SegGeometryCspad2x1V1.py
+M       src/SegGeometryEpix100V1.py
+M       src/SegGeometryMatrixV1.py
+	
 Tag: V00-02-77
 2016-06-06 Mikhail S. Dubrovin
 - GeometryAccess.py/h/cpp - add methods get_pixel_xy_at_z, get_pixel_xy_inds_at_z PSAS-148

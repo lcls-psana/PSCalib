@@ -21,8 +21,8 @@ Usage::
     dettype = gu.det_type_from_source(source)
     detname = gu.string_from_source(source)
 
-    mmask = gu.merge_masks(mask1=None, mask2=None)
-    mask  = gu.mask_neighbors(mask_in, allnbrs=True)
+    mmask = gu.merge_masks(mask1=None, mask2=None, dtype=np.uint8)
+    mask  = gu.mask_neighbors(mask_in, allnbrs=True, dtype=np.uint8)
 
     arr2d = gu.reshape_nda_to_2d(nda)
     arr3d = gu.reshape_nda_to_3d(nda)
@@ -73,7 +73,7 @@ COMMON_MODE  = 6
 
 calib_types  = ( PEDESTALS,   PIXEL_STATUS,   PIXEL_RMS,   PIXEL_GAIN,   PIXEL_MASK,   PIXEL_BKGD,   COMMON_MODE)
 calib_names  = ('pedestals', 'pixel_status', 'pixel_rms', 'pixel_gain', 'pixel_mask', 'pixel_bkgd', 'common_mode')
-calib_dtypes = ( np.float32,  np.uint16,      np.float32,  np.float32,   np.uint16,    np.float32,   np.double)
+calib_dtypes = ( np.float32,  np.uint16,      np.float32,  np.float32,   np.uint8,     np.float32,   np.double)
 
 dic_calib_type_to_name  = dict(zip(calib_types, calib_names))
 dic_calib_name_to_type  = dict(zip(calib_names, calib_types))
@@ -329,7 +329,7 @@ def reshape_nda_to_3d(arr) :
 
 #------------------------------
 
-def merge_masks(mask1=None, mask2=None) :
+def merge_masks(mask1=None, mask2=None, dtype=np.uint8) :
     """Merging masks using np.logical_and rule: (0,1,0,1)^(0,0,1,1) = (0,0,0,1) 
     """
     if mask1 is None : return mask2
@@ -342,11 +342,12 @@ def merge_masks(mask1=None, mask2=None) :
         if len(shape1) > len(shape2) : mask2.shape = shape1
         else                         : mask1.shape = shape2
 
-    return np.logical_and(mask1, mask2)
+    mask = np.logical_and(mask1, mask2)
+    return mask if dtype==np.bool else np.asarray(mask, dtype)
 
 #------------------------------
 
-def mask_neighbors(mask, allnbrs=True) :
+def mask_neighbors(mask, allnbrs=True, dtype=np.uint8) :
     """Return mask with masked eight neighbor pixels around each 0-bad pixel in input mask.
 
        mask    : int - n-dimensional (n>1) array with input mask
@@ -356,7 +357,7 @@ def mask_neighbors(mask, allnbrs=True) :
     if len(shape_in) < 2 :
         raise ValueError('Input mask has less then 2-d, shape = %s' % str(shape_in))
 
-    mask_out = np.array(mask, copy=True)
+    mask_out = np.asarray(mask, dtype)
 
     if len(shape_in) == 2 :
         # mask nearest neighbors
@@ -393,7 +394,7 @@ def mask_neighbors(mask, allnbrs=True) :
 
 #------------------------------
 
-def mask_edges(mask, mrows=1, mcols=1) :
+def mask_edges(mask, mrows=1, mcols=1, dtype=np.uint8) :
     """Return mask with a requested number of row and column pixels masked - set to 0.
        mask  : int - n-dimensional (n>1) array with input mask
        mrows : int - number of edge rows to mask
@@ -403,7 +404,7 @@ def mask_edges(mask, mrows=1, mcols=1) :
     if len(sh) < 2 :
         raise ValueError('Input mask has less then 2-d, shape = %s' % str(sh))
 
-    mask_out = np.array(mask, copy=True)
+    mask_out = np.asarray(mask, dtype)
 
     # print 'shape:', sh
 

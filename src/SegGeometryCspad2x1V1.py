@@ -352,9 +352,9 @@ class SegGeometryCspad2x1V1(SegGeometry) :
                  +8 - mask nearest four neighbours of nonbonded pixels
                  +16- mask eight neighbours of nonbonded pixels
         """
-        zero_col = np.zeros(sp._rows,dtype=np.int)
-        zero_row = np.zeros(sp._cols,dtype=np.int)
-        mask     = np.ones((sp._rows,sp._cols),dtype=np.int)
+        zero_col = np.zeros(sp._rows,dtype=np.uint8)
+        zero_row = np.zeros(sp._cols,dtype=np.uint8)
+        mask     = np.ones((sp._rows,sp._cols),dtype=np.uint8)
 
         if mbits & 1 : 
         # mask edges
