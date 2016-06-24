@@ -13,7 +13,7 @@ reverse time order.
 
 Tag: V00-02-79
 2016-06-23 Christopher O'Grady
-assert in CalibFileFinder is calib-dir does not exist.  Done to try to
+assert in CalibFileFinder if calib-dir does not exist.  Done to try to
 detect mount failures on the mon nodes.
 
 Tag: V00-02-78
