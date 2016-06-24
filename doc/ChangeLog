@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-79
+2016-06-23 Christopher O'Grady
+assert in CalibFileFinder is calib-dir does not exist.  Done to try to
+detect mount failures on the mon nodes.
+
 Tag: V00-02-78
 2016-06-13 Mikhail S. Dubrovin
 - force all methods to return mask of dtype=np.uint8

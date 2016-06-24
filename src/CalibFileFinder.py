@@ -129,9 +129,9 @@ class CalibFileFinder :
             if self.pbits & 1  : print 'WARNING! NOT calib DIRECTORY: %s' % self.cdir
             return None
 
-        if not os.path.exists(self.cdir) :
-            if self.pbits & 1  : print 'WARNING! NON-EXISTENT DIRECTORY: %s' % self.cdir
-            return None        
+        # there have been problems with calib-dir mounts on the mon nodes.
+        # raise an exception here to try to detect this problem
+        assert os.path.isdir(self.cdir), 'psana calib-dir must exist: '+self.cdir
 
         if not self._setGroup(src) :
             return None
@@ -176,9 +176,9 @@ class CalibFileFinder :
         """
         rnum = rnum0 if rnum0 <= CalibFile.rnum_max else CalibFile.rnum_max
 
-        if self.cdir == '' :
-            if self.pbits & 1 : print 'WARNING! CALIBRATION DIRECTORY IS EMPTY'
-            return ''
+        # there have been problems with calib-dir mounts on the mon nodes.
+        # raise an exception here to try to detect this problem
+        assert os.path.isdir(self.cdir), 'psana calib-dir must exist: '+self.cdir
 
         if not self._setGroup(src) : return ''
 
