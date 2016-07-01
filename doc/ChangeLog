@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-80
+2016-06-30 Mikhail S. Dubrovin
+- CalibParsStore.h - add support for Ryonix
+
 Tag: V00-02-79
 2016-06-23 Christopher O'Grady
 assert in CalibFileFinder if calib-dir does not exist.  Done to try to

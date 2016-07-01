@@ -216,6 +216,7 @@ public:
 	v_camera_names.push_back(":Tm6740.");
 	v_camera_names.push_back(":OrcaFl40.");
 	v_camera_names.push_back(":Fccd960.");
+	v_camera_names.push_back(":Rayonix.");
 
         prbits = (print_bits & 8) ? 255 : 0;
 
