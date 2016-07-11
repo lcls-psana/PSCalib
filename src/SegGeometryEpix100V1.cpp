@@ -286,7 +286,8 @@ const SegGeometry::pixel_mask_t* SegGeometryEpix100V1::pixel_mask_array(const un
 
   std::fill_n(&m_pix_mask_arr[0][0], int(SIZE), SegGeometry::pixel_mask_t(1));
 
-  size_t h = COLSHALF;
+  size_t ch = COLSHALF;
+  size_t rh = ROWSHALF;
 
   if(mbits & 1) {
     // mask edges
@@ -297,15 +298,21 @@ const SegGeometry::pixel_mask_t* SegGeometryEpix100V1::pixel_mask_array(const un
 
     for (size_t c=0; c<COLS; c++) {
       m_pix_mask_arr[0][c]      = 0;
-      m_pix_mask_arr[ROWS-1][0] = 0;
+      m_pix_mask_arr[ROWS-1][c] = 0;
     }
   } 
 
   if(mbits & 2) {
     // mask two central columns
     for (size_t r=0; r<ROWS; r++) {
-      m_pix_mask_arr[r][h-1] = 0;
-      m_pix_mask_arr[r][h]   = 0;
+      m_pix_mask_arr[r][ch-1] = 0;
+      m_pix_mask_arr[r][ch]   = 0;
+    }
+
+    // mask two central rows
+    for (size_t c=0; c<COLS; c++) {
+      m_pix_mask_arr[rh-1][c] = 0;
+      m_pix_mask_arr[rh][c]   = 0;
     }
   }
 

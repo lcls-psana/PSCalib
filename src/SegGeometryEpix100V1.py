@@ -369,6 +369,8 @@ class SegGeometryEpix100V1(SegGeometry) :
         # mask two central columns
             mask[:,sp._colsh-1] = zero_col # mask central-left  column
             mask[:,sp._colsh]   = zero_col # mask central-right column
+            mask[sp._rowsh-1]   = zero_row # mask central-low   row
+            mask[sp._rowsh]     = zero_row # mask central-high  row
 
         return mask
 
@@ -480,6 +482,7 @@ def test_2x2_mask(mbits=0377) :
     pc2x2 = SegGeometryEpix100V1(use_wide_pix_center=False)
     X, Y = pc2x2.get_seg_xy_maps_pix_with_offset()
     mask = pc2x2.pixel_mask_array(mbits)
+    mask[mask==0]=3
     iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
     img = gg.getImageFromIndexArrays(iX,iY,mask)
     gg.plotImageLarge(img, amp_range=(-1, 2), figsize=(8,10))
