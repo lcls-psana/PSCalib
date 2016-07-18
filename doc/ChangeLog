@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-82
+2016-07-18 Mikhail S. Dubrovin
+- GeometryAccess.py - update documentation for skipped methods.
+
 Tag: V00-02-81
 2016-07-11 Mikhail S. Dubrovin
 - for Epix100 mask two central rows of wide pixels (in addition to two central columns) PSAS-148

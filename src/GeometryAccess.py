@@ -15,8 +15,20 @@ Usage::
     # get pixel x,y coordinate [um] arrays projected toward origin on specified zplane, if zplane=None then zplane=Z.mean()
     X, Y = geometry.get_pixel_xy_at_z(zplane=None, oname=None, oindex=0, do_tilt=True)
 
+    # print a portion of pixel X, Y, and Z coordinate arrays
+    geometry.print_pixel_coords(oname=None, oindex=0)
+
     # get pixel area array; A=1 for regular pixels, =2.5 for wide.
     area = geometry.get_pixel_areas(oname=None, oindex=0)
+
+    # returns (smallest) pixel size [um]
+    pixel_size = geometry.get_pixel_scale_size(oname=None, oindex=0)
+
+    # returns dictionary of comments associated with geometry (file)
+    dict_of_comments = geometry.get_dict_of_comments()
+
+    # print comments associated with geometry (file) 
+    geometry.print_comments_from_dict()
 
     # get pixel mask array;
     # mbits = +1-mask edges, +2-wide pixels, +4-non-bonded pixels, +8/+16 - four/eight neighbours of non-bonded
@@ -39,6 +51,11 @@ Usage::
     # get 2-d image from index arrays
     img = img_from_pixel_arrays(iX,iY,W=arr)
 
+    # Get specified object of the class GeometryObject, all objects are kept in the list self.list_of_geos
+    geo = geometry.get_geo('QUAD:V1', 1) 
+    # Get top GeometryObject - the object which includes all other geometry objects
+    geo = geometry.get_top_geo()
+
     # modify currect geometry objects' parameters
     geometry.set_geo_pars('QUAD:V1', 1, x0, y0, z0, rot_z, rot_y, rot_x, tilt_z, tilt_y, tilt_x)
     geometry.move_geo('QUAD:V1', 1, 10, 20, 0)
@@ -46,6 +63,9 @@ Usage::
 
     # save current geometry parameters in file
     geometry.save_pars_in_file(fname_geometry_new)
+
+    # change verbosity bit-control word; to print everythisg use pbits = 0xffff
+    geometry.set_print_bits(pbits=0)
 
     # return geometry parameters in "psf" format as a tuple psf[32][3][3]
     psf = geometry.get_psf()
