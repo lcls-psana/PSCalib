@@ -117,7 +117,8 @@ SegGeometryMatrixV1::SegGeometryMatrixV1 ( const size_t& rows
   PIX_SIZE_ROWS  = pix_size_rows;
   PIX_SIZE_COLS  = pix_size_cols;
   PIX_SIZE_DEPTH = pix_size_depth;
-  PIX_SCALE_SIZE = pix_scale_size;
+  PIX_SCALE_SIZE = (pix_scale_size==SegGeometryMatrixV1::PIX_SCALE_SIZE_DEF)? 
+                   min(PIX_SIZE_ROWS, PIX_SIZE_COLS) : pix_scale_size;
   UM_TO_PIX      = 1./PIX_SCALE_SIZE;
 
   IND_CORNER[0]  = 0;

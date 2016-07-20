@@ -128,7 +128,7 @@ public:
         //if (segname=="EPIX100:V1") { return new PSCalib::SegGeometryEpix100V1(); }
         if (segname=="EPIX100:V1") { return PSCalib::SegGeometryEpix100V1::instance(); } // use singleton
 
-        if (segname=="PNCCD:V1") { return new PSCalib::SegGeometryMatrixV1(512,512); }
+        if (segname=="PNCCD:V1") { return new PSCalib::SegGeometryMatrixV1(512,512,75.,75.,400.,75.); }
 
         if (segname.find("MTRX") != std::string::npos) { 
 

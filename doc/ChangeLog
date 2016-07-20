@@ -11,6 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-84
+2016-07-20 Mikhail S. Dubrovin
+- fix problem with propagation of the default pix_scale_size
+M       include/SegGeometryMatrixV1.h
+M       include/SegGeometryStore.h
+M       src/SegGeometryMatrixV1.cpp
+
 Tag: V00-02-83
 2016-07-19 Mikhail S. Dubrovin
 - add support for matrix-like geometry segments with name like MTRX:512:512:54:54

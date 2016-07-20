@@ -153,16 +153,16 @@ public:
   static const size_t  NCORNERS = 4;
 
   /// Pixel scale size [um] for indexing  
-  //static const pixel_coord_t PIX_SCALE_SIZE; // = 75;
+  static const pixel_coord_t PIX_SCALE_SIZE_DEF = 12345;
 
   /// Pixel size [um] in column direction
-  //static const pixel_coord_t PIX_SIZE_COLS; //  = 75;
+  static const pixel_coord_t PIX_SIZE_COLS_DEF = 75; // for pnccd
 
   /// Pixel size [um] in row direction
-  //static const pixel_coord_t PIX_SIZE_ROWS; //  = 75;
+  static const pixel_coord_t PIX_SIZE_ROWS_DEF = 75; // for pnccd
 
   /// Pixel size [um] in depth
-  //static const pixel_coord_t PIX_SIZE_DEPTH; // = 400.;
+  static const pixel_coord_t PIX_SIZE_DEPTH_DEF = 400; // for pnccd
 
   /// Conversion factor between um and pix 
   //static const double UM_TO_PIX;             // = 1./75;
@@ -180,11 +180,11 @@ public:
    */
   SegGeometryMatrixV1 ( const size_t& rows = 512
 		      , const size_t& cols = 512
-		      , const float& pix_size_rows = 75
-		      , const float& pix_size_cols = 75
-		      , const float& pix_size_depth = 400
-		      , const float& pix_scale_size = 75
-                       );
+		      , const float& pix_size_rows  = PIX_SIZE_ROWS_DEF
+		      , const float& pix_size_cols  = PIX_SIZE_COLS_DEF
+		      , const float& pix_size_depth = PIX_SIZE_DEPTH_DEF
+		      , const float& pix_scale_size = PIX_SCALE_SIZE_DEF
+                      );
   /// Destructor
   virtual ~SegGeometryMatrixV1 ();
 
