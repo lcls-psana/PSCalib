@@ -14,6 +14,7 @@
 // This Class's Header --
 //-----------------------
 #include "PSCalib/SegGeometryMatrixV1.h"
+#include <sstream>  // for stringstream
 
 //-----------------
 // C/C++ Headers --
@@ -56,6 +57,34 @@ namespace PSCalib {
 //const size_t SegGeometryMatrixV1::IND_CORNER[NCORNERS] = {0, COLS-1, (ROWS-1)*COLS, ROWS*COLS-1};
 //const size_t SegGeometryMatrixV1::ARR_SHAPE[2] = {ROWS, COLS};
 
+//--------------
+
+// Stripe parameters from string like MTRX:512:512:54:54
+
+bool matrix_pars( const std::string& segname
+                , size_t& rows
+		, size_t& cols
+		, float& pix_size_rows
+		, float& pix_size_cols)
+{
+  //std::cout << "segname: " << segname << '\n';
+
+  if(segname.find("MTRX") == std::string::npos) {
+    cout << "PSCalib::matrix_pars - this is not a MTRX segment, segname: " << segname << '\n';
+    return false;
+  }
+
+  std::string s(segname);
+  for(unsigned i=0; i<s.size(); i++) {if(s[i]==':') s[i]=' ';}
+  //std::cout << " string: " << s << '\n';
+
+  std::string pref;
+  std::stringstream ss(s);
+  ss >> pref >> rows >> cols >> pix_size_rows >> pix_size_cols;
+  //std::cout << " r: " << rows << " c:" << cols << " row_size:" << pix_size_rows << " col_size:" << pix_size_cols << '\n';
+  return true;
+}
+
 //----------------
 // Constructors --
 //----------------
@@ -66,7 +95,7 @@ SegGeometryMatrixV1::SegGeometryMatrixV1 ( const size_t& rows
 					 , const float& pix_size_cols
 					 , const float& pix_size_depth
 					 , const float& pix_scale_size
-                                          )
+                                         )
   : PSCalib::SegGeometry()
   , ROWS(rows)
   , COLS(cols)
@@ -109,6 +138,7 @@ SegGeometryMatrixV1::SegGeometryMatrixV1 ( const size_t& rows
 SegGeometryMatrixV1::~SegGeometryMatrixV1 ()
 {
 }
+
 
 //--------------
 

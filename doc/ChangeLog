@@ -11,6 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-83
+2016-07-19 Mikhail S. Dubrovin
+- add support for matrix-like geometry segments with name like MTRX:512:512:54:54
+M       src/SegGeometryMatrixV1.cpp
+M       include/SegGeometryMatrixV1.h
+M       include/SegGeometryStore.h
+
 Tag: V00-02-82
 2016-07-18 Mikhail S. Dubrovin
 - GeometryAccess.py - update documentation for skipped methods.

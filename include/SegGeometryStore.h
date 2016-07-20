@@ -118,21 +118,38 @@ public:
    */ 
 
   static PSCalib::SegGeometry*
-  Create ( const std::string& segname="SENS2X1:V1", const unsigned print_bits=0)
+  Create (const std::string& segname="SENS2X1:V1", const unsigned print_bits=0)
   {
 	if (print_bits & 1) MsgLog("SegGeometryStore", info, "Segment geometry factory for " << segname);
 
-        //if ( segname=="SENS2X1:V1" ) { return new PSCalib::SegGeometryCspad2x1V1(); }
-        if ( segname=="SENS2X1:V1" ) { return PSCalib::SegGeometryCspad2x1V1::instance(); } // use singleton
+        //if (segname=="SENS2X1:V1") { return new PSCalib::SegGeometryCspad2x1V1(); }
+        if (segname=="SENS2X1:V1") { return PSCalib::SegGeometryCspad2x1V1::instance(); } // use singleton
 
-        //if ( segname=="SENS2X1:V2" ) { return new PSCalib::SegGeometryCspad2x1V2(); }
+        //if (segname=="EPIX100:V1") { return new PSCalib::SegGeometryEpix100V1(); }
+        if (segname=="EPIX100:V1") { return PSCalib::SegGeometryEpix100V1::instance(); } // use singleton
 
-        //if ( segname=="SENS2X1:V3" ) { return new PSCalib::SegGeometryCspad2x1V3(); }
+        if (segname=="PNCCD:V1") { return new PSCalib::SegGeometryMatrixV1(512,512); }
 
-        //if ( segname=="EPIX100:V1" ) { return new PSCalib::SegGeometryEpix100V1(); }
-        if ( segname=="EPIX100:V1" ) { return PSCalib::SegGeometryEpix100V1::instance(); } // use singleton
+        if (segname.find("MTRX") != std::string::npos) { 
 
-        if ( segname=="PNCCD:V1" ) { return new PSCalib::SegGeometryMatrixV1(512,512); }
+          MsgLog("SegGeometryStore", info, "Segment geometry factory for " << segname);
+          std::size_t rows;
+	  std::size_t cols;
+	  float   rpixsize;
+	  float   cpixsize;
+
+	  if(! PSCalib::matrix_pars(segname, rows, cols, rpixsize, cpixsize)) {
+            if (print_bits) MsgLog("SegGeometryStore", error, "Can't demangle geometry segment name: " << segname);  
+	    return 0; // NULL;
+	  }
+
+	  if (print_bits & 1) MsgLog("SegGeometryStore", info, "segname: " << segname
+                                      << " rows: " << rows << " cols:" << cols 
+                                      << " rpixsize: " << rpixsize << " cpixsize: " << cpixsize);
+
+          return new PSCalib::SegGeometryMatrixV1(rows, cols, rpixsize, cpixsize); 
+                                               // pix_size_depth, pix_scale_size); 
+        }
 
         if (print_bits & 2) MsgLog("SegGeometryStore", info, "Segment geometry is undefined for segment name " << segname << " - return 0-pointer...");  
         //abort();

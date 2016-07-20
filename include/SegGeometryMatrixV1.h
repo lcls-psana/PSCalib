@@ -18,6 +18,7 @@
 // Base Class Headers --
 //----------------------
 #include "PSCalib/SegGeometry.h"
+#include <string>
 
 //-------------------------------
 // Collaborating Class Headers --
@@ -120,6 +121,21 @@ namespace PSCalib {
  *
  *  @author Mikhail S. Dubrovin
  */ 
+
+  /**  
+   *  @brief Splits the string segname like MTRX:384:384:100:100 and returns values
+   *  @param[in] segname - string like MTRX:384:384:100:100;
+   *  @param[out] rows - number of rows
+   *  @param[out] cols - number of columnss
+   *  @param[out] pix_size_rows - pixel size along axis counting rows
+   *  @param[out] pix_size_cols - pixel size along axis counting cols
+   */  
+bool matrix_pars( const std::string& segname
+		, size_t& rows
+		, size_t& cols
+		, float& pix_size_rows
+		, float& pix_size_cols);
+
 
 class SegGeometryMatrixV1 : public PSCalib::SegGeometry {
 public:
