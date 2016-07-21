@@ -8,7 +8,7 @@ Usage::
     from PSCalib.NDArrIO import save_txt, load_txt, list_of_comments
 
     # Save n-dimensional numpy array in the text file.
-    savetxt(fname, arr, cmts=(), fmt='%.1f')
+    save_txt(fname, arr, cmts=(), fmt='%.1f')
 
     # Load 1-, 2-, n-dimensional array (if metadata available) from file .
     arr = load_txt(fname)    # this version unpacks data directly in this script

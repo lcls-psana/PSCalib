@@ -27,6 +27,18 @@ Usage::
     fname_existing = find_calib_file(cdir, src, type, rnum, pbits=1)
     fname_new      = make_calib_file_name(cdir, src, type, run_start, run_end=None, pbits=1)
 
+    #-----------------------------------------------
+    # Deploy file or numpy array as a file in the calibration store
+
+    # use optional dictionary of comments to save in the HISTORY and file
+    arr = np.ones((32,185,388))
+    cmts = {'exp':'cxi12345', 'ifname':'input-file-name', 'app':'my-app-name', 'comment':'my-comment'}
+    deploy_calib_array(cdir, src, type, run_start, run_end, arr, cmts, fmt='%.1f', pbits=1)
+
+    cmts = {'exp':'cxi12345', 'app':'my-app-name', 'comment':'my-comment'}
+    ifname='path-to-my-own-calibtation-file/file-name.txt'
+    deploy_calib_file(cdir, src, type, run_start, run_end, ifnameq, cmts, pbits=1)
+
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.
 
@@ -43,6 +55,8 @@ __version__ = "$Revision$"
 import os
 import sys
 import PSCalib.GlobalUtils as gu
+from PSCalib.NDArrIO import save_txt
+import tempfile
 
 #------------------------------
 
@@ -100,6 +114,123 @@ def find_calib_file(cdir, src, type, rnum, pbits=1) :
 def make_calib_file_name(cdir, src, type, run_start, run_end=None, pbits=1) :
     return CalibFileFinder(cdir, pbits=pbits).makeCalibFileName(src, type, run_start, run_end=None)
 
+#------------------------------
+
+def deploy_calib_array(cdir, src, type, run_start, run_end=None, arr=None, dcmts={}, fmt='%.1f', pbits=1) :
+    """Deploys array in calibration file
+
+       - makes the new file name using make_calib_file_name(...)
+       - if file with this name already exists - rename it with current timestamp in the name
+       - save array in file
+       - add history record
+    """
+
+    fname = make_calib_file_name(cdir, src, type, run_start, run_end, pbits)
+    path_history = '%s/HISTORY'%os.path.dirname(fname)
+
+    if os.path.exists(fname) :
+        fname_bkp = '%s-%s'%(fname, gu.str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'))
+        os.system('cp %s %s'%(fname, fname_bkp))
+        if pbits & 1 :
+            print 'Existing file %s\nis backed-up  %s' % (fname, fname_bkp)
+
+    # extend dictionary for other parameters
+    d = dict(dcmts)
+    d['run']   = run_start
+    d['fname'] = os.path.basename(fname)
+    d['src']   = src
+    d['ctype'] = type
+
+    # make list of comments
+    cmts=['%s %s'%(k.upper().ljust(11),v) for k,v in d.iteritems()]
+    
+    # save n-dimensional numpy array in the tmp text file
+    fntmp = tempfile.NamedTemporaryFile(mode='r+b',suffix='.data')
+    if pbits & 2 : print 'Save constants in tmp file: %s' % fntmp.name
+    save_txt(fntmp.name, arr, cmts, fmt='%.1f')
+
+    if pbits & 1 : print 'Deploy constants in file: %s' % fname
+    # USE cat in stead of cp and move in order to create output file with correct ACL permissions
+    cmd_cat = 'cat %s > %s' % (fntmp.name, fname)    
+    #os.system(cmd_cat)
+    stream = os.popen(cmd_cat)
+    resp = stream.read()
+    msg = 'Command: %s\n - resp: %s' % (cmd_cat, resp)
+    if pbits & 2 : print msg
+
+    # add record to the HISTORY file
+    hrec = _history_record(d)
+    if pbits & 1 : print 'Add record: %sto the file: %s' % (hrec, path_history)
+    gu.save_textfile(hrec, path_history, mode='a')
+
+#------------------------------
+
+def deploy_calib_file(cdir, src, type, run_start, run_end=None, ifname='', dcmts={}, pbits=1) :
+    """Deploys calibration file
+
+       - makes the new file name using make_calib_file_name(...)
+       - if file with this name already exists - rename it with current timestamp in the name
+       - save array in file
+       - add history record
+    """
+
+    fname = make_calib_file_name(cdir, src, type, run_start, run_end, pbits)
+    path_history = '%s/HISTORY'%os.path.dirname(fname)
+
+    if os.path.exists(fname) :
+        fname_bkp = '%s-%s'%(fname, gu.str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'))
+        os.system('cp %s %s'%(fname, fname_bkp))
+        if pbits & 1 :
+            print 'Existing file %s\nis backed-up  %s' % (fname, fname_bkp)
+
+    # extend dictionary for other parameters
+    d = dict(dcmts)
+    d['run']   = run_start
+    d['fname'] = os.path.basename(fname)
+    d['ifname']= ifname
+    d['src']   = src
+    d['ctype'] = type
+
+    if pbits & 1 : print 'Deploy constants in file: %s' % fname
+    # USE cat in stead of cp and move in order to create output file with correct ACL permissions
+    cmd_cat = 'cat %s > %s' % (ifname, fname)    
+    #os.system(cmd_cat)
+    stream = os.popen(cmd_cat)
+    resp = stream.read()
+    msg = 'Command: %s\n - resp: %s' % (cmd_cat, resp)
+    if pbits & 2 : print msg
+
+    # add record to the HISTORY file
+    hrec = _history_record(d)
+    if pbits & 1 : print 'Add record: %sto the file: %s' % (hrec, path_history)
+    gu.save_textfile(hrec, path_history, mode='a')
+
+#------------------------------
+
+def _history_record(dcmts) :
+    """Returns history record made of dictionary comments and system info
+    """
+    user   = gu.get_login()
+    host   = gu.get_hostname()
+    tstamp = gu.str_tstamp(fmt='%Y-%m-%dT%H:%M:%S  zone:%Z')
+    rnum   = '%04d' % dcmts.get('run')
+    exp    = '%s' % dcmts.get('exp')
+    ifname = '%s' % dcmts.get('ifname')
+    ofname = '%s' % dcmts.get('fname')
+    app    = '%s' % dcmts.get('app')
+    cmt    = '%s' % dcmts.get('comment')
+
+    return 'file:%s  copy_of:%s  exp:%s  run:%s  app:%s  user:%s  host:%s  cptime:%s  comment:%s\n' % \
+          (ofname.ljust(14),
+           ifname,
+           exp.ljust(8),
+           rnum.ljust(4),
+           app.ljust(10),
+           user,
+           host,
+           tstamp.ljust(29),
+           cmt)
+   
 #------------------------------
 
 class CalibFileFinder :
@@ -229,7 +360,7 @@ class CalibFileFinder :
 
 #----------------------------------------------
 
-if __name__ == "__main__" :
+def test01() :
 
     # assuming /reg/d/psdm/CXI/cxid2714/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/pedestals/15-end.data
 
@@ -240,9 +371,12 @@ if __name__ == "__main__" :
     group = 'CsPad::CalibV1'
     src   = 'CxiDs1.0:Cspad.0'
     type  = 'pedestals'
-    rnum  = 137
+    rnum  = 134
     #rnum  = 123456789
 
+    #--------------------------
+
+    print 80*'_', '\nTest 1'
     print 'Finding calib file for\n  dir = %s\n  grp = %s\n  src = %s\n  type= %s\n  run = %d' % \
           (cdir, group, src, type, rnum)
 
@@ -251,6 +385,7 @@ if __name__ == "__main__" :
 
     #--------------------------
 
+    print 80*'_', '\nTest 2'
     print 'Test methods find_calib_file and make_calib_file_name'
     fname_existing = find_calib_file(cdir, src, type, rnum, pbits=1)
     print '  fname_existing : %s' % fname_existing
@@ -260,6 +395,50 @@ if __name__ == "__main__" :
     gu.create_directory(cdir, True)
     fname_new      = make_calib_file_name(cdir, src, type, run_start, run_end=None, pbits=0)
     print '  fname_new      : %s' % fname_new
+
+#--------------------------
+
+def test_deploy_calib_array() :
+    print 80*'_', '\nTest deploy_calib_array'
+
+    cdir  = './calib'
+    if not os.path.exists(cdir) : gu.create_directory(cdir, verb=True)
+    #cdir  = '/reg/d/psdm/CXI/cxi83714/calib'
+
+    src   = 'CxiDs1.0:Cspad.0'
+    type  = 'pedestals'
+    run_start  = 9991
+    run_end    = None
+    arr= gu.np.ones((32,185,388))
+    cmts = {'exp':'cxi83714', 'ifname':'input-file-name', 'app':'my-app-name', 'comment':'my-comment'}
+    deploy_calib_array(cdir, src, type, run_start, run_end, arr, cmts, fmt='%.1f', pbits=3)
+
+#--------------------------
+
+def test_deploy_calib_file() :
+    print 80*'_', '\nTest deploy_calib_file'
+    cdir  = './calib'
+    if not os.path.exists(cdir) : gu.create_directory(cdir, verb=True)
+    #cdir  = '/reg/d/psdm/CXI/cxi83714/calib'
+    
+    src   = 'CxiDs1.0:Cspad.0'
+    type  = 'geometry'
+    run_start  = 9992
+    run_end    = None
+    fname = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-camera1-2014-09-24/2016-06-15-geometry-cxil0216-r150-camera1-z95mm.txt'
+    cmts = {'exp':'cxi83714', 'app':'my-app-name', 'comment':'my-comment'}
+    deploy_calib_file(cdir, src, type, run_start, run_end, fname, cmts, pbits=3)
+
+#--------------------------
+
+if __name__ == "__main__" :
+
+    if len(sys.argv)<2    : test01()
+    elif sys.argv[1]=='1' : test01() 
+    elif sys.argv[1]=='2' : test01() 
+    elif sys.argv[1]=='3' : test_deploy_calib_array() 
+    elif sys.argv[1]=='4' : test_deploy_calib_file() 
+    else : print 'Non-expected arguments: sys.argv=', sys.argv
 
     sys.exit('End of %s' % sys.argv[0])
 

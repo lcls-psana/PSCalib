@@ -35,6 +35,8 @@ Usage::
     host  = gu.get_hostname()
     cwd   = gu.get_cwd()
 
+    gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append 
+ 
 @see other interface methods in :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`
 
 This software was developed for the SIT project.
@@ -501,6 +503,15 @@ def create_directory(dir, verb=False) :
     else :
         os.makedirs(dir)
         if verb : print 'Directory created: %s' % dir
+
+#------------------------------
+
+def save_textfile(text, path, mode='w') :
+    """Saves text in file specified by path. mode: 'w'-write, 'a'-append 
+    """
+    f=open(path,mode)
+    f.write(text)
+    f.close() 
 
 #------------------------------
 #------------------------------
