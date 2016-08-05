@@ -48,7 +48,7 @@ const size_t  SegGeometryEpix100V1::NCORNERS; //    =   4;
 const SegGeometry::pixel_coord_t SegGeometryEpix100V1::PIX_SCALE_SIZE = 50.00;
 const SegGeometry::pixel_coord_t SegGeometryEpix100V1::PIX_SIZE_COLS  = PIX_SCALE_SIZE;
 const SegGeometry::pixel_coord_t SegGeometryEpix100V1::PIX_SIZE_ROWS  = PIX_SCALE_SIZE;
-const SegGeometry::pixel_coord_t SegGeometryEpix100V1::PIX_SIZE_WIDE  = 200.00;
+const SegGeometry::pixel_coord_t SegGeometryEpix100V1::PIX_SIZE_WIDE  = 175.00;
 const SegGeometry::pixel_coord_t SegGeometryEpix100V1::PIX_SIZE_DEPTH = 400.;
 const double                     SegGeometryEpix100V1::UM_TO_PIX      = 1./PIX_SCALE_SIZE;
 

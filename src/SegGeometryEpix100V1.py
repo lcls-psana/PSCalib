@@ -11,7 +11,7 @@
 In this class we use natural matrix notations like in data array
 \n We assume that
 \n * 2x2 ASICs has 704 rows and 768 columns,
-\n * Epix100 has a pixel size 50x50um, 
+\n * Epix100 has a pixel size 50x50um, wide pixel size 50x175um
 \n * Epix10k has a pixel size 100x100um, 
 \n * X-Y coordinate system origin is in the sensor center,
 \n * pixel (r,c)=(0,0) is in the top left corner of the matrix, has coordinates (xmin,ymax), as shown below
@@ -104,7 +104,7 @@ class SegGeometryEpix100V1(SegGeometry) :
     _rows  = 704     # Number of rows in 2x2
     _cols  = 768     # Number of cols in 2x2
     _pixs  =  50     # Pixel size in um (micrometer)
-    _pixw  = 4*_pixs # Wide pixel size in um (micrometer)
+    _pixw  = 175     # Wide pixel size in um (micrometer)
     _pixd  = 400.00  # Pixel depth in um (micrometer)
 
     _colsh = _cols/2
