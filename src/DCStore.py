@@ -1,0 +1,289 @@
+#!/usr/bin/env python
+#-----------------------------------------------------------------------------
+# File and Version Information:
+#  $Id$
+#-----------------------------------------------------------------------------
+
+""":py:class:`PSCalib.DCStore` class for the Detector Calibration (DC) project.
+
+Usage::
+
+    # Import
+    from PSCalib.DCStore import DCStore
+
+    # Initialization
+    calibdir = env.calibDir()  # or '/reg/d/psdm/INS/experiment/calib'
+    rnum = evt.run()
+
+    cs = DCStore(path)
+
+    # Access methods
+    nda = cs.get(PEDESTALS, ts, vers=None)
+
+@see implementation in :py:class:`PSCalib.DCStore`,
+                       :py:class:`PSCalib.DCType`,
+                       :py:class:`PSCalib.DCRange`,
+                       :py:class:`PSCalib.DCVersion`,
+                       :py:class:`PSCalib.DCBase`
+
+This software was developed for the SIT project.
+If you use all or part of it, please give an appropriate acknowledgment.
+
+@version $Id$
+
+@author Mikhail S. Dubrovin
+"""
+
+#---------------------------------
+__version__ = "$Revision$"
+#---------------------------------
+
+import os
+import sys
+from time import time
+import h5py
+
+#import math
+#import numpy as np
+#from PSCalib.DCConfigParameters import cp
+from PSCalib.DCInterface import DCStoreI
+from PSCalib.DCType import DCType
+from PSCalib.DCLogger import log
+from PSCalib.DCUtils import save_string_as_dset
+
+#------------------------------
+
+def print_warning(obj, metframe) :
+    wng = 'INFO: %s.%s - abstract interface method needs to be re-implemented in derived class.' \
+          % (obj.__class__.__name__, metframe.f_code.co_name)
+    log.warning(wng, obj.__class__.__name__)
+    #print wng
+    #raise NotImplementedError(wng)
+
+#------------------------------
+
+#------------------------------
+
+class DCStore(DCStoreI) :
+    
+    """Class for the Detector Calibration (DC) project
+
+    cs = DCStoreI(fpath)
+
+    tscfile     = cs.tscfile()               # (int) time stamp of the file creation
+    dettype     = cs.dettype()               # (str) detector type
+    detid       = cs.detid()                 # (str) detector id
+    detname     = cs.detname()               # (str) detector name of self object
+    predecessor = cs.predecessor()           # (str) detname of predecessor or None
+    successor   = cs.successor()             # (str) detname of successor or None
+    ctypes      = cs.ctypes()                # (list) calibration types in the file
+    cto         = cs.ctypeobj(ctype)         # (DCType ~ h5py.Group) calibration type object
+
+    nda         = cs.get(ctype, tsp, vers)
+
+    cs.set_tscfile(ts)                       # set (int) time stamp of the file creation 
+    cs.set_dettype(dettype)                  # set (str) detector type
+    cs.set_detid(detid)                      # set (str) detector id
+    cs.set_detname(detname)                  # set (str) detector name of self object
+    cs.set_predecessor(pred)                 # set (str) detname of predecessor or None
+    cs.set_successor(succ)                   # set (str) detname of successor or None
+    cs.add_ctype(ctype)                      # add (str) calibration type to the DCStore object
+    cs.del_ctype(ctype)                      # delete ctype (str) from the DCStore object
+    cs.clear_ctype()                         # clear all ctypes (str) from the DCStore object dictionary
+
+    cs.save(path)                            # save DCStore content in the file specified by path, if path is Null - update current file.
+    cs.load(path)                            # load content of the file in DCStore object.
+    """
+
+#------------------------------
+
+    def __init__(self, path) :
+        DCStoreI.__init__(self, path)
+        self._name = self.__class__.__name__
+        self._set_file_name(path)
+        self._tscfile = None
+        self._dettype = None
+        self._detid = None
+        #self._detname = None
+        self._predecessor = None
+        self._successor = None
+        self._dicctypes = {}
+        log.info('In c-tor for path: %s' % path, self._name)
+        
+#------------------------------
+
+    def _set_file_name(self, path) :
+        self._fpath = path if isinstance(path, str) else None
+
+#------------------------------
+
+    def tscfile(self)               : return self._tscfile
+
+    def dettype(self)               : return self._dettype
+
+    def detid(self)                 : return self._detid
+
+    def detname(self)               :
+        if self._dettype is None : return None
+        if self._detid is None : return None
+        return '%s-%d' % (self._dettype, self._detid)
+
+    def predecessor(self)           : return self._predecessor
+
+    def successor(self)             : return self._successor
+
+    def ctypes(self)                : return self._dicctypes
+
+    def ctypeobj(self, ctype)       : return self._dicctypes.get(ctype, None) if ctype is not None else None
+
+    def set_tscfile(self, ts=None)  : self._tscfile = time() if ts is None else ts
+
+    def set_dettype(self, dettype)  : self._dettype = dettype
+
+    def set_detid(self, detid)      : self._detid = detid
+
+    def set_detname(self, detname)  :
+        if not isinstance(detname, str) :
+            self._dettype, self._detid = None, None
+            return
+
+        fields = detname.split('-')
+        self._dettype, self._detid = fields[0], int(fields[1])
+
+    def set_predecessor(self, pred) : self._predecessor = pred
+
+    def set_successor(self, succ)   : self._successor = succ
+
+    def add_ctype(self, ctype)      :
+        o = self._dicctypes[ctype] = DCType(ctype)
+        return o
+
+    def del_ctype(self, ctype)      : del self._dicctypes[ctype] 
+
+    def clear_ctypes(self)          : self._dicctypes.clear()     
+
+    def save(self, path=None) :
+        if path is not None : self._fpath = path
+        if not isinstance(self._fpath, str) :
+            msg = 'Invalid file name: %s' % str(self._fpath)
+            log.error(msg, self.__class__.__name__)
+            raise ValueError(msg)
+        
+        with h5py.File(self._fpath, 'a') as hf :
+            
+            msg = '= save(), group %s object for %s' % (hf.name, self.detname())
+            log.info(msg, self._name)
+
+            ds1 = save_string_as_dset(hf, 'dettype', self.dettype())
+            ds2 = save_string_as_dset(hf, 'detname', self.detname())
+            ds3 = hf.create_dataset('detid', (1,), dtype='int64', data = self._detid)
+            ds4 = hf.create_dataset('tscfile', (1,), dtype='double', data = self._tscfile)
+            ds5 = save_string_as_dset(hf, 'predecessor', self.predecessor())
+            ds6 = save_string_as_dset(hf, 'successor', self.successor())
+
+            for k,v in self.ctypes().iteritems() :
+                #msg='Add type %s as object %s' % (k, v.ctype())
+                #log.info(msg, self._name)
+                v.save(hf)
+
+            self.save_base(hf)
+
+            hf.close()
+            log.info('File %s is saved' % self._fpath, self._name)
+
+#---- TO-DO
+
+    def load(self, path=None)       : print_warning(self, sys._getframe())
+
+    def get(self, ctype, tsp, vers) : print_warning(self, sys._getframe()); return None
+
+
+#------------------------------
+#------------------------------
+#----------- TEST -------------
+#------------------------------
+#------------------------------
+
+def test_DCStore() :
+
+    o = DCStore('cspad-654321.h5')
+
+    r = o.tscfile()
+    r = o.dettype()
+    r = o.detid()
+    r = o.detname()
+    r = o.predecessor()
+    r = o.successor()
+    r = o.ctypes()
+    r = o.ctypeobj(None)
+    r = o.get(None, None, None)    
+    o.set_tscfile(None)
+    o.set_dettype(None)
+    o.set_detid(None)
+    o.set_detname(None)
+    o.set_predecessor(None)
+    o.set_successor(None)
+    o.add_ctype(None)
+    o.del_ctype(None)
+    o.clear_ctypes()
+    o.save(None)
+    o.load(None)
+
+#------------------------------
+
+def test_DCStore_2() :
+
+    import numpy as np
+
+    o = DCStore('cspad-654321.h5')
+    o.set_dettype('cspad')
+    o.set_detid(654321)
+    o.set_tscfile(ts=None)
+    o.set_predecessor('cspad-654320')
+    o.set_successor('cspad-654322')
+
+    po = o.add_ctype('pedestals')
+    o.add_ctype('pixel_rms')
+    o.add_ctype('pixel_status')
+    o.add_ctype('pixel_mask')
+    o.add_ctype('pixel_gain')
+    o.add_ctype('geometry')
+
+    #po = o.ctypeobj('pedestals')
+    t1 = time();
+    t2 = t1+1;
+    ro1 = po.add_range(t1, end=t1+1000)
+    ro2 = po.add_range(t2, end=t2+1000)
+
+    #ro2 = po.range(t2, end=t2+1000)
+    v1 = 'v0001';
+    v2 = 'v0002';
+    vo1 = ro2.add_version(v1)
+    vo2 = ro2.add_version(v2)
+
+    ro2.set_versdef(v2)
+
+    vo1.set_tsprod(time())
+    vo1.add_calib(np.zeros((32,185,388)))
+
+    vo2.set_tsprod(time())
+    vo2.add_calib(np.ones((32,185,388)))
+
+    o.save()
+
+#------------------------------
+
+def test() :
+    log.setPrintBits(0377) 
+    if   len(sys.argv)==1  : print 'For test(s) use command: python %s <test-number=1-4>' % sys.argv[0]
+    elif(sys.argv[1]=='1') : test_DCStore()        
+    elif(sys.argv[1]=='2') : test_DCStore_2()        
+    else : print 'Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv
+
+#------------------------------
+
+if __name__ == "__main__" :
+    test()
+    sys.exit( 'End of %s test.' % sys.argv[0])
+
+#------------------------------

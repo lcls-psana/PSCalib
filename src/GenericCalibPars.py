@@ -73,6 +73,7 @@ class GenericCalibPars (CalibPars) :
         """ Constructor
         """
         CalibPars.__init__(self)
+        self.name = self.__class__.__name__
 
         self.cbase    = cbase    # ex.: PSCalib.CalibParsBaseAndorV1 or None
         self.calibdir = calibdir # ex.: '/reg/d/psdm/CXI/cxif5315/calib'
@@ -101,7 +102,7 @@ class GenericCalibPars (CalibPars) :
     def print_attrs(self) :
         """ Prints attributes
         """
-        inf = '\nAttributes of %s object:' % self.__class__.__name__ \
+        inf = '\nAttributes of %s object:' % self.name \
             + '\n  base object: %s' % self.cbase.__class__.__name__ \
             + '\n  calibdir   : %s' % self.calibdir \
             + '\n  group      : %s' % self.group    \
@@ -115,14 +116,14 @@ class GenericCalibPars (CalibPars) :
     def msgh(self, i=3) :
         """ Returns message header
         """
-        if   i==3 : return '%s: source %s run=%d' % (self.__class__.__name__, self.source, self.runnum)
-        elif i==2 : return '%s: source %s' % (self.__class__.__name__, self.source) 
-        else      : return '%s:' % (self.__class__.__name__)
+        if   i==3 : return '%s: source %s run=%d' % (self.name, self.source, self.runnum)
+        elif i==2 : return '%s: source %s' % (self.name, self.source) 
+        else      : return '%s:' % (self.name)
 
 #------------------------------
 
     def msgw(self) :
-        return '%s: %s' % (self.__class__.__name__, 'implementation of method %s')
+        return '%s: %s' % (self.name, 'implementation of method %s')
 
 #------------------------------
 
