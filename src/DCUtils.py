@@ -103,6 +103,33 @@ def save_string_as_dset(grp, name, s) :
     return dset
 
 #------------------------------
+
+def save_object_as_dset(grp, name, shape=None, dtype=None, data=0) :
+    """Saves object as h5py dataset
+
+       Currently supports scalar int, double, string and numpy.array
+    """
+
+    #print 'XXX: save_object_as_dset '
+
+    if isinstance(data, np.ndarray) :
+        return grp.create_dataset(name, data=data)
+
+    sh = (1,) if shape is None else shape
+    if dtype is not None :
+        return grp.create_dataset(name, shape=sh, dtype=dtype, data=data)
+
+    if(isinstance(data, str)) :
+        return save_string_as_dset(grp, name, data)
+
+    if(isinstance(data, int)) :
+        return grp.create_dataset(name, shape=sh, dtype='int', data=data)
+
+    if(isinstance(data, float)) :
+        return grp.create_dataset(name, shape=sh, dtype='double', data=data)
+
+    log.warning("Can't save parameter: %s of %s in the h5py group: %s" % (name, str(type()), grp.name), 'DCUtils.save_object_as_dset')
+
 #------------------------------
 #------------------------------
 #------------------------------

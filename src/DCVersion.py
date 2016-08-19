@@ -43,7 +43,7 @@ import sys
 #from PSCalib.DCConfigParameters import cp
 from PSCalib.DCInterface import DCVersionI
 from PSCalib.DCLogger import log
-from PSCalib.DCUtils import save_string_as_dset
+from PSCalib.DCUtils import save_string_as_dset, save_object_as_dset
 
 #------------------------------
 
@@ -70,7 +70,7 @@ class DCVersion(DCVersionI) :
         self.set_version(vers)
         self._tsprod = None
         self._nda = None
-        log.info('In c-tor for version: %s' % vers, self._name)
+        log.debug('In c-tor for version: %s' % vers, self._name)
 
     def version(self)              : return self._vers
 
@@ -87,9 +87,9 @@ class DCVersion(DCVersionI) :
     def save(self, group) :
 
         grp = group.create_group(self.version())
-        ds1 = save_string_as_dset(grp, 'version', str(self.version()))
-        ds2 = grp.create_dataset('tsprod', (1,), dtype='double', data = self.tsprod())
-        ds3 = grp.create_dataset('calib', data = self.calib())
+        ds1 = save_object_as_dset(grp, 'version', data=str(self.version())) # dtype='str'
+        ds2 = save_object_as_dset(grp, 'tsprod',  data=self.tsprod())       # dtype='str'
+        ds3 = save_object_as_dset(grp, 'data',    data=self.calib())        # dtype='np.array'
 
         msg = '==== save(), group %s object for %s' % (grp.name, self.version())
         log.info(msg, self._name)

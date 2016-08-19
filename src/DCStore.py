@@ -49,7 +49,7 @@ import h5py
 from PSCalib.DCInterface import DCStoreI
 from PSCalib.DCType import DCType
 from PSCalib.DCLogger import log
-from PSCalib.DCUtils import save_string_as_dset
+from PSCalib.DCUtils import save_string_as_dset, save_object_as_dset
 
 #------------------------------
 
@@ -70,7 +70,7 @@ class DCStore(DCStoreI) :
 
     cs = DCStoreI(fpath)
 
-    tscfile     = cs.tscfile()               # (int) time stamp of the file creation
+    tscfile     = cs.tscfile()               # (double) time stamp of the file creation
     dettype     = cs.dettype()               # (str) detector type
     detid       = cs.detid()                 # (str) detector id
     detname     = cs.detname()               # (str) detector name of self object
@@ -81,7 +81,7 @@ class DCStore(DCStoreI) :
 
     nda         = cs.get(ctype, tsp, vers)
 
-    cs.set_tscfile(ts)                       # set (int) time stamp of the file creation 
+    cs.set_tscfile(tsec)                     # set (double) time stamp of the file creation 
     cs.set_dettype(dettype)                  # set (str) detector type
     cs.set_detid(detid)                      # set (str) detector id
     cs.set_detname(detname)                  # set (str) detector name of self object
@@ -108,7 +108,7 @@ class DCStore(DCStoreI) :
         self._predecessor = None
         self._successor = None
         self._dicctypes = {}
-        log.info('In c-tor for path: %s' % path, self._name)
+        log.debug('In c-tor for path: %s' % path, self._name)
         
 #------------------------------
 
@@ -126,7 +126,7 @@ class DCStore(DCStoreI) :
     def detname(self)               :
         if self._dettype is None : return None
         if self._detid is None : return None
-        return '%s-%d' % (self._dettype, self._detid)
+        return '%s-%s' % (self._dettype, self._detid)
 
     def predecessor(self)           : return self._predecessor
 
@@ -136,11 +136,11 @@ class DCStore(DCStoreI) :
 
     def ctypeobj(self, ctype)       : return self._dicctypes.get(ctype, None) if ctype is not None else None
 
-    def set_tscfile(self, ts=None)  : self._tscfile = time() if ts is None else ts
+    def set_tscfile(self, tsec=None): self._tscfile = time() if tsec is None else tsec
 
-    def set_dettype(self, dettype)  : self._dettype = dettype
+    def set_dettype(self, dettype)  : self._dettype = str(dettype)
 
-    def set_detid(self, detid)      : self._detid = detid
+    def set_detid(self, detid)      : self._detid = str(detid)
 
     def set_detname(self, detname)  :
         if not isinstance(detname, str) :
@@ -169,17 +169,17 @@ class DCStore(DCStoreI) :
             log.error(msg, self.__class__.__name__)
             raise ValueError(msg)
         
-        with h5py.File(self._fpath, 'a') as hf :
+        with h5py.File(self._fpath, 'w') as hf :
             
             msg = '= save(), group %s object for %s' % (hf.name, self.detname())
             log.info(msg, self._name)
 
-            ds1 = save_string_as_dset(hf, 'dettype', self.dettype())
-            ds2 = save_string_as_dset(hf, 'detname', self.detname())
-            ds3 = hf.create_dataset('detid', (1,), dtype='int64', data = self._detid)
-            ds4 = hf.create_dataset('tscfile', (1,), dtype='double', data = self._tscfile)
-            ds5 = save_string_as_dset(hf, 'predecessor', self.predecessor())
-            ds6 = save_string_as_dset(hf, 'successor', self.successor())
+            ds1 = save_object_as_dset(hf, 'dettype',     data=self.dettype())     # 'str'
+            ds2 = save_object_as_dset(hf, 'detname',     data=self.detname())     # 'str'
+            ds3 = save_object_as_dset(hf, 'detid',       data=self.detid())       # 'str'
+            ds4 = save_object_as_dset(hf, 'tscfile',     data=self.tscfile())     # 'double'
+            ds5 = save_object_as_dset(hf, 'predecessor', data=self.predecessor()) # 'str'       
+            ds6 = save_object_as_dset(hf, 'successor',   data=self.successor())   # 'str'
 
             for k,v in self.ctypes().iteritems() :
                 #msg='Add type %s as object %s' % (k, v.ctype())
@@ -216,7 +216,7 @@ def test_DCStore() :
     r = o.successor()
     r = o.ctypes()
     r = o.ctypeobj(None)
-    r = o.get(None, None, None)    
+    r = o.get(None, None, None)
     o.set_tscfile(None)
     o.set_dettype(None)
     o.set_detid(None)
@@ -237,29 +237,49 @@ def test_DCStore_2() :
 
     o = DCStore('cspad-654321.h5')
     o.set_dettype('cspad')
-    o.set_detid(654321)
-    o.set_tscfile(ts=None)
+    o.set_detid('654321')
+    o.set_tscfile(tsec=None)
     o.set_predecessor('cspad-654320')
     o.set_successor('cspad-654322')
+    o.add_history_record('Some record 1 to commenet DCStore')
+    o.add_history_record('Some record 2 to commenet DCStore')
+    o.add_par('par-1-in-DCStore', 1)
+    o.add_par('par-2-in-DCStore', 'some string 1')
+    o.add_par('par-3-in-DCStore', 1.1)
 
-    po = o.add_ctype('pedestals')
     o.add_ctype('pixel_rms')
     o.add_ctype('pixel_status')
     o.add_ctype('pixel_mask')
     o.add_ctype('pixel_gain')
     o.add_ctype('geometry')
+    po = o.add_ctype('pedestals')
+    po.add_history_record('Some record 1 to commenet DCType')
+    po.add_history_record('Some record 2 to commenet DCType')
+    po.add_par('par-1-in-DCType', 2)
+    po.add_par('par-2-in-DCType', 'some string 2')
+    po.add_par('par-3-in-DCType', 2.2)
 
-    #po = o.ctypeobj('pedestals')
     t1 = time();
     t2 = t1+1;
     ro1 = po.add_range(t1, end=t1+1000)
     ro2 = po.add_range(t2, end=t2+1000)
+    ro1.add_history_record('Some record 1 to commenet DCRange')
+    ro1.add_history_record('Some record 2 to commenet DCRange')
+    ro1.add_par('par-1-in-DCRange', 3)
+    ro1.add_par('par-2-in-DCRange', 'some string 3')
+    ro1.add_par('par-3-in-DCRange', 3.3)
 
-    #ro2 = po.range(t2, end=t2+1000)
     v1 = 'v0001';
     v2 = 'v0002';
     vo1 = ro2.add_version(v1)
     vo2 = ro2.add_version(v2)
+    vo1.add_history_record('Some record 1 to commenet DCVersion')
+    vo1.add_history_record('Some record 2 to commenet DCVersion')
+    vo1.add_history_record('Some record 3 to commenet DCVersion')
+    vo1.add_history_record('Some record 4 to commenet DCVersion')
+    vo1.add_par('par-1-in-DCVersion', 4)
+    vo1.add_par('par-2-in-DCVersion', 'some string 4')
+    vo1.add_par('par-3-in-DCVersion', 4.4)
 
     ro2.set_versdef(v2)
 

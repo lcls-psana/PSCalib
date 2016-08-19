@@ -37,6 +37,7 @@ __version__ = "$Revision$"
 
 import os
 import sys
+from math import floor, ceil
 #import math
 #import numpy as np
 #from time import time
@@ -44,7 +45,7 @@ import sys
 from PSCalib.DCInterface import DCRangeI
 from PSCalib.DCLogger import log
 from PSCalib.DCVersion import DCVersion
-from PSCalib.DCUtils import save_string_as_dset
+from PSCalib.DCUtils import save_string_as_dset, save_object_as_dset
 
 #------------------------------
 
@@ -52,8 +53,10 @@ def key(begin, end=None) :
     """ Return range as a string,
     ex.: 1471285222.108249-1471285555.108249 or 1471285222.108249-end
     """
-    str_begin = '%.6f' % begin if begin is not None else 0
-    str_end = ('%.6f' % end) if end is not None else 'end'
+    #str_begin = ('%.6f' % begin) if begin is not None else 0
+    #str_end = ('%.6f' % end) if end is not None else 'end'
+    str_begin = ('%d' % floor(begin)) if begin is not None else 0
+    str_end = ('%d' % ceil(end)) if end is not None else 'end'
     return '%s-%s' % (str_begin, str_end)
 
 #------------------------------
@@ -88,7 +91,7 @@ class DCRange(DCRangeI) :
         self._dicvers = {}
         self._versdef = None
         self._str_range = key(begin, end)
-        log.info('In c-tor for range: %s' % self._str_range, self._name)
+        log.debug('In c-tor for range: %s' % self._str_range, self._name)
 
     def range(self)                : return self._str_range
 
@@ -117,12 +120,11 @@ class DCRange(DCRangeI) :
     def clear_versions(self)       : self._dicvers.clear()
 
     def save(self, group) :
-
         grp = group.create_group(self.range())
-        ds1 = grp.create_dataset('begin', (1,), dtype='double', data = self.begin())
-        ds2 = grp.create_dataset('end', (1,), dtype='double', data = self.end())
-        ds3 = save_string_as_dset(grp, 'range', self.range())
-        ds4 = save_string_as_dset(grp, 'versdef', str(self.versdef()))
+        ds1 = save_object_as_dset(grp, 'begin',   data=self.begin())        # dtype='double'
+        ds2 = save_object_as_dset(grp, 'end',     data=self.end())          # dtype='double'
+        ds3 = save_object_as_dset(grp, 'range',   data=self.range())        # dtype='str'
+        ds4 = save_object_as_dset(grp, 'versdef', data=str(self.versdef())) # dtype='str'
 
         msg = '=== save(), group %s object for %s' % (grp.name, self.range())
         log.info(msg, self._name)

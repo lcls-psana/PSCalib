@@ -44,7 +44,7 @@ import sys
 from PSCalib.DCInterface import DCTypeI
 from PSCalib.DCLogger import log
 from PSCalib.DCRange import DCRange, key
-from PSCalib.DCUtils import save_string_as_dset
+from PSCalib.DCUtils import save_string_as_dset, save_object_as_dset
 
 #------------------------------
 
@@ -71,7 +71,7 @@ class DCType(DCTypeI) :
         self._name = self.__class__.__name__
         self._dicranges = {}
         self._ctype = ctype
-        log.info('In c-tor for ctype: %s' % ctype, self._name)
+        log.debug('In c-tor for ctype: %s' % ctype, self._name)
 
     def ctype(self)  : return self._ctype
 
@@ -91,7 +91,7 @@ class DCType(DCTypeI) :
     def save(self, group) :
 
         grp = group.create_group(self.ctype())
-        ds1 = save_string_as_dset(grp, 'ctype', self.ctype())
+        ds1 = save_object_as_dset(grp, 'ctype', data=self.ctype()) # dtype='str'
 
         msg = '== save(), group %s object for %s' % (grp.name, self.ctype())
         log.info(msg, self._name)
