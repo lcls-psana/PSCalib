@@ -109,6 +109,7 @@ class DCStoreI(DCBase) :
     def clear_ctypes(self)          : print_warning(self, sys._getframe())
     def save(self, path)            : print_warning(self, sys._getframe())
     def load(self, path)            : print_warning(self, sys._getframe())
+    def print_obj(self, offset)     : print_warning(self, sys._getframe())
 
 #------------------------------
 
@@ -134,27 +135,27 @@ class DCTypeI(DCBase) :
     def add_range(self, begin, end): print_warning(self, sys._getframe()); return None
     def del_range(self, begin, end): print_warning(self, sys._getframe())
     def clear_ranges(self)         : print_warning(self, sys._getframe())
-
     def save(self, group)          : print_warning(self, sys._getframe())
-    def load(self, group)          : print_warning(self, sys._getframe())
+    def load(self, path)           : print_warning(self, sys._getframe())
+    def print_obj(self)            : print_warning(self, sys._getframe())
 
 #------------------------------
 
 class DCRangeI(DCBase) :
     """Abstract interface class for the Detector Calibration (DC) project
 
-       tsro = DCRangeI(begin, end)
+       o = DCRangeI(begin, end)
 
-       tsbegin     = tsro.begin()               # (int) time stamp beginning validity range
-       tsend       = tsro.end()                 # (int) time stamp ending validity range
-       versions    = tsro.versions()            # (list of uint) versions of calibrations
-       versdef     = tsro.versdef()             # (DCVersion ~ h5py.Group) reference to the default version in the time-range object
-       verso       = tsro.version(vers)         # (DCVersion ~ h5py.Group) specified version in the time-range object
-       tsro.set_begin(tsbegin)                  # set (int) time stamp beginning validity range
-       tsro.set_end(tsend)                      # set (int) time stamp ending validity range
-       tsro.add_version(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
-       tsro.set_versdef(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
-       tsro.del_version(vers)                   # delete version 
+       tsbegin     = o.begin()               # (int) time stamp beginning validity range
+       tsend       = o.end()                 # (int) time stamp ending validity range
+       dico        = o.versions()            # (list of uint) versions of calibrations
+       vnum        = o.vnum_def()            # (DCVersion ~ h5py.Group) reference to the default version in the time-range object
+       vo          = o.version(vers)         # (DCVersion ~ h5py.Group) specified version in the time-range object
+       o.set_begin(tsbegin)                  # set (int) time stamp beginning validity range
+       o.set_end(tsend)                      # set (int) time stamp ending validity range
+       o.add_version(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
+       o.set_versdef(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
+       o.del_version(vers)                   # delete version 
     """
 
     def __init__(self, begin, end) :
@@ -164,41 +165,51 @@ class DCRangeI(DCBase) :
     def begin(self)                : print_warning(self, sys._getframe()); return None
     def end(self)                  : print_warning(self, sys._getframe()); return None
     def versions(self)             : print_warning(self, sys._getframe()); return None
-    def versdef(self)              : print_warning(self, sys._getframe()); return None
-    def version(self)              : print_warning(self, sys._getframe()); return None
-
+    def version(self, vnum)        : print_warning(self, sys._getframe()); return None
+    def vnum_def(self)             : print_warning(self, sys._getframe()); return None
+    def vnum_last(self)            : print_warning(self, sys._getframe()); return None
     def set_begin(self, begin)     : print_warning(self, sys._getframe())
     def set_end(self, end)         : print_warning(self, sys._getframe())
-    def add_version(self, vers)    : print_warning(self, sys._getframe()); return None
-    def set_versdef(self, vers)    : print_warning(self, sys._getframe())
-    def del_version(self, vers)    : print_warning(self, sys._getframe())
-
+    def add_version(self)          : print_warning(self, sys._getframe()); return None
+    def set_vnum_def(self, vnum)   : print_warning(self, sys._getframe())
+    def del_version(self, vnum)    : print_warning(self, sys._getframe())
+    def clear_versions(self)       : print_warning(self, sys._getframe())
     def save(self, group)          : print_warning(self, sys._getframe())
     def load(self, group)          : print_warning(self, sys._getframe())
+    def print_obj(self)            : print_warning(self, sys._getframe())
 
 #------------------------------
 
 class DCVersionI(DCBase) :
     """Abstract interface class for the Detector Calibration (DC) project
 
-       verso = DCVersionI(vers)
+       o = DCVersionI(vnum, tsprod=None, arr=None)
 
-       tsvers      = verso.tsprod()             # (int) time stamp of the version production
-       calibdata   = verso.calib()              # (np.array) calibration array
-       verso.set_tsprod(tsprod)                 # set (int) time stamp of the version production
-       verso.add_calib(nda)                     # set (np.array) calibration array
+       o.set_vnum(vnum)            # sets (int) version 
+       o.set_tsprod(tsprod)        # sets (double) time stamp of the version production
+       o.add_data(nda)             # sets (np.array) calibration array
+       vnum   = o.vnum()           # returns (int) version number
+       s_vnum = o.str_vnum()       # returns (str) version number
+       tsvers = o.tsprod()         # returns (double) time stamp of the version production
+       nda    = o.data()           # returns (np.array) calibration array
+       o.save(group)               # saves object content under h5py.group in the hdf5 file. 
+       o.load(group)               # loads object content from the h5py.group of hdf5 file. 
     """
 
-    def __init__(self, vers) :
+    def __init__(self, vnum, tsprod=None, arr=None) :
         DCBase.__init__(self)
         self._name = self.__class__.__name__
 
-    def tsprod(self)               : print_warning(self, sys._getframe()); return None
-    def calib(self)                : print_warning(self, sys._getframe()); return None
+    def set_vnum(self, vnum)       : print_warning(self, sys._getframe())
     def set_tsprod(self, tsprod)   : print_warning(self, sys._getframe())
-    def set_calib(self, nda)       : print_warning(self, sys._getframe())
+    def add_data(self, nda)        : print_warning(self, sys._getframe())
+    def vnum(self)                 : print_warning(self, sys._getframe()); return None
+    def str_vnum(self)             : print_warning(self, sys._getframe()); return None
+    def tsprod(self)               : print_warning(self, sys._getframe()); return None
+    def data(self)                 : print_warning(self, sys._getframe()); return None
     def save(self, group)          : print_warning(self, sys._getframe())
     def load(self, group)          : print_warning(self, sys._getframe())
+    def print_obj(self)            : print_warning(self, sys._getframe())
 
 #------------------------------
 #------------------------------
@@ -254,12 +265,12 @@ def test_DCRangeI() :
     b = o.begin()
     e = o.end()
     v = o.versions()
-    d = o.versdef()
+    n = o.vnum_def()
     r = o.version(None)
     o.set_begin(None)
     o.set_end(None)
-    v = o.add_version(None)
-    o.set_versdef(None)
+    v = o.add_version()
+    o.set_vnum_def(None)
     o.del_version(None)
     o.save(None)
     o.load(None)
@@ -270,10 +281,13 @@ def test_DCVersionI() :
 
     o = DCVersionI(None)
 
+    r = o.vnum()
+    r = o.str_vnum()
     r = o.tsprod()
-    r = o.calib()
+    r = o.data()
+    o.set_vnum(None)
     o.set_tsprod(None)
-    o.add_calib(None)
+    o.add_data(None)
     o.save(None)
     o.load(None)
 

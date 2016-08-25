@@ -44,7 +44,7 @@ import sys
 from PSCalib.DCInterface import DCTypeI
 from PSCalib.DCLogger import log
 from PSCalib.DCRange import DCRange, key
-from PSCalib.DCUtils import save_string_as_dset, save_object_as_dset
+from PSCalib.DCUtils import save_object_as_dset, h5py
 
 #------------------------------
 
@@ -52,18 +52,19 @@ class DCType(DCTypeI) :
     
     """Class for the Detector Calibration (DC) project
 
-       cto = DCType(type)
+    cto = DCType(type)
 
-       ctype  = cto.ctype()                # (str) of ctype name
-       ranges = cto.ranges()               # (list) of time ranges for ctype
-       range  = cto.range(begin, end)      # (DCRange ~ h5py.Group) time stamp validity range object
-       cto.add_range(begin, end)           # add (str) of time ranges for ctype
-       cto.del_range(begin, end)           # delete range from the DCType object
+    cto.set_ctype(ctype)                # add (str) of time ranges for ctype.
+    ctype  = cto.ctype()                # returns (str) of ctype name.
+    ranges = cto.ranges()               # returns (dict) of time range objects.
+    range  = cto.range(begin, end)      # returns time stamp validity range object.
+    cto.add_range(begin, end)           # add (str) of time ranges for ctype.
+    cto.del_range(begin, end)           # delete range from the DCType object.
+    cto.clear_ranges()                  # delete all range objects from dictionary.
 
-
-       r = o.get(None, None, None)    
-       o.save(group)
-       o.load(group)
+    o.save(group)                       # saves object content under h5py.group in the hdf5 file.
+    o.load(group)                       # loads object content from the hdf5 file. 
+    r = o.get(None, None, None)    
     """
 
     def __init__(self, ctype) :
@@ -74,6 +75,8 @@ class DCType(DCTypeI) :
         log.debug('In c-tor for ctype: %s' % ctype, self._name)
 
     def ctype(self)  : return self._ctype
+
+    def set_ctype(self, ctype) : self._ctype = ctype
 
     def ranges(self) : return self._dicranges
 
@@ -94,16 +97,41 @@ class DCType(DCTypeI) :
         ds1 = save_object_as_dset(grp, 'ctype', data=self.ctype()) # dtype='str'
 
         msg = '== save(), group %s object for %s' % (grp.name, self.ctype())
-        log.info(msg, self._name)
+        log.debug(msg, self._name)
 
         for k,v in self.ranges().iteritems() :
             v.save(grp)
 
         self.save_base(grp)
 
-#---- TO-DO
+    def load(self, grp) :
+        msg = '== load data from group %s and fill object %s' % (grp.name, self._name)
+        log.debug(msg, self._name)
 
-    def load(self, group) : pass
+        for k,v in dict(grp).iteritems() :
+            #subgrp = v
+            #print 'XXX    ', k , v# , "   ", subg.name #, val, subg.len(), type(subg),
+
+            if isinstance(v, h5py.Dataset) :                    
+                log.debug('load dataset "%s"' % k, self._name)
+                if   k == 'ctype' : self.set_ctype(v[0])
+                else : log.warning('group "%s" has unrecognized dataset "%s"' % (grp.name, k), self._name)
+
+            elif isinstance(v, h5py.Group) :
+                if self.is_base_group(k,v) : continue
+                log.debug('load group "%s"' % k, self._name)
+                o = self.add_range(v['begin'][0], v['end'][0])
+                o.load(v)
+
+
+    def print_obj(self) :
+        offset = 2 * self._offspace
+        self.print_base(offset)
+        print '%s ctype     %s' % (offset, self.ctype())
+        for k,v in self.ranges().iteritems() :
+            v.print_obj()
+
+#---- TO-DO
 
     def get(self, p1, p2, p3)  : return None
 
@@ -126,7 +154,7 @@ def test_DCType() :
     o.clear_ranges()
 
     r = o.get(None, None, None)    
-    o.save(None)
+    #o.save(None)
     o.load(None)
 
 #------------------------------

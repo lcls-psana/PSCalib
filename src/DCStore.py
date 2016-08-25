@@ -68,7 +68,7 @@ class DCStore(DCStoreI) :
     
     """Class for the Detector Calibration (DC) project
 
-    cs = DCStoreI(fpath)
+    cs = DCStore(fpath)
 
     tscfile     = cs.tscfile()               # (double) time stamp of the file creation
     dettype     = cs.dettype()               # (str) detector type
@@ -91,8 +91,8 @@ class DCStore(DCStoreI) :
     cs.del_ctype(ctype)                      # delete ctype (str) from the DCStore object
     cs.clear_ctype()                         # clear all ctypes (str) from the DCStore object dictionary
 
-    cs.save(path)                            # save DCStore content in the file specified by path, if path is Null - update current file.
-    cs.load(path)                            # load content of the file in DCStore object.
+    cs.save(group)                           # saves object content under h5py.group in the hdf5 file.
+    cs.load(group)                           # loads object content from the hdf5 file. 
     """
 
 #------------------------------
@@ -172,7 +172,7 @@ class DCStore(DCStoreI) :
         with h5py.File(self._fpath, 'w') as hf :
             
             msg = '= save(), group %s object for %s' % (hf.name, self.detname())
-            log.info(msg, self._name)
+            log.debug(msg, self._name)
 
             ds1 = save_object_as_dset(hf, 'dettype',     data=self.dettype())     # 'str'
             ds2 = save_object_as_dset(hf, 'detname',     data=self.detname())     # 'str'
@@ -183,7 +183,7 @@ class DCStore(DCStoreI) :
 
             for k,v in self.ctypes().iteritems() :
                 #msg='Add type %s as object %s' % (k, v.ctype())
-                #log.info(msg, self._name)
+                #log.debug(msg, self._name)
                 v.save(hf)
 
             self.save_base(hf)
@@ -191,12 +191,54 @@ class DCStore(DCStoreI) :
             hf.close()
             log.info('File %s is saved' % self._fpath, self._name)
 
+
+    def load(self, path=None) : 
+
+        with h5py.File(self._fpath, 'r') as grp :
+            
+            #msg = 'Load data from file %s and fill %s object for group "%s"' % (self._fpath, self._name, grp.name)
+            #log.info(msg, self._name)
+            log.info('Load data from file %s' % self._fpath, self._name)
+
+            for k,v in dict(grp).iteritems() :
+                #subgrp = v
+                #print '    ', k # , "   ", subg.name #, val, subg.len(), type(subg),
+
+                if isinstance(v, h5py.Dataset) :                    
+                    log.debug('load dataset "%s"' % k, self._name)
+                    if   k == 'dettype'     : self.set_dettype(v[0])
+                    elif k == 'detname'     : self.set_detname(v[0])
+                    elif k == 'detid'       : self.set_detid(v[0])
+                    elif k == 'tscfile'     : self.set_tscfile(v[0])
+                    elif k == 'predecessor' : self.set_predecessor(v[0])
+                    elif k == 'successor'   : self.set_successor(v[0])
+                    else : log.warning('hdf file has unrecognized dataset "%s"' % k, self._name)
+
+                elif isinstance(v, h5py.Group) :
+                    if self.is_base_group(k,v) : continue
+                    log.debug('load group "%s"' % k, self._name)                    
+                    o = self.add_ctype(k)
+                    o.load(v)
+ 
+
+    def print_obj(self) :
+        offset = 1 * self._offspace
+        self.print_base(offset)
+        print '%s dettype     %s' % (offset, self.dettype())
+        print '%s detname     %s' % (offset, self.detname())
+        print '%s detid       %s' % (offset, self.detid())
+        print '%s tscfile     %f' % (offset, self.tscfile())
+        print '%s predecessor %s' % (offset, self.predecessor())
+        print '%s successor   %s' % (offset, self.successor())
+
+        for k,v in self.ctypes().iteritems() :
+        #    #msg='Add type %s as object %s' % (k, v.ctype())
+        #    #log.info(msg, self._name)
+            v.print_obj()
+
 #---- TO-DO
 
-    def load(self, path=None)       : print_warning(self, sys._getframe())
-
     def get(self, ctype, tsp, vers) : print_warning(self, sys._getframe()); return None
-
 
 #------------------------------
 #------------------------------
@@ -226,12 +268,12 @@ def test_DCStore() :
     o.add_ctype(None)
     o.del_ctype(None)
     o.clear_ctypes()
-    o.save(None)
+    #o.save(None)
     o.load(None)
 
 #------------------------------
 
-def test_DCStore_2() :
+def test_DCStore_save() :
 
     import numpy as np
 
@@ -269,10 +311,8 @@ def test_DCStore_2() :
     ro1.add_par('par-2-in-DCRange', 'some string 3')
     ro1.add_par('par-3-in-DCRange', 3.3)
 
-    v1 = 'v0001';
-    v2 = 'v0002';
-    vo1 = ro2.add_version(v1)
-    vo2 = ro2.add_version(v2)
+    vo1 = ro2.add_version()
+    vo2 = ro2.add_version()
     vo1.add_history_record('Some record 1 to commenet DCVersion')
     vo1.add_history_record('Some record 2 to commenet DCVersion')
     vo1.add_history_record('Some record 3 to commenet DCVersion')
@@ -281,23 +321,53 @@ def test_DCStore_2() :
     vo1.add_par('par-2-in-DCVersion', 'some string 4')
     vo1.add_par('par-3-in-DCVersion', 4.4)
 
-    ro2.set_versdef(v2)
+    #ro2.set_vnum_def(vo2.vnum())
 
     vo1.set_tsprod(time())
-    vo1.add_calib(np.zeros((32,185,388)))
+    vo1.add_data(np.zeros((32,185,388)))
 
     vo2.set_tsprod(time())
-    vo2.add_calib(np.ones((32,185,388)))
+    vo2.add_data(np.ones((32,185,388)))
 
+    o.print_obj()
     o.save()
+
+#------------------------------
+
+def test_DCStore_load() :
+
+    import numpy as np
+
+    o = DCStore('cspad-654321.h5')
+    o.load()
+
+    print 50*'_','\ntest o.print()' 
+    o.print_obj()
+
+#------------------------------
+
+def test_DCStore_load_and_save() :
+
+    import numpy as np
+
+    o = DCStore('cspad-654321.h5')
+    o.load()
+
+    print 50*'_','\ntest o.print()' 
+    o.print_obj()
+
+    print 50*'_','\n test o.save(fname)' 
+    o.save('cspad-re-loaded.h5')
 
 #------------------------------
 
 def test() :
     log.setPrintBits(0377) 
-    if   len(sys.argv)==1  : print 'For test(s) use command: python %s <test-number=1-4>' % sys.argv[0]
+    if len(sys.argv)==1    : print 'For test(s) use command: python %s <test-number=1-4>' % sys.argv[0]
     elif(sys.argv[1]=='1') : test_DCStore()        
-    elif(sys.argv[1]=='2') : test_DCStore_2()        
+    elif(sys.argv[1]=='2') : test_DCStore_save()        
+    elif(sys.argv[1]=='3') : test_DCStore_load()        
+    elif(sys.argv[1]=='4') : test_DCStore_load_and_save()        
     else : print 'Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv
 
 #------------------------------

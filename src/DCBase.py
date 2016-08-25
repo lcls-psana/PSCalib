@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+####!/usr/bin/env python
 #-----------------------------------------------------------------------------
 # File and Version Information:
 #  $Id$
@@ -75,7 +75,7 @@ class DCBase(object) :
     o.load_history_file(path='history.txt', verb=False) # load history from the text file
 
     o.save_base(grp)                     # save everything in hdf5 group
-    o.load_base(grp)                     # load from hdf5 group
+    o.load_base(name, grp)               # load from hdf5 group
 
     # Time convertors
     # ===============
@@ -85,6 +85,7 @@ class DCBase(object) :
 
     """
     _tsfmt = '%Y-%m-%dT%H:%M:%S'
+    _offspace = '    '
 
     def __init__(self) :
         self._name = 'DCBase'
@@ -94,61 +95,84 @@ class DCBase(object) :
         log.debug(msg, self._name)
         self._grp_pars_name = '_parameters'
         self._grp_history_name = '_history'
+        self._tsec_old = None
+
 
     def __del__(self) :
         self._dicpars.clear()
+
 
     def set_pars_dict(self, d) :
         self._dicpars.clear()
         for k,v in d.items() :
             self._dicpars[k] = v
     
+
     def add_par(self, k, v) :
         self._dicpars[k] = v
+
 
     def del_par(self, k) :
         if k in self._dicpars.keys() : del self._dicpars[k]
         
+
     def clear_pars(self) :
         self._dicpars.clear()
+
 
     def pars_dict(self) :
         return self._dicpars if len(self._dicpars)>0 else None
 
+
     def par(self, k ) :
         return self._dicpars.get(k, None)
 
+
     def pars_text(self) :
         return ', '.join(['(%s : %s)' % (str(k), str(v)) for k,v in self._dicpars.items()])
+
 
     def set_history_dict(self, d) :
         self._dichist.clear()
         for k,v in d.items() :
             self._dichist[k] = v
 
+
     def add_history_record(self, rec, tsec=None) :
-        t_sec = time() if tsec is None else tsec
+        t_sec = tsec
+        if t_sec is None :
+            t_sec = time()
+            if t_sec == self._tsec_old : # make sure that all records have different keys
+                t_sec += 0.001
+                self._tsec_old = t_sec
         self._dichist[t_sec] = rec
-        sleep(1) # wait 1ms in order to get unique timestamp
+
+        #sleep(1) # wait 1ms in order to get unique timestamp
         #print 'add recod in time = %.6f' % t_sec
         #log.debug('Add recod: %s with time:  %.6f' % (rec, t_sec), self._name)
+
 
     def del_history_record(self, k) :
         if k in self._dichist.keys() : del self._dichist[k]
         
+
     def clear_history(self) :
-        self._dicpars.clear()
+        self._dichist.clear()
+
 
     def history_dict(self) :
         return self._dichist
 
+
     def history_record(self, tsec) :
         return self._dichist.get(tsec)
+
 
     def history_text(self, tsfmt=None) :
         """Returns (str) history records preceded by the time stamp as a text"""
         fmt = self._tsfmt if tsfmt is None else tsfmt
         return '\n'.join(['%s %s' % (self.tsec_to_tstr(ts), str(rec)) for ts,rec in sorted(self._dichist.items())])
+
 
     def save_history_file(self, path='history.txt', verb=False) :
         """Save history in the text file"""
@@ -158,6 +182,7 @@ class DCBase(object) :
         if verb : 
             #print 'History records are saved in the file: %s' % path
             log.debug('History records are saved in the file: %s' % path, self._name)
+
     
     def load_history_file(self, path='history.txt', verb=False) :
         """Load history from the text file"""
@@ -172,28 +197,71 @@ class DCBase(object) :
             #print 'Read history records from the file: %s' % path
             log.debug('Read history records from the file: %s' % path, self._name)
 
+
     def _save_pars_dict(self, grp) :
         """Saves _dicpars in the h5py group"""
+        if not self._dicpars : return # skip empty dictionary
+
         grpdic = grp.create_group(self._grp_pars_name)
         for k,v in self._dicpars.items() :
             ds = save_object_as_dset(grpdic, name=k, data=v)
 
+
     def _save_hystory_dict(self, grp) :
         """Saves _dichist in the h5py group"""
+        if not self._dichist : return # skip empty dictionary
+
         grpdic = grp.create_group(self._grp_history_name)
         for k,v in self._dichist.items() :
-            tstamp = str(self.tsec_to_tstr(k))
+            #tstamp = str(self.tsec_to_tstr(k))
+            tstamp = str('%.6f' % k)
             #print 'XXX:', tstamp, v
             ds = save_object_as_dset(grpdic, tstamp, data=v)
         #print 'In %s.save_hystory_dict(): group name=%s TBD: save parameters and hystory' % (self._name, grp.name)
 
+
     def save_base(self, grp) :
         self._save_pars_dict(grp)
         self._save_hystory_dict(grp)
-    
-    def load_base(self, grp) :
-        print 'In %s.load_base(): group name=%s TBD: load parameters and hystory' % (self._name, grp.name)
-    
+
+
+    def group_name(self, grp) : 
+        return grp.name.rsplit('/')[-1]
+
+
+    def is_base_group(self, name, grp) : 
+        return self.load_base(name, grp)
+
+
+    def load_base(self, name, grp) :
+        grpname = name # self.group_name()
+
+        if grpname == self._grp_pars_name :
+            self._load_pars_dict(grp)
+            return True
+        elif grpname == self._grp_history_name :
+            self._load_hystory_dict(grp)
+            return True
+        return False
+        
+
+    def _load_pars_dict(self, grp) :
+        log.debug('_load_pars_dict for group %s' % grp.name, self._name)
+        self.clear_pars()
+        for k,v in dict(grp).iteritems() :
+            log.debug('par: %s = %s' % (k, str(v[0])), self._name)
+            self.add_par(k, v[0])
+
+
+    def _load_hystory_dict(self, grp) :
+        log.debug('_load_hystory_dict for group %s' % grp.name, self._name)
+        self.clear_history()
+        for k,v in dict(grp).iteritems() :
+            tsec = float(k)
+            log.debug('t: %.6f  rec: %s' % (tsec, v[0]), self._name)
+            self.add_history_record(v[0], tsec) # tsec=self.tstr_to_tsec(k)
+
+
     def tsec_to_tstr(self, tsec, tsfmt=None) :
         """converts float tsec like 1471035078.908067 to the string 2016-08-12T13:51:18.908067"""
         fmt = self._tsfmt if tsfmt is None else tsfmt
@@ -201,11 +269,26 @@ class DCBase(object) :
         strfsec = ('%.6f' % (tsec-itsec)).lstrip('0')
         return '%s%s' % (strftime(fmt, localtime(itsec)), strfsec)
 
+
     def tstr_to_tsec(self, tstr, tsfmt=None) :
         """converts string tstr like 2016-08-12T13:51:18.908067 to the float time in seconds 1471035078.908067"""
+        #t0_sec=time()
         fmt = self._tsfmt if tsfmt is None else tsfmt
         ts, fsec = tstr.split('.')
         return mktime(strptime(ts, fmt)) + 1e-6*int(fsec)
+        #print 'tstr_to_tsec consumed time (sec) =', time()-t0_sec
+        #return t_sec
+
+
+    def print_base(self, offset='  ') :
+        """Print content of dictionaries of parameters and history"""
+        print '%s %s'             % (offset, self._name)
+
+        for k,v in self._dicpars.items() :
+            print '%s par: %20s  value: %s' % (offset,k,str(v))
+
+        for k,v in self._dichist.items() :
+            print '%s t [sec]: %.6f = %s  rec: %s' % (offset,k, self.tsec_to_tstr(k), str(v))
 
 #------------------------------
 

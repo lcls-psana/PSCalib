@@ -43,6 +43,10 @@ import socket
 import numpy as np
 from time import localtime, strftime
 
+import h5py
+
+from PSCalib.DCLogger import log
+
 #------------------------------
 #------------------------------
 
@@ -119,16 +123,16 @@ def save_object_as_dset(grp, name, shape=None, dtype=None, data=0) :
     if dtype is not None :
         return grp.create_dataset(name, shape=sh, dtype=dtype, data=data)
 
-    if(isinstance(data, str)) :
+    if isinstance(data, str) :
         return save_string_as_dset(grp, name, data)
 
-    if(isinstance(data, int)) :
+    if isinstance(data, int) :
         return grp.create_dataset(name, shape=sh, dtype='int', data=data)
 
-    if(isinstance(data, float)) :
+    if isinstance(data, float) :
         return grp.create_dataset(name, shape=sh, dtype='double', data=data)
 
-    log.warning("Can't save parameter: %s of %s in the h5py group: %s" % (name, str(type()), grp.name), 'DCUtils.save_object_as_dset')
+    log.warning("Can't save parameter: %s of %s in the h5py group: %s" % (name, str(dtype), grp.name), 'DCUtils.save_object_as_dset')
 
 #------------------------------
 #------------------------------
