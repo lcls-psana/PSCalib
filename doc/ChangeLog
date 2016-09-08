@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-02-89
+2016-09-08 Mikhail S. Dubrovin
+- change epix100a default common mode parameters from (4,6,30,10) to (4,7,30,10)
+
 Tag: V00-02-88
 2016-08-25 Mikhail S. Dubrovin
 - first version of the Detector Calibration (DC) project core
