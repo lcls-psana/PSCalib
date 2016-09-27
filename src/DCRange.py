@@ -201,7 +201,7 @@ class DCRange(DCRangeI) :
         ds1 = save_object_as_dset(grp, 'begin',   data=self.begin())    # dtype='double'
         ds2 = save_object_as_dset(grp, 'end',     data=self.end())      # dtype='double'
         ds3 = save_object_as_dset(grp, 'range',   data=self.range())    # dtype='str'
-        ds4 = save_object_as_dset(grp, 'versdef', data=self.vnum_def()) # dtype='int'
+        ds4 = save_object_as_dset(grp, 'versdef', data=self._vnum_def)  # dtype='int'
 
         msg = '=== save(), group %s object for %s' % (grp.name, self.range())
         log.debug(msg, self._name)

@@ -11,9 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-02
+2016-09-27 Mikhail S. Dubrovin
+- DCMethods, DCRange - fix saving/retrieving default version, add comment to delete_version
+
 Tag: V00-03-01
-2016-09-08 Mikhail S. Dubrovin
-- add/update DC*.py - the 1st full scale vorking version
+2016-09-26 Mikhail S. Dubrovin
+- add/update DC*.py - the 1st full scale working version
 	
 Tag: V00-02-89
 2016-09-08 Mikhail S. Dubrovin

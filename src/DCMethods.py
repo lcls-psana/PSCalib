@@ -143,6 +143,7 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
     #ct.add_par('par-1-in-DCType', 1)
 
     cr = ct.add_range(tsec_ev, end=None)
+    #cr.set_vnum_def(vnum=None)
 
     cv = cr.add_version(vnum=None, tsec_prod=time(), nda=nda, cmt=None)
     v = cr.vnum_last()
@@ -218,7 +219,7 @@ def get_constants(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
 
 #------------------------------
 
-def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False) :
+def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False) :
 
     """Delete specified version from calibration constants.
     
@@ -231,6 +232,7 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
     calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
     vers : int - calibration version
     """
+    metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
     if verb : print '  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
@@ -264,6 +266,11 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
         print 50*'_','\nDCRange.print_obj()' 
         cr.print_obj()
 
+    v = vers if vers is not None else cr.vnum_last()
+    c = cmt if cmt is not None else 'no-comments'
+    rec='%s vers=%d: %s' % (metname, v, c) 
+    cr.add_history_record(rec)
+
     vdeleted = cr.del_version(vnum=vers)
 
     if verb : log.setPrintBits(02) # 0377
@@ -287,26 +294,16 @@ def test_add_constants() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
 
-    psana = sp.fetch_psana()
     import numpy as np
 
-    #dsname  = 'exp=cxif5315:run=129'
-    dsname   = '/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc'
-    src      = 'Cspad.'
-    ctype    = gu.PIXEL_STATUS # gu.PIXEL_MASK, gu.PEDESTALS, etc.
-    vers     = None
-    calibdir = './calib'
-    nda      = np.zeros((32,185,388))
-
-    ds = psana.DataSource(dsname)
-    env=ds.env()
-    evt=ds.events().next()
+    vers = None
+    #nda  = np.zeros((32,185,388), dtype=np.float32)
+    nda  = np.zeros((1000,1000), dtype=np.float32)
     pred = None
     succ = None
-    cmt  = 'my comment is here'
-    verb = True # False
+    cmt  = 'my comment to add'
     
-    add_constants(nda, evt, env, src, ctype, calibdir, vers, pred, succ, cmt, verb)
+    add_constants(nda, gevt, genv, gsrc, gctype, gcalibdir, vers, pred, succ, cmt, gverb)
     print '%s: constants added nda.shape=%s' % (metname, nda.shape)
 
 #------------------------------
@@ -315,21 +312,8 @@ def test_get_constants() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
 
-    psana = sp.fetch_psana()
-
-    #dsname  = 'exp=cxif5315:run=129'
-    dsname   = '/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc'
-    src      = 'Cspad.'
-    ctype    = gu.PIXEL_STATUS # gu.PIXEL_MASK, gu.PEDESTALS, etc.
-    vers     = None # 2
-    calibdir = './calib'
-    verb     = True
-
-    ds = psana.DataSource(dsname)
-    env=ds.env()
-    evt=ds.events().next()
-
-    nda = get_constants(evt, env, src, ctype, calibdir, vers, verb)
+    vers = None
+    nda = get_constants(gevt, genv, gsrc, gctype, gcalibdir, vers, gverb)
 
     print '%s: retrieved nda.shape=%s' % (metname, str(nda.shape))
 
@@ -339,21 +323,9 @@ def test_delete_version() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
 
-    psana = sp.fetch_psana()
-
-    #dsname  = 'exp=cxif5315:run=129'
-    dsname   = '/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc'
-    src      = 'Cspad.'
-    ctype    = gu.PIXEL_STATUS # gu.PIXEL_MASK, gu.PEDESTALS, etc.
     vers     = None # for default
-    calibdir = './calib'
-    verb     = True
-
-    ds = psana.DataSource(dsname)
-    env=ds.env()
-    evt=ds.events().next()
-
-    vdeleted = delete_version(evt, env, src, ctype, calibdir, vers, verb)
+    cmt  = 'my comment to delete'
+    vdeleted = delete_version(gevt, genv, gsrc, gctype, gcalibdir, vers, cmt, gverb)
 
     print '%s: deleted version %s' % (metname, str(vdeleted))
 
@@ -372,8 +344,34 @@ def test_misc() :
 
 #------------------------------
 
+def set_parameters() :
+    global genv, gevt, gsrc, gctype, gcalibdir, gverb
+
+    #dsname  = 'exp=cxif5315:run=129'
+    #dsname   = '/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc'
+    #gsrc      = 'Cspad.'
+
+    #dsname = 'exp=mfxn8316:run=11'
+    dsname = '/reg/g/psdm/detector/data_test/types/0021-MfxEndstation.0-Epix100a.0.xtc'
+    gsrc      = ':Epix100a.'
+
+    gcalibdir = './calib'
+    gctype    = gu.PIXEL_STATUS # gu.PIXEL_MASK, gu.PEDESTALS, etc.
+    gverb     = True
+    #gverb     = False
+
+    psana = sp.fetch_psana()
+    ds = psana.DataSource(dsname)
+    genv=ds.env()
+    gevt=ds.events().next()
+
+#------------------------------
+
 def do_test() :
     import sys; global sys
+
+    set_parameters()
+
     #log.setPrintBits(0377)
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     print 50*'_', '\nTest %s:' % tname
