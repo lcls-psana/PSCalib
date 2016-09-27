@@ -1,10 +1,25 @@
 #-------------------------------------------------------------------------
 """DCLogger - logger for Detector Calibration Store.
 
+@see base class :py:class:`CalibManager.Logger`
+
+@see project modules
+    * :py:class:`PSCalib.DCStore`
+    * :py:class:`PSCalib.DCType`
+    * :py:class:`PSCalib.DCRange`
+    * :py:class:`PSCalib.DCVersion`
+    * :py:class:`PSCalib.DCBase`
+    * :py:class:`PSCalib.DCInterface`
+    * :py:class:`PSCalib.DCUtils`
+    * :py:class:`PSCalib.DCDetectorId`
+    * :py:class:`PSCalib.DCConfigParameters`
+    * :py:class:`PSCalib.DCFileName`
+    * :py:class:`PSCalib.DCLogger`
+    * :py:class:`PSCalib.DCMethods`
+    * :py:class:`PSCalib.DCEmail`
+
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
-
-@see :py:class:`CalibManager.Logger`
 
 @version $Id:DCLogger.py 11923 2016-05-17 21:14:33Z dubrovin@SLAC.STANFORD.EDU $
 

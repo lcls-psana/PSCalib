@@ -12,13 +12,59 @@ Usage::
     from PSCalib.DCBase import DCBase
 
     o = DCBase()
+    
+    # Dictionary of parameters
+    # ========================
+    
+    o.set_pars_dict(d)                   # set (dict) dictionary of pars.
+    o.add_par(k,v)                       # add (k,v) par to the dictionary of pars.
+    o.del_par(k)                         # delete par with key k. 
+    o.clear_pars()                       # delete all pars from the dictionary.
+    d = o.pars_dict()                    # returns (dict) dictionary of pars.
+    p = o.par(k)                         # returns par value for key k.
+    t = o.pars_text()                    # returns (str) text of all pars.
+    
+    # History records
+    # ===============
+    
+    o.set_history_dict(d)                # set (dict) dictionary of history from specified dictionary
+    o.add_history_record(rec, tsec=None) # add (str) record with (int) time[sec] to the history dictionary of (tsec:rec).
+                                         # If tsec is None - current time is used as a key.
+    o.del_history_record(tsec)           # Delete one history record from the dictionary by its time tsec.
+    o.clear_history()                    # Delete all history records from the dictionary.
+    d = o.history_dict()                 # returns (dict) history dictionary associated with current object .
+    r = o.history_record(tsec)           # returns (str) history record for specified time tsec.
+    t = o.history_text(tsfmt=None)       # returns (str) all history records preceded by the time stamp as a text.
+    
+    # Save and Load
+    # =============
+    
+    o.save_history_file(path='history.txt', verb=False) # save history in the text file
+    o.load_history_file(path='history.txt', verb=False) # load history from the text file
+    
+    o.save_base(grp)                     # save everything in hdf5 group
+    o.load_base(name, grp)               # load from hdf5 group
+    
+    # Time convertors
+    # ===============
+    
+    t_str = o.tsec_to_tstr(tsec, tsfmt=None) # converts (float) time[sec] to the (str) time stamp
+    t_sec = o.tstr_to_tsec(tstr, tsfmt=None) # converts (str) time stamp to (float) time[sec]
 
-@see classes 
-\n   :py:class:`PSCalib.DCStore`,
-\n   :py:class:`PSCalib.DCType`,
-\n   :py:class:`PSCalib.DCRange`,
-\n   :py:class:`PSCalib.DCVersion`,
-\n   :py:class:`PSCalib.DCBase`
+@see project modules
+    * :py:class:`PSCalib.DCStore`
+    * :py:class:`PSCalib.DCType`
+    * :py:class:`PSCalib.DCRange`
+    * :py:class:`PSCalib.DCVersion`
+    * :py:class:`PSCalib.DCBase`
+    * :py:class:`PSCalib.DCInterface`
+    * :py:class:`PSCalib.DCUtils`
+    * :py:class:`PSCalib.DCDetectorId`
+    * :py:class:`PSCalib.DCConfigParameters`
+    * :py:class:`PSCalib.DCFileName`
+    * :py:class:`PSCalib.DCLogger`
+    * :py:class:`PSCalib.DCMethods`
+    * :py:class:`PSCalib.DCEmail`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
@@ -35,59 +81,23 @@ __version__ = "$Revision$"
 from time import time, sleep, localtime, gmtime, strftime, strptime, mktime
 from math import floor
 from PSCalib.DCLogger import log
-from PSCalib.DCUtils import save_string_as_dset, save_object_as_dset
+from PSCalib.DCUtils import get_subgroup, save_object_as_dset
 
 #------------------------------
 
 #class DCBase() :
 class DCBase(object) :
-    """Base class for the Detector Calibration (DC) project
+    """Base class for the Detector Calibration (DC) project.
 
-    o = DCBase()
-
-    # Dictionary of parameters
-    # ========================
-
-    o.set_pars_dict(d)                   # set (dict) dictionary of pars.
-    o.add_par(k,v)                       # add (k,v) par to the dictionary of pars.
-    o.del_par(k)                         # delete par with key k. 
-    o.clear_pars()                       # delete all pars from the dictionary.
-    d = o.pars_dict()                    # returns (dict) dictionary of pars.
-    p = o.par(k)                         # returns par value for key k.
-    t = o.pars_text()                    # returns (str) text of all pars.
-
-    # History records
-    # ===============
-
-    o.set_history_dict(d)                # set (dict) dictionary of history from specified dictionary
-    o.add_history_record(rec, tsec=None) # add (str) record with (int) time[sec] to the history dictionary of (tsec:rec).
-                                         # If tsec is None - current time is used as a key.
-    o.del_history_record(tsec)           # Delete one history record from the dictionary by its time tsec.
-    o.clear_history()                    # Delete all history records from the dictionary.
-    d = o.history_dict()                 # returns (dict) history dictionary associated with current object .
-    r = o.history_record(tsec)           # returns (str) history record for specified time tsec.
-    t = o.history_text(tsfmt=None)       # returns (str) all history records preceded by the time stamp as a text.
-
-    # Save and Load
-    # =============
-
-    o.save_history_file(path='history.txt', verb=False) # save history in the text file
-    o.load_history_file(path='history.txt', verb=False) # load history from the text file
-
-    o.save_base(grp)                     # save everything in hdf5 group
-    o.load_base(name, grp)               # load from hdf5 group
-
-    # Time convertors
-    # ===============
-
-    t_str = o.tsec_to_tstr(tsec, tsfmt=None) # converts (float) time[sec] to the (str) time stamp
-    t_sec = o.tstr_to_tsec(tstr, tsfmt=None) # converts (str) time stamp to (float) time[sec]
-
+       Parameters
+       
+       cmt : str - string of comment associated with derived class object.
     """
     _tsfmt = '%Y-%m-%dT%H:%M:%S'
     _offspace = '    '
 
-    def __init__(self) :
+
+    def __init__(self, cmt=None) :
         self._name = 'DCBase'
         self._dicpars = {}
         self._dichist = {}
@@ -96,6 +106,7 @@ class DCBase(object) :
         self._grp_pars_name = '_parameters'
         self._grp_history_name = '_history'
         self._tsec_old = None
+        if cmt is not None : self.add_history_record(cmt)
 
 
     def __del__(self) :
@@ -202,7 +213,8 @@ class DCBase(object) :
         """Saves _dicpars in the h5py group"""
         if not self._dicpars : return # skip empty dictionary
 
-        grpdic = grp.create_group(self._grp_pars_name)
+        #grpdic = grp.create_group(self._grp_pars_name)
+        grpdic = get_subgroup(grp, self._grp_pars_name)
         for k,v in self._dicpars.items() :
             ds = save_object_as_dset(grpdic, name=k, data=v)
 
@@ -211,7 +223,8 @@ class DCBase(object) :
         """Saves _dichist in the h5py group"""
         if not self._dichist : return # skip empty dictionary
 
-        grpdic = grp.create_group(self._grp_history_name)
+        #grpdic = grp.create_group(self._grp_history_name)
+        grpdic = get_subgroup(grp, self._grp_history_name)
         for k,v in self._dichist.items() :
             #tstamp = str(self.tsec_to_tstr(k))
             tstamp = str('%.6f' % k)
@@ -258,15 +271,15 @@ class DCBase(object) :
         self.clear_history()
         for k,v in dict(grp).iteritems() :
             tsec = float(k)
-            log.debug('t: %.6f  rec: %s' % (tsec, v[0]), self._name)
+            log.debug('t: %.6f rec: %s' % (tsec, v[0]), self._name)
             self.add_history_record(v[0], tsec) # tsec=self.tstr_to_tsec(k)
 
 
-    def tsec_to_tstr(self, tsec, tsfmt=None) :
+    def tsec_to_tstr(self, tsec, tsfmt=None, addfsec=True) :
         """converts float tsec like 1471035078.908067 to the string 2016-08-12T13:51:18.908067"""
         fmt = self._tsfmt if tsfmt is None else tsfmt
         itsec = floor(tsec)
-        strfsec = ('%.6f' % (tsec-itsec)).lstrip('0')
+        strfsec = ('%.6f' % (tsec-itsec)).lstrip('0') if addfsec else ''
         return '%s%s' % (strftime(fmt, localtime(itsec)), strfsec)
 
 
@@ -285,10 +298,11 @@ class DCBase(object) :
         print '%s %s'             % (offset, self._name)
 
         for k,v in self._dicpars.items() :
-            print '%s par: %20s  value: %s' % (offset,k,str(v))
+            print '%s par: %20s  value: %s' % (offset, k, str(v))
 
-        for k,v in self._dichist.items() :
-            print '%s t [sec]: %.6f = %s  rec: %s' % (offset,k, self.tsec_to_tstr(k), str(v))
+        for k,v in sorted(self._dichist.items()) :
+            #print '%s t[sec]: %d: %s rec: %s' % (offset, floor(k), self.tsec_to_tstr(k), str(v))
+            print '%s %s cmt: %s' % (offset, self.tsec_to_tstr(k, addfsec=False), str(v))
 
 #------------------------------
 

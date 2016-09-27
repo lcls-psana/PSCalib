@@ -12,19 +12,45 @@ Usage::
     from PSCalib.DCStore import DCStore
 
     # Initialization
-    calibdir = env.calibDir()  # or '/reg/d/psdm/INS/experiment/calib'
-    rnum = evt.run()
+    o = DCStore(fpath)
 
-    cs = DCStore(path)
+    # Methods
+    tscfile     = o.tscfile()               # (double) time stamp of the file creation
+    dettype     = o.dettype()               # (str) detector type
+    detid       = o.detid()                 # (str) detector id
+    detname     = o.detname()               # (str) detector name of self object
+    predecessor = o.predecessor()           # (str) detname of predecessor or None
+    successor   = o.successor()             # (str) detname of successor or None
+    ctypes      = o.ctypes()                # (list) calibration types in the file
+    cto         = o.ctypeobj(ctype)         # (DCType ~ h5py.Group) calibration type object
+    o.set_tscfile(tsec)                     # set (double) time stamp of the file creation 
+    o.set_dettype(dettype)                  # set (str) detector type
+    o.set_detid(detid)                      # set (str) detector id
+    o.set_detname(detname)                  # set (str) detector name of self object
+    o.set_predecessor(pred)                 # set (str) detname of predecessor or None
+    o.set_successor(succ)                   # set (str) detname of successor or None
+    o.add_ctype(ctype)                      # add (str) calibration type to the DCStore object
+    o.del_ctype(ctype)                      # delete ctype (str) from the DCStore object
+    o.clear_ctype()                         # clear all ctypes (str) from the DCStore object dictionary
 
-    # Access methods
-    nda = cs.get(PEDESTALS, ts, vers=None)
+    o.save(group)                           # saves object content under h5py.group in the hdf5 file.
+    o.load(group)                           # loads object content from the hdf5 file. 
+    o.print_obj()                           # print info about this object and its children
 
-@see implementation in :py:class:`PSCalib.DCStore`,
-                       :py:class:`PSCalib.DCType`,
-                       :py:class:`PSCalib.DCRange`,
-                       :py:class:`PSCalib.DCVersion`,
-                       :py:class:`PSCalib.DCBase`
+@see project modules
+    * :py:class:`PSCalib.DCStore`
+    * :py:class:`PSCalib.DCType`
+    * :py:class:`PSCalib.DCRange`
+    * :py:class:`PSCalib.DCVersion`
+    * :py:class:`PSCalib.DCBase`
+    * :py:class:`PSCalib.DCInterface`
+    * :py:class:`PSCalib.DCUtils`
+    * :py:class:`PSCalib.DCDetectorId`
+    * :py:class:`PSCalib.DCConfigParameters`
+    * :py:class:`PSCalib.DCFileName`
+    * :py:class:`PSCalib.DCLogger`
+    * :py:class:`PSCalib.DCMethods`
+    * :py:class:`PSCalib.DCEmail`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
@@ -41,7 +67,6 @@ __version__ = "$Revision$"
 import os
 import sys
 from time import time
-import h5py
 
 #import math
 #import numpy as np
@@ -49,7 +74,7 @@ import h5py
 from PSCalib.DCInterface import DCStoreI
 from PSCalib.DCType import DCType
 from PSCalib.DCLogger import log
-from PSCalib.DCUtils import save_string_as_dset, save_object_as_dset
+from PSCalib.DCUtils import sp, save_object_as_dset, evt_time
 
 #------------------------------
 
@@ -68,43 +93,19 @@ class DCStore(DCStoreI) :
     
     """Class for the Detector Calibration (DC) project
 
-    cs = DCStore(fpath)
-
-    tscfile     = cs.tscfile()               # (double) time stamp of the file creation
-    dettype     = cs.dettype()               # (str) detector type
-    detid       = cs.detid()                 # (str) detector id
-    detname     = cs.detname()               # (str) detector name of self object
-    predecessor = cs.predecessor()           # (str) detname of predecessor or None
-    successor   = cs.successor()             # (str) detname of successor or None
-    ctypes      = cs.ctypes()                # (list) calibration types in the file
-    cto         = cs.ctypeobj(ctype)         # (DCType ~ h5py.Group) calibration type object
-
-    nda         = cs.get(ctype, tsp, vers)
-
-    cs.set_tscfile(tsec)                     # set (double) time stamp of the file creation 
-    cs.set_dettype(dettype)                  # set (str) detector type
-    cs.set_detid(detid)                      # set (str) detector id
-    cs.set_detname(detname)                  # set (str) detector name of self object
-    cs.set_predecessor(pred)                 # set (str) detname of predecessor or None
-    cs.set_successor(succ)                   # set (str) detname of successor or None
-    cs.add_ctype(ctype)                      # add (str) calibration type to the DCStore object
-    cs.del_ctype(ctype)                      # delete ctype (str) from the DCStore object
-    cs.clear_ctype()                         # clear all ctypes (str) from the DCStore object dictionary
-
-    cs.save(group)                           # saves object content under h5py.group in the hdf5 file.
-    cs.load(group)                           # loads object content from the hdf5 file. 
+    Parameters
+    
+    path : str - path to the hdf5 file with calibration info
+    cmt  : str - comment
     """
 
 #------------------------------
 
-    def __init__(self, path) :
-        DCStoreI.__init__(self, path)
+    def __init__(self, path, cmt=None) :
+        DCStoreI.__init__(self, path, cmt)
         self._name = self.__class__.__name__
         self._set_file_name(path)
         self._tscfile = None
-        self._dettype = None
-        self._detid = None
-        #self._detname = None
         self._predecessor = None
         self._successor = None
         self._dicctypes = {}
@@ -114,6 +115,12 @@ class DCStore(DCStoreI) :
 
     def _set_file_name(self, path) :
         self._fpath = path if isinstance(path, str) else None
+        if self._fpath is None : return
+        root, ext = os.path.splitext(path)
+        detname = os.path.basename(root)
+        dettype, detid = detname.split('-',1)
+        self.set_dettype(dettype)
+        self.set_detid(detid)
 
 #------------------------------
 
@@ -147,14 +154,16 @@ class DCStore(DCStoreI) :
             self._dettype, self._detid = None, None
             return
 
-        fields = detname.split('-')
-        self._dettype, self._detid = fields[0], int(fields[1])
+        fields = detname.split('-',1)
+        self._dettype, self._detid = fields[0], fields[1]
 
-    def set_predecessor(self, pred) : self._predecessor = pred
+    def set_predecessor(self, pred=None) : self._predecessor = pred 
 
-    def set_successor(self, succ)   : self._successor = succ
+    def set_successor(self, succ=None)   : self._successor = succ
 
     def add_ctype(self, ctype)      :
+        if ctype in self._dicctypes.keys() :
+            return self._dicctypes[ctype]
         o = self._dicctypes[ctype] = DCType(ctype)
         return o
 
@@ -169,8 +178,8 @@ class DCStore(DCStoreI) :
             log.error(msg, self.__class__.__name__)
             raise ValueError(msg)
         
-        with h5py.File(self._fpath, 'w') as hf :
-            
+        with sp.File(self._fpath, 'w') as hf :
+
             msg = '= save(), group %s object for %s' % (hf.name, self.detname())
             log.debug(msg, self._name)
 
@@ -194,7 +203,7 @@ class DCStore(DCStoreI) :
 
     def load(self, path=None) : 
 
-        with h5py.File(self._fpath, 'r') as grp :
+        with sp.File(self._fpath, 'r') as grp :
             
             #msg = 'Load data from file %s and fill %s object for group "%s"' % (self._fpath, self._name, grp.name)
             #log.info(msg, self._name)
@@ -204,17 +213,17 @@ class DCStore(DCStoreI) :
                 #subgrp = v
                 #print '    ', k # , "   ", subg.name #, val, subg.len(), type(subg),
 
-                if isinstance(v, h5py.Dataset) :                    
+                if isinstance(v, sp.dataset_t) :                    
                     log.debug('load dataset "%s"' % k, self._name)
                     if   k == 'dettype'     : self.set_dettype(v[0])
-                    elif k == 'detname'     : self.set_detname(v[0])
                     elif k == 'detid'       : self.set_detid(v[0])
+                    elif k == 'detname'     : self.set_detname(v[0])
                     elif k == 'tscfile'     : self.set_tscfile(v[0])
                     elif k == 'predecessor' : self.set_predecessor(v[0])
                     elif k == 'successor'   : self.set_successor(v[0])
                     else : log.warning('hdf file has unrecognized dataset "%s"' % k, self._name)
 
-                elif isinstance(v, h5py.Group) :
+                elif isinstance(v, sp.group_t) :
                     if self.is_base_group(k,v) : continue
                     log.debug('load group "%s"' % k, self._name)                    
                     o = self.add_ctype(k)
@@ -224,12 +233,18 @@ class DCStore(DCStoreI) :
     def print_obj(self) :
         offset = 1 * self._offspace
         self.print_base(offset)
+        tsec = self.tscfile()
         print '%s dettype     %s' % (offset, self.dettype())
-        print '%s detname     %s' % (offset, self.detname())
         print '%s detid       %s' % (offset, self.detid())
-        print '%s tscfile     %f' % (offset, self.tscfile())
+        print '%s detname     %s' % (offset, self.detname())
+        print '%s tscfile     %s' % (offset, ('%.9f: %s' % (tsec, self.tsec_to_tstr(tsec)))\
+                                     if tsec is not None else str(tsec))
         print '%s predecessor %s' % (offset, self.predecessor())
         print '%s successor   %s' % (offset, self.successor())
+        print '%s ctypes'         % (offset)
+
+        print '%s N types     %s' % (offset, len(self.ctypes()))
+        print '%s types       %s' % (offset, str(self.ctypes().keys()))
 
         for k,v in self.ctypes().iteritems() :
         #    #msg='Add type %s as object %s' % (k, v.ctype())
@@ -238,7 +253,7 @@ class DCStore(DCStoreI) :
 
 #---- TO-DO
 
-    def get(self, ctype, tsp, vers) : print_warning(self, sys._getframe()); return None
+#    def get(self, ctype, tsp, vers) : print_warning(self, sys._getframe()); return None
 
 #------------------------------
 #------------------------------

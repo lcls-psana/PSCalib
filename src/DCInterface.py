@@ -6,27 +6,20 @@
 """
 :py:class:`PSCalib.DCInterface` - abstract interface for the Detector Calibration (DC) project.
 
-Usage::
-
-    # Import
-    from PSCalib.DCInterface import DCStore
-
-    # Initialization
-    calibdir = env.calibDir()  # or '/reg/d/psdm/<INS>/<experiment>/calib'
-    rnum = evt.run()
-
-    fname = calibdir + '/cspad/cspad-123456.h5
-
-    cs = DCStore(fname)
-
-    # Access methods
-    nda = cs.get(PEDESTALS, ts, vers=None)
-
-@see implementation in :py:class:`PSCalib.DCStore`,
-                       :py:class:`PSCalib.DCType`,
-                       :py:class:`PSCalib.DCRange`,
-                       :py:class:`PSCalib.DCVersion`,
-                       :py:class:`PSCalib.DCBase`
+@see project modules
+    * :py:class:`PSCalib.DCStore`
+    * :py:class:`PSCalib.DCType`
+    * :py:class:`PSCalib.DCRange`
+    * :py:class:`PSCalib.DCVersion`
+    * :py:class:`PSCalib.DCBase`
+    * :py:class:`PSCalib.DCInterface`
+    * :py:class:`PSCalib.DCUtils`
+    * :py:class:`PSCalib.DCDetectorId`
+    * :py:class:`PSCalib.DCConfigParameters`
+    * :py:class:`PSCalib.DCFileName`
+    * :py:class:`PSCalib.DCLogger`
+    * :py:class:`PSCalib.DCMethods`
+    * :py:class:`PSCalib.DCEmail`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
@@ -41,9 +34,6 @@ __version__ = "$Revision$"
 #---------------------------------
 
 import sys
-#import math
-#import numpy as np
-#from time import time
 from PSCalib.DCBase import DCBase
 
 #------------------------------
@@ -84,8 +74,8 @@ class DCStoreI(DCBase) :
        cs.load(path)                            # load content of the file in DCStore object
     """
 
-    def __init__(self, fname) :
-        DCBase.__init__(self)
+    def __init__(self, fname, cmt=None) :
+        DCBase.__init__(self, cmt)
         #super(DCStoreI, self).__init__()
         self._name = self.__class__.__name__
 
@@ -121,12 +111,14 @@ class DCTypeI(DCBase) :
        ctype       = cto.ctype()                # (str) of ctype name
        ranges      = cto.ranges()               # (list) of time ranges for ctype
        ro          = cto.rangeobj(begin, end)   # (DCRange ~ h5py.Group) time stamp validity range object
+       ro          = cto.range_for_tsec(tsec)   # (DCRange) range object for time stamp in (double) sec
+       ro          = cto.range_for_evt(evt)     # (DCRange) range object for psana.Evt object 
        cto.add_range(tsr)                       # add (str) of time ranges for ctype
        cto.del_range(tsr)                       # delete range from the DCType object
     """
  
-    def __init__(self, ctype) :
-        DCBase.__init__(self)
+    def __init__(self, ctype, cmt=None) :
+        DCBase.__init__(self, cmt)
         self._name = self.__class__.__name__
 
     def ctype(self)                : print_warning(self, sys._getframe()); return None
@@ -135,6 +127,8 @@ class DCTypeI(DCBase) :
     def add_range(self, begin, end): print_warning(self, sys._getframe()); return None
     def del_range(self, begin, end): print_warning(self, sys._getframe())
     def clear_ranges(self)         : print_warning(self, sys._getframe())
+    def range_for_tsec(self, tsec) : print_warning(self, sys._getframe())
+    def range_for_evt(self, evt)   : print_warning(self, sys._getframe())
     def save(self, group)          : print_warning(self, sys._getframe())
     def load(self, path)           : print_warning(self, sys._getframe())
     def print_obj(self)            : print_warning(self, sys._getframe())
@@ -151,6 +145,8 @@ class DCRangeI(DCBase) :
        dico        = o.versions()            # (list of uint) versions of calibrations
        vnum        = o.vnum_def()            # (DCVersion ~ h5py.Group) reference to the default version in the time-range object
        vo          = o.version(vers)         # (DCVersion ~ h5py.Group) specified version in the time-range object
+       bool        = o.tsec_in_range(tsec)   # (bool) True/False if tsec is/not in the validity range
+       bool        = o.evt_in_range(evt)     # (bool) True/False if evt is/not in the validity range
        o.set_begin(tsbegin)                  # set (int) time stamp beginning validity range
        o.set_end(tsend)                      # set (int) time stamp ending validity range
        o.add_version(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
@@ -158,8 +154,8 @@ class DCRangeI(DCBase) :
        o.del_version(vers)                   # delete version 
     """
 
-    def __init__(self, begin, end) :
-        DCBase.__init__(self)
+    def __init__(self, begin, end, cmt=None) :
+        DCBase.__init__(self, cmt)
         self._name = self.__class__.__name__
 
     def begin(self)                : print_warning(self, sys._getframe()); return None
@@ -174,6 +170,8 @@ class DCRangeI(DCBase) :
     def set_vnum_def(self, vnum)   : print_warning(self, sys._getframe())
     def del_version(self, vnum)    : print_warning(self, sys._getframe())
     def clear_versions(self)       : print_warning(self, sys._getframe())
+    def tsec_in_range(self, tsec)  : print_warning(self, sys._getframe()); return False
+    def evt_in_range(self, evt)    : print_warning(self, sys._getframe()); return False
     def save(self, group)          : print_warning(self, sys._getframe())
     def load(self, group)          : print_warning(self, sys._getframe())
     def print_obj(self)            : print_warning(self, sys._getframe())
@@ -196,8 +194,8 @@ class DCVersionI(DCBase) :
        o.load(group)               # loads object content from the h5py.group of hdf5 file. 
     """
 
-    def __init__(self, vnum, tsprod=None, arr=None) :
-        DCBase.__init__(self)
+    def __init__(self, vnum, tsprod=None, arr=None, cmt=None) :
+        DCBase.__init__(self, cmt)
         self._name = self.__class__.__name__
 
     def set_vnum(self, vnum)       : print_warning(self, sys._getframe())

@@ -3,7 +3,7 @@
 #  $Id$
 #
 # Description:
-#  Module CalibParsStore...
+#  Module GlobalUtils...
 #
 #------------------------------------------------------------------------
 
@@ -514,6 +514,32 @@ def save_textfile(text, path, mode='w') :
     f.close() 
 
 #------------------------------
+
+def calib_dir(env) :
+    cdir = env.calibDir()
+    #if cdir == '/reg/d/psdm///calib' :
+    #    return None
+    if os.path.exists(cdir) :
+        return cdir
+
+#------------------------------
+
+def exp_name(env) :
+    exp = env.experiment()
+    if exp=='' : return None
+    return exp
+
+#------------------------------
+
+def alias_for_src_name(env) :
+    ckeys = env.configStore().keys()
+    srcs  = [k.src()   for k in ckeys]
+    alias = [k.alias() for k in ckeys]
+    d = dict(zip(srcs, alias))
+    for s,a in d.items() : print 'src: %40s   alias: %s' % (s, a)
+    #print keysalias
+
+#------------------------------
 #------------------------------
 #------------------------------
 #------------------------------
@@ -601,13 +627,20 @@ def test_mask_edges_3d(mrows=1, mcols=1) :
     gr.show(mode=None)
     
 #------------------------------
-#------------------------------
+
+#def src_name_from_alias(env, alias='') :
+#    amap = env.aliasMap()
+#    for s in amap.srcs() :
+#        str_s = str(s) # 'MfxEndstation.0:Rayonix.0'
+#        print s, amap.src(str_s), ' alias ="%s"' % amap.alias(amap.src(str_s))
+#
+#    #psasrc = amap.src(str_src)
+#    #source  = src if amap.alias(psasrc) == '' else amap.src(str_src)
+
 #------------------------------
 #------------------------------
 
 def do_test() :
-
-    import sys
 
     print 'get_enviroment(USER) : %s' % get_enviroment()
     print 'get_login()          : %s' % get_login()

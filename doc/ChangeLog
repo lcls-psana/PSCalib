@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-01
+2016-09-08 Mikhail S. Dubrovin
+- add/update DC*.py - the 1st full scale vorking version
+	
 Tag: V00-02-89
 2016-09-08 Mikhail S. Dubrovin
 - change epix100a default common mode parameters from (4,6,30,10) to (4,7,30,10)

@@ -12,16 +12,37 @@ Usage::
     from PSCalib.DCVersion import DCVersion
 
     # Initialization
-    vo = DCVersion(version=None)
+    o = DCVersion(vnum, tsprod=None, arr=None, cmt=None)
 
-    # Access methods
-    ...
+    # Methods
+    o.set_vnum(vnum)            # sets (int) version 
+    o.set_tsprod(tsprod)        # sets (double) time stamp of the version production
+    o.add_data(nda)             # sets (np.array) calibration array
+    vnum   = o.vnum()           # returns (int) version number
+    s_vnum = o.str_vnum()       # returns (str) version number
+    tsvers = o.tsprod()         # returns (double) time stamp of the version production
+    nda    = o.data()           # returns (np.array) calibration array
+    o.save(group)               # saves object content under h5py.group in the hdf5 file. 
+    o.load(group)               # loads object content from the h5py.group of hdf5 file. 
+    o.print_obj()               # print info about this object.
 
-@see implementation in :py:class:`PSCalib.DCStore`,
-                       :py:class:`PSCalib.DCType`,
-                       :py:class:`PSCalib.DCRange`,
-                       :py:class:`PSCalib.DCVersion`,
-                       :py:class:`PSCalib.DCBase`
+    # and all methods inherited from PSCalib.DCBase
+
+
+@see project modules
+    * :py:class:`PSCalib.DCStore`
+    * :py:class:`PSCalib.DCType`
+    * :py:class:`PSCalib.DCRange`
+    * :py:class:`PSCalib.DCVersion`
+    * :py:class:`PSCalib.DCBase`
+    * :py:class:`PSCalib.DCInterface`
+    * :py:class:`PSCalib.DCUtils`
+    * :py:class:`PSCalib.DCDetectorId`
+    * :py:class:`PSCalib.DCConfigParameters`
+    * :py:class:`PSCalib.DCFileName`
+    * :py:class:`PSCalib.DCLogger`
+    * :py:class:`PSCalib.DCMethods`
+    * :py:class:`PSCalib.DCEmail`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
@@ -37,40 +58,31 @@ __version__ = "$Revision$"
 
 import os
 import sys
-#import math
 import numpy as np
-#from time import time
-#from PSCalib.DCConfigParameters import cp
+from math import floor
 from PSCalib.DCInterface import DCVersionI
 from PSCalib.DCLogger import log
-from PSCalib.DCUtils import save_object_as_dset, h5py
+from PSCalib.DCUtils import sp, get_subgroup, save_object_as_dset
 
 #------------------------------
 
 def version_int_to_str(vnum) : return ('v%04d' % vnum) if vnum is not None else 'None'
 
-def version_str_to_int(vstr) : return int(vstr.lstrip('v').lstrip('0'))
-    
+def version_str_to_int(vstr) : return int(vstr.lstrip('v').lstrip('0'))    
 
 class DCVersion(DCVersionI) :
 
     """Class for the Detector Calibration (DC) project
 
-       o = DCVersionI(vnum, tsprod=None, arr=None)
-
-       o.set_vnum(vnum)            # sets (int) version 
-       o.set_tsprod(tsprod)        # sets (double) time stamp of the version production
-       o.add_data(nda)             # sets (np.array) calibration array
-       vnum   = o.vnum()           # returns (int) version number
-       s_vnum = o.str_vnum()       # returns (str) version number
-       tsvers = o.tsprod()         # returns (double) time stamp of the version production
-       nda    = o.data()           # returns (np.array) calibration array
-       o.save(group)               # saves object content under h5py.group in the hdf5 file. 
-       o.load(group)               # loads object content from the h5py.group of hdf5 file. 
+    Parameters
+    \n vnum : int - version number
+    \n tsprod : double - time in sec
+    \n arr : numpy.array - array of constants to save
+    \n cmt : str - comment
     """
 
-    def __init__(self, vnum, tsprod=None, arr=None) : # int, double, np.array
-        DCVersionI.__init__(self, vnum, tsprod, arr)
+    def __init__(self, vnum, tsprod=None, arr=None, cmt=None) : # int, double, np.array
+        DCVersionI.__init__(self, vnum, tsprod, arr, cmt)
         self._name = self.__class__.__name__
 
         self.set_vnum(vnum)
@@ -80,9 +92,9 @@ class DCVersion(DCVersionI) :
 
     def set_vnum(self, vnum)       : self._vnum = vnum     # int
 
-    def set_tsprod(self, tsprod)   : self._tsprod = tsprod # double
+    def set_tsprod(self, tsprod)   : self._tsprod = tsprod # double or None
 
-    def add_data(self, nda)        : self._nda = nda       # np.array
+    def add_data(self, nda)        : self._nda = nda       # np.array or None
 
     def vnum(self)                 : return self._vnum     # int
 
@@ -93,7 +105,8 @@ class DCVersion(DCVersionI) :
     def data(self)                 : return self._nda      # np.array
 
     def save(self, group) :
-        grp = group.create_group(self.str_vnum())                       # (str)
+        #grp = group.create_group(self.str_vnum())                       # (str)
+        grp = get_subgroup(group, self.str_vnum())                       # (str)
         ds1 = save_object_as_dset(grp, 'version', data=self.vnum())     # dtype='int'
         ds2 = save_object_as_dset(grp, 'tsprod',  data=self.tsprod())   # dtype='double'
         ds3 = save_object_as_dset(grp, 'data',    data=self.data())     # dtype='np.array'
@@ -112,14 +125,14 @@ class DCVersion(DCVersionI) :
             #subgrp = v
             #print '    ', k , v
 
-            if isinstance(v, h5py.Dataset) :                    
+            if isinstance(v, sp.dataset_t) :                    
                 log.debug('load dataset "%s"' % k, self._name)
                 if   k == 'version': self.set_vnum(v[0])
                 elif k == 'tsprod' : self.set_tsprod(v[0])
                 elif k == 'data'   : self.add_data(v.value)
                 else : log.warning('group "%s" has unrecognized dataset "%s"' % (grp.name, k), self._name)
 
-            elif isinstance(v, h5py.Group) :
+            elif isinstance(v, sp.group_t) :
                 if self.is_base_group(k,v) : continue
             #    print 'XXX: ', self._name, k,v
             #    log.debug('load group "%s"' % k, self._name)
@@ -131,7 +144,10 @@ class DCVersion(DCVersionI) :
         offset = 4 * self._offspace
         self.print_base(offset)
         print '%s version    %s' % (offset, self.vnum())
-        print '%s tsprod     %s' % (offset, self.tsprod())
+
+        tsec = self.tsprod()
+        msg = '%d: %s' % (floor(tsec), self.tsec_to_tstr(tsec)) if tsec is not None else 'None'
+        print '%s tsprod     %s' % (offset, msg)
 
         data = self.data()
         if isinstance(data, np.ndarray) :
@@ -144,7 +160,7 @@ class DCVersion(DCVersionI) :
 
 #---- TO-DO
 
-    def get(self, p1, p2, p3)  : return None
+#    def get(self, p1, p2, p3)  : return None
 
 #------------------------------
 

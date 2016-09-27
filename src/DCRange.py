@@ -12,16 +12,42 @@ Usage::
     from PSCalib.DCRange import DCRange
 
     # Initialization
-    ro = DCRange(tsbegin,tsend=None)
+    o = DCRange(begin, end=None, cmt=None)
 
-    # Access methods
-    ...
+    # Methods
+    str_range   = o.range()               # (str) of the time stamp validity range
+    t_sec       = o.begin()               # (double) time stamp beginning validity range
+    t_sec       = o.end()                 # (double) time stamp ending validity range or (str) 'end'
+    dico        = o.versions()            # (list of uint) versions of calibrations
+    v           = o.vnum_def()            # returns default version number
+    v           = o.vnum_last()           # returns last version number 
+    vo          = o.version(vnum=None)    # returns version object for specified version
+    ts_in_range = o.tsec_in_range(tsec)   # (bool) True/False if tsec is/not in the validity range
+    evt_in_range= o.evt_in_range(evt)     # (bool) True/False if evt is/not in the validity range
+    o.set_begin(tsbegin)                  # set (int) time stamp beginning validity range
+    o.set_end(tsend)                      # set (int) time stamp ending validity range
+    o.add_version(vnum=None, tsec_prod=None, nda=None, cmt=None) # add object for new version of calibration data
+    o.set_vnum_def(vnum=None)             # set default version number, if available. vnum=None - use last available.
+    vd = o.del_version(vnum=None)         # delete version, returns deleted version number or None if nothing was deleted
 
-@see implementation in :py:class:`PSCalib.DCStore`,
-                       :py:class:`PSCalib.DCType`,
-                       :py:class:`PSCalib.DCRange`,
-                       :py:class:`PSCalib.DCVersion`,
-                       :py:class:`PSCalib.DCBase`
+    o.save(group)                         # saves object content under h5py.group in the hdf5 file. 
+    o.load(group)                         # loads object content from the hdf5 file. 
+    o.print_obj()                         # print info about this object and its children
+
+@see project modules
+    * :py:class:`PSCalib.DCStore`
+    * :py:class:`PSCalib.DCType`
+    * :py:class:`PSCalib.DCRange`
+    * :py:class:`PSCalib.DCVersion`
+    * :py:class:`PSCalib.DCBase`
+    * :py:class:`PSCalib.DCInterface`
+    * :py:class:`PSCalib.DCUtils`
+    * :py:class:`PSCalib.DCDetectorId`
+    * :py:class:`PSCalib.DCConfigParameters`
+    * :py:class:`PSCalib.DCFileName`
+    * :py:class:`PSCalib.DCLogger`
+    * :py:class:`PSCalib.DCMethods`
+    * :py:class:`PSCalib.DCEmail`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
@@ -45,7 +71,7 @@ from math import floor, ceil
 from PSCalib.DCInterface import DCRangeI
 from PSCalib.DCLogger import log
 from PSCalib.DCVersion import DCVersion, version_int_to_str
-from PSCalib.DCUtils import save_object_as_dset, h5py
+from PSCalib.DCUtils import sp, evt_time, get_subgroup, save_object_as_dset, delete_object
 
 #------------------------------
 
@@ -54,7 +80,7 @@ def key(begin, end=None) :
     ex.: 1471285222-1471285555 or 1471285222-end from double time like 1471285222.123456
     """
     str_begin = ('%d' % floor(begin)) if begin is not None else 0
-    str_end = ('%d' % ceil(end)) if end is not None else 'end'
+    str_end = 'end' if (end is None or end=='end') else ('%d' % ceil(end))
     return '%s-%s' % (str_begin, str_end)
 
 #------------------------------
@@ -63,33 +89,21 @@ class DCRange(DCRangeI) :
 
     """Class for the Detector Calibration (DC) project
 
-       o = DCRangeI(begin, end=None)
-
-       str_range   = o.range()               # (str) of the time stamp validity range
-       t_sec       = o.begin()               # (double) time stamp beginning validity range
-       t_sec       = o.end()                 # (double) time stamp ending validity range
-       dico        = o.versions()            # (list of uint) versions of calibrations
-       v           = o.vnum_def()            # returns default version number
-       vo          = o.version(vnum=None)    # returns version object for specified version
-       o.set_begin(tsbegin)                  # set (int) time stamp beginning validity range
-       o.set_end(tsend)                      # set (int) time stamp ending validity range
-       o.add_version()                       # add object for new version of calibration data
-       o.set_vnum_def(vnum=None)             # set default version number, if available. vnum=None - set last available.
-       o.set_vnum_last()                     # set last available versions of calibrations
-       o.del_version(vnum=None)              # delete version 
-
-       r = o.get(None, None, None)    
-       o.save(group)                         # saves object content under h5py.group in the hdf5 file. 
-       o.load(group)                         # loads object content from the hdf5 file. 
+    Parameters
+    
+    begin : double - time in sec
+    end   : double - time in sec or None meaning infinity
+    cmt   : str - comment
     """
 
-    def __init__(self, begin, end=None) : # double, double/None
-        DCRangeI.__init__(self, begin, end)
+    def __init__(self, begin, end=None, cmt=None) : # double, double/None
+        DCRangeI.__init__(self, begin, end, cmt)
         self._name = self.__class__.__name__
         self.set_begin(begin)
         self.set_end(end)
         self._dicvers = {}
-        self._vnum_def = None
+        self._dicstat = {} # flags 1/0 = good/marked-to-delete
+        self._vnum_def = 0 # 0 = use last
         self._str_range = key(begin, end)
         log.debug('In c-tor for range: %s' % self._str_range, self._name)
 
@@ -102,9 +116,14 @@ class DCRange(DCRangeI) :
     def versions(self)             : return self._dicvers
 
     def vnum_def(self) :
-        return self._vnum_def if self._vnum_def is not None else len(self._dicvers)
+        #return self.vnum_last()
+        if self._vnum_def == 0 or self._vnum_def is None :
+            return self.vnum_last()
+        return self._vnum_def 
 
-    def vnum_last(self)            : return len(self._dicvers)
+    def vnum_last(self) :
+        keys = self._dicvers.keys()
+        return keys[-1] if len(keys) else 0
 
     def version(self, vnum=None)   :
         v = vnum if vnum is not None else self.vnum_def()
@@ -112,35 +131,73 @@ class DCRange(DCRangeI) :
 
     def set_begin(self, begin)     : self._begin = begin
 
-    def set_end(self, end=None)    : self._end   = end
+    def set_end(self, end=None)    : self._end = 'end' if end is None else end
 
     def set_str_range(self, str_range) : self._str_range = str_range
 
-    def add_version(self, vnum=None) :
+    def add_version(self, vnum=None, tsec_prod=None, nda=None, cmt=None) :
         vn = self.vnum_last() + 1 if vnum is None else vnum
-        o = self._dicvers[vn] = DCVersion(vn)
+        o = self._dicvers[vn] = DCVersion(vn, tsec_prod, nda)
+        self._dicstat[vn] = 1
+        if cmt is not None : o.add_history_record(cmt)
+        #self._vnum_def = vn
         return o
 
     def set_vnum_def(self, vnum=None) :
-        if vnum is None :
-            self._vnum_def = self.vnum_last()
+        if vnum is None or vnum == 0 :
+            self._vnum_def = 0 # will use last
         elif vnum in self._dicvers.keys() :
             self._vnum_def = vnum
         else :
             msg = 'Attemt to set non-existent version %d as default' % vnum
             log.warning(msg, self._name)
 
-    def del_version(self, vnum) :
-        if vnum in self._dicvers.keys() :
-            del self._dicvers[vnum]
-        else :
-            msg = 'Requested delition of non-existent version %s' % str(vnum)
-            log.warning(msg, self._name)
+    def del_version(self, vnum=None) :
+        vers = self.vnum_last() if vnum is None else vnum
 
-    def clear_versions(self) : self._dicvers.clear()
+        if vers in self._dicvers.keys() :
+            del self._dicvers[vers]
+            self._dicstat[vers] = 0 # set flag for delition 
+            return vers
+        else :
+            msg = 'Requested delition of non-existent version %s' % str(vers)
+            log.warning(msg, self._name)
+            return None
+
+
+    def clear_versions(self) :
+        self._dicvers.clear()
+        self._dicstat.clear()
+
+    def tsec_in_range(self, tsec) :
+        if tsec < self.begin() : return False 
+        if self.end() == 'end' : return True 
+        if tsec > self.end()   : return False 
+        return True
+
+
+    def evt_in_range(self, evt) :
+        return self.tsec_in_range(evt_time(evt))
+
+
+    def __cmp__(self, other) :
+        """for comparison in sorted()
+        """
+        if self.begin() <  other.begin() : return -1
+        if self.begin() >  other.begin() : return  1
+        if self.begin() == other.begin() : 
+            if self.end() == other.end() : return  0
+            if self.end()  == 'end'      : return -1 # inverse comparison for end
+            if other.end() == 'end'      : return  1
+            if self.end()  > other.end() : return -1
+            if self.end()  < other.end() : return  1
+
 
     def save(self, group) :
-        grp = group.create_group(self.range())
+
+        #grp = group.create_group(self.range())
+        grp = get_subgroup(group, self.range())
+
         ds1 = save_object_as_dset(grp, 'begin',   data=self.begin())    # dtype='double'
         ds2 = save_object_as_dset(grp, 'end',     data=self.end())      # dtype='double'
         ds3 = save_object_as_dset(grp, 'range',   data=self.range())    # dtype='str'
@@ -149,8 +206,12 @@ class DCRange(DCRangeI) :
         msg = '=== save(), group %s object for %s' % (grp.name, self.range())
         log.debug(msg, self._name)
 
+        #print 'ZZZ: self._dicstat', self._dicstat 
+        #print 'ZZZ: self.versions()', self.versions() 
+
         for k,v in self.versions().iteritems() :
-            v.save(grp)
+            if self._dicstat[k] == 1 : v.save(grp)
+            else : delete_object(grp, k)
 
         self.save_base(grp)
 
@@ -163,15 +224,15 @@ class DCRange(DCRangeI) :
             #subgrp = v
             #print '    ', k , v
 
-            if isinstance(v, h5py.Dataset) :                    
+            if isinstance(v, sp.dataset_t) :                    
                 log.debug('load dataset "%s"' % k, self._name)
                 if   k == 'begin'   : self.set_begin(v[0])
                 elif k == 'end'     : self.set_end(v[0])
                 elif k == 'range'   : self.set_str_range(v[0])
-                elif k == 'versdef' : self._vnum_def = v[0]
+                elif k == 'versdef' : self.set_vnum_def(v[0]) # self._vnum_def = v[0]
                 else : log.warning('group "%s" has unrecognized dataset "%s"' % (grp.name, k), self._name)
 
-            elif isinstance(v, h5py.Group) :
+            elif isinstance(v, sp.group_t) :
                 if self.is_base_group(k,v) : continue
                 log.debug('load group "%s"' % k, self._name)
                 o = self.add_version(v['version'][0])
@@ -181,16 +242,21 @@ class DCRange(DCRangeI) :
     def print_obj(self) :
         offset = 3 * self._offspace
         self.print_base(offset)
-        print '%s begin     %s' % (offset, self.begin())
-        print '%s end       %s' % (offset, self.end())
+        print '%s begin     %s' % (offset, self.begin()),
+        print ': %s'            % self.tsec_to_tstr(self.begin())
+        print '%s end       %s' % (offset, self.end()),
+        print ' %s'             % ('' if (self.end() in (None,'end')) else self.tsec_to_tstr(self.end()))
         print '%s range     %s' % (offset, self.range())
         print '%s versdef   %s' % (offset, self.vnum_def())
+        print '%s N vers    %s' % (offset, len(self.versions()))
+        print '%s versions  %s' % (offset, str(self.versions().keys()))
+
         for k,v in self.versions().iteritems() :
             v.print_obj()
 
 #---- TO-DO
 
-    def get(self, p1, p2, p3)  : return None
+#    def get(self, p1, p2, p3)  : return None
 
 #------------------------------
 
