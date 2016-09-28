@@ -33,7 +33,7 @@ Usage::
     o.del_ctype(ctype)                      # delete ctype (str) from the DCStore object
     o.clear_ctype()                         # clear all ctypes (str) from the DCStore object dictionary
 
-    o.save(group)                           # saves object content under h5py.group in the hdf5 file.
+    o.save(group, mode='r+')                # saves object in hdf5 file. mode='r+'/'w' update/rewrite file.
     o.load(group)                           # loads object content from the hdf5 file. 
     o.print_obj()                           # print info about this object and its children
 
@@ -171,14 +171,16 @@ class DCStore(DCStoreI) :
 
     def clear_ctypes(self)          : self._dicctypes.clear()     
 
-    def save(self, path=None) :
+    def save(self, path=None, mode='r+') :
         if path is not None : self._fpath = path
         if not isinstance(self._fpath, str) :
             msg = 'Invalid file name: %s' % str(self._fpath)
             log.error(msg, self.__class__.__name__)
             raise ValueError(msg)
+
+        mode_rw = mode if os.path.exists(self._fpath) else 'w'
         
-        with sp.File(self._fpath, 'w') as hf :
+        with sp.File(self._fpath, mode_rw) as hf :
 
             msg = '= save(), group %s object for %s' % (hf.name, self.detname())
             log.debug(msg, self._name)

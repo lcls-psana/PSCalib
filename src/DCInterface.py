@@ -70,7 +70,7 @@ class DCStoreI(DCBase) :
        cs.add_ctype(ctype)                      # add (str) calibration type to the DCStore object
        cs.del_ctype(ctype)                      # delete ctype (str) from the DCStore object
        cs.clear_ctypes(ctype)                   # clear dictionary of ctypes in the DCStore object
-       cs.save(path)                            # save current calibration in the file specified by path, if path is Null - update current file.
+       cs.save(path, mode)                      # save current calibration in the file specified by path, if path is Null - update current file.
        cs.load(path)                            # load content of the file in DCStore object
     """
 

@@ -315,7 +315,7 @@ def test_get_constants() :
     vers = None
     nda = get_constants(gevt, genv, gsrc, gctype, gcalibdir, vers, gverb)
 
-    print '%s: retrieved nda.shape=%s' % (metname, str(nda.shape))
+    print '%s: retrieved constants for vers %s nda.shape=%s' % (metname, str(vers), str(nda.shape))
 
 #------------------------------
 
@@ -323,7 +323,7 @@ def test_delete_version() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
 
-    vers     = None # for default
+    vers = None # for default - last version
     cmt  = 'my comment to delete'
     vdeleted = delete_version(gevt, genv, gsrc, gctype, gcalibdir, vers, cmt, gverb)
 
@@ -358,7 +358,7 @@ def set_parameters() :
     gcalibdir = './calib'
     gctype    = gu.PIXEL_STATUS # gu.PIXEL_MASK, gu.PEDESTALS, etc.
     gverb     = True
-    #gverb     = False
+    gverb     = False
 
     psana = sp.fetch_psana()
     ds = psana.DataSource(dsname)
@@ -369,18 +369,21 @@ def set_parameters() :
 
 def do_test() :
     import sys; global sys
+    from time import time
 
     set_parameters()
 
     #log.setPrintBits(0377)
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     print 50*'_', '\nTest %s:' % tname
+    t0_sec = time()
     if   tname == '0' : test_misc(); 
     elif tname == '1' : test_add_constants()
     elif tname == '2' : test_get_constants()
     elif tname == '3' : test_delete_version()
     else : print 'Not-recognized test name: %s' % tname
-    sys.exit('End of test %s' % tname)
+    msg = 'End of test %s, consumed time (sec) = %.6f' % (tname, time()-t0_sec)
+    sys.exit(msg)
  
 #------------------------------
 

@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-03
+2016-09-28 Mikhail S. Dubrovin
+- DCStore.save(group, mode='r+') - by default works in 'r+' mode - file is not overwritten.
+- DCRange - fix issue with deleting group from file - loop over _dicstat
+	
 Tag: V00-03-02
 2016-09-27 Mikhail S. Dubrovin
 - DCMethods, DCRange - fix saving/retrieving default version, add comment to delete_version

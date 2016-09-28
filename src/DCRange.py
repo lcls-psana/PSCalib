@@ -148,6 +148,7 @@ class DCRange(DCRangeI) :
             self._vnum_def = 0 # will use last
         elif vnum in self._dicvers.keys() :
             self._vnum_def = vnum
+            self.add_history_record('WARNING: set_vnum_defdef sets default version %d' % vnum)
         else :
             msg = 'Attemt to set non-existent version %d as default' % vnum
             log.warning(msg, self._name)
@@ -209,9 +210,13 @@ class DCRange(DCRangeI) :
         #print 'ZZZ: self._dicstat', self._dicstat 
         #print 'ZZZ: self.versions()', self.versions() 
 
-        for k,v in self.versions().iteritems() :
-            if self._dicstat[k] == 1 : v.save(grp)
-            else : delete_object(grp, k)
+        #for k,v in self.versions().iteritems() :
+        #    if self._dicstat[k] == 1 : v.save(grp)
+        #    else : delete_object(grp, k)
+
+        for k,v in self._dicstat.iteritems() :
+            if v == 1 : self.versions()[k].save(grp)
+            else : delete_object(grp, version_int_to_str(k))
 
         self.save_base(grp)
 

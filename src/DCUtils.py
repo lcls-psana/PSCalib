@@ -51,12 +51,12 @@ If you use all or part of it, please give an appropriate acknowledgment.
 __version__ = "$Revision$"
 #--------------------------------
 
-#import sys
+import sys
 import os
 import getpass
 import socket
 import numpy as np
-from time import localtime, strftime
+from time import localtime, strftime #, time
 from PSCalib.DCLogger import log
 import PSCalib.GlobalUtils as gu
 
@@ -255,7 +255,10 @@ def psana_source(env, srcpar) :
  
 #------------------------------
 
-def get_subgroup(grp, subgr_name) :    
+def get_subgroup(grp, subgr_name) :
+    """For hdf5:
+       returns subgroup of the group if it exists or creates and returns new subgroup
+    """    
     #print 'YYY grp.name:', grp.name, '  subgr_name:', subgr_name
     if subgr_name in grp : return grp[subgr_name]
     return grp.create_group(subgr_name)
@@ -263,8 +266,12 @@ def get_subgroup(grp, subgr_name) :
 #------------------------------
 
 def delete_object(grp, oname) :    
-    print 'YYY grp.name:', grp.name, '  delete object with name:', oname
+    """For hdf5: removes object from group.
+    """    
+    #print 'TTT grp.name: %s  delete object with name: %s' % (grp.name, oname)
+    #t0_sec = time()
     if oname in grp : del grp[oname]
+    #print 'TTT %s: time (sec) = %.6f' % (sys._getframe().f_code.co_name, time()-t0_sec)
 
 #------------------------------
 

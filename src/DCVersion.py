@@ -59,6 +59,7 @@ __version__ = "$Revision$"
 import os
 import sys
 import numpy as np
+#from time import time
 from math import floor
 from PSCalib.DCInterface import DCVersionI
 from PSCalib.DCLogger import log
@@ -127,10 +128,12 @@ class DCVersion(DCVersionI) :
 
             if isinstance(v, sp.dataset_t) :                    
                 log.debug('load dataset "%s"' % k, self._name)
+                #t0_sec = time()
                 if   k == 'version': self.set_vnum(v[0])
                 elif k == 'tsprod' : self.set_tsprod(v[0])
                 elif k == 'data'   : self.add_data(v.value)
                 else : log.warning('group "%s" has unrecognized dataset "%s"' % (grp.name, k), self._name)
+                #print 'TTT %s dataset "%s" time (sec) = %.6f' % (sys._getframe().f_code.co_name, k, time()-t0_sec)
 
             elif isinstance(v, sp.group_t) :
                 if self.is_base_group(k,v) : continue

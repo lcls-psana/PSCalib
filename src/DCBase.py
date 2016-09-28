@@ -302,7 +302,7 @@ class DCBase(object) :
 
         for k,v in sorted(self._dichist.items()) :
             #print '%s t[sec]: %d: %s rec: %s' % (offset, floor(k), self.tsec_to_tstr(k), str(v))
-            print '%s %s cmt: %s' % (offset, self.tsec_to_tstr(k, addfsec=False), str(v))
+            print '%s %s %s' % (offset, self.tsec_to_tstr(k, addfsec=False), str(v))
 
 #------------------------------
 
