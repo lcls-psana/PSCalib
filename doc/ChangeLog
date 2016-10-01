@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-04
+2016-09-30 Christopher O'Grady
+- Back out to previous default EPIX common-mode params: 4,6,30,10
+
 Tag: V00-03-03
 2016-09-28 Mikhail S. Dubrovin
 - DCStore.save(group, mode='r+') - by default works in 'r+' mode - file is not overwritten.
