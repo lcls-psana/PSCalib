@@ -68,7 +68,8 @@ class DCStoreI(DCBase) :
        cs.set_predecessor(pred)                 # set (str) detname of predecessor or None
        cs.set_successor(succ)                   # set (str) detname of successor or None
        cs.add_ctype(ctype)                      # add (str) calibration type to the DCStore object
-       cs.del_ctype(ctype)                      # delete ctype (str) from the DCStore object
+       ct = cs.mark_ctype(ctype)                # mark ctype (str) from the DCStore object, returns (str) ctype or None
+       cs.mark_ctypes()                         # mark all ctypes from the DCStore object
        cs.clear_ctypes(ctype)                   # clear dictionary of ctypes in the DCStore object
        cs.save(path, mode)                      # save current calibration in the file specified by path, if path is Null - update current file.
        cs.load(path)                            # load content of the file in DCStore object
@@ -95,7 +96,8 @@ class DCStoreI(DCBase) :
     def set_predecessor(self, pred) : print_warning(self, sys._getframe())
     def set_successor(self, succ)   : print_warning(self, sys._getframe())
     def add_ctype(self, ctype)      : print_warning(self, sys._getframe()); return None
-    def del_ctype(self, ctype)      : print_warning(self, sys._getframe())
+    def mark_ctype(self, ctype)     : print_warning(self, sys._getframe()); return None
+    def mark_ctypes(self)           : print_warning(self, sys._getframe())
     def clear_ctypes(self)          : print_warning(self, sys._getframe())
     def save(self, path)            : print_warning(self, sys._getframe())
     def load(self, path)            : print_warning(self, sys._getframe())
@@ -114,24 +116,29 @@ class DCTypeI(DCBase) :
        ro          = cto.range_for_tsec(tsec)   # (DCRange) range object for time stamp in (double) sec
        ro          = cto.range_for_evt(evt)     # (DCRange) range object for psana.Evt object 
        cto.add_range(tsr)                       # add (str) of time ranges for ctype
-       cto.del_range(tsr)                       # delete range from the DCType object
+       keyr = cto.mark_range(begin, end)        # mark range from the DCType object
+       keyr = cto.mark_range_for_key(keyr)      # mark range from the DCType object
+       cto.mark_ranges(tsr)                     # mark all ranges from the DCType object
+       cto.print_obj()
     """
  
     def __init__(self, ctype, cmt=None) :
         DCBase.__init__(self, cmt)
         self._name = self.__class__.__name__
 
-    def ctype(self)                : print_warning(self, sys._getframe()); return None
-    def ranges(self)               : print_warning(self, sys._getframe()); return None
-    def range(self, begin, end)    : print_warning(self, sys._getframe()); return None
-    def add_range(self, begin, end): print_warning(self, sys._getframe()); return None
-    def del_range(self, begin, end): print_warning(self, sys._getframe())
-    def clear_ranges(self)         : print_warning(self, sys._getframe())
-    def range_for_tsec(self, tsec) : print_warning(self, sys._getframe())
-    def range_for_evt(self, evt)   : print_warning(self, sys._getframe())
-    def save(self, group)          : print_warning(self, sys._getframe())
-    def load(self, path)           : print_warning(self, sys._getframe())
-    def print_obj(self)            : print_warning(self, sys._getframe())
+    def ctype(self)                  : print_warning(self, sys._getframe()); return None
+    def ranges(self)                 : print_warning(self, sys._getframe()); return None
+    def range(self, begin, end)      : print_warning(self, sys._getframe()); return None
+    def add_range(self, begin, end)  : print_warning(self, sys._getframe()); return None
+    def mark_range(self, begin, end) : print_warning(self, sys._getframe()); return None
+    def mark_range_for_key(self, k)  : print_warning(self, sys._getframe()); return None
+    def mark_ranges(self)            : print_warning(self, sys._getframe())
+    def clear_ranges(self)           : print_warning(self, sys._getframe())
+    def range_for_tsec(self, tsec)   : print_warning(self, sys._getframe())
+    def range_for_evt(self, evt)     : print_warning(self, sys._getframe())
+    def save(self, group)            : print_warning(self, sys._getframe())
+    def load(self, path)             : print_warning(self, sys._getframe())
+    def print_obj(self)              : print_warning(self, sys._getframe())
 
 #------------------------------
 
@@ -151,7 +158,8 @@ class DCRangeI(DCBase) :
        o.set_end(tsend)                      # set (int) time stamp ending validity range
        o.add_version(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
        o.set_versdef(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
-       o.del_version(vers)                   # delete version 
+       vnum = o.del_version(vers)            # del version 
+       o.del_versions()                      # del all registered versions
     """
 
     def __init__(self, begin, end, cmt=None) :
@@ -168,7 +176,8 @@ class DCRangeI(DCBase) :
     def set_end(self, end)         : print_warning(self, sys._getframe())
     def add_version(self)          : print_warning(self, sys._getframe()); return None
     def set_vnum_def(self, vnum)   : print_warning(self, sys._getframe())
-    def del_version(self, vnum)    : print_warning(self, sys._getframe())
+    def del_version(self, vnum)    : print_warning(self, sys._getframe()); return None
+    def del_versions(self)         : print_warning(self, sys._getframe())
     def clear_versions(self)       : print_warning(self, sys._getframe())
     def tsec_in_range(self, tsec)  : print_warning(self, sys._getframe()); return False
     def evt_in_range(self, evt)    : print_warning(self, sys._getframe()); return False
@@ -235,7 +244,8 @@ def test_DCStoreI() :
     o.set_predecessor(None)
     o.set_successor(None)
     o.add_ctype(None)
-    o.del_ctype(None)
+    t = o.mark_ctype(None)
+    o.mark_ctypes()
     o.clear_ctypes()
     o.save(None)
     o.load(None)
@@ -250,7 +260,9 @@ def test_DCTypeI() :
     r = o.ranges()
     r = o.range(None, None)
     o.add_range(None, None)
-    o.del_range(None, None)
+    o.mark_range(None, None)
+    r = o.mark_range_for_key(None)
+    o.mark_ranges()
     o.save(None)
     o.load(None)
 
@@ -269,7 +281,8 @@ def test_DCRangeI() :
     o.set_end(None)
     v = o.add_version()
     o.set_vnum_def(None)
-    o.del_version(None)
+    v = o.del_version(None)
+    o.del_versions()
     o.save(None)
     o.load(None)
 

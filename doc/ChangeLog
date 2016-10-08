@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-06
+2016-10-07 Mikhail S. Dubrovin
+- add app/dcs
+- add option to mark/delete objects for DCType, DCRange
+	
 Tag: V00-03-05
 2016-10-03 Christopher O'Grady
 - Change default EPIX common-mode params to 4,6,30,30 as requested by Silke

@@ -15,19 +15,21 @@ Usage::
     o = DCType(type)
 
     # Methods
-    o.set_ctype(ctype)                # add (str) of time ranges for ctype.
-    ctype  = o.ctype()                # returns (str) of ctype name.
-    ranges = o.ranges()               # returns (dict) of time range objects.
-    range  = o.range(begin, end)      # returns time stamp validity range object.
-    ro     = o.range_for_tsec(tsec)   # (DCRange) range object for time stamp in (double) sec
-    ro     = o.range_for_evt(evt)     # (DCRange) range object for psana.Evt object 
-    o.add_range(begin, end)           # add (str) of time ranges for ctype.
-    o.del_range(begin, end)           # delete range from the DCType object.
-    o.clear_ranges()                  # delete all range objects from dictionary.
+    o.set_ctype(ctype)                 # add (str) of time ranges for ctype.
+    ctype  = o.ctype()                 # returns (str) of ctype name.
+    ranges = o.ranges()                # returns (dict) of time range objects.
+    range  = o.range(begin, end)       # returns time stamp validity range object.
+    ro     = o.range_for_tsec(tsec)    # (DCRange) range object for time stamp in (double) sec
+    ro     = o.range_for_evt(evt)      # (DCRange) range object for psana.Evt object 
+    o.add_range(begin, end)            # add (str) of time ranges for ctype.
+    kr = o.mark_range(begin, end)      # mark range from the DCType object, returns (str) key or None
+    kr = o.mark_range_for_key(keyrange)# mark range specified by (str) keyrange from the DCType object, returns (str) key or None
+    o.mark_ranges()                    # mark all ranges from the DCType object
+    o.clear_ranges()                   # delete all range objects from dictionary.
 
-    o.save(group)                     # saves object content under h5py.group in the hdf5 file.
-    o.load(group)                     # loads object content from the hdf5 file. 
-    o.print_obj()                     # print info about this object and its children
+    o.save(group)                      # saves object content under h5py.group in the hdf5 file.
+    o.load(group)                      # loads object content from the hdf5 file. 
+    o.print_obj()                      # print info about this object and its children
 
 
 @see project modules
@@ -80,6 +82,7 @@ class DCType(DCTypeI) :
         DCTypeI.__init__(self, ctype, cmt)
         self._name = self.__class__.__name__
         self._dicranges = {}
+        self._dicstat = {} # flags 0/1 = good/marked-to-delete
         self._ctype = ctype
         log.debug('In c-tor for ctype: %s' % ctype, self._name)
 
@@ -92,16 +95,48 @@ class DCType(DCTypeI) :
     def range(self, begin, end=None) :
         return self._dicranges.get(key(begin, end), None) if begin is not None else None
 
+
     def add_range(self, begin, end=None) :
         keyrng = key(begin, end)
         if keyrng in self._dicranges.keys() :
             return self._dicranges[keyrng]
-        o = self._dicranges[key(begin, end)] = DCRange(begin, end)
+        o = self._dicranges[keyrng] = DCRange(begin, end)
+        self._dicstat[keyrng] = 0
         return o
 
-    def del_range(self, begin, end=None) : del self._dicranges[key(begin, end)] 
 
-    def clear_ranges(self) : self._dicranges.clear()
+    def mark_range_for_key(self, keyrng) :
+        if keyrng in self._dicranges.keys() :
+            o = self._dicranges[keyrng]
+            o.mark_versions()
+            #del o  - DO NOT DELETE OBJECT!
+            self._dicstat[keyrng] = 1 # set flag for delition 
+            #self.add_history_record('range "%s" deleted. %s'%(keyrng, cmt))
+            return keyrng
+        else :
+            msg = 'Requested delition of non-existent range %s' % str(keyrng)
+            log.warning(msg, self._name)
+            return None
+
+
+    def mark_range(self, begin, end=None) :
+        return self.mark_range_for_key(key(begin, end))
+
+
+    def mark_ranges(self) :
+        if keyrng in self._dicranges.keys() :
+            kr = self.mark_range_for_key(keyrng)
+
+ 
+    def __del__(self) :
+        for keyrng in self._dicranges.keys() :
+            del self._dicranges[keyrng] 
+
+
+    def clear_ranges(self) :
+        self._dicranges.clear()
+        self._dicstat.clear()
+
 
     def range_for_tsec(self, tsec) :
         """Return DCRange object from all available which range validity is matched to tsec.
@@ -111,6 +146,7 @@ class DCType(DCTypeI) :
         for ro in ranges[::-1] :
             if ro.tsec_in_range(tsec) : return ro
         return None
+
 
     def range_for_evt(self, evt) :
         """Return DCRange object from all available which range validity is matched to the evt time.
@@ -127,8 +163,14 @@ class DCType(DCTypeI) :
         msg = '== save(), group %s object for %s' % (grp.name, self.ctype())
         log.debug(msg, self._name)
 
-        for k,v in self.ranges().iteritems() :
-            v.save(grp)
+        #for k,v in self.ranges().iteritems() :
+        #    v.save(grp)
+
+        for k,v in self._dicstat.iteritems() :
+            if v & 1 :
+                delete_object(grp, k)
+                #del self.ranges()[k]
+            else : self.ranges()[k].save(grp)
 
         self.save_base(grp)
 
@@ -184,7 +226,8 @@ def test_DCType() :
     r = o.ranges()
     r = o.range(None)
     o.add_range(None)
-    o.del_range(None)
+    o.mark_range(None)
+    o.mark_ranges()
     o.clear_ranges()
 
     r = o.get(None, None, None)    

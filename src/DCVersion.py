@@ -161,6 +161,9 @@ class DCVersion(DCVersionI) :
         #for k,v in self.versions().iteritems() :
         #    v.print_obj()
 
+    def __del__(self) :
+        pass
+
 #---- TO-DO
 
 #    def get(self, p1, p2, p3)  : return None

@@ -30,7 +30,8 @@ Usage::
     o.set_predecessor(pred)                 # set (str) detname of predecessor or None
     o.set_successor(succ)                   # set (str) detname of successor or None
     o.add_ctype(ctype)                      # add (str) calibration type to the DCStore object
-    o.del_ctype(ctype)                      # delete ctype (str) from the DCStore object
+    ctype = o.mark_ctype(ctype)              # delete ctype (str) from the DCStore object, returns ctype or None
+    o.mark_ctypes()                          # delete all ctypes (str) from the DCStore object
     o.clear_ctype()                         # clear all ctypes (str) from the DCStore object dictionary
 
     o.save(group, mode='r+')                # saves object in hdf5 file. mode='r+'/'w' update/rewrite file.
@@ -74,7 +75,7 @@ from time import time
 from PSCalib.DCInterface import DCStoreI
 from PSCalib.DCType import DCType
 from PSCalib.DCLogger import log
-from PSCalib.DCUtils import sp, save_object_as_dset, evt_time
+from PSCalib.DCUtils import gu, sp, save_object_as_dset, evt_time
 
 #------------------------------
 
@@ -109,6 +110,7 @@ class DCStore(DCStoreI) :
         self._predecessor = None
         self._successor = None
         self._dicctypes = {}
+        self._dicstat = {} # flags 0/1 = good/marked-to-delete
         log.debug('In c-tor for path: %s' % path, self._name)
         
 #------------------------------
@@ -149,7 +151,7 @@ class DCStore(DCStoreI) :
 
     def set_detid(self, detid)      : self._detid = str(detid)
 
-    def set_detname(self, detname)  :
+    def set_detname(self, detname) :
         if not isinstance(detname, str) :
             self._dettype, self._detid = None, None
             return
@@ -161,15 +163,46 @@ class DCStore(DCStoreI) :
 
     def set_successor(self, succ=None)   : self._successor = succ
 
-    def add_ctype(self, ctype)      :
+    def add_ctype(self, ctype) :
+        if not (ctype in gu.calib_names) : 
+            msg = 'ctype "%s" is not in the list of known types:\n  %s' % (ctype, gu.calib_names)
+            log.error(msg, self.__class__.__name__)
+            return None
+            
         if ctype in self._dicctypes.keys() :
             return self._dicctypes[ctype]
         o = self._dicctypes[ctype] = DCType(ctype)
+        self._dicstat[ctype] = 0
         return o
 
-    def del_ctype(self, ctype)      : del self._dicctypes[ctype] 
 
-    def clear_ctypes(self)          : self._dicctypes.clear()     
+    def mark_ctype(self, ctype) :
+        if ctype in self._dicctypes.keys() :
+            o = self._dicctypes[ctype] 
+            o.mark_ranges()
+            #del o - DO NOT DELETE OBJECT, othervise its content will not be deleted from file...
+            self._dicstat[ctype] = 1 # set flag (for deletion) 
+            return ctype
+        else :
+            msg = 'Requested delition of non-existent ctype "%s"' % str(ctype)
+            log.warning(msg, self._name)
+            return None
+
+
+    def mark_ctypes(self) :
+        for ctype in self._dicctypes.keys() :
+            self.mark_ctype(ctype)
+
+
+    def __del__(self) :
+        for ctype in self._dicctypes.keys() :
+            del self._dicctypes[ctype] 
+
+
+    def clear_ctypes(self) :
+        self._dicctypes.clear()     
+        self._dicstat.clear()
+
 
     def save(self, path=None, mode='r+') :
         if path is not None : self._fpath = path
@@ -180,27 +213,33 @@ class DCStore(DCStoreI) :
 
         mode_rw = mode if os.path.exists(self._fpath) else 'w'
         
-        with sp.File(self._fpath, mode_rw) as hf :
+        with sp.File(self._fpath, mode_rw) as grp :
 
-            msg = '= save(), group %s object for %s' % (hf.name, self.detname())
+            msg = '= save(), group %s object for %s' % (grp.name, self.detname())
             log.debug(msg, self._name)
 
-            ds1 = save_object_as_dset(hf, 'dettype',     data=self.dettype())     # 'str'
-            ds2 = save_object_as_dset(hf, 'detname',     data=self.detname())     # 'str'
-            ds3 = save_object_as_dset(hf, 'detid',       data=self.detid())       # 'str'
-            ds4 = save_object_as_dset(hf, 'tscfile',     data=self.tscfile())     # 'double'
-            ds5 = save_object_as_dset(hf, 'predecessor', data=self.predecessor()) # 'str'       
-            ds6 = save_object_as_dset(hf, 'successor',   data=self.successor())   # 'str'
+            ds1 = save_object_as_dset(grp, 'dettype',     data=self.dettype())     # 'str'
+            ds2 = save_object_as_dset(grp, 'detname',     data=self.detname())     # 'str'
+            ds3 = save_object_as_dset(grp, 'detid',       data=self.detid())       # 'str'
+            ds4 = save_object_as_dset(grp, 'tscfile',     data=self.tscfile())     # 'double'
+            ds5 = save_object_as_dset(grp, 'predecessor', data=self.predecessor()) # 'str'       
+            ds6 = save_object_as_dset(grp, 'successor',   data=self.successor())   # 'str'
 
-            for k,v in self.ctypes().iteritems() :
-                #msg='Add type %s as object %s' % (k, v.ctype())
-                #log.debug(msg, self._name)
-                v.save(hf)
+            #for k,v in self.ctypes().iteritems() :
+            #    #msg='Add type %s as object %s' % (k, v.ctype())
+            #    #log.debug(msg, self._name)
+            #    v.save(grp)
 
-            self.save_base(hf)
+            for k,v in self._dicstat.iteritems() :
+                if v & 1 :
+                    delete_object(grp, k)
+                    #del self.ctypes()[k]
+                else     : self.ctypes()[k].save(grp)
 
-            hf.close()
-            log.info('File %s is saved' % self._fpath, self._name)
+            self.save_base(grp)
+
+            grp.close()
+            log.info('File %s is updated/saved' % self._fpath, self._name)
 
 
     def load(self, path=None) : 
@@ -283,7 +322,8 @@ def test_DCStore() :
     o.set_predecessor(None)
     o.set_successor(None)
     o.add_ctype(None)
-    o.del_ctype(None)
+    o.mark_ctype(None)
+    o.mark_ctypes()
     o.clear_ctypes()
     #o.save(None)
     o.load(None)

@@ -17,6 +17,11 @@ Usage::
     o.set_dettype(env, src)
     o.set_detid(env, src)
     status = o.make_path_to_calib_file(mode=0770)
+
+    dt  = o.dettype()
+    did = o.detid()
+    dn  = o.detname()
+
     fname = o.calib_file_name() # e.g., epix100a-3925868555.h5
     fdir  = o.calib_file_dir()  # e.g., /reg/neh/home4/dubrovin/LCLS/rel-calib/calib
     fpath = o.calib_file_path() # e.g., /reg/neh/home4/dubrovin/LCLS/rel-calib/calib/epix100a/epix100a-3925868555.h5
@@ -88,11 +93,11 @@ class DCFileName() :
             + '\n  env      : %s' % self._env\
             + '\n  src      : %s' % self._src\
             + '\n  src_name : %s' % self._src_name\
-            + '\n  dettype  : %s' % self._dettype\
-            + '\n  detid    : %s' % self._detid\
-            + '\n  detname  : %s' % self._detname\
-            + '\n  calibdir : %s' % self._calibdir\
+            + '\n  dettype  : %s' % self.dettype()\
+            + '\n  detid    : %s' % self.detid()\
+            + '\n  detname  : %s' % self.detname()\
             + '\n  file name: %s' % self.calib_file_name()\
+            + '\n  calibdir : %s' % self._calibdir\
             + '\n  file dir : %s' % self.calib_file_dir()\
             + '\n  file path: %s' % self.calib_file_path()
 
@@ -137,22 +142,34 @@ class DCFileName() :
         self._calibdir = None if '///' in cdir else cdir # /reg/d/psdm///calib
 
 
+    def dettype(self) :
+        """Returns detector id, ex.: epix100a"""
+        return self._dettype
+
+
+    def detid(self) :
+        """Returns detector id, ex.: 3925868555"""
+        return self._detid
+
+
+    def detname(self) :
+        """Returns detector name, ex.: epix100a-3925868555"""
+        return self._detname
+
+
     def calib_file_dir(self) :
-        """Returns file directory name, ex.: .../calib/epix100a/
-        """
+        """Returns file directory name, ex.: .../calib/epix100a/"""
         if self._calibdir is None : return None
         else : return '%s/%s' % (self._calibdir, self._dettype)
 
 
     def calib_file_name(self) :
-        """Returns file name, ex.: epix100a-3925868555.h5
-        """
+        """Returns file name, ex.: epix100a-3925868555.h5"""
         return '%s.%s' % (self._detname, self.fname_ext)
 
 
     def calib_file_path(self) :
-        """Returns path to the file, ex.: .../calib/epix100a/epix100a-3925868555.h5 
-        """
+        """Returns path to the file, ex.: .../calib/epix100a/epix100a-3925868555.h5"""
         if self._calibdir is None : return None
         else : return '%s/%s/%s.%s' % (self._calibdir, self._dettype, self._detname, self.fname_ext)
 

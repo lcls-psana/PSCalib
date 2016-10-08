@@ -56,7 +56,8 @@ import os
 import getpass
 import socket
 import numpy as np
-from time import localtime, strftime #, time
+from time import localtime, strftime, time
+import psana
 from PSCalib.DCLogger import log
 import PSCalib.GlobalUtils as gu
 
@@ -81,16 +82,9 @@ import h5py
 
 class Storage :
     def __init__(self) :
-        self.psana = None
         self.dataset_t = h5py.Dataset
         self.group_t   = h5py.Group
         self.File      = h5py.File
-
-#------------------------------
-    
-    def fetch_psana(self) :
-        if sp.psana is None : import psana; sp.psana=psana
-        return sp.psana
 
 #------------------------------
 
@@ -220,8 +214,6 @@ def string_from_source(source) :
 def detector_full_name(env, src) :
     """Returns full detector name like 'XppGon.0:Cspad2x2.0' for short src, alias src, or psana.Source.
     """
-    psana = sp.fetch_psana()
-
     str_src = str(src)
     str_src = string_from_source(str_src)
     if str_src is None : return None
@@ -240,8 +232,6 @@ def psana_source(env, srcpar) :
        set_sub : bool - default=True - propagates source parameter to low level package  
     """
     #print 'type of srcpar: ', type(srcpar)
-
-    psana = sp.fetch_psana()
     
     src = srcpar if isinstance(srcpar, psana.Source) else psana.Source(srcpar)
     str_src = string_from_source(src)
@@ -308,7 +298,7 @@ def save_object_as_dset(grp, name, shape=None, dtype=None, data=0) :
 def evt_time(evt) :
     """Returns event (double) time.
     """
-    evid = evt.get(sp.fetch_psana().EventId)
+    evid = evt.get(psana.EventId)
     ttuple = evid.time()
     #print 'XXX time:',  ttuple
     return float(ttuple[0]) + float(ttuple[1])*1e-9
@@ -318,13 +308,12 @@ def evt_time(evt) :
 def evt_fiducials(evt) :
     """Returns event fiducials.
     """
-    evid = evt.get(sp.fetch_psana().EventId)
+    evid = evt.get(psana.EventId)
     return evid.fiducials()
 
 #------------------------------
 
 def test_source_full_name() :
-    psana = sp.fetch_psana()
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     env=ds.env()    
     print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
@@ -336,7 +325,6 @@ def test_source_full_name() :
 #------------------------------
 
 def test_string_from_source() :
-    psana = sp.fetch_psana()
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     env=ds.env()    
     source = psana_source(env, 'cs140_0')
@@ -347,7 +335,6 @@ def test_string_from_source() :
 #------------------------------
 
 def test_psana_source() :
-    psana = sp.fetch_psana()
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     env=ds.env()    
     print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
@@ -359,7 +346,6 @@ def test_psana_source() :
 #------------------------------
 
 def test_detector_full_name() :
-    psana = sp.fetch_psana()
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     env=ds.env()
     print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
@@ -371,7 +357,6 @@ def test_detector_full_name() :
 #------------------------------
 
 def test_evt_time() :
-    psana = sp.fetch_psana()
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     evt=ds.events().next()
     print 20*'_', '\n%s:' % sys._getframe().f_code.co_name

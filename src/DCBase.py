@@ -297,12 +297,14 @@ class DCBase(object) :
         """Print content of dictionaries of parameters and history"""
         print '%s %s'             % (offset, self._name)
 
+        if len(self._dicpars) : print '%s Parameters:' % offset
         for k,v in self._dicpars.items() :
-            print '%s par: %20s  value: %s' % (offset, k, str(v))
+            print '  %s par: %20s  value: %s' % (offset, k, str(v))
 
+        if len(self._dichist) : print '%s History:' % offset
         for k,v in sorted(self._dichist.items()) :
             #print '%s t[sec]: %d: %s rec: %s' % (offset, floor(k), self.tsec_to_tstr(k), str(v))
-            print '%s %s %s' % (offset, self.tsec_to_tstr(k, addfsec=False), str(v))
+            print '  %s %s %s' % (offset, self.tsec_to_tstr(k, addfsec=False), str(v))
 
 #------------------------------
 

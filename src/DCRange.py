@@ -29,6 +29,7 @@ Usage::
     o.add_version(vnum=None, tsec_prod=None, nda=None, cmt=None) # add object for new version of calibration data
     o.set_vnum_def(vnum=None)             # set default version number, if available. vnum=None - use last available.
     vd = o.del_version(vnum=None)         # delete version, returns deleted version number or None if nothing was deleted
+    o.del_versions()                      # delete all registered versions
 
     o.save(group)                         # saves object content under h5py.group in the hdf5 file. 
     o.load(group)                         # loads object content from the hdf5 file. 
@@ -102,7 +103,7 @@ class DCRange(DCRangeI) :
         self.set_begin(begin)
         self.set_end(end)
         self._dicvers = {}
-        self._dicstat = {} # flags 1/0 = good/marked-to-delete
+        self._dicstat = {} # flags 0/1 = good/marked-to-delete
         self._vnum_def = 0 # 0 = use last
         self._str_range = key(begin, end)
         log.debug('In c-tor for range: %s' % self._str_range, self._name)
@@ -138,10 +139,12 @@ class DCRange(DCRangeI) :
     def add_version(self, vnum=None, tsec_prod=None, nda=None, cmt=None) :
         vn = self.vnum_last() + 1 if vnum is None else vnum
         o = self._dicvers[vn] = DCVersion(vn, tsec_prod, nda)
-        self._dicstat[vn] = 1
-        if cmt is not None : o.add_history_record(cmt)
+        self._dicstat[vn] = 0
+        #self.add_history_record('vers=%d deleted. %s'%(vers, cmt))
+        #if cmt is not None : o.add_history_record(cmt)
         #self._vnum_def = vn
         return o
+
 
     def set_vnum_def(self, vnum=None) :
         if vnum is None or vnum == 0 :
@@ -153,12 +156,14 @@ class DCRange(DCRangeI) :
             msg = 'Attemt to set non-existent version %d as default' % vnum
             log.warning(msg, self._name)
 
+
     def del_version(self, vnum=None) :
         vers = self.vnum_last() if vnum is None else vnum
 
         if vers in self._dicvers.keys() :
             del self._dicvers[vers]
-            self._dicstat[vers] = 0 # set flag for delition 
+            self._dicstat[vers] = 1 # set flag for delition 
+            #self.add_history_record('vers=%d deleted. %s'%(vers, cmt))
             return vers
         else :
             msg = 'Requested delition of non-existent version %s' % str(vers)
@@ -166,9 +171,20 @@ class DCRange(DCRangeI) :
             return None
 
 
+    def del_versions(self) :
+        for vers in self._dicvers.keys() :
+            self.del_version(self, vers)
+
+
+    def __del__(self) :
+        for vers in self._dicvers.keys() :
+            del self._dicvers[vers]
+
+
     def clear_versions(self) :
         self._dicvers.clear()
         self._dicstat.clear()
+
 
     def tsec_in_range(self, tsec) :
         if tsec < self.begin() : return False 
@@ -210,13 +226,9 @@ class DCRange(DCRangeI) :
         #print 'ZZZ: self._dicstat', self._dicstat 
         #print 'ZZZ: self.versions()', self.versions() 
 
-        #for k,v in self.versions().iteritems() :
-        #    if self._dicstat[k] == 1 : v.save(grp)
-        #    else : delete_object(grp, k)
-
         for k,v in self._dicstat.iteritems() :
-            if v == 1 : self.versions()[k].save(grp)
-            else : delete_object(grp, version_int_to_str(k))
+            if v & 1 : delete_object(grp, version_int_to_str(k))
+            else     : self.versions()[k].save(grp)
 
         self.save_base(grp)
 
@@ -278,7 +290,8 @@ def test_DCRange() :
     o.set_end(None)
     o.add_version()
     o.set_vnum_def(None)
-    o.del_version(None)
+    v = o.del_version(None)
+    o.del_versions()
     o.clear_versions()
 
     r = o.get(None, None, None)    

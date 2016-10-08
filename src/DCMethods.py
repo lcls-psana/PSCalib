@@ -64,7 +64,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 __version__ = "$Revision$"
 #--------------------------------
 
-#import sys
+import sys
 import os
 #import numpy as np
 #import h5py
@@ -115,7 +115,7 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
 
     if verb :
         ofn.print_attrs()
-        print 'path: ', fname
+        #print 'path: ', fname
 
     if fname is None :
         if verb : print 'WARNING: file name is not defined - return None'
@@ -139,14 +139,17 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
     #cs.add_par('par-1-in-DCStore', 1)
 
     ct = cs.add_ctype(str_ctype)
+    if ct is None : return
     #ct.add_history_record('%s - add DCType %s' % (metname,str_ctype))
     #ct.add_par('par-1-in-DCType', 1)
 
     cr = ct.add_range(tsec_ev, end=None)
+    if cr is None : return
     #cr.set_vnum_def(vnum=None)
 
-    cv = cr.add_version(vnum=None, tsec_prod=time(), nda=nda, cmt=None)
-    v = cr.vnum_last()
+    cv = cr.add_version(vnum=vers, tsec_prod=time(), nda=nda, cmt=None)
+    if cv is None : return
+    v = cr.vnum_last() if vers is None else vers
     rec='%s vers=%d: %s' % (metname, v, cmt if cmt is not None else 'no-comments') 
     cr.add_history_record(rec)
     #cv.add_data(nda)
@@ -185,7 +188,6 @@ def get_constants(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
     fname = ofn.calib_file_path()
     if verb :
         ofn.print_attrs()
-        print 'path: ', fname
 
     if fname is None : return None
     if not os.path.exists(fname) :
@@ -199,21 +201,22 @@ def get_constants(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
         cs.print_obj()
 
     ct = cs.ctypeobj(str_ctype)
-    if verb :
-        print 50*'_','\nDCType.print_obj()' 
-        ct.print_obj()
+    if ct is None : return None 
+    #if verb : 
+    #    print 50*'_','\nDCType.print_obj()' 
+    #    ct.print_obj()
 
     cr = ct.range_for_evt(evt)
     if cr is None : return None
-    if verb :
-        print 50*'_','\nDCRange.print_obj()' 
-        cr.print_obj()
+    #if verb :
+    #    print 50*'_','\nDCRange.print_obj()' 
+    #    cr.print_obj()
 
     cv = cr.version(vnum=vers)
     if cv is None : return None
-    if verb :
-        print 50*'_','\nDCVersion.print_obj()' 
-        cv.print_obj()
+    #if verb :
+    #    print 50*'_','\nDCVersion.print_obj()' 
+    #    cv.print_obj()
 
     return cv.data()
 
@@ -242,7 +245,6 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
     fname = ofn.calib_file_path()
     if verb :
         ofn.print_attrs()
-        print 'path: ', fname
 
     if fname is None : return None
     if not os.path.exists(fname) :
@@ -251,23 +253,24 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
 
     cs = DCStore(fname)
     cs.load()
-    if verb :
-        print 50*'_','\nDCStore.print_obj()' 
-        cs.print_obj()
+    #if verb :
+    #    print 50*'_','\nDCStore.print_obj()' 
+    #    cs.print_obj()
 
     ct = cs.ctypeobj(str_ctype)
-    if verb :
-        print 50*'_','\nDCType.print_obj()' 
-        ct.print_obj()
+    if ct is None : return None 
+    #if verb :
+    #    print 50*'_','\nDCType.print_obj()' 
+    #    ct.print_obj()
 
     cr = ct.range_for_evt(evt)
     if cr is None : return None
-    if verb :
-        print 50*'_','\nDCRange.print_obj()' 
-        cr.print_obj()
+    #if verb :
+    #    print 50*'_','\nDCRange.print_obj()' 
+    #    cr.print_obj()
 
     v = vers if vers is not None else cr.vnum_last()
-    c = cmt if cmt is not None else 'no-comments'
+    c = cmt if cmt is not None else ''
     rec='%s vers=%d: %s' % (metname, v, c) 
     cr.add_history_record(rec)
 
@@ -276,9 +279,49 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
     if verb : log.setPrintBits(02) # 0377
 
     ofn.make_path_to_calib_file() # depth=2, mode=0775)
-    cs.save()
+
+    if verb :
+        print 50*'_','\nDCStore.print_obj() after delete version %d' % vdeleted
+        cs.print_obj()
     
+    cs.save()
     return vdeleted
+
+#------------------------------
+
+def print_file_content(evt, env, src='Epix100a.', calibdir=None) :
+
+    """Delete specified version from calibration constants.
+    
+    Parameters
+    
+    env : psana.Env -> full detector name for psana.Source 
+    evt : psana.Event -> event time
+    src : str - source short/full name, alias or full
+    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    """
+    metname = sys._getframe().f_code.co_name
+
+    ofn = DCFileName(env, src, calibdir)
+    fname = ofn.calib_file_path()
+    ofn.print_attrs()
+
+    if fname is None :
+        print 'WARNING: file name is not defined'
+        return
+
+    if not os.path.exists(fname) :
+        print 'WARNING: path does not exist'
+        return
+
+    cs = DCStore(fname)
+
+    t0_sec = time()
+    cs.load()
+    print 'File content loading time (sec) = %.6f' % (time()-t0_sec)
+    
+    print 50*'_','\nDCStore.print_obj()' 
+    cs.print_obj()
 
 #------------------------------
 #------------------------------
@@ -331,6 +374,12 @@ def test_delete_version() :
 
 #------------------------------
 
+def test_print_file_content() :
+    print 20*'_', '\n%s' % sys._getframe().f_code.co_name
+    print_file_content(gevt, genv, gsrc, gcalibdir)
+
+#------------------------------
+
 def test_misc() :
     print 20*'_', '\n%s' % sys._getframe().f_code.co_name
 
@@ -345,6 +394,9 @@ def test_misc() :
 #------------------------------
 
 def set_parameters() :
+
+    import psana
+
     global genv, gevt, gsrc, gctype, gcalibdir, gverb
 
     #dsname  = 'exp=cxif5315:run=129'
@@ -358,9 +410,8 @@ def set_parameters() :
     gcalibdir = './calib'
     gctype    = gu.PIXEL_STATUS # gu.PIXEL_MASK, gu.PEDESTALS, etc.
     gverb     = True
-    gverb     = False
+    #gverb     = False
 
-    psana = sp.fetch_psana()
     ds = psana.DataSource(dsname)
     genv=ds.env()
     gevt=ds.events().next()
@@ -368,12 +419,12 @@ def set_parameters() :
 #------------------------------
 
 def do_test() :
-    import sys; global sys
     from time import time
 
     set_parameters()
 
     #log.setPrintBits(0377)
+
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     print 50*'_', '\nTest %s:' % tname
     t0_sec = time()
@@ -381,6 +432,7 @@ def do_test() :
     elif tname == '1' : test_add_constants()
     elif tname == '2' : test_get_constants()
     elif tname == '3' : test_delete_version()
+    elif tname == '4' : test_print_file_content()
     else : print 'Not-recognized test name: %s' % tname
     msg = 'End of test %s, consumed time (sec) = %.6f' % (tname, time()-t0_sec)
     sys.exit(msg)

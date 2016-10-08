@@ -1,0 +1,244 @@
+#!/usr/bin/env python
+#------------------------------
+
+import os
+import sys
+from time import time
+from PSCalib.DCMethods import add_constants, get_constants, delete_version, print_file_content
+import PSCalib.DCUtils as dcu
+
+#------------------------------
+
+class DCS_CLI :
+    def __init__(self, parser) :
+        """Detector Calibration Store Command Line Interface"""
+
+        self.parser = parser
+        (opts, args) = parser.parse_args()
+        self.args = args
+        self.opts = vars(opts)
+        self.defs = vars(parser.get_default_values())
+
+        self.verbos = opts.verbos
+        #if self.verbos : self.print_raw()
+        if self.verbos : self.print_pars()
+
+        self.command_dispatcher()
+
+#------------------------------
+
+    def print_raw(self) :
+        print 'Command:', ' '.join(sys.argv)
+        print '  opts: ', self.opts
+        print '  defs: ', self.defs
+        print '  args: ', self.args
+
+#------------------------------
+
+    def print_pars(self) :
+        """Prints input parameters"""
+        print 'Command:', ' '.join(sys.argv)+\
+              '\nlaunches %s' % self.__init__.__doc__+\
+              '\nwith argument %s and optional parameters key, value, default:' % str(self.args)
+        for k,v in self.opts.items() :
+            print '%s %s %s' % (k.ljust(10), str(v).ljust(16), str(self.defs[k]).ljust(16))
+
+#------------------------------
+
+    def dsname(self) :
+        """Returns dsname retrieved from input parameters"""
+        #dsname = 'exp=mfxn8316:run=11'
+        #dsname = '/reg/g/psdm/detector/data_test/types/0021-MfxEndstation.0-Epix100a.0.xtc'
+        exp = self.opts['exp']
+        run = self.opts['run']
+        return 'exp=%s:run=%s' % (exp, run)
+
+#------------------------------
+
+    def fname_nda(self, env, src, cdir) :
+        cfname = self.opts['cfname']
+        #cfndef = self.defs['cfname']
+        if cfname is not None : return cfname
+
+        str_ctype = self.opts['ctype']
+        from PSCalib.DCFileName import DCFileName
+        ofn = DCFileName(env, src, cdir)
+        detname = ofn.detname()
+        return '%s-%s.npy' % (detname, str_ctype)
+
+#------------------------------
+
+    def calib_type(self) :
+        """Returns enumerated calibration type"""
+        str_ctype = self.opts['ctype']
+        ctype = dcu.gu.dic_calib_name_to_type[str_ctype]
+        return ctype
+
+#------------------------------
+
+    def command_dispatcher(self) : 
+        """Command line dispatcher by the 1-st argument"""
+
+        if not len(self.args) :
+            self.parser.print_usage()
+            print 'WARNING: command argument is missing. See command usage above.'
+            return
+
+        import psana
+
+        #if self.verbos :
+
+        t0_sec = time()
+        ds = psana.DataSource(self.dsname())
+        env=ds.env()
+        evt=ds.events().next()
+        #if self.verbos :
+        print 'time (sec) to get ds, env, evt = %.6f' % (time()-t0_sec)
+
+        src    = self.opts['src']
+        cdir   = self.opts['cdir']
+        msg    = self.opts['msg']
+        pred   = self.opts['pred']
+        succ   = self.opts['succ']
+        vers   = self.opts['vers']
+        verb   = self.opts['verbos']
+
+        ctype  = self.calib_type()
+
+        action = (self.args[0])[0]
+        if   action=='p' : print_file_content (evt, env, src, calibdir=cdir)
+        elif action=='a' : self.add_constants (evt, env, src, ctype, cdir, vers, pred, succ, msg, verb)
+        elif action=='g' : self.get_constants (evt, env, src, ctype, cdir, vers, verb)
+        elif action=='d' : self.delete_version(evt, env, src, ctype, cdir, vers, msg, verb)
+        else :
+            self.parser.print_usage()
+            print 'WARNING: unrecognized command argument "%s". See command usage above.' % self.args[0]
+            return
+
+#------------------------------
+
+    def delete_version(self, evt, env, src, ctype, cdir, vers, msg, verb) :
+        delete_version(evt, env, src, ctype, cdir, vers, 'CLI %s'%msg, verb)
+
+#------------------------------
+
+    def add_constants(self, evt, env, src, ctype, cdir, vers, pred, succ, msg, verb) :
+        print 'In %s' % sys._getframe().f_code.co_name
+        cfname = self.opts['cfname']
+        if not os.path.exists(cfname) :
+            print 'WARNING: file %s does not exist' % cfname
+            return
+
+        root, ext = os.path.splitext(cfname)
+        nda = None
+        if ext=='.npy' :
+            nda = dcu.np.load(cfname)
+        else :
+            from PSCalib.NDArrIO import load_txt
+            nda = load_txt(cfname)
+        if verb : print 'data loaded from file: %s\n' % (cfname), nda
+
+        add_constants(nda, evt, env, src, ctype, cdir, vers, pred, succ, 'CLI %s'%msg, verb)
+
+#------------------------------
+
+    def get_constants(self, evt, env, src, ctype, cdir, vers, verb) :
+        """Get array of specified constants from the DCS and save them in npy/txt file. 
+        """
+        print 'In %s' % sys._getframe().f_code.co_name
+        cfname = self.fname_nda(env, src, cdir)
+        nda = get_constants(evt, env, src, ctype, cdir, vers, verb)
+        root, ext = os.path.splitext(cfname)
+        if ext=='.npy' :
+            dcu.np.save(cfname, nda)
+        else : # save as text file
+            from PSCalib.NDArrIO import save_txt
+            #rms = nda.std()
+            fmt = '%.1f' # if rms>10 else '%.3f' if rms>0.1 else '%.6f'  
+            save_txt(cfname, nda, cmts=(), fmt=fmt)
+        if verb : print 'Array of constants for vers=%s is saved in file: %s' % (vers, cfname)
+
+#------------------------------
+
+def usage() :
+    return '\n\nCommand to print, get, add, or delete info from/in calibration file:\n'+\
+           '\n  %prog <arg>'+\
+           ' -e <experiment> -r <run-number> -d <datector-source> -t <ctype> [-c <calib_dir>]'+\
+           '\n      [-f <file-name>] [-v <version>] [-f <i/o-file-name>] [-m <message>]'+\
+           '\n      [-p <predecessor>] [-s <successor>] [-v <vebousity>]'+\
+           '\n\n  where <arg> is one of the keywords p[rint], g[et], a[dd], or d[elete]'+\
+           '\n\n  Examples:'+\
+           '\n  %prog pri -e mfxn8316 -r 11 -d Epix100a -c ./calib'+\
+           '\n  %prog pri -e mfxn8316 -r 11 -d Epix100a\n'+\
+           '\n  %prog get -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 3 -f my-nda.txt -c ./calib'+\
+           '\n  %prog get -e mfxn8316 -r 11 -d Epix100a -t pixel_status\n'+\
+           '\n  %prog add -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4 -f my-nda.txt -m "my comment" -c ./calib'+\
+           '\n  %prog add -e mfxn8316 -r 11 -d Epix100a -t pixel_status -f my-nda.txt\n'+\
+           '\n  %prog del -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4 -m "my comment" -c ./calib'+\
+           '\n  %prog del -e mfxn8316 -r 11 -d Epix100a -t pixel_status'
+ 
+#------------------------------
+
+def input_option_parser() :
+
+    from optparse import OptionParser
+
+    mode_def   = 'print' # print/get/add/delete
+    exp_def    = 'mfxn8316' 
+    run_def    = 1
+    src_def    = 'Epix100a.'
+    ctype_def  = 'pixel_status'
+    cdir_def   = './calib'
+    vers_def   = None
+    msg_def    = ''
+    pred_def   = None
+    succ_def   = None
+    cfname_def = None # 'ndarray.txt'
+    verbos_def = True
+
+    h_mode   = 'command mode: print/get/add/delete, default = %s' % mode_def
+    h_exp    = 'experiment, e.g., cxi43210, default = %s' % exp_def
+    h_run    = 'run number, default = %d' % run_def
+    h_src    = 'detector source name, e.g., Cspad., default = %s' % str(src_def)
+    h_ctype  = '(str) calibration type, default = %s' % str(ctype_def)
+    h_cdir   = 'non-default calibration directory, default = %s' % str(cdir_def)
+    h_vers   = 'version of constants, default = %s' % str(vers_def)
+    h_msg    = 'comment to add/delete constant version, default = "%s"' % str(msg_def)
+    h_pred   = 'predecessor, default = %s' % str(pred_def)
+    h_succ   = 'succecessor, default = %s' % str(succ_def)
+    h_cfname = 'i/o file name for constants, default = %s' % str(cfname_def)
+    h_verbos = 'verbosity, default = %s' % str(verbos_def)
+
+    parser = OptionParser(description='Command line parameters', usage ='usage: %prog <arg> <opts>' + usage())
+    parser.add_option('-e', '--exp',    default=exp_def,    action='store', type='string', help=h_exp   )
+    parser.add_option('-r', '--run',    default=run_def,    action='store', type='int',    help=h_run   )
+    parser.add_option('-d', '--src',    default=src_def,    action='store', type='string', help=h_src   )
+    parser.add_option('-t', '--ctype',  default=ctype_def,  action='store', type='string', help=h_ctype )
+    parser.add_option('-c', '--cdir',   default=cdir_def,   action='store', type='string', help=h_cdir  )
+    parser.add_option('-v', '--vers',   default=vers_def,   action='store', type='int',    help=h_vers  )
+    parser.add_option('-m', '--msg',    default=msg_def,    action='store', type='string', help=h_msg   )
+    parser.add_option('-p', '--pred',   default=pred_def,   action='store', type='string', help=h_pred  )
+    parser.add_option('-s', '--succ',   default=succ_def,   action='store', type='string', help=h_succ  )
+    parser.add_option('-f', '--cfname', default=cfname_def, action='store', type='string', help=h_cfname)
+    parser.add_option('-i', '--verbos', default=verbos_def, action='store_false',          help=h_verbos)
+ 
+    return parser #, parser.parse_args()
+
+#------------------------------
+
+if __name__ == "__main__" :
+
+    proc_name = os.path.basename(sys.argv[0])
+
+    parser = input_option_parser()
+
+    if len(sys.argv)==1 :
+        parser.print_help()
+        msg = '\nWARNING: run this command with parameters, e.g.:    %s -h' % proc_name
+        sys.exit ('%s\nEnd of %s' % (msg, proc_name))
+
+    DCS_CLI(parser)
+
+    sys.exit(0)
+
+#------------------------------
