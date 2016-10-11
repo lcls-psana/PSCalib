@@ -28,8 +28,8 @@ Usage::
     o.set_end(tsend)                      # set (int) time stamp ending validity range
     o.add_version(vnum=None, tsec_prod=None, nda=None, cmt=None) # add object for new version of calibration data
     o.set_vnum_def(vnum=None)             # set default version number, if available. vnum=None - use last available.
-    vd = o.del_version(vnum=None)         # delete version, returns deleted version number or None if nothing was deleted
-    o.del_versions()                      # delete all registered versions
+    vd = o.mark_version(vnum=None)        # mark version for deletion, returns version number or None if nothing was deleted
+    o.mark_versions()                     # mark all registered versions for deletion
 
     o.save(group)                         # saves object content under h5py.group in the hdf5 file. 
     o.load(group)                         # loads object content from the hdf5 file. 
@@ -103,7 +103,6 @@ class DCRange(DCRangeI) :
         self.set_begin(begin)
         self.set_end(end)
         self._dicvers = {}
-        self._dicstat = {} # flags 0/1 = good/marked-to-delete
         self._vnum_def = 0 # 0 = use last
         self._str_range = key(begin, end)
         log.debug('In c-tor for range: %s' % self._str_range, self._name)
@@ -136,13 +135,16 @@ class DCRange(DCRangeI) :
 
     def set_str_range(self, str_range) : self._str_range = str_range
 
-    def add_version(self, vnum=None, tsec_prod=None, nda=None, cmt=None) :
+
+    def add_version(self, vnum=None, tsec_prod=None, nda=None, cmt=False) :
         vn = self.vnum_last() + 1 if vnum is None else vnum
+        if vn in self._dicvers.keys() :
+            return self._dicvers[vn]
         o = self._dicvers[vn] = DCVersion(vn, tsec_prod, nda)
-        self._dicstat[vn] = 0
-        #self.add_history_record('vers=%d deleted. %s'%(vers, cmt))
-        #if cmt is not None : o.add_history_record(cmt)
-        #self._vnum_def = vn
+
+        rec = self.make_record('add version', str(vn), cmt) 
+        if cmt is not False : self.add_history_record(rec)
+        log.info(rec, self.__class__.__name__)
         return o
 
 
@@ -157,23 +159,28 @@ class DCRange(DCRangeI) :
             log.warning(msg, self._name)
 
 
-    def del_version(self, vnum=None) :
+    def mark_version(self, vnum=None, cmt=False) :
+        """Marks child object for deletion in save()"""
         vers = self.vnum_last() if vnum is None else vnum
 
         if vers in self._dicvers.keys() :
-            del self._dicvers[vers]
-            self._dicstat[vers] = 1 # set flag for delition 
-            #self.add_history_record('vers=%d deleted. %s'%(vers, cmt))
+            self._lst_del_keys.append(vers)
+
+            rec = self.make_record('del version', str(vers), cmt) 
+            if cmt is not False : self.add_history_record(rec)
+            log.info(rec, self.__class__.__name__)
             return vers
         else :
-            msg = 'Requested delition of non-existent version %s' % str(vers)
+            msg = 'Marking of non-existent version %s' % str(vers)
             log.warning(msg, self._name)
             return None
 
 
-    def del_versions(self) :
+    def mark_versions(self) :
+        """Marks all child objects for deletion in save()"""
         for vers in self._dicvers.keys() :
-            self.del_version(self, vers)
+            self.mark_version(vers)
+            #self._lst_del_keys.append(vers)
 
 
     def __del__(self) :
@@ -183,7 +190,6 @@ class DCRange(DCRangeI) :
 
     def clear_versions(self) :
         self._dicvers.clear()
-        self._dicstat.clear()
 
 
     def tsec_in_range(self, tsec) :
@@ -212,7 +218,6 @@ class DCRange(DCRangeI) :
 
     def save(self, group) :
 
-        #grp = group.create_group(self.range())
         grp = get_subgroup(group, self.range())
 
         ds1 = save_object_as_dset(grp, 'begin',   data=self.begin())    # dtype='double'
@@ -223,12 +228,18 @@ class DCRange(DCRangeI) :
         msg = '=== save(), group %s object for %s' % (grp.name, self.range())
         log.debug(msg, self._name)
 
-        #print 'ZZZ: self._dicstat', self._dicstat 
         #print 'ZZZ: self.versions()', self.versions() 
 
-        for k,v in self._dicstat.iteritems() :
-            if v & 1 : delete_object(grp, version_int_to_str(k))
-            else     : self.versions()[k].save(grp)
+        # save/delete objects in/from hdf5 file
+        for k,v in self._dicvers.iteritems() :
+            if k in self._lst_del_keys : delete_object(grp, version_int_to_str(k))
+            else : v.save(grp)
+
+        # deletes items from dictionary
+        for k in self._lst_del_keys :
+            del self._dicvers[k]
+
+        self._lst_del_keys = []
 
         self.save_base(grp)
 
@@ -252,7 +263,7 @@ class DCRange(DCRangeI) :
             elif isinstance(v, sp.group_t) :
                 if self.is_base_group(k,v) : continue
                 log.debug('load group "%s"' % k, self._name)
-                o = self.add_version(v['version'][0])
+                o = self.add_version(v['version'][0], cmt=False)
                 o.load(v)
 
 
@@ -270,10 +281,6 @@ class DCRange(DCRangeI) :
 
         for k,v in self.versions().iteritems() :
             v.print_obj()
-
-#---- TO-DO
-
-#    def get(self, p1, p2, p3)  : return None
 
 #------------------------------
 

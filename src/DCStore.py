@@ -75,7 +75,7 @@ from time import time
 from PSCalib.DCInterface import DCStoreI
 from PSCalib.DCType import DCType
 from PSCalib.DCLogger import log
-from PSCalib.DCUtils import gu, sp, save_object_as_dset, evt_time
+from PSCalib.DCUtils import gu, sp, save_object_as_dset, evt_time, delete_object
 
 #------------------------------
 
@@ -110,7 +110,6 @@ class DCStore(DCStoreI) :
         self._predecessor = None
         self._successor = None
         self._dicctypes = {}
-        self._dicstat = {} # flags 0/1 = good/marked-to-delete
         log.debug('In c-tor for path: %s' % path, self._name)
         
 #------------------------------
@@ -163,7 +162,8 @@ class DCStore(DCStoreI) :
 
     def set_successor(self, succ=None)   : self._successor = succ
 
-    def add_ctype(self, ctype) :
+
+    def add_ctype(self, ctype, cmt=False) :
         if not (ctype in gu.calib_names) : 
             msg = 'ctype "%s" is not in the list of known types:\n  %s' % (ctype, gu.calib_names)
             log.error(msg, self.__class__.__name__)
@@ -172,26 +172,33 @@ class DCStore(DCStoreI) :
         if ctype in self._dicctypes.keys() :
             return self._dicctypes[ctype]
         o = self._dicctypes[ctype] = DCType(ctype)
-        self._dicstat[ctype] = 0
+
+        rec = self.make_record('add ctype', ctype, cmt) 
+        if cmt is not False : self.add_history_record(rec)
+        log.info(rec, self.__class__.__name__)
         return o
 
 
-    def mark_ctype(self, ctype) :
+    def mark_ctype(self, ctype, cmt=False) :
+        """Marks child object for deletion in save()"""
         if ctype in self._dicctypes.keys() :
-            o = self._dicctypes[ctype] 
-            o.mark_ranges()
-            #del o - DO NOT DELETE OBJECT, othervise its content will not be deleted from file...
-            self._dicstat[ctype] = 1 # set flag (for deletion) 
+            self._lst_del_keys.append(ctype)
+
+            rec = self.make_record('del ctype', ctype, cmt) 
+            if cmt is not False : self.add_history_record(rec)
+            log.info(rec, self.__class__.__name__)
             return ctype
         else :
-            msg = 'Requested delition of non-existent ctype "%s"' % str(ctype)
+            msg = 'Marking of non-existent ctype "%s"' % str(ctype)
             log.warning(msg, self._name)
             return None
 
 
     def mark_ctypes(self) :
+        """Marks all child objects for deletion in save()"""
         for ctype in self._dicctypes.keys() :
             self.mark_ctype(ctype)
+            #self._lst_del_keys.append(ctype)
 
 
     def __del__(self) :
@@ -201,7 +208,6 @@ class DCStore(DCStoreI) :
 
     def clear_ctypes(self) :
         self._dicctypes.clear()     
-        self._dicstat.clear()
 
 
     def save(self, path=None, mode='r+') :
@@ -225,16 +231,17 @@ class DCStore(DCStoreI) :
             ds5 = save_object_as_dset(grp, 'predecessor', data=self.predecessor()) # 'str'       
             ds6 = save_object_as_dset(grp, 'successor',   data=self.successor())   # 'str'
 
-            #for k,v in self.ctypes().iteritems() :
-            #    #msg='Add type %s as object %s' % (k, v.ctype())
-            #    #log.debug(msg, self._name)
-            #    v.save(grp)
+            # save/delete objects in/from hdf5 file
+            for k,v in self._dicctypes.iteritems() :
+                if k in self._lst_del_keys : delete_object(grp, k)
+                else : v.save(grp)
+                       #self._dicctypes[k].save(grp)
 
-            for k,v in self._dicstat.iteritems() :
-                if v & 1 :
-                    delete_object(grp, k)
-                    #del self.ctypes()[k]
-                else     : self.ctypes()[k].save(grp)
+            # deletes items from dictionary
+            for k in self._lst_del_keys :
+                del self._dicctypes[k]
+
+            self._lst_del_keys = []
 
             self.save_base(grp)
 
@@ -267,7 +274,7 @@ class DCStore(DCStoreI) :
                 elif isinstance(v, sp.group_t) :
                     if self.is_base_group(k,v) : continue
                     log.debug('load group "%s"' % k, self._name)                    
-                    o = self.add_ctype(k)
+                    o = self.add_ctype(k, cmt=False)
                     o.load(v)
  
 
@@ -291,10 +298,6 @@ class DCStore(DCStoreI) :
         #    #msg='Add type %s as object %s' % (k, v.ctype())
         #    #log.info(msg, self._name)
             v.print_obj()
-
-#---- TO-DO
-
-#    def get(self, ctype, tsp, vers) : print_warning(self, sys._getframe()); return None
 
 #------------------------------
 #------------------------------

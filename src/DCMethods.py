@@ -25,6 +25,7 @@ Usage::
     nda      = np.zeros((32,185,388))
     pred     = 'CxiDs2.0:Cspad.0'
     succ     = 'CxiDs2.0:Cspad.0'
+    range    = '1474587520-end'
 
     # Methods
     dcm.add_constants(nda, evt, env, src, ctype, calibdir,\
@@ -33,9 +34,12 @@ Usage::
                       succ=None,\
                       cmt=None) 
 
-    dcm.get_constants(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
+    nda = dcm.get_constants(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
 
     dcm.delete_version(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
+    dcm.delete_range  (evt, env, src, ctype, cdir, range, msg, verb)
+    dcm.delete_ctype  (evt, env, src, ctype, cdir, msg, verb)
+
 
 @see project modules
     * :py:class:`PSCalib.DCStore`
@@ -138,22 +142,20 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
     #cs.add_history_record('%s for %s' % (metname, msg))
     #cs.add_par('par-1-in-DCStore', 1)
 
-    ct = cs.add_ctype(str_ctype)
+    ct = cs.add_ctype(str_ctype, cmt=cmt)
     if ct is None : return
     #ct.add_history_record('%s - add DCType %s' % (metname,str_ctype))
     #ct.add_par('par-1-in-DCType', 1)
 
-    cr = ct.add_range(tsec_ev, end=None)
+    cr = ct.add_range(tsec_ev, end=None, cmt=cmt)
     if cr is None : return
     #cr.set_vnum_def(vnum=None)
 
-    cv = cr.add_version(vnum=vers, tsec_prod=time(), nda=nda, cmt=None)
+    cv = cr.add_version(vnum=vers, tsec_prod=time(), nda=nda, cmt=cmt)
     if cv is None : return
-    v = cr.vnum_last() if vers is None else vers
-    rec='%s vers=%d: %s' % (metname, v, cmt if cmt is not None else 'no-comments') 
-    cr.add_history_record(rec)
-    #cv.add_data(nda)
-    #cv.add_history_record('%s - add data' % metname)
+    #v = cr.vnum_last() if vers is None else vers
+    #rec='%s vers=%d: %s' % (metname, v, cmt if cmt is not None else 'no-comments') 
+    #cr.add_history_record(rec)
 
     if verb : 
         print 50*'_','\nIn %s:' % metname
@@ -202,21 +204,15 @@ def get_constants(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
 
     ct = cs.ctypeobj(str_ctype)
     if ct is None : return None 
-    #if verb : 
-    #    print 50*'_','\nDCType.print_obj()' 
-    #    ct.print_obj()
+    #ct.print_obj()
 
     cr = ct.range_for_evt(evt)
     if cr is None : return None
-    #if verb :
-    #    print 50*'_','\nDCRange.print_obj()' 
-    #    cr.print_obj()
+    #cr.print_obj()
 
     cv = cr.version(vnum=vers)
     if cv is None : return None
-    #if verb :
-    #    print 50*'_','\nDCVersion.print_obj()' 
-    #    cv.print_obj()
+    #cv.print_obj()
 
     return cv.data()
 
@@ -228,12 +224,14 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
     
     Parameters
     
-    env : psana.Env -> full detector name for psana.Source 
     evt : psana.Event -> event time
+    env : psana.Env -> full detector name for psana.Source 
     src : str - source short/full name, alias or full
     ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
     calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
     vers : int - calibration version
+    cmt  : str - comment
+    verb : bool - verbousity
     """
     metname = sys._getframe().f_code.co_name
 
@@ -243,8 +241,7 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
 
     ofn = DCFileName(env, src, calibdir)
     fname = ofn.calib_file_path()
-    if verb :
-        ofn.print_attrs()
+    if verb : ofn.print_attrs()
 
     if fname is None : return None
     if not os.path.exists(fname) :
@@ -253,39 +250,127 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
 
     cs = DCStore(fname)
     cs.load()
-    #if verb :
-    #    print 50*'_','\nDCStore.print_obj()' 
-    #    cs.print_obj()
 
     ct = cs.ctypeobj(str_ctype)
     if ct is None : return None 
-    #if verb :
-    #    print 50*'_','\nDCType.print_obj()' 
-    #    ct.print_obj()
+    #ct.print_obj()
 
     cr = ct.range_for_evt(evt)
     if cr is None : return None
-    #if verb :
-    #    print 50*'_','\nDCRange.print_obj()' 
-    #    cr.print_obj()
 
     v = vers if vers is not None else cr.vnum_last()
-    c = cmt if cmt is not None else ''
-    rec='%s vers=%d: %s' % (metname, v, c) 
-    cr.add_history_record(rec)
 
-    vdeleted = cr.del_version(vnum=vers)
+    vdel = cr.mark_version(vnum=vers, cmt=cmt)
 
     if verb : log.setPrintBits(02) # 0377
 
-    ofn.make_path_to_calib_file() # depth=2, mode=0775)
+    cs.save()
 
     if verb :
-        print 50*'_','\nDCStore.print_obj() after delete version %d' % vdeleted
+        print 50*'_','\nDCStore.print_obj() after delete version %s' % str(vdel)
         cs.print_obj()
     
+    return vdel
+
+#------------------------------
+
+def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False) :
+
+    """Delete specified version from calibration constants.
+    
+    Parameters
+    
+    evt : psana.Event -> event time
+    env : psana.Env -> full detector name for psana.Source 
+    src : str - source short/full name, alias or full
+    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    range : str - range, e.g. '1474587520-end'
+    cmt   : str - comment
+    verb  : bool - verbousity
+    """
+    metname = sys._getframe().f_code.co_name
+
+    str_ctype = gu.dic_calib_type_to_name[ctype]
+    if verb : print '  src: %s\n  ctype: %s\n  range: %s\n  calibdir:%s'%\
+                    (src, str_ctype, range, calibdir)
+
+    ofn = DCFileName(env, src, calibdir)
+    fname = ofn.calib_file_path()
+    if verb : ofn.print_attrs()
+
+    if fname is None : return None
+    if not os.path.exists(fname) :
+        if verb : print 'WARNING: path does not exist.'
+        return None
+
+    cs = DCStore(fname)
+    cs.load()
+    #cs.print_obj()
+
+    ct = cs.ctypeobj(str_ctype)
+    if ct is None : return None 
+
+    rdel = ct.mark_range_for_key(range, cmt=cmt)
+    if rdel is None : return None
+
+    if verb : log.setPrintBits(02) # 0377
+
     cs.save()
-    return vdeleted
+
+    if verb :
+        print 50*'_','\nDCStore.print_obj() after delete range %s' % rdel
+        cs.print_obj()
+    
+    return rdel
+
+#------------------------------
+
+def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False) :
+
+    """Delete specified version from calibration constants.
+    
+    Parameters
+    
+    evt : psana.Event -> event time
+    env : psana.Env -> full detector name for psana.Source 
+    src : str - source short/full name, alias or full
+    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    cmt   : str - comment
+    verb  : bool - verbousity
+    """
+    metname = sys._getframe().f_code.co_name
+
+    str_ctype = gu.dic_calib_type_to_name[ctype]
+    if verb : print '  src: %s\n  ctype: %s\n  range: %s\n  calibdir:%s'%\
+                    (src, str_ctype, range, calibdir)
+
+    ofn = DCFileName(env, src, calibdir)
+    fname = ofn.calib_file_path()
+    if verb : ofn.print_attrs()
+
+    if fname is None : return None
+    if not os.path.exists(fname) :
+        if verb : print 'WARNING: path does not exist.'
+        return None
+
+    cs = DCStore(fname)
+    cs.load()
+    #cs.print_obj()
+
+    tdel = cs.mark_ctype(str_ctype, cmt=cmt)
+    if tdel is None : return None 
+
+    if verb : log.setPrintBits(02) # 0377
+
+    cs.save()
+
+    if verb :
+        print 50*'_','\nDCStore.print_obj() after delete ctype %s' % tdel
+        cs.print_obj()
+    
+    return tdel
 
 #------------------------------
 
@@ -344,10 +429,34 @@ def test_add_constants() :
     nda  = np.zeros((1000,1000), dtype=np.float32)
     pred = None
     succ = None
-    cmt  = 'my comment to add'
+    cmt  = 'my comment'
     
     add_constants(nda, gevt, genv, gsrc, gctype, gcalibdir, vers, pred, succ, cmt, gverb)
     print '%s: constants added nda.shape=%s' % (metname, nda.shape)
+
+#------------------------------
+
+def test_add_constants_two() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+
+    import numpy as np
+
+    vers   = None
+    pred   = None
+    succ   = None
+    ctype1 = gu.PIXEL_STATUS
+    ctype2 = gu.PIXEL_MASK
+    #nda   = np.zeros((32,185,388), dtype=np.float32)
+    nda1   = np.ones((1000,1000), dtype=np.float32)
+    nda2   = 2 * nda1
+    cmt1   = 'my comment 1'
+    cmt2   = 'my comment 2'
+    
+    add_constants(nda1, gevt, genv, gsrc, ctype1, gcalibdir, vers, pred, succ, cmt1, gverb)
+    add_constants(nda2, gevt, genv, gsrc, ctype2, gcalibdir, vers, pred, succ, cmt2, gverb)
+    print '%s: constants added ctype1=%s nda1.shape=%s' % (metname, str(ctype1), nda1.shape)
+    print '%s: constants added ctype2=%s nda2.shape=%s' % (metname, str(ctype2), nda2.shape)
 
 #------------------------------
 
@@ -358,7 +467,9 @@ def test_get_constants() :
     vers = None
     nda = get_constants(gevt, genv, gsrc, gctype, gcalibdir, vers, gverb)
 
-    print '%s: retrieved constants for vers %s nda.shape=%s' % (metname, str(vers), str(nda.shape))
+    print '%s: retrieved constants for vers %s' % (metname, str(vers))
+    print '    nda:', nda
+    if nda is not None : print '    nda.shape=%s' % (str(nda.shape))
 
 #------------------------------
 
@@ -367,16 +478,38 @@ def test_delete_version() :
     print 20*'_', '\n%s' % metname
 
     vers = None # for default - last version
-    cmt  = 'my comment to delete'
-    vdeleted = delete_version(gevt, genv, gsrc, gctype, gcalibdir, vers, cmt, gverb)
+    cmt  = 'my comment to delete version'
+    vdel = delete_version(gevt, genv, gsrc, gctype, gcalibdir, vers, cmt, gverb)
+    print '%s: deleted version %s' % (metname, str(vdel))
 
-    print '%s: deleted version %s' % (metname, str(vdeleted))
+#------------------------------
+
+def test_delete_range() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+
+    range = '1474587520-end'
+    cmt  = 'my comment to delete range'
+    rdel = delete_range(gevt, genv, gsrc, gctype, gcalibdir, range, cmt, gverb)
+    print '%s: deleted range %s' % (metname, str(rdel))
+
+#------------------------------
+
+def test_delete_ctype() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+
+    cmt  = 'my comment to delete ctype'
+    tdel = delete_ctype(gevt, genv, gsrc, gctype, gcalibdir, cmt, gverb)
+    print '%s: deleted ctype %s' % (metname, str(tdel))
 
 #------------------------------
 
 def test_print_file_content() :
-    print 20*'_', '\n%s' % sys._getframe().f_code.co_name
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
     print_file_content(gevt, genv, gsrc, gcalibdir)
+    print '%s is completed' % (metname)
 
 #------------------------------
 
@@ -430,9 +563,12 @@ def do_test() :
     t0_sec = time()
     if   tname == '0' : test_misc(); 
     elif tname == '1' : test_add_constants()
-    elif tname == '2' : test_get_constants()
-    elif tname == '3' : test_delete_version()
+    elif tname == '2' : test_add_constants_two()
+    elif tname == '3' : test_get_constants()
     elif tname == '4' : test_print_file_content()
+    elif tname == '5' : test_delete_version()
+    elif tname == '6' : test_delete_range()
+    elif tname == '7' : test_delete_ctype()
     else : print 'Not-recognized test name: %s' % tname
     msg = 'End of test %s, consumed time (sec) = %.6f' % (tname, time()-t0_sec)
     sys.exit(msg)

@@ -106,8 +106,7 @@ class DCVersion(DCVersionI) :
     def data(self)                 : return self._nda      # np.array
 
     def save(self, group) :
-        #grp = group.create_group(self.str_vnum())                       # (str)
-        grp = get_subgroup(group, self.str_vnum())                       # (str)
+        grp = get_subgroup(group, self.str_vnum())                      # (str)
         ds1 = save_object_as_dset(grp, 'version', data=self.vnum())     # dtype='int'
         ds2 = save_object_as_dset(grp, 'tsprod',  data=self.tsprod())   # dtype='double'
         ds3 = save_object_as_dset(grp, 'data',    data=self.data())     # dtype='np.array'

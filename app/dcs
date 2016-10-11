@@ -4,7 +4,7 @@
 import os
 import sys
 from time import time
-from PSCalib.DCMethods import add_constants, get_constants, delete_version, print_file_content
+from PSCalib.DCMethods import add_constants, get_constants, delete_version, delete_range, delete_ctype, print_file_content
 import PSCalib.DCUtils as dcu
 
 #------------------------------
@@ -98,6 +98,7 @@ class DCS_CLI :
         src    = self.opts['src']
         cdir   = self.opts['cdir']
         msg    = self.opts['msg']
+        rng    = self.opts['rng']
         pred   = self.opts['pred']
         succ   = self.opts['succ']
         vers   = self.opts['vers']
@@ -105,11 +106,14 @@ class DCS_CLI :
 
         ctype  = self.calib_type()
 
-        action = (self.args[0])[0]
-        if   action=='p' : print_file_content (evt, env, src, calibdir=cdir)
-        elif action=='a' : self.add_constants (evt, env, src, ctype, cdir, vers, pred, succ, msg, verb)
-        elif action=='g' : self.get_constants (evt, env, src, ctype, cdir, vers, verb)
-        elif action=='d' : self.delete_version(evt, env, src, ctype, cdir, vers, msg, verb)
+        mode   = self.args[0]
+        action = mode[0]
+        if   action=='p'     : print_file_content (evt, env, src, calibdir=cdir)
+        elif action=='a'     : self.add_constants (evt, env, src, ctype, cdir, vers, pred, succ, msg, verb)
+        elif action=='g'     : self.get_constants (evt, env, src, ctype, cdir, vers, verb)
+        elif 'delv' in mode  : self.delete_version(evt, env, src, ctype, cdir, vers, msg, verb)
+        elif 'delr' in mode  : self.delete_range  (evt, env, src, ctype, cdir, rng, msg, verb)
+        elif 'delc' in mode  : self.delete_ctype  (evt, env, src, ctype, cdir, msg, verb)
         else :
             self.parser.print_usage()
             print 'WARNING: unrecognized command argument "%s". See command usage above.' % self.args[0]
@@ -119,6 +123,16 @@ class DCS_CLI :
 
     def delete_version(self, evt, env, src, ctype, cdir, vers, msg, verb) :
         delete_version(evt, env, src, ctype, cdir, vers, 'CLI %s'%msg, verb)
+
+#------------------------------
+
+    def delete_range(self, evt, env, src, ctype, cdir, range, msg, verb) :
+        delete_range(evt, env, src, ctype, cdir, range, 'CLI %s'%msg, verb)
+
+#------------------------------
+
+    def delete_ctype(self, evt, env, src, ctype, cdir, msg, verb) :
+        delete_ctype(evt, env, src, ctype, cdir, 'CLI %s'%msg, verb)
 
 #------------------------------
 
@@ -168,14 +182,18 @@ def usage() :
            '\n      [-p <predecessor>] [-s <successor>] [-v <vebousity>]'+\
            '\n\n  where <arg> is one of the keywords p[rint], g[et], a[dd], or d[elete]'+\
            '\n\n  Examples:'+\
-           '\n  %prog pri -e mfxn8316 -r 11 -d Epix100a -c ./calib'+\
-           '\n  %prog pri -e mfxn8316 -r 11 -d Epix100a\n'+\
-           '\n  %prog get -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 3 -f my-nda.txt -c ./calib'+\
-           '\n  %prog get -e mfxn8316 -r 11 -d Epix100a -t pixel_status\n'+\
-           '\n  %prog add -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4 -f my-nda.txt -m "my comment" -c ./calib'+\
-           '\n  %prog add -e mfxn8316 -r 11 -d Epix100a -t pixel_status -f my-nda.txt\n'+\
-           '\n  %prog del -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4 -m "my comment" -c ./calib'+\
-           '\n  %prog del -e mfxn8316 -r 11 -d Epix100a -t pixel_status'
+           '\n  %prog print      -e mfxn8316 -r 11 -d Epix100a -c ./calib'+\
+           '\n  %prog print      -e mfxn8316 -r 11 -d Epix100a\n'+\
+           '\n  %prog get        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 3 -f my-nda.txt -c ./calib'+\
+           '\n  %prog get        -e mfxn8316 -r 11 -d Epix100a -t pixel_status\n'+\
+           '\n  %prog add        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4 -f my-nda.txt -m "my comment" -c ./calib'+\
+           '\n  %prog add        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -f my-nda.txt\n'+\
+           '\n  %prog delversion -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4 -m "my comment" -c ./calib'+\
+           '\n  %prog delversion -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4\n'+\
+           '\n  %prog delrange   -e mfxn8316 -r 11 -d Epix100a -t pixel_status -g 1474587520-end -m "my comment" -c ./calib'+\
+           '\n  %prog delrange   -e mfxn8316 -r 11 -d Epix100a -t pixel_status -g 1474587520-end\n'+\
+           '\n  %prog delctype   -e mfxn8316 -r 11 -d Epix100a -t pixel_status -m "my comment" -c ./calib'+\
+           '\n  %prog delctype   -e mfxn8316 -r 11 -d Epix100a -t pixel_status'
  
 #------------------------------
 
@@ -191,6 +209,7 @@ def input_option_parser() :
     cdir_def   = './calib'
     vers_def   = None
     msg_def    = ''
+    rng_def    = ''
     pred_def   = None
     succ_def   = None
     cfname_def = None # 'ndarray.txt'
@@ -204,6 +223,7 @@ def input_option_parser() :
     h_cdir   = 'non-default calibration directory, default = %s' % str(cdir_def)
     h_vers   = 'version of constants, default = %s' % str(vers_def)
     h_msg    = 'comment to add/delete constant version, default = "%s"' % str(msg_def)
+    h_rng    = 'string time range to delete range, default = "%s"' % str(rng_def)
     h_pred   = 'predecessor, default = %s' % str(pred_def)
     h_succ   = 'succecessor, default = %s' % str(succ_def)
     h_cfname = 'i/o file name for constants, default = %s' % str(cfname_def)
@@ -217,6 +237,7 @@ def input_option_parser() :
     parser.add_option('-c', '--cdir',   default=cdir_def,   action='store', type='string', help=h_cdir  )
     parser.add_option('-v', '--vers',   default=vers_def,   action='store', type='int',    help=h_vers  )
     parser.add_option('-m', '--msg',    default=msg_def,    action='store', type='string', help=h_msg   )
+    parser.add_option('-g', '--rng',    default=rng_def,    action='store', type='string', help=h_rng   )
     parser.add_option('-p', '--pred',   default=pred_def,   action='store', type='string', help=h_pred  )
     parser.add_option('-s', '--succ',   default=succ_def,   action='store', type='string', help=h_succ  )
     parser.add_option('-f', '--cfname', default=cfname_def, action='store', type='string', help=h_cfname)

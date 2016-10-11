@@ -312,6 +312,10 @@ def evt_fiducials(evt) :
     return evid.fiducials()
 
 #------------------------------
+#------------------------------
+#------------------------------
+#------------------------------
+#------------------------------
 
 def test_source_full_name() :
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')

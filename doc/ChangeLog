@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-07
+2016-10-11 Mikhail S. Dubrovin
+- DCMethods.py - add new methods
+- the 1-st full-scale version of CLI in app/dcs
+
 Tag: V00-03-06
 2016-10-07 Mikhail S. Dubrovin
 - add app/dcs

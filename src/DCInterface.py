@@ -59,7 +59,6 @@ class DCStoreI(DCBase) :
        successor   = cs.successor()             # (str) detname of successor or None
        ctypes      = cs.ctypes()                # (list) calibration types in the file
        cto         = cs.ctypeobj(ctype)         # (DCType ~ h5py.Group) calibration type object
-       nda         = cs.get(ctype, tsp, vers)
 
        cs.set_tscfile(ts)                       # set (int) time stamp of the file creation 
        cs.set_dettype(dettype)                  # set (str) detector type
@@ -88,14 +87,13 @@ class DCStoreI(DCBase) :
     def successor(self)             : print_warning(self, sys._getframe()); return None
     def ctypes(self)                : print_warning(self, sys._getframe()); return None
     def ctypeobj(self, ctype)       : print_warning(self, sys._getframe()); return None
-    def get(self, ctype, tsp, vers) : print_warning(self, sys._getframe()); return None
     def set_tscfile(self, ts)       : print_warning(self, sys._getframe())
     def set_dettype(self, dettype)  : print_warning(self, sys._getframe())
     def set_detid(self, detid)      : print_warning(self, sys._getframe())
     def set_detname(self, detname)  : print_warning(self, sys._getframe())
     def set_predecessor(self, pred) : print_warning(self, sys._getframe())
     def set_successor(self, succ)   : print_warning(self, sys._getframe())
-    def add_ctype(self, ctype)      : print_warning(self, sys._getframe()); return None
+    def add_ctype(self, ctype, cmt=None)      : print_warning(self, sys._getframe()); return None
     def mark_ctype(self, ctype)     : print_warning(self, sys._getframe()); return None
     def mark_ctypes(self)           : print_warning(self, sys._getframe())
     def clear_ctypes(self)          : print_warning(self, sys._getframe())
@@ -129,7 +127,7 @@ class DCTypeI(DCBase) :
     def ctype(self)                  : print_warning(self, sys._getframe()); return None
     def ranges(self)                 : print_warning(self, sys._getframe()); return None
     def range(self, begin, end)      : print_warning(self, sys._getframe()); return None
-    def add_range(self, begin, end)  : print_warning(self, sys._getframe()); return None
+    def add_range(self, begin, end, cmt=None) : print_warning(self, sys._getframe()); return None
     def mark_range(self, begin, end) : print_warning(self, sys._getframe()); return None
     def mark_range_for_key(self, k)  : print_warning(self, sys._getframe()); return None
     def mark_ranges(self)            : print_warning(self, sys._getframe())
@@ -158,8 +156,8 @@ class DCRangeI(DCBase) :
        o.set_end(tsend)                      # set (int) time stamp ending validity range
        o.add_version(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
        o.set_versdef(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
-       vnum = o.del_version(vers)            # del version 
-       o.del_versions()                      # del all registered versions
+       vnum = o.mark_version(vers)           # del version 
+       o.mark_versions()                     # del all registered versions
     """
 
     def __init__(self, begin, end, cmt=None) :
@@ -174,10 +172,10 @@ class DCRangeI(DCBase) :
     def vnum_last(self)            : print_warning(self, sys._getframe()); return None
     def set_begin(self, begin)     : print_warning(self, sys._getframe())
     def set_end(self, end)         : print_warning(self, sys._getframe())
-    def add_version(self)          : print_warning(self, sys._getframe()); return None
+    def add_version(self, cmt=None): print_warning(self, sys._getframe()); return None
     def set_vnum_def(self, vnum)   : print_warning(self, sys._getframe())
-    def del_version(self, vnum)    : print_warning(self, sys._getframe()); return None
-    def del_versions(self)         : print_warning(self, sys._getframe())
+    def mark_version(self, vnum)   : print_warning(self, sys._getframe()); return None
+    def mark_versions(self)        : print_warning(self, sys._getframe())
     def clear_versions(self)       : print_warning(self, sys._getframe())
     def tsec_in_range(self, tsec)  : print_warning(self, sys._getframe()); return False
     def evt_in_range(self, evt)    : print_warning(self, sys._getframe()); return False
@@ -236,7 +234,6 @@ def test_DCStoreI() :
     r = o.successor()
     r = o.ctypes()
     r = o.ctypeobj(None)
-    r = o.get(None, None, None)    
     o.set_tscfile(None)
     o.set_dettype(None)
     o.set_detid(None)

@@ -106,6 +106,8 @@ class DCBase(object) :
         self._grp_pars_name = '_parameters'
         self._grp_history_name = '_history'
         self._tsec_old = None
+        self._lst_del_keys = []
+
         if cmt is not None : self.add_history_record(cmt)
 
 
@@ -308,6 +310,22 @@ class DCBase(object) :
 
 #------------------------------
 
+    def make_record(self, action='', key='', cmt=False) :
+        """Returns string record combined with comment.
+        
+        Parameters
+        
+        action : str - description of method action,
+        key    : str - key for hdf5 group or dataset name,
+        cmt    : str/None/False - additional comment or no-comment:
+                 False is used to turn off history record,
+                 None - no-comment.
+        """
+        if cmt is None or cmt is False : return '%s %s' % (action, key)
+        return '%s %s: %s' % (action, key, cmt)
+
+#------------------------------
+
 def test_pars() :
     o = DCBase()
     d = {1:'10', 2:'20', 3:'30'}
@@ -346,11 +364,20 @@ def test_time_converters() :
 
 #------------------------------
 
+def test_make_record() :
+    o = DCBase()
+    print o.make_record(action='test make_record for cmt=False', key='keyword', cmt=False)
+    print o.make_record(action='test make_record for cmt=None', key='keyword', cmt=None)
+    print o.make_record(action='test make_record for cmt="my comment"', key='keyword', cmt="my comment")
+
+#------------------------------
+
 if __name__ == "__main__" :
     import sys
     test_pars()
     test_history()
     test_time_converters()
-    sys.exit( 'End of %s test.' % sys.argv[0])
+    test_make_record()
+    sys.exit('End of %s test.' % sys.argv[0])
 
 #------------------------------

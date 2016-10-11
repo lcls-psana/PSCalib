@@ -64,7 +64,7 @@ import sys
 from PSCalib.DCInterface import DCTypeI
 from PSCalib.DCLogger import log
 from PSCalib.DCRange import DCRange, key
-from PSCalib.DCUtils import sp, evt_time, get_subgroup, save_object_as_dset
+from PSCalib.DCUtils import sp, evt_time, get_subgroup, save_object_as_dset, delete_object
 
 #------------------------------
 
@@ -82,7 +82,6 @@ class DCType(DCTypeI) :
         DCTypeI.__init__(self, ctype, cmt)
         self._name = self.__class__.__name__
         self._dicranges = {}
-        self._dicstat = {} # flags 0/1 = good/marked-to-delete
         self._ctype = ctype
         log.debug('In c-tor for ctype: %s' % ctype, self._name)
 
@@ -96,36 +95,45 @@ class DCType(DCTypeI) :
         return self._dicranges.get(key(begin, end), None) if begin is not None else None
 
 
-    def add_range(self, begin, end=None) :
+    def add_range(self, begin, end=None, cmt=False) :
         keyrng = key(begin, end)
         if keyrng in self._dicranges.keys() :
             return self._dicranges[keyrng]
         o = self._dicranges[keyrng] = DCRange(begin, end)
-        self._dicstat[keyrng] = 0
+
+        rec = self.make_record('add range', keyrng, cmt) 
+        if cmt is not False : self.add_history_record(rec)
+        log.info(rec, self.__class__.__name__)
         return o
 
 
-    def mark_range_for_key(self, keyrng) :
+    def mark_range_for_key(self, keyrng, cmt=False) :
+        """Marks child object for deletion in save()"""
         if keyrng in self._dicranges.keys() :
-            o = self._dicranges[keyrng]
-            o.mark_versions()
-            #del o  - DO NOT DELETE OBJECT!
-            self._dicstat[keyrng] = 1 # set flag for delition 
-            #self.add_history_record('range "%s" deleted. %s'%(keyrng, cmt))
+            #o = self._dicranges[keyrng]
+            #o.mark_versions()
+            self._lst_del_keys.append(keyrng)
+
+            rec = self.make_record('del range', keyrng, cmt) 
+            if cmt is not False : self.add_history_record(rec)
+            log.info(rec, self.__class__.__name__)
             return keyrng
         else :
-            msg = 'Requested delition of non-existent range %s' % str(keyrng)
+            msg = 'Marking of non-existent range %s' % str(keyrng)
             log.warning(msg, self._name)
             return None
 
 
     def mark_range(self, begin, end=None) :
+        """Marks child object for deletion in save()"""
         return self.mark_range_for_key(key(begin, end))
 
 
     def mark_ranges(self) :
+        """Marks all child objects for deletion in save()"""
         if keyrng in self._dicranges.keys() :
-            kr = self.mark_range_for_key(keyrng)
+            self.mark_range_for_key(keyrng)
+            #self._lst_del_keys.append(keyrng)
 
  
     def __del__(self) :
@@ -135,7 +143,6 @@ class DCType(DCTypeI) :
 
     def clear_ranges(self) :
         self._dicranges.clear()
-        self._dicstat.clear()
 
 
     def range_for_tsec(self, tsec) :
@@ -155,22 +162,22 @@ class DCType(DCTypeI) :
 
 
     def save(self, group) :
-
-        #grp = group.create_group(self.ctype())
         grp = get_subgroup(group, self.ctype())
         ds1 = save_object_as_dset(grp, 'ctype', data=self.ctype()) # dtype='str'
 
         msg = '== save(), group %s object for %s' % (grp.name, self.ctype())
         log.debug(msg, self._name)
 
-        #for k,v in self.ranges().iteritems() :
-        #    v.save(grp)
+        # save/delete objects in/from hdf5 file
+        for k,v in self._dicranges.iteritems() :
+            if k in self._lst_del_keys : delete_object(grp, k)
+            else : v.save(grp)
 
-        for k,v in self._dicstat.iteritems() :
-            if v & 1 :
-                delete_object(grp, k)
-                #del self.ranges()[k]
-            else : self.ranges()[k].save(grp)
+        # deletes items from dictionary
+        for k in self._lst_del_keys :
+            del self._dicranges[k]
+
+        self._lst_del_keys = []
 
         self.save_base(grp)
 
@@ -193,7 +200,7 @@ class DCType(DCTypeI) :
                 log.debug('load group "%s"' % k, self._name)
 
                 #print "XXX:v['begin'][0], v['end'][0]", v['begin'][0], v['end'][0]
-                o = self.add_range(v['begin'][0], v['end'][0])
+                o = self.add_range(v['begin'][0], v['end'][0], cmt=False)
                 o.load(v)
 
 
@@ -207,11 +214,6 @@ class DCType(DCTypeI) :
         for k,v in self.ranges().iteritems() :
             v.print_obj()
 
-#---- TO-DO
-
-    def get(self, p1, p2, p3)  : return None
-
-#------------------------------
 #------------------------------
 #------------------------------
 #----------- TEST -------------
@@ -230,7 +232,6 @@ def test_DCType() :
     o.mark_ranges()
     o.clear_ranges()
 
-    r = o.get(None, None, None)    
     #o.save(None)
     o.load(None)
 
