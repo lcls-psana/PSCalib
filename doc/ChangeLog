@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-08
+2016-10-17 Mikhail S. Dubrovin
+- app/dcs - hide test print messages
+
 Tag: V00-03-07
 2016-10-11 Mikhail S. Dubrovin
 - DCMethods.py - add new methods

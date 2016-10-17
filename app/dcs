@@ -93,7 +93,7 @@ class DCS_CLI :
         env=ds.env()
         evt=ds.events().next()
         #if self.verbos :
-        print 'time (sec) to get ds, env, evt = %.6f' % (time()-t0_sec)
+        #print 'time (sec) to get ds, env, evt = %.6f' % (time()-t0_sec)
 
         src    = self.opts['src']
         cdir   = self.opts['cdir']
@@ -137,7 +137,8 @@ class DCS_CLI :
 #------------------------------
 
     def add_constants(self, evt, env, src, ctype, cdir, vers, pred, succ, msg, verb) :
-        print 'In %s' % sys._getframe().f_code.co_name
+        if verb : print 'In %s' % sys._getframe().f_code.co_name
+
         cfname = self.opts['cfname']
         if not os.path.exists(cfname) :
             print 'WARNING: file %s does not exist' % cfname
