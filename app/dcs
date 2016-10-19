@@ -39,7 +39,8 @@ class DCS_CLI :
         """Prints input parameters"""
         print 'Command:', ' '.join(sys.argv)+\
               '\nlaunches %s' % self.__init__.__doc__+\
-              '\nwith argument %s and optional parameters key, value, default:' % str(self.args)
+              '\nwith argument %s and optional parameters:\n' % str(self.args)+\
+              '<key>      <value>          <default>'
         for k,v in self.opts.items() :
             print '%s %s %s' % (k.ljust(10), str(v).ljust(16), str(self.defs[k]).ljust(16))
 
@@ -108,7 +109,7 @@ class DCS_CLI :
 
         mode   = self.args[0]
         action = mode[0]
-        if   action=='p'     : print_file_content (evt, env, src, calibdir=cdir)
+        if   action=='p'     : print_file_content (evt, env, src, cdir)
         elif action=='a'     : self.add_constants (evt, env, src, ctype, cdir, vers, pred, succ, msg, verb)
         elif action=='g'     : self.get_constants (evt, env, src, ctype, cdir, vers, verb)
         elif 'delv' in mode  : self.delete_version(evt, env, src, ctype, cdir, vers, msg, verb)
@@ -207,7 +208,7 @@ def input_option_parser() :
     run_def    = 1
     src_def    = 'Epix100a.'
     ctype_def  = 'pixel_status'
-    cdir_def   = './calib'
+    cdir_def   = None
     vers_def   = None
     msg_def    = ''
     rng_def    = ''
@@ -256,7 +257,7 @@ if __name__ == "__main__" :
 
     if len(sys.argv)==1 :
         parser.print_help()
-        msg = '\nWARNING: run this command with parameters, e.g.:    %s -h' % proc_name
+        msg = '\nWARNING: run this command with parameters, e.g.: %s -h' % proc_name
         sys.exit ('%s\nEnd of %s' % (msg, proc_name))
 
     DCS_CLI(parser)

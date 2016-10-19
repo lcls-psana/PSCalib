@@ -34,6 +34,7 @@ Usage::
                       succ=None,\
                       cmt=None) 
 
+    dcm.print_file_content(evt, env, src, calibdir=None)
     nda = dcm.get_constants(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
 
     dcm.delete_version(evt, env, src, ctype, calibdir=None, vers=None, verb=False)

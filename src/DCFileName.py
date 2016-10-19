@@ -22,9 +22,11 @@ Usage::
     did = o.detid()
     dn  = o.detname()
 
-    fname = o.calib_file_name() # e.g., epix100a-3925868555.h5
-    fdir  = o.calib_file_dir()  # e.g., /reg/neh/home4/dubrovin/LCLS/rel-calib/calib
-    fpath = o.calib_file_path() # e.g., /reg/neh/home4/dubrovin/LCLS/rel-calib/calib/epix100a/epix100a-3925868555.h5
+    fname = o.calib_file_name()      # e.g., epix100a-3925868555.h5
+    fdir  = o.calib_file_dir()       # e.g., /reg/neh/home4/dubrovin/LCLS/rel-calib/calib
+    fpath = o.calib_file_path()      # e.g., /reg/neh/home4/dubrovin/LCLS/rel-calib/calib/epix100a/epix100a-3925868555.h5
+    fdir  = o.calib_file_dir_repo()  # e.g., /reg/g/psdm/detector/calib/epix100a/
+    fpath = o.calib_file_path_repo() # e.g., /reg/g/psdm/detector/calib/epix100a/epix100a-3925868555.h5
     o.print_attrs() # print attributes
     o.log_attrs()  # dump attributes in the logger
     s = o.str_attrs() # returns a string of attributes
@@ -62,6 +64,7 @@ import os
 from   PSCalib.DCLogger import log
 import PSCalib.DCUtils as gu
 import PSCalib.DCDetectorId as did
+from PSCalib.DCConfigParameters import cp
 
 #------------------------------
 
@@ -99,7 +102,9 @@ class DCFileName() :
             + '\n  file name: %s' % self.calib_file_name()\
             + '\n  calibdir : %s' % self._calibdir\
             + '\n  file dir : %s' % self.calib_file_dir()\
-            + '\n  file path: %s' % self.calib_file_path()
+            + '\n  file path: %s' % self.calib_file_path()\
+            + '\n  repo dir : %s' % self.calib_file_dir_repo()\
+            + '\n  repo path: %s' % self.calib_file_path_repo()
 
 
     def print_attrs(self) :
@@ -133,7 +138,7 @@ class DCFileName() :
 
 
     def _set_calib_dir(self, env, calibdir=None) :
-        if calibdir is not None : 
+        if calibdir is not None and calibdir != 'None' : 
             self._calibdir = calibdir
             return
 
@@ -163,6 +168,11 @@ class DCFileName() :
         else : return '%s/%s' % (self._calibdir, self._dettype)
 
 
+    def calib_file_dir_repo(self) :
+        """Returns repository directory, ex.: /reg/g/psdm/detector/calib/epix100a/"""
+        return '%s/%s' % (cp.dir_repo.value(), self._dettype)
+
+
     def calib_file_name(self) :
         """Returns file name, ex.: epix100a-3925868555.h5"""
         return '%s.%s' % (self._detname, self.fname_ext)
@@ -172,6 +182,11 @@ class DCFileName() :
         """Returns path to the file, ex.: .../calib/epix100a/epix100a-3925868555.h5"""
         if self._calibdir is None : return None
         else : return '%s/%s/%s.%s' % (self._calibdir, self._dettype, self._detname, self.fname_ext)
+
+
+    def calib_file_path_repo(self) :
+        """Returns path to the file in repository, ex.: /reg/g/.../calib/epix100a/epix100a-3925868555.h5"""
+        return '%s/%s/%s.%s' % (cp.dir_repo.value(), self._dettype, self._detname, self.fname_ext)
 
 
     def make_path_to_calib_file(self, depth=2, mode=0775) :

@@ -63,9 +63,9 @@ class DCConfigParameters(ConfigParameters) :
     def declareParameters(self) :
         # Possible typs for declaration : 'str', 'int', 'long', 'float', 'bool'
         # Logger.py
-        self.log_level = self.declareParameter(name='LOG_LEVEL_OF_MSGS',  val_def='info',      type='str' )
-        self.log_file  = self.declareParameter(name='LOG_FILE_NAME',      val_def='./log.txt', type='str' )
-        self.repo      = self.declareParameter(name='CDS_REPO_DEFAULT',   val_def='/reg/g/psdm/detector/calib', type='str' )
+        self.log_level = self.declareParameter(name='LOG_LEVEL_OF_MSGS', val_def='info',      type='str' )
+        self.log_file  = self.declareParameter(name='LOG_FILE_NAME',     val_def='./log.txt', type='str' )
+        self.dir_repo  = self.declareParameter(name='CDS_DIR_REPO',      val_def='/reg/g/psdm/detector/calib', type='str' )
 
 #------------------------------
     

@@ -21,8 +21,24 @@ Usage::
     usr   = gu.get_login()
     host  = gu.get_hostname()
     cwd   = gu.get_cwd()
+    gu.create_directory(dir, mode=0775)
+    gu.create_path(path, depth=2, mode=0775)
+    gu.save_string_as_dset(grp, name, s)
+    src   = gu.source_full_name(env, src)
+    dtype = gu.dettype_from_str_source(src)
 
-    etc.
+    src   = gu.string_from_source(source) # source is psana.Source object or string like
+                                          # 'CxiDs2.0:Cspad.0' from 'DetInfo(CxiDs2.0:Cspad.0)'
+    dname  = gu.detector_full_name(env, src)
+    source = gu.psana_source(env, srcpar)
+    t_sec  = gu.evt_time(evt)
+    fid    = gu.evt_fiducials(evt)
+
+    # methods for HDF5 
+    sg = gu.get_subgroup(grp, subgr_name)
+    gu.delete_object(grp, oname)
+    gu.save_object_as_dset(grp, name, shape=None, dtype=None, data=0)
+
 
 @see project modules
     * :py:class:`PSCalib.DCStore`
