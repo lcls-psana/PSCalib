@@ -4,7 +4,8 @@
 import os
 import sys
 from time import time
-from PSCalib.DCMethods import add_constants, get_constants, delete_version, delete_range, delete_ctype, print_file_content
+from PSCalib.DCMethods import add_constants, get_constants, delete_version, delete_range, delete_ctype,\
+     print_file, print_file_content
 import PSCalib.DCUtils as dcu
 
 #------------------------------
@@ -80,7 +81,8 @@ class DCS_CLI :
     def command_dispatcher(self) : 
         """Command line dispatcher by the 1-st argument"""
 
-        if not len(self.args) :
+        nargs =len(self.args) 
+        if not nargs :
             self.parser.print_usage()
             print 'WARNING: command argument is missing. See command usage above.'
             return
@@ -107,14 +109,17 @@ class DCS_CLI :
 
         ctype  = self.calib_type()
 
+        fname  = self.args[1] if nargs > 1 else None
         mode   = self.args[0]
         action = mode[0]
-        if   action=='p'     : print_file_content (evt, env, src, cdir)
-        elif action=='a'     : self.add_constants (evt, env, src, ctype, cdir, vers, pred, succ, msg, verb)
-        elif action=='g'     : self.get_constants (evt, env, src, ctype, cdir, vers, verb)
-        elif 'delv' in mode  : self.delete_version(evt, env, src, ctype, cdir, vers, msg, verb)
-        elif 'delr' in mode  : self.delete_range  (evt, env, src, ctype, cdir, rng, msg, verb)
-        elif 'delc' in mode  : self.delete_ctype  (evt, env, src, ctype, cdir, msg, verb)
+        if   action=='p':
+          if fname is not None : print_file(fname)
+          else                 : print_file_content (evt, env, src, cdir)
+        elif action=='a'       : self.add_constants (evt, env, src, ctype, cdir, vers, pred, succ, msg, verb)
+        elif action=='g'       : self.get_constants (evt, env, src, ctype, cdir, vers, verb)
+        elif 'delv' in mode    : self.delete_version(evt, env, src, ctype, cdir, vers, msg, verb)
+        elif 'delr' in mode    : self.delete_range  (evt, env, src, ctype, cdir, rng, msg, verb)
+        elif 'delc' in mode    : self.delete_ctype  (evt, env, src, ctype, cdir, msg, verb)
         else :
             self.parser.print_usage()
             print 'WARNING: unrecognized command argument "%s". See command usage above.' % self.args[0]
@@ -184,6 +189,7 @@ def usage() :
            '\n      [-p <predecessor>] [-s <successor>] [-v <vebousity>]'+\
            '\n\n  where <arg> is one of the keywords p[rint], g[et], a[dd], or d[elete]'+\
            '\n\n  Examples:'+\
+           '\n  %prog print ./calib/epix100a/epix100a-<full-file-name>.h5'+\
            '\n  %prog print      -e mfxn8316 -r 11 -d Epix100a -c ./calib'+\
            '\n  %prog print      -e mfxn8316 -r 11 -d Epix100a\n'+\
            '\n  %prog get        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 3 -f my-nda.txt -c ./calib'+\

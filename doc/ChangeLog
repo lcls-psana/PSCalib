@@ -11,6 +11,16 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-10
+2016-11-08 Mikhail S. Dubrovin
+- Tuning of DCMethods, update of examples.
+  - DCDetectorId.id_epix - returns eics Id made of 7 numbers
+  - add DCMethods.print_file - print directly from file
+  - dcs - add print option directly from file
+  - DCMethods.add_constants - add experiment name and run number in the comment for range 
+	and add them to the dict of parameters
+  - update examples
+	
 Tag: V00-03-09
 2016-10-19 Mikhail S. Dubrovin
 - app/dcs - set cdir_def = None

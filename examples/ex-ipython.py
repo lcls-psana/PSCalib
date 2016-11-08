@@ -59,6 +59,7 @@ evt = ds.events().next()
 runnum = evt.run()
 
 #pda = PyDetectorAccess(src, env, pbits=0)
+
 cs = env.configStore()
 cs.keys()
 
@@ -85,8 +86,6 @@ co = env.getConfig(psana.EvrData.ConfigV7)
 #cs = env.configStore()
 #cs.keys()
 #co1 = cs.get(psana.EvrData.ConfigV7, psana.Source(':Evr'))
-
-
 
 #------------------------------
 # get time from psana.EventId

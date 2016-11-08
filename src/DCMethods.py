@@ -34,6 +34,7 @@ Usage::
                       succ=None,\
                       cmt=None) 
 
+    dcm.print_file(fname)
     dcm.print_file_content(evt, env, src, calibdir=None)
     nda = dcm.get_constants(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
 
@@ -92,7 +93,7 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
                   succ=None,\
                   cmt=None,\
                   verb=False) :
-    """Add specified numpy array to the hdf5 file.
+    """Adds specified numpy array to the hdf5 file.
 
     Parameters
     
@@ -143,16 +144,23 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
     #cs.add_history_record('%s for %s' % (metname, msg))
     #cs.add_par('par-1-in-DCStore', 1)
 
-    ct = cs.add_ctype(str_ctype, cmt=cmt)
+    ct = cs.add_ctype(str_ctype, cmt='')
     if ct is None : return
     #ct.add_history_record('%s - add DCType %s' % (metname,str_ctype))
     #ct.add_par('par-1-in-DCType', 1)
 
-    cr = ct.add_range(tsec_ev, end=None, cmt=cmt)
+    exp = env.experiment()
+    exp = exp if exp != '' else 'unknown'
+    runnum = evt.run()
+    msg = 'exp=%s:run=%s' % (exp, str(runnum))
+    cr = ct.add_range(tsec_ev, end=None, cmt=msg)
     if cr is None : return
+    cr.add_par('experiment', exp)
+    cr.add_par('run', str(runnum))
     #cr.set_vnum_def(vnum=None)
 
-    cv = cr.add_version(vnum=vers, tsec_prod=time(), nda=nda, cmt=cmt)
+    msg = '' if cmt is None else cmt
+    cv = cr.add_version(vnum=vers, tsec_prod=time(), nda=nda, cmt=msg)
     if cv is None : return
     #v = cr.vnum_last() if vers is None else vers
     #rec='%s vers=%d: %s' % (metname, v, cmt if cmt is not None else 'no-comments') 
@@ -277,7 +285,7 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
 
 def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False) :
 
-    """Delete specified version from calibration constants.
+    """Delete specified time range from calibration constants.
     
     Parameters
     
@@ -329,7 +337,7 @@ def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
 
 def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False) :
 
-    """Delete specified version from calibration constants.
+    """Delete specified ctype from calibration constants.
     
     Parameters
     
@@ -375,22 +383,15 @@ def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
 
 #------------------------------
 
-def print_file_content(evt, env, src='Epix100a.', calibdir=None) :
+def print_file(fname) :
 
-    """Delete specified version from calibration constants.
+    """Prints content of the file.
     
     Parameters
     
-    env : psana.Env -> full detector name for psana.Source 
-    evt : psana.Event -> event time
-    src : str - source short/full name, alias or full
-    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    fname : str - full path to the file
     """
     metname = sys._getframe().f_code.co_name
-
-    ofn = DCFileName(env, src, calibdir)
-    fname = ofn.calib_file_path()
-    ofn.print_attrs()
 
     if fname is None :
         print 'WARNING: file name is not defined'
@@ -408,6 +409,44 @@ def print_file_content(evt, env, src='Epix100a.', calibdir=None) :
     
     print 50*'_','\nDCStore.print_obj()' 
     cs.print_obj()
+
+#------------------------------
+
+def print_file_content(evt, env, src='Epix100a.', calibdir=None) :
+
+    """Defines the file name and prints its content.
+    
+    Parameters
+    
+    env : psana.Env -> full detector name for psana.Source 
+    evt : psana.Event -> event time
+    src : str - source short/full name, alias or full
+    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    """
+    metname = sys._getframe().f_code.co_name
+
+    ofn = DCFileName(env, src, calibdir)
+    fname = ofn.calib_file_path()
+    ofn.print_attrs()
+
+    print_file(fname)
+
+#    if fname is None :
+#        print 'WARNING: file name is not defined'
+#        return
+
+#    if not os.path.exists(fname) :
+#        print 'WARNING: path does not exist'
+#        return
+
+#    cs = DCStore(fname)
+
+#    t0_sec = time()
+#    cs.load()
+#    print 'File content loading time (sec) = %.6f' % (time()-t0_sec)
+    
+#    print 50*'_','\nDCStore.print_obj()' 
+#    cs.print_obj()
 
 #------------------------------
 #------------------------------
@@ -430,7 +469,7 @@ def test_add_constants() :
     nda  = np.zeros((1000,1000), dtype=np.float32)
     pred = None
     succ = None
-    cmt  = 'my comment'
+    cmt  = 'my comment is here'
     
     add_constants(nda, gevt, genv, gsrc, gctype, gcalibdir, vers, pred, succ, cmt, gverb)
     print '%s: constants added nda.shape=%s' % (metname, nda.shape)
@@ -506,6 +545,15 @@ def test_delete_ctype() :
 
 #------------------------------
 
+def test_print_file() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+    fname = './calib/epix100a/epix100a-3925999616-0996663297-3791650826-1232098304-0953206283-2655595777-0520093719.h5'
+    print_file(fname)
+    print '%s is completed' % (metname)
+
+#------------------------------
+
 def test_print_file_content() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
@@ -566,10 +614,11 @@ def do_test() :
     elif tname == '1' : test_add_constants()
     elif tname == '2' : test_add_constants_two()
     elif tname == '3' : test_get_constants()
-    elif tname == '4' : test_print_file_content()
-    elif tname == '5' : test_delete_version()
-    elif tname == '6' : test_delete_range()
-    elif tname == '7' : test_delete_ctype()
+    elif tname == '4' : test_print_file()
+    elif tname == '5' : test_print_file_content()
+    elif tname == '6' : test_delete_version()
+    elif tname == '7' : test_delete_range()
+    elif tname == '8' : test_delete_ctype()
     else : print 'Not-recognized test name: %s' % tname
     msg = 'End of test %s, consumed time (sec) = %.6f' % (tname, time()-t0_sec)
     sys.exit(msg)

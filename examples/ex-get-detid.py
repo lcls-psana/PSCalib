@@ -81,8 +81,22 @@ def print_epix100_id(tname) :
     print 'numberOfColumns :', o.numberOfColumns()
     print 'numberOfRows    :', o.numberOfRows()
     print 'TypeId          :', o.TypeId
-    #print 'digitalCardId0  :', o.digitalCardId0()
-    #print 'digitalCardId1  :', o.digitalCardId1()
+    print 'digitalCardId0/1:', o.digitalCardId0(), '/', o.digitalCardId1()
+    print 'analogCardId0/1 :', o.analogCardId0(), '/', o.analogCardId1()
+    print 'carrierId0/1    :', o.carrierId0(), '/', o.carrierId1()
+
+#------------------------------
+
+def print_epix100_id_cpo(tname) :
+    """cpo version of epix100_id
+    """
+    ds, src, evt, env = init_psana('2')
+    o = get_epix_config_object(env, src)
+
+    print 'carrierId0/1     :', str(o.carrierId0())+'/'+str(o.carrierId1())
+    print 'digitalCardId0/1 :', str(o.digitalCardId0())+'/'+str(o.digitalCardId1())
+    print 'analogCardId0/1  :', str(o.analogCardId0())+'/'+str(o.analogCardId1())
+    print 'version          :', o.version()   
 
 #------------------------------
 
@@ -91,7 +105,8 @@ if __name__ == "__main__" :
 
     tname = '1' if len(sys.argv) < 2 else sys.argv[1]
     if tname in ('1', '2', '3') : print_epix100_id(tname)
-    else : sys.exit ('Not recognized test name: "%s"' % testname)
+    elif tname == '4' : print_epix100_id_cpo(tname)
+    else : sys.exit ('Not recognized test name: "%s"' % tname)
 
     sys.exit ('End of %s' % sys.argv[0])
 

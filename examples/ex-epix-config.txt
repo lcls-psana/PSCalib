@@ -1,0 +1,15 @@
+
+Example of epix100a configuration data:
+
+#------------------------------
+
+version         : 3925999616
+Version         : 2
+numberOfColumns : 768
+numberOfRows    : 704
+TypeId          : 84
+digitalCardId0/1: 1232098304 / 953206283
+analogCardId0/1 : 2655595777 / 520093719
+carrierId0/1    : 996663297 / 3791650826
+
+#------------------------------

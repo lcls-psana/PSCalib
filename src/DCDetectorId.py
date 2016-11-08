@@ -65,10 +65,13 @@ from Detector.PyDataAccess import\
 #------------------------------
 
 def id_epix(env, src) :
-    """Returns Epix100 Id as a string, e.g., 3925999619"""
+    """Returns Epix100 Id as a string, e.g., 3925999616-0996663297-3791650826-1232098304-0953206283-2655595777-0520093719"""
     psa_src = psana_source(env, src)
-    return str(get_epix_config_object(env, psa_src).version())
-
+    o = get_epix_config_object(env, psa_src)
+    return '%010d-%010d-%010d-%010d-%010d-%010d-%010d' % (o.version(),\
+                                                          o.carrierId0(),     o.carrierId1(),\
+                                                          o.digitalCardId0(), o.digitalCardId1(),\
+                                                          o.analogCardId0(),  o.analogCardId1())
 #------------------------------
 
 def id_cspad(env, src) :
