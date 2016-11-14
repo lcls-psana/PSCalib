@@ -35,7 +35,7 @@ Usage::
                       cmt=None) 
 
     dcm.print_file(fname)
-    dcm.print_file_content(evt, env, src, calibdir=None)
+    dcm.print_file_content(env, src, calibdir=None)
     nda = dcm.get_constants(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
 
     dcm.delete_version(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
@@ -412,14 +412,13 @@ def print_file(fname) :
 
 #------------------------------
 
-def print_file_content(evt, env, src='Epix100a.', calibdir=None) :
+def print_file_content(env, src='Epix100a.', calibdir=None) :
 
     """Defines the file name and prints its content.
     
     Parameters
     
     env : psana.Env -> full detector name for psana.Source 
-    evt : psana.Event -> event time
     src : str - source short/full name, alias or full
     calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
     """
@@ -557,7 +556,7 @@ def test_print_file() :
 def test_print_file_content() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
-    print_file_content(gevt, genv, gsrc, gcalibdir)
+    print_file_content(genv, gsrc, gcalibdir)
     print '%s is completed' % (metname)
 
 #------------------------------

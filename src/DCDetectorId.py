@@ -68,10 +68,17 @@ def id_epix(env, src) :
     """Returns Epix100 Id as a string, e.g., 3925999616-0996663297-3791650826-1232098304-0953206283-2655595777-0520093719"""
     psa_src = psana_source(env, src)
     o = get_epix_config_object(env, psa_src)
-    return '%010d-%010d-%010d-%010d-%010d-%010d-%010d' % (o.version(),\
-                                                          o.carrierId0(),     o.carrierId1(),\
-                                                          o.digitalCardId0(), o.digitalCardId1(),\
-                                                          o.analogCardId0(),  o.analogCardId1())
+    fmt2 = '%010d-%010d'
+    zeros = fmt2 % (0,0)
+    version = '%010d' % (o.version()) if getattr(o, "version", None) is not None else '%010d' % 0
+    carrier = fmt2 % (o.carrierId0(), o.carrierId1())\
+              if getattr(o, "carrierId0", None) is not None else zeros
+    digital = fmt2 % (o.digitalCardId0(), o.digitalCardId1())\
+              if getattr(o, "digitalCardId0", None) is not None else zeros
+    analog  = fmt2 % (o.analogCardId0(), o.analogCardId1())\
+              if getattr(o, "analogCardId0", None) is not None else zeros
+    return '%s-%s-%s-%s' % (version, carrier, digital, analog)
+
 #------------------------------
 
 def id_cspad(env, src) :

@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-11
+2016-11-14 Mikhail S. Dubrovin
+- DCDetectorId.id_epix - add protection and extend backward compatability for old data with missing carrierId methods
+	
 Tag: V00-03-10
 2016-11-08 Mikhail S. Dubrovin
 - Tuning of DCMethods, update of examples.

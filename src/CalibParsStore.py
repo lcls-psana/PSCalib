@@ -86,7 +86,9 @@ class CalibParsStore() :
 
     def __init__(self) :
         self.name = self.__class__.__name__
-
+        self.fname = None
+        self.fname_repo = None
+        
 #------------------------------
 
 #------------------------------
@@ -133,6 +135,30 @@ class CalibParsStore() :
             print 'Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__)
             #raise IOError('Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__))
         return GenericCalibPars(cbase, calibdir, grp, source, runnum, pbits)
+
+#------------------------------
+
+    def CreateForEvtEnv(self, calibdir, group, source, par, env, pbits=0) :
+        """ Factory method
+            This method makes access to the calibration store with fallback access to hdf5 file.
+        """
+
+        runnum = par if isinstance(par, int) else par.run()
+
+        if not isinstance(par, int) : # evt is not integer runnum
+
+            from PSCalib.DCFileName import DCFileName
+
+            ofn = DCFileName(env, source, calibdir)
+            if pbits & 512 : ofn.print_attrs()
+            self.fname      = ofn.calib_file_path()
+            self.fname_repo = ofn.calib_file_path_repo()
+            if pbits :
+            #if True :
+                print '%s: expected hdf5 file name local: %s' % (self.name, self.fname)
+                print '%s: expected hdf5 file name repo : %s' % (self.name, self.fname_repo)
+
+        return self.Create(calibdir, group, source, runnum, pbits)
 
 #------------------------------
 

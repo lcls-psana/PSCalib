@@ -114,7 +114,7 @@ class DCS_CLI :
         action = mode[0]
         if   action=='p':
           if fname is not None : print_file(fname)
-          else                 : print_file_content (evt, env, src, cdir)
+          else                 : print_file_content (env, src, cdir)
         elif action=='a'       : self.add_constants (evt, env, src, ctype, cdir, vers, pred, succ, msg, verb)
         elif action=='g'       : self.get_constants (evt, env, src, ctype, cdir, vers, verb)
         elif 'delv' in mode    : self.delete_version(evt, env, src, ctype, cdir, vers, msg, verb)
