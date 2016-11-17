@@ -2,9 +2,12 @@
 #-----------------------------------------------------------------------------
 # File and Version Information:
 #  $Id$
+#
+# Description:
 #-----------------------------------------------------------------------------
 
-""":py:class:`PSCalib.DCStore` base class for the Detector Calibration (DC) project.
+"""
+:py:class:`PSCalib.DCBase` - base class for the Detector Calibration (DC) project.
 
 Usage::
 
@@ -12,7 +15,7 @@ Usage::
     from PSCalib.DCBase import DCBase
 
     o = DCBase()
-    
+
     # Dictionary of parameters
     # ========================
     
@@ -317,9 +320,7 @@ class DCBase(object) :
         
         action : str - description of method action,
         key    : str - key for hdf5 group or dataset name,
-        cmt    : str/None/False - additional comment or no-comment:
-                 False is used to turn off history record,
-                 None - no-comment.
+        cmt    : str/None/False - additional comment or no-comment: False is used to turn off history record, None - no-comment.
         """
         if cmt is None or cmt is False : return '%s %s' % (action, key)
         return '%s %s: %s' % (action, key, cmt)

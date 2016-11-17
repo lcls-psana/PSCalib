@@ -22,6 +22,7 @@ Usage::
     source   = 'CxiDs2.0:Cspad.0'
     runnum   = 60
     pbits    = 255
+    ctype    = gu.PEDESTALS
 
     gcp = GenericCalibPars(cbase, calibdir, group, source, runnum, pbits)
 
@@ -37,6 +38,12 @@ Usage::
     shape  = gcp.get_shape(ctype)
     size   = gcp.get_size(ctype)
     ndim   = gcp.get_ndim(ctype)
+
+    nda = gcp.set_version(vers=None)
+    nda = gcp.constants_default(ctype)
+    nda = gcp.constants_calib(ctype)
+    nda = gcp.constants_dcs(ctype, vers=None, verb=False)
+    nda = gcp.constants(ctype, vers=None, verb=False)
     
 @see :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`, :py:class:`PSCalib.CalibParsCspad2x1V1, :py:class:`PSCalib.GlobalUtils`
 
@@ -69,8 +76,20 @@ class GenericCalibPars (CalibPars) :
 
 #------------------------------
 
-    def __init__(self, cbase, calibdir, group, source, runnum, pbits=255) : 
-        """ Constructor
+    def __init__(self, cbase, calibdir, group, source, runnum, pbits=255, fnexpc=None, fnrepo=None, tsec=None) : 
+        """ GenericCalibPars constructor
+
+            Parameters
+
+            cbase    : PSCalib.CalibParsBase* - base-object
+            calibdir : string - calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
+            group    : string - group, ex: PNCCD::CalibV1
+            source   : string - data source, ex: Camp.0:pnCCD.0
+            runnum   : int    - run number, ex: 10
+            pbits    : int    - print control bits, ex: 255
+            fnexpc   : str    - path to experiment calib hdf5 file
+            fnrepo   : str    - path to repository calib hdf5 file
+            tsec     : float  - event time to select calibration file range 
         """
         CalibPars.__init__(self)
         self.name = self.__class__.__name__
@@ -80,7 +99,11 @@ class GenericCalibPars (CalibPars) :
         self.group    = group    # ex.: 'PNCCD::CalibV1'
         self.source   = source   # ex.: 'CxiDs2.0:Cspad.0' 
         self.runnum   = runnum   # ex.: 10
-        self.pbits    = pbits    # ex.: 255 
+        self.pbits    = pbits    # ex.: 255
+        #---------- parameters introduced for DCS fallback
+        self.fnexpc   = fnexpc   # ex.: /reg/d/psdm/<INS>/<exp>/calib/epix100a/epix100a-3925868555...h5
+        self.fnrepo   = fnrepo   # ex.: /reg/g/psdm/detector/calib/epix100a/epix100a-3925868555...h5
+        self.tsec     = tsec     # ex.: 1474587520.88
 
         self.reset_dicts()
 
@@ -108,6 +131,9 @@ class GenericCalibPars (CalibPars) :
             + '\n  group      : %s' % self.group    \
             + '\n  source     : %s' % self.source   \
             + '\n  runnum     : %s' % self.runnum   \
+            + '\n  fnexpc     : %s' % self.fnexpc   \
+            + '\n  fnrepo     : %s' % self.fnrepo   \
+            + '\n  tsec       : %s' % self.tsec     \
             + '\n  pbits      : %s' % self.pbits    
         print inf
 
@@ -166,7 +192,7 @@ class GenericCalibPars (CalibPars) :
 
 #------------------------------
 
-    def constants(self, ctype) :
+    def constants_calib(self, ctype) :
         """ Returns numpy array with calibration constants for specified type
 
         Logic:
@@ -240,52 +266,93 @@ class GenericCalibPars (CalibPars) :
 
 #------------------------------
 
-    def pedestals(self) :
+    def constants_dcs(self, ctype=gu.PEDESTALS, vers=None) :
+        """ Returns numpy array with calibration constants of specified type from DCS
+            @see :class:`PSCalib.DCStore`, :class:`PSCalib.DCMethods`
+            Parameters
+    
+            ctype : int - enumerated calibration type from :class:`PSCalib.GlobalUtils`, e.g. gu.PIXEL_STATUS
+        """
+        from PSCalib.DCMethods import get_constants_from_file, is_good_fname
+
+        verb = self.pbits & 128
+        if self.pbits :
+            self.print_attrs()
+            print '%s.constants_dcs  tsec: %s  ctype: %s  vers: %s  verb: %s\n  fname: %s' %\
+                  (self.name, str(self.tsec), str(ctype), str(vers), str(verb), self.fnexpc)
+
+        return get_constants_from_file(self.fnexpc, self.tsec, ctype, vers, verb) if is_good_fname(self.fnexpc) else\
+               get_constants_from_file(self.fnrepo, self.tsec, ctype, vers, verb)
+
+#------------------------------
+
+    def constants(self, ctype, vers=None) :
+        """ Returns numpy array with calibration constants of specified type
+            Parameters
+    
+            vers  : int - version number
+            ctype : int - enumerated calibration type from :class:`PSCalib.GlobalUtils`, e.g. gu.PIXEL_STATUS
+        """
+        arr = self.constants_calib(ctype)
+
+        if arr is None or self.dic_status[ctype] == gu.DEFAULT :
+            # try to retrieve constants from DCS hdf5 file
+            arr = self.constants_dcs(ctype, vers)
+
+        if self.pbits & 128 :
+            print '%s.constants   ctype, default:' % (self.name), ctype, gu.DEFAULT
+            #print 'YYY %s array:' % gu.dic_calib_type_to_name[ctype], arr
+
+        return arr
+
+#------------------------------
+
+    def pedestals(self, vers=None) :
         """ Returns pedestals
         """
-        return self.constants(gu.PEDESTALS)
+        return self.constants(gu.PEDESTALS, vers)
 
 #------------------------------
 
-    def pixel_status(self) :
+    def pixel_status(self, vers=None) :
         """ Returns pixel_status
         """
-        return self.constants(gu.PIXEL_STATUS)
+        return self.constants(gu.PIXEL_STATUS, vers)
 
 #------------------------------
 
-    def pixel_rms(self) :
+    def pixel_rms(self, vers=None) :
         """ Returns pixel_rms
         """
-        return self.constants(gu.PIXEL_RMS)
+        return self.constants(gu.PIXEL_RMS, vers)
 
 #------------------------------
 
-    def pixel_gain(self) :
+    def pixel_gain(self, vers=None) :
         """ Returns pixel_gain
         """
-        return self.constants(gu.PIXEL_GAIN)
+        return self.constants(gu.PIXEL_GAIN, vers)
 
 #------------------------------
 
-    def pixel_mask(self) :
+    def pixel_mask(self, vers=None) :
         """ Returns pixel_mask
         """
-        return self.constants(gu.PIXEL_MASK)
+        return self.constants(gu.PIXEL_MASK, vers)
 
 #------------------------------
 
-    def pixel_bkgd(self) :
+    def pixel_bkgd(self, vers=None) :
         """ Returns pixel_bkgd
         """
-        return self.constants(gu.PIXEL_BKGD)
+        return self.constants(gu.PIXEL_BKGD, vers)
 
 #------------------------------
 
-    def common_mode(self) :
+    def common_mode(self, vers=None) :
         """ Returns common_mode
         """
-        return self.constants(gu.COMMON_MODE)
+        return self.constants(gu.COMMON_MODE, vers)
 
 #------------------------------
 #------------------------------

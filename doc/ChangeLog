@@ -11,6 +11,12 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-12
+2016-11-17 Mikhail S. Dubrovin
+- CalibParsStore, GenericCalibPars - support constants from DCS
+- DCMethods - update methods, add methods for direct access to hdf5 file
+- DCBase - tune doc
+
 Tag: V00-03-11
 2016-11-14 Mikhail S. Dubrovin
 - DCDetectorId.id_epix - add protection and extend backward compatability for old data with missing carrierId methods

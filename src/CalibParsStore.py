@@ -18,26 +18,29 @@ Usage::
     from PSCalib.GlobalUtils import *
 
     # Initialization
-    calibdir = env.calibDir()  # or '/reg/d/psdm/<INS>/<experiment>/calib'
-    group = None               # or 'CsPad::CalibV1'
+    calibdir = env.calibDir()  # or e.g. '/reg/d/psdm/<INS>/<experiment>/calib'
+    group = None               # or e.g. 'CsPad::CalibV1'
     source = 'Camp.0:pnCCD.1'
-    runnum = 10                # or evt.run()
+    runnum = 10                # or e.g. evt.run()
     pbits = 255
-    cpstore = cps.Create(calibdir, group, source, runnum, pbits)
+    o = cps.Create(calibdir, group, source, runnum, pbits)
+
+    # or using different list of parameters to access calibration from hdf5 DCS file:
+    o = cps.CreateForEvtEnv(self, calibdir, group, source, evt, env, pbits=0)
 
     # Access methods
-    nda = cpstore.pedestals()
-    nda = cpstore.pixel_status()
-    nda = cpstore.pixel_rms()
-    nda = cpstore.pixel_mask()
-    nda = cpstore.pixel_gain()
-    nda = cpstore.pixel_bkgd()
-    nda = cpstore.common_mode()
+    nda = o.pedestals()
+    nda = o.pixel_status()
+    nda = o.pixel_rms()
+    nda = o.pixel_mask()
+    nda = o.pixel_gain()
+    nda = o.pixel_bkgd()
+    nda = o.common_mode()
 
-    status = gcp.status(ctype=PEDESTALS) # see list of ctypes in :py:class:`PSCalib.GlobalUtils`
-    shape  = gcp.shape(ctype)
-    size   = gcp.size(ctype)
-    ndim   = gcp.ndim(ctype)
+    status = o.status(ctype=PEDESTALS) # see list of ctypes in :py:class:`PSCalib.GlobalUtils`
+    shape  = o.shape(ctype)
+    size   = o.size(ctype)
+    ndim   = o.ndim(ctype)
 
 @see other interface methods in :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`
 
@@ -86,8 +89,8 @@ class CalibParsStore() :
 
     def __init__(self) :
         self.name = self.__class__.__name__
-        self.fname = None
-        self.fname_repo = None
+        self.fnexpc = None
+        self.fnrepo = None
         
 #------------------------------
 
@@ -95,11 +98,14 @@ class CalibParsStore() :
 
     def Create(self, calibdir, group, source, runnum, pbits=0) :
         """ Factory method
-            @param calibdir - [string] calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
-            @param group    - [string] group, ex: PNCCD::CalibV1
-            @param source   - [string] data source, ex: Camp.0:pnCCD.0
-            @param runnum   - [int]    run number, ex: 10
-            @param pbits=0  - [int] print control bits, ex: 255
+
+            Parameters
+
+            calibdir : string - calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
+            group    : string - group, ex: PNCCD::CalibV1
+            source   : string - data source, ex: Camp.0:pnCCD.0
+            runnum   : int    - run number, ex: 10
+            pbits=0  : int    - print control bits, ex: 255
         """        
 
         dettype = gu.det_type_from_source(source)
@@ -134,29 +140,42 @@ class CalibParsStore() :
         else :
             print 'Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__)
             #raise IOError('Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__))
-        return GenericCalibPars(cbase, calibdir, grp, source, runnum, pbits)
+        return GenericCalibPars(cbase, calibdir, grp, source, runnum, pbits, self.fnexpc, self.fnrepo, tsec=self.tsec)
 
 #------------------------------
 
-    def CreateForEvtEnv(self, calibdir, group, source, par, env, pbits=0) :
+    def CreateForEvtEnv(self, calibdir, group, source, evt, env, pbits=0) :
         """ Factory method
             This method makes access to the calibration store with fallback access to hdf5 file.
+
+            Parameters
+
+            calibdir : string - calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
+            group    : string - group, ex: PNCCD::CalibV1
+            source   : string - data source, ex: Camp.0:pnCCD.0
+            evt      : psana.Event - event object - is used to get event time to retrieve DCRange
+            env      : psana.Env   - environment object - is used to retrieve file name
+            pbits=0  : int         - print control bits, ex: 255
         """
 
-        runnum = par if isinstance(par, int) else par.run()
+        runnum = evt if isinstance(evt, int) else evt.run()
 
-        if not isinstance(par, int) : # evt is not integer runnum
+        if not isinstance(evt, int) : # evt is not integer runnum
 
             from PSCalib.DCFileName import DCFileName
+            from PSCalib.DCUtils import evt_time
 
             ofn = DCFileName(env, source, calibdir)
             if pbits & 512 : ofn.print_attrs()
-            self.fname      = ofn.calib_file_path()
-            self.fname_repo = ofn.calib_file_path_repo()
-            if pbits :
+            self.fnexpc = ofn.calib_file_path()
+            self.fnrepo = ofn.calib_file_path_repo()
+            self.tsec = evt_time(evt)
+
             #if True :
-                print '%s: expected hdf5 file name local: %s' % (self.name, self.fname)
-                print '%s: expected hdf5 file name repo : %s' % (self.name, self.fname_repo)
+            if pbits :
+                print '%s.CreateForEvtEnv: for tsec: %s' % (self.name, str(self.tsec))
+                print '  expected hdf5 file name local: %s' % (self.fnexpc)
+                print '  expected hdf5 file name repo : %s' % (self.fnrepo)
 
         return self.Create(calibdir, group, source, runnum, pbits)
 

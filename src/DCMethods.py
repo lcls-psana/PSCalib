@@ -1,9 +1,9 @@
-#--------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 # File and Version Information:
 #  $Id$
 #
 # Description:
-#------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 
 """
 :py:class:`PSCalib.DCMethods` - contains a set of utilities for direct operations with calibration data.
@@ -20,43 +20,49 @@ Usage::
     dsname   = '/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc'
     src      = 'Cspad.' # 'Epix100a.', etc
     ctype    = gu.PIXEL_MASK # OR: gu.PEDESTALS, gu.PIXEL_STATUS, etc.
-    vers     = None # or 5
-    calibdir = None # or './calib'
+    vers     = None # or e.g. 5
+    calibdir = None # or e.g. './calib'
     nda      = np.zeros((32,185,388))
     pred     = 'CxiDs2.0:Cspad.0'
     succ     = 'CxiDs2.0:Cspad.0'
     range    = '1474587520-end'
 
-    # Methods
-    dcm.add_constants(nda, evt, env, src, ctype, calibdir,\
-                      vers=None,\
-                      pred=None,\
-                      succ=None,\
-                      cmt=None) 
+    # Methods of
+    dcm.add_constants(nda, evt, env, src, ctype, calibdir, vers=None, pred=None, succ=None, cmt=None) 
 
     dcm.print_file(fname)
     dcm.print_file_content(env, src, calibdir=None)
     nda = dcm.get_constants(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
+    nda = dcm.get_constants_from_file(fname, evt, ctype, vers=None, verb=False)
 
     dcm.delete_version(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
     dcm.delete_range  (evt, env, src, ctype, cdir, range, msg, verb)
     dcm.delete_ctype  (evt, env, src, ctype, cdir, msg, verb)
 
+@see methods 
+    :meth:`add_constants`, 
+    :meth:`print_file`, 
+    :meth:`print_file_content`, 
+    :meth:`get_constants`, 
+    :meth:`get_constants_from_file`, 
+    :meth:`delete_version`, 
+    :meth:`delete_range`, 
+    :meth:`delete_ctype`
 
 @see project modules
-    * :py:class:`PSCalib.DCStore`
-    * :py:class:`PSCalib.DCType`
-    * :py:class:`PSCalib.DCRange`
-    * :py:class:`PSCalib.DCVersion`
-    * :py:class:`PSCalib.DCBase`
-    * :py:class:`PSCalib.DCInterface`
-    * :py:class:`PSCalib.DCUtils`
-    * :py:class:`PSCalib.DCDetectorId`
-    * :py:class:`PSCalib.DCConfigParameters`
-    * :py:class:`PSCalib.DCFileName`
-    * :py:class:`PSCalib.DCLogger`
-    * :py:class:`PSCalib.DCMethods`
-    * :py:class:`PSCalib.DCEmail`
+    * :class:`PSCalib.DCStore`
+    * :class:`PSCalib.DCType`
+    * :class:`PSCalib.DCRange`
+    * :class:`PSCalib.DCVersion`
+    * :class:`PSCalib.DCBase`
+    * :class:`PSCalib.DCInterface`
+    * :class:`PSCalib.DCUtils`
+    * :class:`PSCalib.DCDetectorId`
+    * :class:`PSCalib.DCConfigParameters`
+    * :class:`PSCalib.DCFileName`
+    * :class:`PSCalib.DCLogger`
+    * :class:`PSCalib.DCMethods`
+    * :class:`PSCalib.DCEmail`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
@@ -78,12 +84,36 @@ from time import time #localtime, strftime
 
 from PSCalib.DCLogger import log
 from PSCalib.DCFileName import DCFileName
-
 import PSCalib.DCUtils as dcu
 from PSCalib.DCStore import DCStore
 
 sp = dcu.sp
 gu = dcu.gu
+
+#------------------------------
+
+def is_good_fname(fname, verb=False) :
+    """Checks the hdf5 file name parameter fname validity, returns True or False.
+    
+    Parameters
+    
+    fname : str - full path to the file
+    """
+    metname = sys._getframe().f_code.co_name
+
+    if fname is None :
+        if verb : print '%s WARNING: file name is None' % metname
+        return False
+
+    if not isinstance(fname, str) :
+        if verb : print '%s WARNING: parameter fname is not str' % metname
+        return False
+
+    if not os.path.exists(fname) :
+        if verb : print '%s WARNING: file %s does not exist' % (metname, fname)
+        return False
+
+    return True
 
 #------------------------------
 
@@ -106,8 +136,10 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
     vers : int - calibration version
     pred : str - predecessor name
     succ : str - successor name
-    cmt : str - comment saved as a history record within DCRange
+    cmt  : str - comment saved as a history record within DCRange
     verb : bool - verbosity, default=False - do not prnt any message
+
+    Back to :py:class:`PSCalib.DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -117,11 +149,11 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
                     (src, str_ctype, vers, calibdir)
 
     ofn = DCFileName(env, src, calibdir)
+    if verb : ofn.print_attrs()
+
     fname = ofn.calib_file_path()
 
-    if verb :
-        ofn.print_attrs()
-        #print 'path: ', fname
+    if verb : ofn.print_attrs()
 
     if fname is None :
         if verb : print 'WARNING: file name is not defined - return None'
@@ -177,33 +209,19 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
 
 #------------------------------
 
-def get_constants(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False) :
-
+def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=False) :
     """Returns specified array of calibration constants.
     
     Parameters
-    
-    env : psana.Env -> full detector name for psana.Source 
-    evt : psana.Event -> event time
-    src : str - source short/full name, alias or full
+
+    fname : full path to the hdf5 file
+    par   : psana.Event | float - tsec event time
     ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
-    vers : int - calibration version
+    vers  : int - calibration version
+
+    Back to :py:class:`PSCalib.DCMethods`
     """
-
-    str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
-                    (src, str_ctype, vers, calibdir)
-
-    ofn = DCFileName(env, src, calibdir)
-    fname = ofn.calib_file_path()
-    if verb :
-        ofn.print_attrs()
-
-    if fname is None : return None
-    if not os.path.exists(fname) :
-        if verb : print 'WARNING: path does not exist.'
-        return None
+    if not is_good_fname(fname, verb) : return None
 
     cs = DCStore(fname)
     cs.load()
@@ -211,11 +229,18 @@ def get_constants(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
         print 50*'_','\nDCStore.print_obj()' 
         cs.print_obj()
 
+    str_ctype = gu.dic_calib_type_to_name[ctype]
     ct = cs.ctypeobj(str_ctype)
     if ct is None : return None 
     #ct.print_obj()
 
-    cr = ct.range_for_evt(evt)
+    tsec = None if par is None else\
+           par if isinstance(par, float) else\
+           dcu.evt_time(par) # for psana.Event
+    #print 'XXX: get DCRange object for time = %.3f' % tsec
+    cr = ct.range_for_tsec(tsec)
+    #cr = ct.range_for_evt(evt)
+
     if cr is None : return None
     #cr.print_obj()
 
@@ -227,8 +252,34 @@ def get_constants(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
 
 #------------------------------
 
-def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False) :
+def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False) :
+    """Returns specified array of calibration constants.
+    
+    Parameters
+    
+    par   : psana.Event | float - tsec event time
+    env   : psana.Env -> full detector name for psana.Source 
+    src   : str - source short/full name, alias or full
+    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    vers : int - calibration version
 
+    Back to :py:class:`PSCalib.DCMethods`
+    """
+    str_ctype = gu.dic_calib_type_to_name[ctype]
+    if verb : print '  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
+                    (src, str_ctype, vers, calibdir)
+
+    ofn = DCFileName(env, src, calibdir)
+    if verb : ofn.print_attrs()
+
+    fname = ofn.calib_file_path()
+
+    return get_constants_from_file(fname, par, ctype, vers, verb)
+
+#------------------------------
+
+def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False) :
     """Delete specified version from calibration constants.
     
     Parameters
@@ -241,6 +292,8 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
     vers : int - calibration version
     cmt  : str - comment
     verb : bool - verbousity
+
+    Back to :py:class:`PSCalib.DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -249,13 +302,10 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
                     (src, str_ctype, vers, calibdir)
 
     ofn = DCFileName(env, src, calibdir)
-    fname = ofn.calib_file_path()
     if verb : ofn.print_attrs()
 
-    if fname is None : return None
-    if not os.path.exists(fname) :
-        if verb : print 'WARNING: path does not exist.'
-        return None
+    fname = ofn.calib_file_path()
+    if not is_good_fname(fname, verb) : return None
 
     cs = DCStore(fname)
     cs.load()
@@ -284,7 +334,6 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
 #------------------------------
 
 def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False) :
-
     """Delete specified time range from calibration constants.
     
     Parameters
@@ -297,21 +346,20 @@ def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
     range : str - range, e.g. '1474587520-end'
     cmt   : str - comment
     verb  : bool - verbousity
+
+    Back to :py:class:`PSCalib.DCMethods`
     """
-    metname = sys._getframe().f_code.co_name
+    #metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
     if verb : print '  src: %s\n  ctype: %s\n  range: %s\n  calibdir:%s'%\
                     (src, str_ctype, range, calibdir)
 
     ofn = DCFileName(env, src, calibdir)
-    fname = ofn.calib_file_path()
     if verb : ofn.print_attrs()
 
-    if fname is None : return None
-    if not os.path.exists(fname) :
-        if verb : print 'WARNING: path does not exist.'
-        return None
+    fname = ofn.calib_file_path()
+    if not is_good_fname(fname, verb) : return None
 
     cs = DCStore(fname)
     cs.load()
@@ -336,7 +384,6 @@ def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
 #------------------------------
 
 def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False) :
-
     """Delete specified ctype from calibration constants.
     
     Parameters
@@ -348,21 +395,20 @@ def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
     calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
     cmt   : str - comment
     verb  : bool - verbousity
+
+    Back to :py:class:`PSCalib.DCMethods`
     """
-    metname = sys._getframe().f_code.co_name
+    #metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
     if verb : print '  src: %s\n  ctype: %s\n  range: %s\n  calibdir:%s'%\
                     (src, str_ctype, range, calibdir)
 
     ofn = DCFileName(env, src, calibdir)
-    fname = ofn.calib_file_path()
     if verb : ofn.print_attrs()
 
-    if fname is None : return None
-    if not os.path.exists(fname) :
-        if verb : print 'WARNING: path does not exist.'
-        return None
+    fname = ofn.calib_file_path()
+    if not is_good_fname(fname, verb) : return None
 
     cs = DCStore(fname)
     cs.load()
@@ -384,22 +430,17 @@ def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
 #------------------------------
 
 def print_file(fname) :
-
     """Prints content of the file.
     
     Parameters
     
     fname : str - full path to the file
+
+    Back to :py:class:`PSCalib.DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
-    if fname is None :
-        print 'WARNING: file name is not defined'
-        return
-
-    if not os.path.exists(fname) :
-        print 'WARNING: path does not exist'
-        return
+    if not is_good_fname(fname, True) : return
 
     cs = DCStore(fname)
 
@@ -413,39 +454,23 @@ def print_file(fname) :
 #------------------------------
 
 def print_file_content(env, src='Epix100a.', calibdir=None) :
-
-    """Defines the file name and prints its content.
+    """Defines the file name and prints file content.
     
     Parameters
     
     env : psana.Env -> full detector name for psana.Source 
     src : str - source short/full name, alias or full
     calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+
+    Back to :py:class:`PSCalib.DCMethods`
     """
-    metname = sys._getframe().f_code.co_name
+    #metname = sys._getframe().f_code.co_name
 
     ofn = DCFileName(env, src, calibdir)
     fname = ofn.calib_file_path()
     ofn.print_attrs()
 
     print_file(fname)
-
-#    if fname is None :
-#        print 'WARNING: file name is not defined'
-#        return
-
-#    if not os.path.exists(fname) :
-#        print 'WARNING: path does not exist'
-#        return
-
-#    cs = DCStore(fname)
-
-#    t0_sec = time()
-#    cs.load()
-#    print 'File content loading time (sec) = %.6f' % (time()-t0_sec)
-    
-#    print 50*'_','\nDCStore.print_obj()' 
-#    cs.print_obj()
 
 #------------------------------
 #------------------------------
