@@ -13,7 +13,7 @@ reverse time order.
 
 Tag: V00-03-12
 2016-11-17 Mikhail S. Dubrovin
-- CalibParsStore, GenericCalibPars - support constants from DCS
+- CalibParsStore, GenericCalibPars - now support constants from DCS
 - DCMethods - update methods, add methods for direct access to hdf5 file
 - DCBase - tune doc
 
