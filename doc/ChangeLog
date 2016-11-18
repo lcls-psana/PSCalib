@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # File and Version Information:
-#  $Id$
+#  $Id:$
 #
 # Description:
 #  ChangeLog file for package PSCalib
@@ -10,6 +10,13 @@ Package author: Mikhail S. Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+
+Tag: V00-03-13
+2016-11-18 Mikhail S. Dubrovin
+- dcs - add/get DCS geometry constants from/to the text file
+- DCMethods - add evt_to_tsec, test_add_text
+- DCVersion - fix issue with returning data as str: d.tostring()
+- GlobalUtils - add load_textfile, GEOMETRY 
 
 Tag: V00-03-12
 2016-11-17 Mikhail S. Dubrovin

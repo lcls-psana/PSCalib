@@ -151,15 +151,19 @@ class DCS_CLI :
             return
 
         root, ext = os.path.splitext(cfname)
-        nda = None
+        data = None
         if ext=='.npy' :
-            nda = dcu.np.load(cfname)
+            data = dcu.np.load(cfname)
+
+        if ctype==dcu.gu.GEOMETRY :
+            data = dcu.gu.load_textfile(cfname)
+
         else :
             from PSCalib.NDArrIO import load_txt
-            nda = load_txt(cfname)
-        if verb : print 'data loaded from file: %s\n' % (cfname), nda
+            data = load_txt(cfname)
+        if verb : print 'data loaded from file: %s\n' % (cfname), data
 
-        add_constants(nda, evt, env, src, ctype, cdir, vers, pred, succ, 'CLI %s'%msg, verb)
+        add_constants(data, evt, env, src, ctype, cdir, vers, pred, succ, 'CLI %s'%msg, verb)
 
 #------------------------------
 
@@ -170,7 +174,9 @@ class DCS_CLI :
         cfname = self.fname_nda(env, src, cdir)
         nda = get_constants(evt, env, src, ctype, cdir, vers, verb)
         root, ext = os.path.splitext(cfname)
-        if ext=='.npy' :
+        if ctype==dcu.gu.GEOMETRY  :
+            dcu.gu.save_textfile(nda, cfname)
+        elif ext=='.npy' :
             dcu.np.save(cfname, nda)
         else : # save as text file
             from PSCalib.NDArrIO import save_txt
@@ -193,9 +199,11 @@ def usage() :
            '\n  %prog print      -e mfxn8316 -r 11 -d Epix100a -c ./calib'+\
            '\n  %prog print      -e mfxn8316 -r 11 -d Epix100a\n'+\
            '\n  %prog get        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 3 -f my-nda.txt -c ./calib'+\
-           '\n  %prog get        -e mfxn8316 -r 11 -d Epix100a -t pixel_status\n'+\
+           '\n  %prog get        -e mfxn8316 -r 11 -d Epix100a -t pixel_status'+\
+           '\n  %prog get        -e mfxn8316 -r 11 -d Epix100a -t geometry     -f geo-extracted.txt -c ./calib\n'+\
            '\n  %prog add        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4 -f my-nda.txt -m "my comment" -c ./calib'+\
-           '\n  %prog add        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -f my-nda.txt\n'+\
+           '\n  %prog add        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -f my-nda.txt'+\
+           '\n  %prog add        -e mfxn8316 -r 11 -d Epix100a -t geometry     -f geo.txt -m "my geo" -c ./calib\n'+\
            '\n  %prog delversion -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4 -m "my comment" -c ./calib'+\
            '\n  %prog delversion -e mfxn8316 -r 11 -d Epix100a -t pixel_status -v 4\n'+\
            '\n  %prog delrange   -e mfxn8316 -r 11 -d Epix100a -t pixel_status -g 1474587520-end -m "my comment" -c ./calib'+\

@@ -72,10 +72,11 @@ PIXEL_GAIN   = 3
 PIXEL_MASK   = 4
 PIXEL_BKGD   = 5
 COMMON_MODE  = 6
+GEOMETRY     = 7
 
-calib_types  = ( PEDESTALS,   PIXEL_STATUS,   PIXEL_RMS,   PIXEL_GAIN,   PIXEL_MASK,   PIXEL_BKGD,   COMMON_MODE)
-calib_names  = ('pedestals', 'pixel_status', 'pixel_rms', 'pixel_gain', 'pixel_mask', 'pixel_bkgd', 'common_mode')
-calib_dtypes = ( np.float32,  np.uint16,      np.float32,  np.float32,   np.uint8,     np.float32,   np.double)
+calib_types  = ( PEDESTALS,   PIXEL_STATUS,   PIXEL_RMS,   PIXEL_GAIN,   PIXEL_MASK,   PIXEL_BKGD,   COMMON_MODE,   GEOMETRY)
+calib_names  = ('pedestals', 'pixel_status', 'pixel_rms', 'pixel_gain', 'pixel_mask', 'pixel_bkgd', 'common_mode', 'geometry')
+calib_dtypes = ( np.float32,  np.uint16,      np.float32,  np.float32,   np.uint8,     np.float32,   np.double,     str)
 
 dic_calib_type_to_name  = dict(zip(calib_types, calib_names))
 dic_calib_name_to_type  = dict(zip(calib_names, calib_types))
@@ -509,9 +510,19 @@ def create_directory(dir, verb=False) :
 def save_textfile(text, path, mode='w') :
     """Saves text in file specified by path. mode: 'w'-write, 'a'-append 
     """
-    f=open(path,mode)
+    f=open(path, mode)
     f.write(text)
     f.close() 
+
+#------------------------------
+
+def load_textfile(path) :
+    """Returns text file as a str object
+    """
+    f=open(path, 'r')
+    recs = f.read() # f.readlines()
+    f.close() 
+    return recs
 
 #------------------------------
 

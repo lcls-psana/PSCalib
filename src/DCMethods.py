@@ -117,7 +117,19 @@ def is_good_fname(fname, verb=False) :
 
 #------------------------------
 
-def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,\
+def evt_to_tsec(par) :
+    """Checks if par is float or assumes that it is psana.Event and returns event time in (float) sec or None.
+    Parameters
+
+    par   : psana.Event | float - tsec event time | None    
+    """
+    return None if par is None else\
+           par if isinstance(par, float) else\
+           dcu.evt_time(par) # for psana.Event
+
+#------------------------------
+
+def add_constants(data, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,\
                   vers=None,\
                   pred=None,\
                   succ=None,\
@@ -127,11 +139,11 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
 
     Parameters
     
-    nda : numpy.array - array of calibration constants to save in file 
-    env : psana.Env -> full detector name for psana.Source 
-    evt : psana.Event -> event time
-    src : str - source short/full name, alias or full
-    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    data : numpy.array or str - array or string of calibration constants/data to save in file
+    env  : psana.Env -> full detector name for psana.Source 
+    evt  : psana.Event -> event time
+    src  : str - source short/full name, alias or full
+    ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
     calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
     vers : int - calibration version
     pred : str - predecessor name
@@ -192,7 +204,7 @@ def add_constants(nda, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=
     #cr.set_vnum_def(vnum=None)
 
     msg = '' if cmt is None else cmt
-    cv = cr.add_version(vnum=vers, tsec_prod=time(), nda=nda, cmt=msg)
+    cv = cr.add_version(vnum=vers, tsec_prod=time(), nda=data, cmt=msg)
     if cv is None : return
     #v = cr.vnum_last() if vers is None else vers
     #rec='%s vers=%d: %s' % (metname, v, cmt if cmt is not None else 'no-comments') 
@@ -234,9 +246,7 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
     if ct is None : return None 
     #ct.print_obj()
 
-    tsec = None if par is None else\
-           par if isinstance(par, float) else\
-           dcu.evt_time(par) # for psana.Event
+    tsec = evt_to_tsec(par)
     #print 'XXX: get DCRange object for time = %.3f' % tsec
     cr = ct.range_for_tsec(tsec)
     #cr = ct.range_for_evt(evt)
@@ -500,6 +510,24 @@ def test_add_constants() :
 
 #------------------------------
 
+def test_add_text() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+
+    import numpy as np
+
+    data = 'Now we are going to save\n this little piece of text'
+    vers = None
+    pred = None
+    succ = None
+    ctype = gu.GEOMETRY
+    cmt  = 'test_add_text'
+    
+    add_constants(data, gevt, genv, gsrc, ctype, gcalibdir, vers, pred, succ, cmt, gverb)
+    print '%s: text is added to the file' % (metname)
+
+#------------------------------
+
 def test_add_constants_two() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
@@ -643,6 +671,7 @@ def do_test() :
     elif tname == '6' : test_delete_version()
     elif tname == '7' : test_delete_range()
     elif tname == '8' : test_delete_ctype()
+    elif tname == '9' : test_add_text()
     else : print 'Not-recognized test name: %s' % tname
     msg = 'End of test %s, consumed time (sec) = %.6f' % (tname, time()-t0_sec)
     sys.exit(msg)

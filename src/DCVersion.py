@@ -17,11 +17,11 @@ Usage::
     # Methods
     o.set_vnum(vnum)            # sets (int) version 
     o.set_tsprod(tsprod)        # sets (double) time stamp of the version production
-    o.add_data(nda)             # sets (np.array) calibration array
+    o.add_data(data)            # sets (str or np.array) calibration data
     vnum   = o.vnum()           # returns (int) version number
     s_vnum = o.str_vnum()       # returns (str) version number
     tsvers = o.tsprod()         # returns (double) time stamp of the version production
-    nda    = o.data()           # returns (np.array) calibration array
+    data   = o.data()           # returns (np.array) calibration array
     o.save(group)               # saves object content under h5py.group in the hdf5 file. 
     o.load(group)               # loads object content from the h5py.group of hdf5 file. 
     o.print_obj()               # print info about this object.
@@ -95,7 +95,7 @@ class DCVersion(DCVersionI) :
 
     def set_tsprod(self, tsprod)   : self._tsprod = tsprod # double or None
 
-    def add_data(self, nda)        : self._nda = nda       # np.array or None
+    def add_data(self, data)       : self._data = data     # np.array, str or None
 
     def vnum(self)                 : return self._vnum     # int
 
@@ -103,13 +103,13 @@ class DCVersion(DCVersionI) :
 
     def tsprod(self)               : return self._tsprod   # double
 
-    def data(self)                 : return self._nda      # np.array
+    def data(self)                 : return self._data      # np.array
 
     def save(self, group) :
         grp = get_subgroup(group, self.str_vnum())                      # (str)
         ds1 = save_object_as_dset(grp, 'version', data=self.vnum())     # dtype='int'
         ds2 = save_object_as_dset(grp, 'tsprod',  data=self.tsprod())   # dtype='double'
-        ds3 = save_object_as_dset(grp, 'data',    data=self.data())     # dtype='np.array'
+        ds3 = save_object_as_dset(grp, 'data',    data=self.data())     # dtype='str' or 'np.array'
 
         msg = '==== save(), group %s object for version %d' % (grp.name, self.vnum())
         log.debug(msg, self._name)
@@ -130,7 +130,13 @@ class DCVersion(DCVersionI) :
                 #t0_sec = time()
                 if   k == 'version': self.set_vnum(v[0])
                 elif k == 'tsprod' : self.set_tsprod(v[0])
-                elif k == 'data'   : self.add_data(v.value)
+                elif k == 'data'   :
+                    d = v.value
+                    if str(d.dtype)[:2] == '|S' :
+                        s=d.tostring() # .split('\n')
+                        #print 'XXX: s, type(s): %s'%s, type(s)
+                    self.add_data(s)
+
                 else : log.warning('group "%s" has unrecognized dataset "%s"' % (grp.name, k), self._name)
                 #print 'TTT %s dataset "%s" time (sec) = %.6f' % (sys._getframe().f_code.co_name, k, time()-t0_sec)
 
@@ -155,7 +161,7 @@ class DCVersion(DCVersionI) :
         if isinstance(data, np.ndarray) :
            print '%s data.shape %s  dtype %s' % (offset, str(data.shape), str(data.dtype))
         else :
-           print '%s data    %s' % (offset, str(data))
+           print '%s data    %s' % (offset, str(data).replace('\n',' | '))
 
         #for k,v in self.versions().iteritems() :
         #    v.print_obj()
