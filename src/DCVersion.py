@@ -133,9 +133,9 @@ class DCVersion(DCVersionI) :
                 elif k == 'data'   :
                     d = v.value
                     if str(d.dtype)[:2] == '|S' :
-                        s=d.tostring() # .split('\n')
-                        #print 'XXX: s, type(s): %s'%s, type(s)
-                    self.add_data(s)
+                        d=d.tostring() # .split('\n')
+                        #print 'XXX: d, type(d): %s'%d, type(d)
+                    self.add_data(d)
 
                 else : log.warning('group "%s" has unrecognized dataset "%s"' % (grp.name, k), self._name)
                 #print 'TTT %s dataset "%s" time (sec) = %.6f' % (sys._getframe().f_code.co_name, k, time()-t0_sec)
