@@ -27,29 +27,35 @@ Usage::
     succ     = 'CxiDs2.0:Cspad.0'
     range    = '1474587520-end'
 
-    # Methods of
-    dcm.add_constants(nda, evt, env, src, ctype, calibdir, vers=None, pred=None, succ=None, cmt=None) 
-
-    dcm.print_file(fname)
-    dcm.print_file_content(env, src, calibdir=None)
+    # Methods with dynamically-reconstruction of calib file name
+    dcm.add_constants(nda, evt, env, src, ctype, calibdir, vers=None, pred=None, succ=None, cmt=None)
+    dcm.print_content(env, src, calibdir=None)
     nda = dcm.get_constants(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
-    nda = dcm.get_constants_from_file(fname, evt, ctype, vers=None, verb=False)
-
-    dcm.delete_version_from_file(fname, src, ctype, vers=None, cmt=None, verb=False)
-
     dcm.delete_version(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
-    dcm.delete_range  (evt, env, src, ctype, cdir, range, msg, verb)
-    dcm.delete_ctype  (evt, env, src, ctype, cdir, msg, verb)
+    dcm.delete_range  (evt, env, src, ctype, calibdir, range, cmt, verb)
+    dcm.delete_ctype  (evt, env, src, ctype, calibdir, cmt, verb)
+
+    # Methods using fname
+    dcm.add_constants_to_file(data, fname, par, env, ctype, vers=None, pred=None, succ=None, cmt=None) 
+    dcm.print_content_from_file(fname)
+    nda = dcm.get_constants_from_file(fname, evt, ctype, vers=None, verb=False)
+    dcm.delete_version_from_file(fname, ctype, vers=None, cmt=None, verb=False)
+    dcm.delete_range_from_file  (fname, ctype, range, cmt, verb)
+    dcm.delete_ctype_from_file  (fname, ctype, cmt, verb)
 
 @see methods 
     :meth:`add_constants`, 
-    :meth:`print_file`, 
-    :meth:`print_file_content`, 
+    :meth:`add_constants_to_file`, 
+    :meth:`print_content`, 
+    :meth:`print_content_from_file`, 
     :meth:`get_constants`, 
     :meth:`get_constants_from_file`, 
     :meth:`delete_version`, 
+    :meth:`delete_version_from_file`, 
     :meth:`delete_range`, 
+    :meth:`delete_range_from_file`, 
     :meth:`delete_ctype`
+    :meth:`delete_ctype_from_file`
 
 @see project modules
     * :class:`PSCalib.DCStore`
@@ -133,7 +139,7 @@ def evt_to_tsec(par) :
 #------------------------------
 #------------------------------
 
-def add_constants_to_file(data, fname, par, env=None, src='Epix100a.', ctype=gu.PIXEL_MASK,\
+def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
                           vers=None,\
                           pred=None,\
                           succ=None,\
@@ -147,7 +153,6 @@ def add_constants_to_file(data, fname, par, env=None, src='Epix100a.', ctype=gu.
     fname: full path to the hdf5 file
     par  : psana.Event | float - tsec event time
     env  : psana.Env -> full detector name for psana.Source 
-    src  : str - source short/full name, alias or full
     ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
     vers : int - calibration version
     pred : str - predecessor name
@@ -161,8 +166,8 @@ def add_constants_to_file(data, fname, par, env=None, src='Epix100a.', ctype=gu.
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
 
-    if verb : print '  %s.add_constants_to_file   src: %s\n  ctype: %s\n  vers: %s'%\
-                    (metname, src, str_ctype, vers)
+    if verb : print '  %s.add_constants_to_file  ctype: %s  vers: %s'%\
+                    (metname, str_ctype, vers)
 
     if fname is None :
         if verb : print 'WARNING: file name is not defined - return None'
@@ -254,7 +259,7 @@ def add_constants(data, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir
 
     fname = ofn.calib_file_path()
 
-    add_constants_to_file(data, fname, evt, env, src, ctype, vers, pred, succ, cmt, verb)
+    add_constants_to_file(data, fname, evt, env, ctype, vers, pred, succ, cmt, verb)
 
 #------------------------------
 #------------------------------
@@ -332,14 +337,13 @@ def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
 #------------------------------
 #------------------------------
 
-def delete_version_from_file(fname, par, src='Epix100a.', ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False) :
+def delete_version_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False) :
     """Delete specified version from calibration constants.
     
     Parameters
     
     fname : full path to the hdf5 file
     par   : psana.Event | float - tsec event time
-    src   : str - source short/full name, alias or full
     ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
     vers  : int - calibration version
     cmt   : str - comment
@@ -350,8 +354,8 @@ def delete_version_from_file(fname, par, src='Epix100a.', ctype=gu.PIXEL_MASK, v
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.delete_version_from_file:\n  src: %s\n  ctype: %s\n  vers: %s'%\
-                    (metname, src, str_ctype, vers)
+    if verb : print '  %s.delete_version_from_file:  ctype: %s  vers: %s'%\
+                    (metname, str_ctype, vers)
 
     if not is_good_fname(fname, verb) : return None
 
@@ -409,19 +413,18 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
 
     fname = ofn.calib_file_path()
 
-    return delete_version_from_file(fname, evt, src, ctype, vers, cmt, verb)
+    return delete_version_from_file(fname, evt, ctype, vers, cmt, verb)
 
 #------------------------------
 #------------------------------
 #------------------------------
 
-def delete_range_from_file(fname, src='Epix100a.', ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False) :
+def delete_range_from_file(fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False) :
     """Delete specified time range from calibration constants.
     
     Parameters
     
     fname : full path to the hdf5 file
-    src   : str - source short/full name, alias or full
     ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
     range : str - range, e.g. '1474587520-end'
     cmt   : str - comment
@@ -432,8 +435,8 @@ def delete_range_from_file(fname, src='Epix100a.', ctype=gu.PIXEL_MASK, range=No
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.delete_range_from_file  src: %s\n  ctype: %s\n  range: %s'%\
-                    (metname, src, str_ctype, range)
+    if verb : print '  %s.delete_range_from_file  ctype: %s  range: %s'%\
+                    (metname, str_ctype, range)
 
     if not is_good_fname(fname, verb) : return None
 
@@ -486,19 +489,18 @@ def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
 
     fname = ofn.calib_file_path()
 
-    return delete_range_from_file(fname, src, ctype, range, cmt, verb)
+    return delete_range_from_file(fname, ctype, range, cmt, verb)
 
 #------------------------------
 #------------------------------
 #------------------------------
 
-def delete_ctype_from_file(fname, src='Epix100a.', ctype=gu.PIXEL_MASK, cmt=None, verb=False) :
+def delete_ctype_from_file(fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False) :
     """Delete specified ctype from calibration constants.
     
     Parameters
     
     fname : full path to the hdf5 file
-    src   : str - source short/full name, alias or full
     ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
     cmt   : str - comment
     verb  : bool - verbousity
@@ -508,8 +510,8 @@ def delete_ctype_from_file(fname, src='Epix100a.', ctype=gu.PIXEL_MASK, cmt=None
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.delete_ctype  src: %s\n  ctype: %s\n  range: %s'%\
-                    (metname, src, str_ctype, range)
+    if verb : print '  %s.delete_ctype  ctype: %s  range: %s'%\
+                    (metname, str_ctype, range)
 
     if not is_good_fname(fname, verb) : return None
 
@@ -558,11 +560,11 @@ def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
 
     fname = ofn.calib_file_path()
 
-    return delete_ctype_from_file(fname, src, ctype, cmt, verb)
+    return delete_ctype_from_file(fname, ctype, cmt, verb)
 
 #------------------------------
 
-def print_file(fname) :
+def print_content_from_file(fname) :
     """Prints content of the file.
     
     Parameters
@@ -586,7 +588,7 @@ def print_file(fname) :
 
 #------------------------------
 
-def print_file_content(env, src='Epix100a.', calibdir=None) :
+def print_content(env, src='Epix100a.', calibdir=None) :
     """Defines the file name and prints file content.
     
     Parameters
@@ -603,7 +605,7 @@ def print_file_content(env, src='Epix100a.', calibdir=None) :
     fname = ofn.calib_file_path()
     ofn.print_attrs()
 
-    print_file(fname)
+    print_content_from_file(fname)
 
 #------------------------------
 #------------------------------
@@ -626,10 +628,30 @@ def test_add_constants() :
     nda  = np.zeros((1000,1000), dtype=np.float32)
     pred = None
     succ = None
-    cmt  = 'my comment is here'
+    cmt  = 'my comment: %s' % metname
     
     add_constants(nda, gevt, genv, gsrc, gctype, gcalibdir, vers, pred, succ, cmt, gverb)
     print '%s: constants added nda.shape=%s' % (metname, nda.shape)
+
+#------------------------------
+
+def test_add_constants_to_file() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+
+    import numpy as np
+
+    vers = None
+    #data  = np.zeros((32,185,388), dtype=np.float32)
+    data  = 11*np.ones((500,500), dtype=np.float32)
+    pred = None
+    succ = None
+    cmt  = 'my comment: %s' % metname
+    par = gevt # 1474587525.3 # gevt
+
+    add_constants_to_file(data, gfname, par, genv, gctype, vers, pred, succ, cmt, gverb)
+
+    print '%s: constants added data.shape=%s' % (metname, data.shape)
 
 #------------------------------
 
@@ -641,13 +663,33 @@ def test_add_text() :
 
     data = 'Now we are going to save\n this little piece of text'
     vers = None
-    pred = None
-    succ = None
+    pred = 'Predecessor_name'
+    succ = 'Successor_name'
     ctype = gu.GEOMETRY
-    cmt  = 'test_add_text'
+    cmt  = 'my comment: %s' % metname
     
     add_constants(data, gevt, genv, gsrc, ctype, gcalibdir, vers, pred, succ, cmt, gverb)
     print '%s: text is added to the file' % (metname)
+
+#------------------------------
+
+def test_add_text_to_file() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+
+    import numpy as np
+
+    data = 'Now we are going to save\n this little piece of text'
+    vers = None
+    pred = None
+    succ = None
+    ctype = gu.GEOMETRY
+    cmt  = 'my comment: %s' % metname
+    par = gevt
+    
+    add_constants_to_file(data, gfname, par, genv, gctype, vers, pred, succ, cmt, gverb)
+    
+    print '%s: text is added to the file\n  %s' % (metname, gfname)
 
 #------------------------------
 
@@ -665,8 +707,8 @@ def test_add_constants_two() :
     #nda   = np.zeros((32,185,388), dtype=np.float32)
     nda1   = np.ones((1000,1000), dtype=np.float32)
     nda2   = 2 * nda1
-    cmt1   = 'my comment 1'
-    cmt2   = 'my comment 2'
+    cmt1   = 'my comment 1: %s' % metname
+    cmt2   = 'my comment 2: %s' % metname
     
     add_constants(nda1, gevt, genv, gsrc, ctype1, gcalibdir, vers, pred, succ, cmt1, gverb)
     add_constants(nda2, gevt, genv, gsrc, ctype2, gcalibdir, vers, pred, succ, cmt2, gverb)
@@ -680,11 +722,24 @@ def test_get_constants() :
     print 20*'_', '\n%s' % metname
 
     vers = None
-    nda = get_constants(gevt, genv, gsrc, gctype, gcalibdir, vers, gverb)
+    data = get_constants(gevt, genv, gsrc, gctype, gcalibdir, vers, gverb)
 
     print '%s: retrieved constants for vers %s' % (metname, str(vers))
-    print '    nda:', nda
-    if nda is not None : print '    nda.shape=%s' % (str(nda.shape))
+    print 'data:\n', data
+    if isinstance(data, np.ndarray) : print 'data.shape=%s' % (str(data.shape))
+
+#------------------------------
+
+def test_get_constants_from_file() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+
+    vers = None
+    data = get_constants_from_file(gfname, gevt, gctype, vers, gverb)
+
+    print '%s: retrieved constants for vers %s' % (metname, str(vers))
+    print 'data:\n', data
+    if isinstance(data, np.ndarray) : print 'data.shape=%s' % (str(data.shape))
 
 #------------------------------
 
@@ -693,8 +748,20 @@ def test_delete_version() :
     print 20*'_', '\n%s' % metname
 
     vers = None # for default - last version
-    cmt  = 'my comment to delete version'
+    cmt  = 'my comment: %s' % metname
     vdel = delete_version(gevt, genv, gsrc, gctype, gcalibdir, vers, cmt, gverb)
+    print '%s: deleted version %s' % (metname, str(vdel))
+
+#------------------------------
+
+def test_delete_version_from_file() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+
+    vers = None # for default - last version
+    cmt  = 'my comment: %s' % metname
+    vdel = delete_version_from_file(gfname, gevt, gctype, vers, cmt, gverb)
+
     print '%s: deleted version %s' % (metname, str(vdel))
 
 #------------------------------
@@ -704,8 +771,19 @@ def test_delete_range() :
     print 20*'_', '\n%s' % metname
 
     range = '1474587520-end'
-    cmt  = 'my comment to delete range'
+    cmt  = 'my comment: %s' % metname
     rdel = delete_range(gevt, genv, gsrc, gctype, gcalibdir, range, cmt, gverb)
+    print '%s: deleted range %s' % (metname, str(rdel))
+
+#------------------------------
+
+def test_delete_range_from_file() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+
+    range = '1474587520-end'
+    cmt  = 'my comment: %s' % metname
+    rdel = delete_range_from_file(gfname, gctype, range, cmt, gverb)    
     print '%s: deleted range %s' % (metname, str(rdel))
 
 #------------------------------
@@ -714,25 +792,35 @@ def test_delete_ctype() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
 
-    cmt  = 'my comment to delete ctype'
+    cmt  = 'my comment: %s' % metname
     tdel = delete_ctype(gevt, genv, gsrc, gctype, gcalibdir, cmt, gverb)
     print '%s: deleted ctype %s' % (metname, str(tdel))
 
 #------------------------------
 
-def test_print_file() :
+def test_delete_ctype_from_file() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
-    fname = './calib/epix100a/epix100a-3925999616-0996663297-3791650826-1232098304-0953206283-2655595777-0520093719.h5'
-    print_file(fname)
+
+    cmt  = 'my comment: %s' % metname
+    tdel = delete_ctype_from_file(gfname, gctype, cmt, gverb)
+    
+    print '%s: deleted ctype %s' % (metname, str(tdel))
+
+#------------------------------
+
+def test_print_content() :
+    metname = sys._getframe().f_code.co_name
+    print 20*'_', '\n%s' % metname
+    print_content(genv, gsrc, gcalibdir)
     print '%s is completed' % (metname)
 
 #------------------------------
 
-def test_print_file_content() :
+def test_print_content_from_file() :
     metname = sys._getframe().f_code.co_name
     print 20*'_', '\n%s' % metname
-    print_file_content(genv, gsrc, gcalibdir)
+    print_content_from_file(gfname)
     print '%s is completed' % (metname)
 
 #------------------------------
@@ -753,8 +841,9 @@ def test_misc() :
 def set_parameters() :
 
     import psana
+    import numpy as np; global np
 
-    global genv, gevt, gsrc, gctype, gcalibdir, gverb
+    global genv, gevt, gsrc, gctype, gcalibdir, gverb, gfname
 
     #dsname  = 'exp=cxif5315:run=129'
     #dsname   = '/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc'
@@ -768,6 +857,8 @@ def set_parameters() :
     gctype    = gu.PIXEL_STATUS # gu.PIXEL_MASK, gu.PEDESTALS, etc.
     gverb     = True
     #gverb     = False
+
+    gfname = './calib/epix100a/epix100a-3925999616-0996663297-3791650826-1232098304-0953206283-2655595777-0520093719.h5'
 
     ds = psana.DataSource(dsname)
     genv=ds.env()
@@ -786,15 +877,25 @@ def do_test() :
     print 50*'_', '\nTest %s:' % tname
     t0_sec = time()
     if   tname == '0' : test_misc(); 
-    elif tname == '1' : test_add_constants()
-    elif tname == '2' : test_add_constants_two()
-    elif tname == '3' : test_get_constants()
-    elif tname == '4' : test_print_file()
-    elif tname == '5' : test_print_file_content()
-    elif tname == '6' : test_delete_version()
-    elif tname == '7' : test_delete_range()
-    elif tname == '8' : test_delete_ctype()
-    elif tname == '9' : test_add_text()
+
+    elif tname ==  '1': test_add_constants()
+    elif tname ==  '2': test_add_constants_two()
+    elif tname ==  '3': test_add_text()
+    elif tname ==  '4': test_print_content()
+    elif tname ==  '5': test_get_constants()
+    elif tname ==  '6': test_delete_version()
+    elif tname ==  '7': test_delete_range()
+    elif tname ==  '8': test_delete_ctype()
+
+    elif tname == '11': test_add_constants_to_file()
+    elif tname == '12': test_add_constants_to_file()
+    elif tname == '13': test_add_text_to_file()
+    elif tname == '14': test_print_content_from_file()
+    elif tname == '15': test_get_constants_from_file()
+    elif tname == '16': test_delete_version_from_file()
+    elif tname == '17': test_delete_range_from_file()
+    elif tname == '18': test_delete_ctype_from_file()
+
     else : print 'Not-recognized test name: %s' % tname
     msg = 'End of test %s, consumed time (sec) = %.6f' % (tname, time()-t0_sec)
     sys.exit(msg)
