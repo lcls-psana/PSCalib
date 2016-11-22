@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-16
+2016-11-22 Mikhail S. Dubrovin
+- GeometryAccess - add default constructor and load_pars_from_str method
+- in DCVersion.print_obj - switch to formatted print for str/text constants 
+	
 Tag: V00-03-15
 2016-11-21 Mikhail S. Dubrovin
 - DCMethods - add methods test_*_file() 

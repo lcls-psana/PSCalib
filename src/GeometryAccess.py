@@ -9,6 +9,15 @@ Usage::
     fname_geometry = '/reg/d/psdm/CXI/cxitut13/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
     geometry = GeometryAccess(fname_geometry, 0377)
 
+    # load constants from geometry file
+    geometry.load_pars_from_file(path=None)
+
+    # load constants from '\n'-separated str / text object
+    geometry.load_pars_from_str(s)
+
+    # check if geometry info is available, returns bool
+    status = geometry.is_valid()
+
     # get pixel coordinate [um] arrays
     X, Y, Z = geometry.get_pixel_coords(oname=None, oindex=0, do_tilt=True)
 
@@ -29,6 +38,12 @@ Usage::
 
     # print comments associated with geometry (file) 
     geometry.print_comments_from_dict()
+
+    # print list of geometry objects
+    geometry.print_list_of_geos()
+
+    # print list of geometry object children
+    geometry.print_list_of_geos_children()
 
     # get pixel mask array;
     # mbits = +1-mask edges, +2-wide pixels, +4-non-bonded pixels, +8/+16 - four/eight neighbours of non-bonded
@@ -110,20 +125,26 @@ class GeometryAccess :
     """ :py:class:`GeometryAccess`
     """
 
-    def __init__(self, path, pbits=0) : 
-        """  Constructor of the class :py:class:`GeometryAccess`      
+    def __init__(self, path=None, pbits=0) : 
+        """Constructor of the class :py:class:`GeometryAccess`      
         """        
-        if not os.path.exists(path) :
+        self.path  = path
+        self.pbits = pbits
+        self.valid = False
+
+        if path is None or not os.path.exists(path) :
             if pbits : print '%s: geometry file "%s" does not exist' % (self.__class__.__name__, path)
-            self.valid = False
             return
 
-        self.valid = True
-
-        self.path = path
-        self.pbits = pbits
         self.load_pars_from_file()
 
+        if self.pbits & 1 : self.print_list_of_geos()
+        if self.pbits & 2 : self.print_list_of_geos_children()
+        if self.pbits & 4 : self.print_comments_from_dict()
+    
+    #------------------------------
+
+    def reset_cash(self) :
         # Parameters for caching
         self.geo_old    = None
         self.oname_old  = None
@@ -138,17 +159,22 @@ class GeometryAccess :
         self.ipy_old    = None
         self.p_um_old   = None
 
-        if self.pbits & 1 : self.print_list_of_geos()
-        if self.pbits & 2 : self.print_list_of_geos_children()
-        if self.pbits & 4 : self.print_comments_from_dict()
-    
+    #------------------------------
+
+    def is_valid(self) :
+        """returns True if geometry is loaded and presumably valid, otherwise False
+        """
+        return self.valid
+
     #------------------------------
 
     def load_pars_from_file(self, path=None) :
         """Reads input "geometry" file, discards empty lines and comments, fills the list of geometry objects for data lines
         """        
+        self.valid = False
         if path is not None : self.path = path
             
+        self.reset_cash()
         self.dict_of_comments = {}
         self.list_of_geos = []
 
@@ -168,11 +194,41 @@ class GeometryAccess :
         f.close()
     
         self._set_relations()
+        self.valid = True
+    
+    #------------------------------
+
+    def load_pars_from_str(self, s) :
+        """Reads input geometry from str, discards empty lines and comments, fills the list of geometry objects for data lines
+        """        
+        self.valid = False
+        if not isinstance(s, str) :
+            if pbits : print '%s.load_pars_from_str input parameter is not a str, s: %s' % (self.__class__.__name__, str(s))
+            return
+            
+        self.reset_cash()
+        self.dict_of_comments = {}
+        self.list_of_geos = []
+
+        if self.pbits & 32 : print 'Load text: %s' % s
+
+        for linef in s.split('\n') :
+            line = linef.strip('\n')
+            if self.pbits & 128 : print line
+            if not line : continue   # discard empty strings
+            if line[0] == '#' :      # process line of comments
+                self._add_comment_to_dict(line)
+                continue
+            #geo=self._parse_line(line)
+            self.list_of_geos.append(self._parse_line(line))
+    
+        self._set_relations()
+        self.valid = True
     
     #------------------------------
 
     def save_pars_in_file(self, path) :
-        """Save "geometry" file with current content
+        """Save geometry file with current content
         """        
         if not self.valid : return
 

@@ -161,7 +161,8 @@ class DCVersion(DCVersionI) :
         if isinstance(data, np.ndarray) :
            print '%s data.shape %s  dtype %s' % (offset, str(data.shape), str(data.dtype))
         else :
-           print '%s data    %s' % (offset, str(data).replace('\n',' | '))
+           print '%s data' % (offset)
+           for s in data.split('\n') : print '%s     %s' % (offset, s)
 
         #for k,v in self.versions().iteritems() :
         #    v.print_obj()
