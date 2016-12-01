@@ -42,7 +42,21 @@ Usage::
     size   = o.size(ctype)
     ndim   = o.ndim(ctype)
 
-@see other interface methods in :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`
+@see
+    :py:class:`PSCalib.GenericCalibPars`
+    :py:class:`PSCalib.GlobalUtils`
+    :py:class:`PSCalib.CalibPars`
+    :py:class:`PSCalib.CalibParsStore` 
+    :py:class:`PSCalib.CalibParsBaseAndorV1`
+    :py:class:`PSCalib.CalibParsBaseAndor3dV1`
+    :py:class:`PSCalib.CalibParsBaseCameraV1`
+    :py:class:`PSCalib.CalibParsBaseCSPad2x2V1`
+    :py:class:`PSCalib.CalibParsBaseCSPadV1`
+    :py:class:`PSCalib.CalibParsBaseEpix100aV1`
+    :py:class:`PSCalib.CalibParsBasePnccdV1`
+    :py:class:`PSCalib.CalibParsBasePrincetonV1`
+    :py:class:`PSCalib.CalibParsBaseAcqirisV1`
+    :py:class:`PSCalib.CalibParsBaseImpV1`
 
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.
@@ -91,6 +105,7 @@ class CalibParsStore() :
         self.name = self.__class__.__name__
         self.fnexpc = None
         self.fnrepo = None
+        self.tsec   = None
         
 #------------------------------
 
