@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-19
+2016-12-08 Mikhail S. Dubrovin
+- GenericCalibPars.constants(...) - return default constants if dcs is None
+
 Tag: V00-03-18
 2016-12-01 Mikhail S. Dubrovin
 - CalibParsStore.py - fix issue with non-defined attibute self.tsec

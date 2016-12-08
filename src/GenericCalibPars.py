@@ -297,7 +297,10 @@ class GenericCalibPars (CalibPars) :
 
         if arr is None or self.dic_status[ctype] == gu.DEFAULT :
             # try to retrieve constants from DCS hdf5 file
-            arr = self.constants_dcs(ctype, vers)
+            arr_dcs = self.constants_dcs(ctype, vers)
+            if arr_dcs is not None :
+                arr = arr_dcs
+                self.dic_status[ctype] = gu.DCSTORE
 
         if self.pbits & 128 :
             print '%s.constants   ctype, default:' % (self.name), ctype, gu.DEFAULT

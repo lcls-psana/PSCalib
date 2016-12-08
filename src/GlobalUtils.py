@@ -88,9 +88,10 @@ UNREADABLE = 3
 UNDEFINED  = 4
 WRONGSIZE  = 5
 NONFOUND   = 6
+DCSTORE    = 7
 
-calib_statvalues = ( LOADED,   DEFAULT,   UNREADABLE,   UNDEFINED,   WRONGSIZE,   NONFOUND)
-calib_statnames  = ('LOADED', 'DEFAULT', 'UNREADABLE', 'UNDEFINED', 'WRONGSIZE', 'NONFOUND')
+calib_statvalues = ( LOADED,   DEFAULT,   UNREADABLE,   UNDEFINED,   WRONGSIZE,   NONFOUND,   DCSTORE)
+calib_statnames  = ('LOADED', 'DEFAULT', 'UNREADABLE', 'UNDEFINED', 'WRONGSIZE', 'NONFOUND', 'DCSTORE')
 
 dic_calib_status_value_to_name = dict(zip(calib_statvalues, calib_statnames))
 dic_calib_status_name_to_value = dict(zip(calib_statnames,  calib_statvalues))
