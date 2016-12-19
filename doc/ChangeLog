@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-20
+2016-12-19 Christopher O'Grady
+- Add Jungfrau to list of area detectors
+
 Tag: V00-03-19
 2016-12-08 Mikhail S. Dubrovin
 - GenericCalibPars.constants(...) - return default constants if dcs is None
