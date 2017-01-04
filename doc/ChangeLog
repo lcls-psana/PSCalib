@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-21
+2017-01-04 Mikhail S. Dubrovin 
+- CalibParsStore, CalibParsBaseJungfrauV1 - add support for Jungfrau
+	
 Tag: V00-03-20
 2016-12-19 Christopher O'Grady
 - Add Jungfrau to list of area detectors

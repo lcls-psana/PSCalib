@@ -93,6 +93,7 @@ from PSCalib.CalibParsBasePnccdV1     import CalibParsBasePnccdV1
 from PSCalib.CalibParsBasePrincetonV1 import CalibParsBasePrincetonV1
 from PSCalib.CalibParsBaseAcqirisV1   import CalibParsBaseAcqirisV1
 from PSCalib.CalibParsBaseImpV1       import CalibParsBaseImpV1
+from PSCalib.CalibParsBaseJungfrauV1  import CalibParsBaseJungfrauV1
 
 #------------------------------
 
@@ -136,6 +137,7 @@ class CalibParsStore() :
         elif dettype ==  gu.ANDOR3D   : cbase = CalibParsBaseAndor3dV1()    
         elif dettype ==  gu.ANDOR     : cbase = CalibParsBaseAndorV1()    
         elif dettype ==  gu.EPIX100A  : cbase = CalibParsBaseEpix100aV1() 
+        elif dettype ==  gu.JUNGFRAU  : cbase = CalibParsBaseJungfrauV1()    
         elif dettype ==  gu.ACQIRIS   : cbase = CalibParsBaseAcqirisV1() 
         elif dettype ==  gu.IMP       : cbase = CalibParsBaseImpV1() 
         elif dettype in (gu.OPAL1000,\
