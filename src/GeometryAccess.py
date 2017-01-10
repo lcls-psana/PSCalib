@@ -12,7 +12,7 @@ Usage::
     # load constants from geometry file
     geometry.load_pars_from_file(path=None)
 
-    # load constants from '\n'-separated str / text object
+    # load constants from next-line-symbol separated str / text object
     geometry.load_pars_from_str(s)
 
     # check if geometry info is available, returns bool
