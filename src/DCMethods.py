@@ -11,6 +11,7 @@
 Usage::
 
     # Import
+    import psana
     import PSCalib.DCMethods as dcm
 
     # Example of parameters
@@ -18,8 +19,12 @@ Usage::
     dsname  = 'exp=cxif5315:run=129'
     # or:
     dsname   = '/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc'
+    ds = psana.DataSource(dsname)
+    env=ds.env()
+    evt=ds.events().next()
+
     src      = 'Cspad.' # 'Epix100a.', etc
-    ctype    = gu.PIXEL_MASK # OR: gu.PEDESTALS, gu.PIXEL_STATUS, etc.
+    ctype    = gu.PIXEL_MASK # | gu.PEDESTALS | gu.PIXEL_STATUS, etc.
     vers     = None # or e.g. 5
     calibdir = None # or e.g. './calib'
     nda      = np.zeros((32,185,388))
@@ -27,21 +32,23 @@ Usage::
     succ     = 'CxiDs2.0:Cspad.0'
     range    = '1474587520-end'
 
-    # Methods with dynamically-reconstruction of calib file name
-    dcm.add_constants(nda, evt, env, src, ctype, calibdir, vers=None, pred=None, succ=None, cmt=None)
-    dcm.print_content(env, src, calibdir=None)
-    nda = dcm.get_constants(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
-    dcm.delete_version(evt, env, src, ctype, calibdir=None, vers=None, verb=False)
-    dcm.delete_range  (evt, env, src, ctype, calibdir, range, cmt, verb)
-    dcm.delete_ctype  (evt, env, src, ctype, calibdir, cmt, verb)
+    par      = 0. # | evt : psana.Event | float - tsec event time
+
+    # Methods with dynamically-reconstructed calib file name
+    dcm.add_constants(nda, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, pred=None, succ=None, cmt=None, verb=False)
+    dcm.print_content(env, src='Epix100a.', calibdir=None)
+    nda = dcm.get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False)
+    dcm.delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False)
+    dcm.delete_range  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False)
+    dcm.delete_ctype  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False)
 
     # Methods using fname
-    dcm.add_constants_to_file(data, fname, par, env, ctype, vers=None, pred=None, succ=None, cmt=None) 
+    dcm.add_constants_to_file(data, fname, par, env, ctype=gu.PIXEL_MASK, vers=None, pred=None, succ=None, cmt=None, verb=False) 
     dcm.print_content_from_file(fname)
-    nda = dcm.get_constants_from_file(fname, evt, ctype, vers=None, verb=False)
-    dcm.delete_version_from_file(fname, ctype, vers=None, cmt=None, verb=False)
-    dcm.delete_range_from_file  (fname, ctype, range, cmt, verb)
-    dcm.delete_ctype_from_file  (fname, ctype, cmt, verb)
+    nda = dcm.get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=False)
+    dcm.delete_version_from_file(fname, ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False)
+    dcm.delete_range_from_file  (fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)
+    dcm.delete_ctype_from_file  (fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)
 
 @see methods 
     :meth:`add_constants`, 
@@ -152,7 +159,7 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
     data : numpy.array or str - array or string of calibration constants/data to save in file
     fname: full path to the hdf5 file
     par  : psana.Event | float - tsec event time
-    env  : psana.Env -> full detector name for psana.Source 
+    env  : psana.Env -> is used to get exp=env.experiment() for comments etc.
     ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
     vers : int - calibration version
     pred : str - predecessor name
@@ -222,7 +229,7 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
 
 #------------------------------
 
-def add_constants(data, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,\
+def add_constants(data, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,\
                   vers=None,\
                   pred=None,\
                   succ=None,\
@@ -233,9 +240,9 @@ def add_constants(data, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir
     Parameters
     
     data : numpy.array or str - array or string of calibration constants/data to save in file
-    env  : psana.Env -> full detector name for psana.Source 
-    evt  : psana.Event -> event time
-    src  : str - source short/full name, alias or full
+    env  : psana.Env -> full detector name for psana.Source -> hdf5 file name
+    par  : psana.Event | float time -> event time
+    src  : str - source short/full name, alias or full -> hdf5 file name
     ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
     calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
     vers : int - calibration version
@@ -259,7 +266,7 @@ def add_constants(data, evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir
 
     fname = ofn.calib_file_path()
 
-    add_constants_to_file(data, fname, evt, env, ctype, vers, pred, succ, cmt, verb)
+    add_constants_to_file(data, fname, par, env, ctype, vers, pred, succ, cmt, verb)
 
 #------------------------------
 #------------------------------
@@ -351,6 +358,7 @@ def delete_version_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, cmt=Non
 
     Back to :py:class:`PSCalib.DCMethods`
     """
+
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]

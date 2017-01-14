@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-23
+2017-01-13 Mikhail S. Dubrovin 
+- dcs and DCMethods - extend CLI to implicitly specified hdf5 file name
+
 Tag: V00-03-22
 2017-01-09 Mikhail S. Dubrovin 
 - GeometryAccess.py - fix self-documentation
