@@ -11,18 +11,22 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-24
+2017-01-17 Mikhail S. Dubrovin
+- DCBase, DCRange, DCType - add protection at h5 file input
+
 Tag: V00-03-23
-2017-01-13 Mikhail S. Dubrovin 
+2017-01-13 Mikhail S. Dubrovin
 - dcs and DCMethods - extend CLI to implicitly specified hdf5 file name
 
 Tag: V00-03-22
-2017-01-09 Mikhail S. Dubrovin 
+2017-01-09 Mikhail S. Dubrovin
 - GeometryAccess.py - fix self-documentation
 
 Tag: V00-03-21
-2017-01-04 Mikhail S. Dubrovin 
+2017-01-04 Mikhail S. Dubrovin
 - CalibParsStore, CalibParsBaseJungfrauV1 - add support for Jungfrau
-	
+
 Tag: V00-03-20
 2016-12-19 Christopher O'Grady
 - Add Jungfrau to list of area detectors
@@ -34,7 +38,7 @@ Tag: V00-03-19
 Tag: V00-03-18
 2016-12-01 Mikhail S. Dubrovin
 - CalibParsStore.py - fix issue with non-defined attibute self.tsec
-	
+
 Tag: V00-03-17
 2016-11-23 Jacob Scott and Christopher O'Grady
 - add h5constants.py to persist hierarchy of dictionaries in a calib-dir hdf5 file
@@ -46,18 +50,18 @@ Tag: V00-03-16
 
 Tag: V00-03-15
 2016-11-21 Mikhail S. Dubrovin
-- DCMethods - add methods test_*_file() 
+- DCMethods - add methods test_*_file()
 
 Tag: V00-03-14
 2016-11-18 Mikhail S. Dubrovin
 - DCMethods - add *_file(...,fname,...) for all procedures
-	
+
 Tag: V00-03-13
 2016-11-18 Mikhail S. Dubrovin
 - dcs - add/get DCS geometry constants from/to the text file
 - DCMethods - add evt_to_tsec, test_add_text
 - DCVersion - fix issue with returning data as str: d.tostring()
-- GlobalUtils - add load_textfile, GEOMETRY 
+- GlobalUtils - add load_textfile, GEOMETRY
 
 Tag: V00-03-12
 2016-11-17 Mikhail S. Dubrovin
@@ -68,17 +72,17 @@ Tag: V00-03-12
 Tag: V00-03-11
 2016-11-14 Mikhail S. Dubrovin
 - DCDetectorId.id_epix - add protection and extend backward compatability for old data with missing carrierId methods
-	
+
 Tag: V00-03-10
 2016-11-08 Mikhail S. Dubrovin
 - Tuning of DCMethods, update of examples.
   - DCDetectorId.id_epix - returns eics Id made of 7 numbers
   - add DCMethods.print_file - print directly from file
   - dcs - add print option directly from file
-  - DCMethods.add_constants - add experiment name and run number in the comment for range 
+  - DCMethods.add_constants - add experiment name and run number in the comment for range
 	and add them to the dict of parameters
   - update examples
-	
+
 Tag: V00-03-09
 2016-10-19 Mikhail S. Dubrovin
 - app/dcs - set cdir_def = None
@@ -98,7 +102,7 @@ Tag: V00-03-06
 2016-10-07 Mikhail S. Dubrovin
 - add app/dcs
 - add option to mark/delete objects for DCType, DCRange
-	
+
 Tag: V00-03-05
 2016-10-03 Christopher O'Grady
 - Change default EPIX common-mode params to 4,6,30,30 as requested by Silke
@@ -111,7 +115,7 @@ Tag: V00-03-03
 2016-09-28 Mikhail S. Dubrovin
 - DCStore.save(group, mode='r+') - by default works in 'r+' mode - file is not overwritten.
 - DCRange - fix issue with deleting group from file - loop over _dicstat
-	
+
 Tag: V00-03-02
 2016-09-27 Mikhail S. Dubrovin
 - DCMethods, DCRange - fix saving/retrieving default version, add comment to delete_version
@@ -119,7 +123,7 @@ Tag: V00-03-02
 Tag: V00-03-01
 2016-09-26 Mikhail S. Dubrovin
 - add/update DC*.py - the 1st full scale working version
-	
+
 Tag: V00-02-89
 2016-09-08 Mikhail S. Dubrovin
 - change epix100a default common mode parameters from (4,6,30,10) to (4,7,30,10)
@@ -766,7 +770,7 @@ svn add PSCalib/include/
 svn add PSCalib/src/
 svn add PSCalib/app/
 ...
-	
+
 svn update
 svn status PSCalib
 svn commit -m "Work in progress." PSCalib

@@ -199,8 +199,24 @@ class DCType(DCTypeI) :
                 if self.is_base_group(k,v) : continue
                 log.debug('load group "%s"' % k, self._name)
 
+                begin = v.get('begin')
+                if begin is None :
+                    msg = 'corrupted file structure - group "%s" does not contain key "begin", keys: "%s"' % (v.name, v.keys())
+                    log.error(msg, self._name)
+                    print 'ERROR:', self._name, msg
+                    continue
+
+                end = v.get('end')
+                if end is None :
+                    msg = 'corrupted file structure - group "%s" does not contain key "end", keys: "%s"' % (v.name, v.keys())
+                    log.error(msg, self._name)
+                    print 'ERROR:', self._name, msg
+                    continue
+
+                #print 'ZZZ: name, k, v', v.name, v.keys(), v.values()
+
                 #print "XXX:v['begin'][0], v['end'][0]", v['begin'][0], v['end'][0]
-                o = self.add_range(v['begin'][0], v['end'][0], cmt=False)
+                o = self.add_range(begin[0], end[0], cmt=False)
                 o.load(v)
 
 

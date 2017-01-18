@@ -248,10 +248,9 @@ class DCRange(DCRangeI) :
         msg = '=== load data from group %s and fill object %s' % (grp.name, self._name)
         log.debug(msg, self._name)
 
+        #print  'XXX load grp, keys:', grp, grp.keys()
         for k,v in dict(grp).iteritems() :
             #subgrp = v
-            #print '    ', k , v
-
             if isinstance(v, sp.dataset_t) :                    
                 log.debug('load dataset "%s"' % k, self._name)
                 if   k == 'begin'   : self.set_begin(v[0])
@@ -261,9 +260,16 @@ class DCRange(DCRangeI) :
                 else : log.warning('group "%s" has unrecognized dataset "%s"' % (grp.name, k), self._name)
 
             elif isinstance(v, sp.group_t) :
+                #print '  YYY:group v.name, v.keys():', v.name, v.keys()
                 if self.is_base_group(k,v) : continue
                 log.debug('load group "%s"' % k, self._name)
-                o = self.add_version(v['version'][0], cmt=False)
+                version = v.get('version')
+                if version is None :
+                    msg = 'corrupted file structure - group "%s" does not contain key "version", keys: "%s"' % (v.name, v.keys())
+                    log.error(msg, self._name)
+                    print 'ERROR:', self._name, msg
+                    continue
+                o = self.add_version(version[0], cmt=False)
                 o.load(v)
 
 

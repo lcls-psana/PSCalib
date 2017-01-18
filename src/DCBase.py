@@ -274,10 +274,13 @@ class DCBase(object) :
     def _load_hystory_dict(self, grp) :
         log.debug('_load_hystory_dict for group %s' % grp.name, self._name)
         self.clear_history()
-        for k,v in dict(grp).iteritems() :
+        
+        for k,v in zip(grp.keys(), grp.values()) :
+            #print '             YYY:k,v:', k,v 
             tsec = float(k)
-            log.debug('t: %.6f rec: %s' % (tsec, v[0]), self._name)
-            self.add_history_record(v[0], tsec) # tsec=self.tstr_to_tsec(k)
+            rec = 'None' if v is None else v[0]
+            log.debug('t: %.6f rec: %s' % (tsec, rec), self._name)
+            self.add_history_record(rec, tsec) # tsec=self.tstr_to_tsec(k)
 
 
     def tsec_to_tstr(self, tsec, tsfmt=None, addfsec=True) :
