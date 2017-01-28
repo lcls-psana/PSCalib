@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V00-03-25
+2017-01-28 Mikhail S. Dubrovin
+- DCConfigParameters.py - set default calib repository to /reg/d/psdm/detector/calib
+
 Tag: V00-03-24
 2017-01-17 Mikhail S. Dubrovin
 - DCBase, DCRange, DCType - add protection at h5 file input
