@@ -59,7 +59,7 @@ static const size_t SIZE2X2 = N2X1*SIZE2X1;
     for(size_t c=0; c<COLS2X1; ++c) {
     for(size_t r=0; r<ROWS2X1; ++r) {
 
-      two2x1[n,r,c] = data2x2[r,c,n];  
+      two2x1(n,r,c) = data2x2(r,c,n);  
 
     }
     }
@@ -84,7 +84,7 @@ static const size_t SIZE2X2 = N2X1*SIZE2X1;
     for(size_t c=0; c<COLS2X1; ++c) {
     for(size_t r=0; r<ROWS2X1; ++r) {
 
-      data2x2[r,c,n] = two2x1[n,r,c];  
+      data2x2(r,c,n) = two2x1(n,r,c);  
 
     }
     }
@@ -111,7 +111,7 @@ static const size_t SIZE2X2 = N2X1*SIZE2X1;
     for(size_t c=0; c<COLS2X1; ++c) {
     for(size_t r=0; r<ROWS2X1; ++r) {
 
-      data2x2[r][c][n] = two2x1[n][r][c];
+      data2x2(r,c,n) = two2x1(n,r,c);
 
     }
     }

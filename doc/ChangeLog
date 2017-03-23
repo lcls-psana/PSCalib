@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-00
+2017-03-23 Mikhail S. Dubrovin
+- switch to github, fix ndarray indexing
+
 Tag: V00-03-26
 2017-01-30 Mikhail S. Dubrovin
 - DCFileName.py - retrieve path like /reg/d/psdm through the env SIT_PSDM_DATA if available

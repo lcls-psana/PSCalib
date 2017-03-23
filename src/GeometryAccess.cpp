@@ -686,8 +686,8 @@ GeometryAccess::ref_img_from_pixel_arrays(const unsigned*& iX,
     // std::fill_n(img, int(img.size()), GeometryAccess::image_t(0));
     for(ndarray<GeometryAccess::image_t, 2>::iterator it=img.begin(); it!=img.end(); it++) { *it = 0; }
 
-    if (W) for(unsigned i=0; i<size; ++i) img[iX[i]][iY[i]] = (GeometryAccess::image_t) W[i];
-    else   for(unsigned i=0; i<size; ++i) img[iX[i]][iY[i]] = 1;
+    if (W) for(unsigned i=0; i<size; ++i) img(iX[i],iY[i]) = (GeometryAccess::image_t) W[i];
+    else   for(unsigned i=0; i<size; ++i) img(iX[i],iY[i]) = 1;
     return *p_image;
 }
 
@@ -710,8 +710,8 @@ GeometryAccess::img_from_pixel_arrays(const unsigned*& iX,
     // std::fill_n(img, int(img.size()), GeometryAccess::image_t(0));
     for(ndarray<GeometryAccess::image_t, 2>::iterator it=img.begin(); it!=img.end(); it++) { *it = 0; }
 
-    if (W) for(unsigned i=0; i<size; ++i) img[iX[i]][iY[i]] = (GeometryAccess::image_t) W[i];
-    else   for(unsigned i=0; i<size; ++i) img[iX[i]][iY[i]] = 1;
+    if (W) for(unsigned i=0; i<size; ++i) img(iX[i],iY[i]) = (GeometryAccess::image_t) W[i];
+    else   for(unsigned i=0; i<size; ++i) img(iX[i],iY[i]) = 1;
     return img;
 }
 

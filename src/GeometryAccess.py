@@ -705,8 +705,8 @@ def img_from_pixel_arrays(iX, iY, W=None, dtype=np.float32, vbase=0) :
     iXfl = iX.flatten()
     iYfl = iY.flatten()
 
-    xsize = iXfl.max()+1 
-    ysize = iYfl.max()+1
+    xsize = int(iXfl.max())+1 
+    ysize = int(iYfl.max())+1
 
     weight = W.flatten() if W is not None else np.ones_like(iXfl)
     img = vbase*np.ones((xsize,ysize), dtype=dtype)
