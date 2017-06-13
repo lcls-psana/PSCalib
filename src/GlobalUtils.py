@@ -1,10 +1,6 @@
 #--------------------------------------------------------------------------
-# File and Version Information:
-#  $Id$
-#
 # Description:
 #  Module GlobalUtils...
-#
 #------------------------------------------------------------------------
 
 """
@@ -42,13 +38,9 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-@version $Id: 2013-03-08$
-
-@author Mikhail S. Dubrovin
+Created: 2013-03-08
+Author: Mikhail Dubrovin
 """
-
-#--------------------------------
-__version__ = "$Revision$"
 #--------------------------------
 
 #import sys
@@ -128,6 +120,7 @@ FLI         = 23
 PIMAX       = 24
 ANDOR3D     = 25
 JUNGFRAU    = 26
+ZYLA        = 27
 
 #XAMPS    # N/A data
 #FEXAMP   # N/A data
@@ -140,13 +133,13 @@ JUNGFRAU    = 26
 list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740, \
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000, \
                     ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX,
-                    EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU)
+                    EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU, ZYLA)
 """ List of enumetated detector types"""
 
 list_of_det_names = ('UNDEFINED', 'Cspad', 'Cspad2x2', 'Princeton', 'pnCCD', 'Tm6740', \
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
                      'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150', 'Rayonix',\
-                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d', 'Jungfrau')
+                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d', 'Jungfrau', 'Zyla')
 """ List of enumetated detector names"""
 
 list_of_calib_groups = ('UNDEFINED',
@@ -175,7 +168,8 @@ list_of_calib_groups = ('UNDEFINED',
                         'Fli::CalibV1',
                         'Pimax::CalibV1',
                         'Andor3d::CalibV1',
-                        'Jungfrau::CalibV1'
+                        'Jungfrau::CalibV1',
+                        'Zyla::CalibV1'
                         )
 """ List of enumetated detector calibration groups"""
 
@@ -283,6 +277,7 @@ def det_type_from_source(source) :
     elif ':Pimax.'       in str_src : return PIMAX
     elif ':DualAndor.'   in str_src : return ANDOR3D
     elif ':Jungfrau.'    in str_src : return JUNGFRAU
+    elif ':Zyla.'        in str_src : return ZYLA
     else                            : return UNDEFINED
 
 #------------------------------

@@ -11,6 +11,12 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-01
+2017-06-13 Mikhail S. Dubrovin
+- add support for new detector Zyla
+	modified:   src/CalibParsStore.py
+	modified:   src/GlobalUtils.py
+
 Tag: V01-00-00
 2017-03-23 Mikhail S. Dubrovin
 - switch to github, fix ndarray indexing
