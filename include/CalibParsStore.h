@@ -217,6 +217,7 @@ public:
 	v_camera_names.push_back(":OrcaFl40.");
 	v_camera_names.push_back(":Fccd960.");
 	v_camera_names.push_back(":Rayonix.");
+	v_camera_names.push_back(":Zyla.");
 
         prbits = (print_bits & 8) ? 255 : 0;
 

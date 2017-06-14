@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-02
+2017-06-13 Mikhail S. Dubrovin
+CalibParsStore.h - add Zyla
+GlobalUtils.py - change Zyla::CalibV1 to Camera::CalibV1
+
 Tag: V01-00-01
 2017-06-13 Mikhail S. Dubrovin
 - add support for new detector Zyla

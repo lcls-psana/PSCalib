@@ -169,7 +169,7 @@ list_of_calib_groups = ('UNDEFINED',
                         'Pimax::CalibV1',
                         'Andor3d::CalibV1',
                         'Jungfrau::CalibV1',
-                        'Zyla::CalibV1'
+                        'Camera::CalibV1'
                         )
 """ List of enumetated detector calibration groups"""
 
