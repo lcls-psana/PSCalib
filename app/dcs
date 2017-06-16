@@ -112,7 +112,7 @@ class DCS_CLI :
         if ext=='.npy' :
             data = dcu.np.load(cfname)
 
-        if ctype==dcu.gu.GEOMETRY :
+        elif ctype==dcu.gu.GEOMETRY :
             data = dcu.gu.load_textfile(cfname)
 
         else :
