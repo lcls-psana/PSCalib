@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-04
+2017-06-19 Mikhail S. Dubrovin
+- GenericCalibPars.constants_dcs - use only repo file, do not check *.h5 in calib
+
 Tag: V01-00-03
 2017-06-16 Mikhail S. Dubrovin
 - app/dcs - fix logistics of adding *.npy file

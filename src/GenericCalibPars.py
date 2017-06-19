@@ -281,8 +281,10 @@ class GenericCalibPars (CalibPars) :
             print '%s.constants_dcs  tsec: %s  ctype: %s  vers: %s  verb: %s\n  fname: %s' %\
                   (self.name, str(self.tsec), str(ctype), str(vers), str(verb), self.fnexpc)
 
-        return get_constants_from_file(self.fnexpc, self.tsec, ctype, vers, verb) if is_good_fname(self.fnexpc) else\
-               get_constants_from_file(self.fnrepo, self.tsec, ctype, vers, verb)
+        return get_constants_from_file(self.fnrepo, self.tsec, ctype, vers, verb)
+
+        #return get_constants_from_file(self.fnexpc, self.tsec, ctype, vers, verb) if is_good_fname(self.fnexpc) else\
+        #       get_constants_from_file(self.fnrepo, self.tsec, ctype, vers, verb)
 
 #------------------------------
 
