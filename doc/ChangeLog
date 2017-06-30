@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-05
+2017-06-30 Mikhail S. Dubrovin
+- CalibParsStore - cosmetic - get rid of redundant member data.
+  GenericCalibPars.py - fix cashing of calib parameters in method constants()
+
 Tag: V01-00-04
 2017-06-19 Mikhail S. Dubrovin
 - GenericCalibPars.constants_dcs - use only repo file, do not check *.h5 in calib

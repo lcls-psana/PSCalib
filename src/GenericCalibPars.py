@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 #------------------------------
 """ GenericCalibPars - implementation of CalibPars interface methods for generic detectors.
@@ -70,9 +71,10 @@ from PSCalib.CalibFileFinder import CalibFileFinder
 import PSCalib.GlobalUtils as gu
 from PSCalib.NDArrIO import load_txt # , save_txt, list_of_comments
 
+from pyimgalgos.GlobalUtils import print_ndarr
 #------------------------------
 
-class GenericCalibPars (CalibPars) :
+class GenericCalibPars(CalibPars) :
 
 #------------------------------
 
@@ -119,6 +121,12 @@ class GenericCalibPars (CalibPars) :
         """
         self.dic_constants = dict([(k, None) for k in gu.calib_types])
         self.dic_status    = dict([(k, gu.UNDEFINED) for k in gu.calib_types])
+
+#------------------------------
+
+    def set_print_bits(self, pbits=0) :
+        self.pbits  = pbits
+        if self.cff is not None : self.cff.pbits=0377 if pbits else 0
 
 #------------------------------
 
@@ -301,12 +309,16 @@ class GenericCalibPars (CalibPars) :
             # try to retrieve constants from DCS hdf5 file
             arr_dcs = self.constants_dcs(ctype, vers)
             if arr_dcs is not None :
-                arr = arr_dcs
                 self.dic_status[ctype] = gu.DCSTORE
+                self.dic_constants[ctype] = arr_dcs
+                arr = arr_dcs
 
         if self.pbits & 128 :
-            print '%s.constants   ctype, default:' % (self.name), ctype, gu.DEFAULT
-            #print 'YYY %s array:' % gu.dic_calib_type_to_name[ctype], arr
+            i_status = self.dic_status[ctype]
+            s_status = gu.dic_calib_status_value_to_name[i_status]
+            s_ctype  = gu.dic_calib_type_to_name[ctype]
+            print '%s.constants  ctype:%s  status:%s' % (self.name, s_ctype, s_status)
+            print_ndarr(arr, name='    arr', first=0, last=5)
 
         return arr
 

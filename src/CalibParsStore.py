@@ -70,13 +70,9 @@ part of it, please give an appropriate acknowledgment.
 #  Module's version from CVS --
 #--------------------------------
 __version__ = "$Revision$"
-# $Source$
 #--------------------------------
 
 import sys
-#import math
-#import numpy as np
-#from time import time
 
 #------------------------------
 
@@ -104,15 +100,10 @@ class CalibParsStore() :
 
     def __init__(self) :
         self.name = self.__class__.__name__
-        self.fnexpc = None
-        self.fnrepo = None
-        self.tsec   = None
         
 #------------------------------
 
-#------------------------------
-
-    def Create(self, calibdir, group, source, runnum, pbits=0) :
+    def Create(self, calibdir, group, source, runnum, pbits=0, fnexpc=None, fnrepo=None, tsec=None) :
         """ Factory method
 
             Parameters
@@ -156,9 +147,9 @@ class CalibParsStore() :
                          gu.PIMAX) : cbase = CalibParsBaseCameraV1()
 
         else :
-            print 'Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__)
+            print '%s: calibration is not implemented data source "%s"' % (self.__class__.__name__, source)
             #raise IOError('Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__))
-        return GenericCalibPars(cbase, calibdir, grp, source, runnum, pbits, self.fnexpc, self.fnrepo, tsec=self.tsec)
+        return GenericCalibPars(cbase, calibdir, grp, source, runnum, pbits, fnexpc, fnrepo, tsec)
 
 #------------------------------
 
@@ -185,17 +176,17 @@ class CalibParsStore() :
 
             ofn = DCFileName(env, source, calibdir)
             if pbits & 512 : ofn.print_attrs()
-            self.fnexpc = ofn.calib_file_path()
-            self.fnrepo = ofn.calib_file_path_repo()
-            self.tsec = evt_time(evt)
+            fnexpc = ofn.calib_file_path()
+            fnrepo = ofn.calib_file_path_repo()
+            tsec = evt_time(evt)
 
             #if True :
             if pbits :
-                print '%s.CreateForEvtEnv: for tsec: %s' % (self.name, str(self.tsec))
-                print '  expected hdf5 file name local: %s' % (self.fnexpc)
-                print '  expected hdf5 file name repo : %s' % (self.fnrepo)
+                print '%s.CreateForEvtEnv: for tsec: %s' % (self.name, str(tsec))
+                print '  expected hdf5 file name repo : %s' % (fnrepo)
+                print '  expected hdf5 file name local: %s' % (fnexpc)
 
-        return self.Create(calibdir, group, source, runnum, pbits)
+        return self.Create(calibdir, group, source, runnum, pbits, fnexpc, fnrepo, tsec)
 
 #------------------------------
 
