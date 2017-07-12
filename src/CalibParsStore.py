@@ -169,6 +169,8 @@ class CalibParsStore() :
 
         runnum = evt if isinstance(evt, int) else evt.run()
 
+        fnexpc, fnrepo, tsec = None, None, None
+
         if not isinstance(evt, int) : # evt is not integer runnum
 
             from PSCalib.DCFileName import DCFileName
