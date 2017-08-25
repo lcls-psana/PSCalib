@@ -88,14 +88,30 @@ todo_include_todos = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-#html_theme = 'alabaster'
-html_theme = 'alabaster' # Also working: 'alabaster' 'haiku','agogo'
+html_theme = 'agogo' # Also working: 'alabaster' 'haiku','agogo'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'pagewidth': '900px',
+    'documentwidth': '850px'
+    'nav_width': '900px', # Fix the width of the content area. Defaults to false
+    'content_fixed': False,
+    # Set the width of the content area. Defaults to '900px'
+    'content_width': '900px',
+    # Fix the width of the row. Defaults to false
+    'row_fixed': False,
+
+    # Set the Size of Heading text. Defaults to None
+    'h1_size': '3.0em',
+    'h2_size': '2.6em',
+    'h3_size': '2.2em',
+    'h4_size': '1.8em',
+    'h5_size': '1.4em',
+    'h6_size': '1.1em',
+                     }
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
