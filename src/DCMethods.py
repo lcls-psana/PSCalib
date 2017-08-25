@@ -1,10 +1,5 @@
-#-----------------------------------------------------------------------------
-# File and Version Information:
-#  $Id$
-#
-# Description:
-#-----------------------------------------------------------------------------
-
+#!/usr/bin/env python
+#------------------------------
 """
 :py:class:`PSCalib.DCMethods` - contains a set of utilities for direct operations with calibration data.
 
@@ -50,7 +45,7 @@ Usage::
     dcm.delete_range_from_file  (fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)
     dcm.delete_ctype_from_file  (fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)
 
-@see methods 
+see methods 
     :meth:`add_constants`, 
     :meth:`add_constants_to_file`, 
     :meth:`print_content`, 
@@ -64,7 +59,7 @@ Usage::
     :meth:`delete_ctype`
     :meth:`delete_ctype_from_file`
 
-@see project modules
+see project modules
     * :class:`PSCalib.DCStore`
     * :class:`PSCalib.DCType`
     * :class:`PSCalib.DCRange`
@@ -82,14 +77,10 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-@version $Id: 2016-09-23$
-
-@author Mikhail S. Dubrovin
+:Created: 2016-09-23
+:Author: Mikhail Dubrovin
 """
-
-#--------------------------------
-__version__ = "$Revision$"
-#--------------------------------
+#------------------------------
 
 import sys
 import os

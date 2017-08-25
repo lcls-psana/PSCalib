@@ -55,22 +55,16 @@ Usage::
     arrTwo2x1 = data2x2ToTwo2x1(asData2x2)
     asData2x2 = two2x1ToData2x2(arrTwo2x1)
 
-@see :py:class:`PSCalib.GeometryAccess`
+See :py:class:`PSCalib.GeometryAccess`
 
 For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 
-This software was developed for the SIT project.  If you use all or 
-part of it, please give an appropriate acknowledgment.
+This software was developed for the SIT project.
+If you use all or part of it, please give an appropriate acknowledgment.
 
-$Revision$
-
-@version $Id$
-
-@author Mikhail S. Dubrovin
+:Author: Mikhail Dubrovin
 """
-#--------------------------------
-__version__ = "$Revision$"
-#--------------------------------
+#------------------------------
 
 import os
 import sys

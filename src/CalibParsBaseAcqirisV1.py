@@ -2,16 +2,12 @@
 #------------------------------
 """:py:class:`CalibParsBaseAcqirisV1` - holds basic calibration metadata parameters for associated detector.
 
-@see :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`.
+See :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`.
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-Revision: $Revision$
-
-@version $Id$
-
-@author Mikhail S. Dubrovin
+:Author: Mikhail Dubrovin
 """
 #------------------------------
 

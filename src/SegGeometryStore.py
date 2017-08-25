@@ -1,12 +1,5 @@
-#--------------------------------------------------------------------------
-# File and Version Information:
-#  $Id$
-#
-# Description:
-#  Module SegGeometryStore...
-#
-#------------------------------------------------------------------------
-
+#!/usr/bin/env python
+#------------------------------
 """
 :py:class:`PSCalib.SegGeometryStore` - is a factory class/method to switch between different device-dependent
 segments/sensors to access their pixel geometry uling :py:class:`PSCalib.SegGeometry` interface.
@@ -38,19 +31,15 @@ Usage::
     xmax, ymax, zmax = sg.pixel_coord_mas()
     ...
 
-@see other interface methods in :py:class:`PSCalib.SegGeometry`, :py:class:`PSCalib.SegGeometryCspad2x1V1`
+See other interface methods in :py:class:`PSCalib.SegGeometry`, :py:class:`PSCalib.SegGeometryCspad2x1V1`
 
-This software was developed for the SIT project.  If you use all or 
-part of it, please give an appropriate acknowledgment.
+This software was developed for the SIT project.
+If you use all or part of it, please give an appropriate acknowledgment.
 
-@version $Id: 2013-03-08$
-
-@author Mikhail S. Dubrovin
+:Created: 2013-03-08
+:Author: Mikhail Dubrovin
 """
-
-#--------------------------------
-__version__ = "$Revision$"
-#--------------------------------
+#------------------------------
 
 from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one
 from PSCalib.SegGeometryEpix100V1  import epix2x2_one

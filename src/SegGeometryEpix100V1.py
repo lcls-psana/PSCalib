@@ -1,11 +1,5 @@
-#--------------------------------------------------------------------------
-# File and Version Information:
-#  $Id$
-#
-# Description:
-#  Module SegGeometryEpix100V1...
-#------------------------------------------------------------------------
-
+#!/usr/bin/env python
+#------------------------------
 """Class :py:class:`PSCalib.SegGeometryEpix100V1` describes the Epix100 V1 sensor geometry.
 
 In this class we use natural matrix notations like in data array
@@ -72,22 +66,15 @@ Usage of interface methods::
     Xrot, Yrot = rotation(X, Y, C, S)
     ...
 
-This software was developed for the SIT project.  If you use all or 
-part of it, please give an appropriate acknowledgment.
+See :py:class:`PSCalib.SegGeometry`
 
-@see :py:class:`PSCalib.SegGeometry`
+This software was developed for the SIT project.
+If you use all or part of it, please give an appropriate acknowledgment.
 
-@version $Id: 2013-03-08$
-
-@author Mikhail S. Dubrovin
+:Created: 2013-03-08
+:Author: Mikhail Dubrovin
 """
-
-#--------------------------------
-#  Module's version from CVS --
-#--------------------------------
-__version__ = "$Revision$"
-# $Source$
-#--------------------------------
+#------------------------------
 
 import sys
 import math
@@ -277,11 +264,11 @@ class SegGeometryEpix100V1(SegGeometry) :
 
     def print_seg_info(sp, pbits=0) :
         """ Prints segment info for selected bits
-            pbits = 0 - nothing
-                   +1 - member data
-                   +2 - coordinate maps in um
-                   +4 - min, max coordinates in um
-                   +8 - x, y 1-d pixel coordinate arrays in um
+        pbits = 0 - nothing,
+        +1 - member data,
+        +2 - coordinate maps in um,
+        +4 - min, max coordinates in um,
+        +8 - x, y 1-d pixel coordinate arrays in um.
         """
         if pbits & 1 : sp.print_member_data()
         if pbits & 2 : sp.print_maps_seg_um()
@@ -351,8 +338,8 @@ class SegGeometryEpix100V1(SegGeometry) :
 
     def pixel_mask_array(sp, mbits=0377) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
-            mbits: +1 - mask edges
-                   +2 - mask two central columns 
+        mbits: +1 - mask edges,
+        +2 - mask two central columns 
         """
         zero_col = np.zeros(sp._rows,dtype=np.uint8)
         zero_row = np.zeros(sp._cols,dtype=np.uint8)

@@ -8,7 +8,7 @@ For example, CSPAD 2x1 sensor is implemented in class :py:class:`PSCalib.SegGeom
 Access to all implemented sensors is available through the factory method in class :py:class:`PSCalib.SegGeometryStore`.
 
 
-Usage of interface methods::
+Usage::
 
     from SegGeometryCspad2x1V1 import cspad2x1_one as sg
 
@@ -32,20 +32,14 @@ Usage of interface methods::
     print 'X.shape =', X.shape
 
 
-@see :py:class:`PSCalib.SegGeometry`, :py:class:`PSCalib.SegGeometryCspad2x1V1`, :py:class:`PSCalib.SegGeometryStore`
+See :py:class:`PSCalib.SegGeometry`, :py:class:`PSCalib.SegGeometryCspad2x1V1`, :py:class:`PSCalib.SegGeometryStore`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-Revision: $Revision$
-
-@version $Id$
-
-@author Mikhail S. Dubrovin
+:Author: Mikhail Dubrovin
 """
-#--------------------------------
-__version__ = "$Revision$"
-#--------------------------------
+#------------------------------
 
 import sys
 #import os

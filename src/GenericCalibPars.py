@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 #------------------------------
 """ GenericCalibPars - implementation of CalibPars interface methods for generic detectors.
@@ -46,20 +45,14 @@ Usage::
     nda = gcp.constants_dcs(ctype, vers=None, verb=False)
     nda = gcp.constants(ctype, vers=None, verb=False)
     
-@see :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`, :py:class:`PSCalib.CalibParsCspad2x1V1, :py:class:`PSCalib.GlobalUtils`
+See :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`, :py:class:`PSCalib.CalibParsCspad2x1V1, :py:class:`PSCalib.GlobalUtils`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-Revision: $Revision$
-
-@version $Id$
-
-@author Mikhail S. Dubrovin
+:Author: Mikhail Dubrovin
 """
-#--------------------------------
-__version__ = "$Revision$"
-#--------------------------------
+#------------------------------
 
 import sys
 #import os
@@ -276,7 +269,7 @@ class GenericCalibPars(CalibPars) :
 
     def constants_dcs(self, ctype=gu.PEDESTALS, vers=None) :
         """ Returns numpy array with calibration constants of specified type from DCS
-            @see :class:`PSCalib.DCStore`, :class:`PSCalib.DCMethods`
+            See :class:`PSCalib.DCStore`, :class:`PSCalib.DCMethods`
             Parameters
     
             ctype : int - enumerated calibration type from :class:`PSCalib.GlobalUtils`, e.g. gu.PIXEL_STATUS

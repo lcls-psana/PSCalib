@@ -1,12 +1,5 @@
-#--------------------------------------------------------------------------
-# File and Version Information:
-#  $Id$
-#
-# Description:
-#  Module CalibParsStore...
-#
-#------------------------------------------------------------------------
-
+#!/usr/bin/env python
+#------------------------------
 """
 :py:class:`PSCalib.CalibParsStore` - is a factory class/method to switch between different device-dependent
 segments/sensors to access their pixel geometry uling :py:class:`PSCalib.SegGeometry` interface.
@@ -61,9 +54,8 @@ Usage::
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.
 
-@version $Id: 2013-03-08$
-
-@author Mikhail S. Dubrovin
+:Created: 2013-03-08
+:Author: Mikhail Dubrovin
 """
 
 #--------------------------------

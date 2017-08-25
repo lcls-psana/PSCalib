@@ -39,18 +39,12 @@ Usage::
     ifname='path-to-my-own-calibtation-file/file-name.txt'
     deploy_calib_file(cdir, src, type, run_start, run_end, ifnameq, cmts, pbits=1)
 
-This software was developed for the SIT project.  If you use all or 
-part of it, please give an appropriate acknowledgment.
+This software was developed for the SIT project.
+If you use all or part of it, please give an appropriate acknowledgment.
 
-Revision: $Revision$
-
-@version $Id: CalibFileFinder.py 8469 2014-06-24 22:55:21Z dubrovin@SLAC.STANFORD.EDU $
-
-@author Mikhail S. Dubrovin
+:Author: Mikhail Dubrovin
 """
-#--------------------------------
-__version__ = "$Revision$"
-#--------------------------------
+#------------------------------
 
 import os
 import sys

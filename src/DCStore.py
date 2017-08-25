@@ -1,9 +1,5 @@
 #!/usr/bin/env python
-#-----------------------------------------------------------------------------
-# File and Version Information:
-#  $Id$
-#-----------------------------------------------------------------------------
-
+#------------------------------
 """:py:class:`PSCalib.DCStore` class for the Detector Calibration (DC) project.
 
 Usage::
@@ -38,7 +34,7 @@ Usage::
     o.load(group)                           # loads object content from the hdf5 file. 
     o.print_obj()                           # print info about this object and its children
 
-@see project modules
+see project modules
     * :py:class:`PSCalib.DCStore`
     * :py:class:`PSCalib.DCType`
     * :py:class:`PSCalib.DCRange`
@@ -56,14 +52,9 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-@version $Id$
-
-@author Mikhail S. Dubrovin
+:Author: Mikhail Dubrovin
 """
-
-#---------------------------------
-__version__ = "$Revision$"
-#---------------------------------
+#------------------------------
 
 import os
 import sys
@@ -87,7 +78,6 @@ def print_warning(obj, metframe) :
     #raise NotImplementedError(wng)
 
 #------------------------------
-
 #------------------------------
 
 class DCStore(DCStoreI) :
