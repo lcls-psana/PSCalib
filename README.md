@@ -1,5 +1,5 @@
 # PSCalib
-A set of pythonic methods for data processing with back-end implementation in C++ and cython interface.
+A set of python classes/methods to deal with calibration constants.
 
 ## Documentation
 - Sphinx generated documentation: https://lcls-psana.github.io/PSCalib/
