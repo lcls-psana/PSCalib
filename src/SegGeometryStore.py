@@ -46,6 +46,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 :Created: 2013-03-08
 :Author: Mikhail Dubrovin
+
 -----------
 """
 #------------------------------
