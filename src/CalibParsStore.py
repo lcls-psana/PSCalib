@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-:py:class:`PSCalib.CalibParsStore` - is a factory class/method to switch between different device-dependent
-segments/sensors to access their pixel geometry uling :py:class:`PSCalib.SegGeometry` interface.
+:py:class:`CalibParsStore` - a factory class/method to switch between different device-dependent
+segments/sensors to access their pixel geometry uling :py:class:`SegGeometry` interface.
 
 Usage::
 
@@ -30,26 +30,26 @@ Usage::
     nda = o.pixel_bkgd()
     nda = o.common_mode()
 
-    status = o.status(ctype=PEDESTALS) # see list of ctypes in :py:class:`PSCalib.GlobalUtils`
+    status = o.status(ctype=PEDESTALS) # see list of ctypes in :py:class:`GlobalUtils`
     shape  = o.shape(ctype)
     size   = o.size(ctype)
     ndim   = o.ndim(ctype)
 
-@see
-    :py:class:`PSCalib.GenericCalibPars`
-    :py:class:`PSCalib.GlobalUtils`
-    :py:class:`PSCalib.CalibPars`
-    :py:class:`PSCalib.CalibParsStore` 
-    :py:class:`PSCalib.CalibParsBaseAndorV1`
-    :py:class:`PSCalib.CalibParsBaseAndor3dV1`
-    :py:class:`PSCalib.CalibParsBaseCameraV1`
-    :py:class:`PSCalib.CalibParsBaseCSPad2x2V1`
-    :py:class:`PSCalib.CalibParsBaseCSPadV1`
-    :py:class:`PSCalib.CalibParsBaseEpix100aV1`
-    :py:class:`PSCalib.CalibParsBasePnccdV1`
-    :py:class:`PSCalib.CalibParsBasePrincetonV1`
-    :py:class:`PSCalib.CalibParsBaseAcqirisV1`
-    :py:class:`PSCalib.CalibParsBaseImpV1`
+:See:
+    :py:class:`GenericCalibPars`
+    :py:class:`GlobalUtils`
+    :py:class:`CalibPars`
+    :py:class:`CalibParsStore` 
+    :py:class:`CalibParsBaseAndorV1`
+    :py:class:`CalibParsBaseAndor3dV1`
+    :py:class:`CalibParsBaseCameraV1`
+    :py:class:`CalibParsBaseCSPad2x2V1`
+    :py:class:`CalibParsBaseCSPadV1`
+    :py:class:`CalibParsBaseEpix100aV1`
+    :py:class:`CalibParsBasePnccdV1`
+    :py:class:`CalibParsBasePrincetonV1`
+    :py:class:`CalibParsBaseAcqirisV1`
+    :py:class:`CalibParsBaseImpV1`
 
 This software was developed for the SIT project.  If you use all or 
 part of it, please give an appropriate acknowledgment.

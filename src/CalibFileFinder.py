@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`PSCalib.CalibFileFinder` is a python version of CalibFileFinder.cpp - finds calibration file
+""":py:class:`CalibFileFinder` is a python version of CalibFileFinder.cpp - finds calibration file
 
 Usage::
 
@@ -38,6 +38,8 @@ Usage::
     cmts = {'exp':'cxi12345', 'app':'my-app-name', 'comment':'my-comment'}
     ifname='path-to-my-own-calibtation-file/file-name.txt'
     deploy_calib_file(cdir, src, type, run_start, run_end, ifnameq, cmts, pbits=1)
+
+See :py:class:`GlobalUtils`, :py:class:`NDArrIO`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.

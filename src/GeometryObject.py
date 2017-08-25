@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`PSCalib.GeometryObject` - building block for hierarchical geometry
+""":py:class:`GeometryObject` - building block for hierarchical geometry.
 
 Usage::
 
@@ -55,7 +55,7 @@ Usage::
     arrTwo2x1 = data2x2ToTwo2x1(asData2x2)
     asData2x2 = two2x1ToData2x2(arrTwo2x1)
 
-See :py:class:`PSCalib.GeometryAccess`
+See :py:class:`GeometryAccess`
 
 For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 

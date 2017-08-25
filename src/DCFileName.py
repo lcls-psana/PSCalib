@@ -1,10 +1,7 @@
-#-----------------------------------------------------------------------------
-# File and Version Information:
-#  $Id$
-#-----------------------------------------------------------------------------
-
+####!/usr/bin/env python
+#------------------------------
 """
-:py:class:`PSCalib.DCFileName` - file name object for Detector Calibration Store (DCS) project.
+:py:class:`DCFileName` - file name object for Detector Calibration Store (DCS) project.
 
 Usage::
 
@@ -31,34 +28,26 @@ Usage::
     o.log_attrs()  # dump attributes in the logger
     s = o.str_attrs() # returns a string of attributes
 
-
-@see project modules
-    * :py:class:`PSCalib.DCStore`
-    * :py:class:`PSCalib.DCType`
-    * :py:class:`PSCalib.DCRange`
-    * :py:class:`PSCalib.DCVersion`
-    * :py:class:`PSCalib.DCBase`
-    * :py:class:`PSCalib.DCInterface`
-    * :py:class:`PSCalib.DCUtils`
-    * :py:class:`PSCalib.DCDetectorId`
-    * :py:class:`PSCalib.DCConfigParameters`
-    * :py:class:`PSCalib.DCFileName`
-    * :py:class:`PSCalib.DCLogger`
-    * :py:class:`PSCalib.DCMethods`
-    * :py:class:`PSCalib.DCEmail`
-
+:See:
+    * :py:class:`DCStore`
+    * :py:class:`DCType`
+    * :py:class:`DCRange`
+    * :py:class:`DCVersion`
+    * :py:class:`DCBase`
+    * :py:class:`DCInterface`
+    * :py:class:`DCUtils`
+    * :py:class:`DCDetectorId`
+    * :py:class:`DCConfigParameters`
+    * :py:class:`DCFileName`
+    * :py:class:`DCLogger`
+    * :py:class:`DCMethods`
+    * :py:class:`DCEmail`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-@version $Id$
-
-@author Mikhail S. Dubrovin
+:Author: Mikhail Dubrovin
 """
-
-#---------------------------------
-__version__ = "$Revision$"
-#---------------------------------
 
 import os
 from   PSCalib.DCLogger import log

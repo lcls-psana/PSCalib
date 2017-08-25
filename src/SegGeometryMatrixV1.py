@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #------------------------------
-"""Class :py:class:`PSCalib.SegGeometryMatrixV1` defines the matrix V1 (pnCCD, 512x512) sensor pixel coordinates in its local frame.
+""":py:class:`SegGeometryMatrixV1` - defines the matrix V1 (pnCCD, 512x512) sensor pixel coordinates in its local frame.
 
 Default constructor parameters are set for pnCCD; 512x512 pixels with 75x75um pixel size.
 In this class we use natural matrix notations like in data array
@@ -65,13 +65,22 @@ Usage of interface methods::
     Xrot, Yrot = rotation(X, Y, C, S)
     ...
 
-See :py:class:`PSCalib.SegGeometry`
+:See:
+ * :py:class:`GeometryObject`, 
+ * :py:class:`SegGeometry`, 
+ * :py:class:`SegGeometryCspad2x1V1`, 
+ * :py:class:`SegGeometryEpix100V1`, 
+ * :py:class:`SegGeometryMatrixV1`, 
+ * :py:class:`SegGeometryStore`
+
+For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 :Created: 2013-03-08
 :Author: Mikhail Dubrovin
+-------------------------
 """
 #------------------------------
 

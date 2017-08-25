@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
-:py:class:`PSCalib.DCMethods` - contains a set of utilities for direct operations with calibration data.
+:py:class:`DCMethods` - contains a set of utilities for direct operations with calibration data.
 
 Usage::
 
@@ -45,34 +45,34 @@ Usage::
     dcm.delete_range_from_file  (fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)
     dcm.delete_ctype_from_file  (fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)
 
-see methods 
-    :meth:`add_constants`, 
-    :meth:`add_constants_to_file`, 
-    :meth:`print_content`, 
-    :meth:`print_content_from_file`, 
-    :meth:`get_constants`, 
-    :meth:`get_constants_from_file`, 
-    :meth:`delete_version`, 
-    :meth:`delete_version_from_file`, 
-    :meth:`delete_range`, 
-    :meth:`delete_range_from_file`, 
-    :meth:`delete_ctype`
-    :meth:`delete_ctype_from_file`
-
-see project modules
-    * :class:`PSCalib.DCStore`
-    * :class:`PSCalib.DCType`
-    * :class:`PSCalib.DCRange`
-    * :class:`PSCalib.DCVersion`
-    * :class:`PSCalib.DCBase`
-    * :class:`PSCalib.DCInterface`
-    * :class:`PSCalib.DCUtils`
-    * :class:`PSCalib.DCDetectorId`
-    * :class:`PSCalib.DCConfigParameters`
-    * :class:`PSCalib.DCFileName`
-    * :class:`PSCalib.DCLogger`
-    * :class:`PSCalib.DCMethods`
-    * :class:`PSCalib.DCEmail`
+See methods 
+    * :meth:`add_constants`, 
+    * :meth:`add_constants_to_file`, 
+    * :meth:`print_content`, 
+    * :meth:`print_content_from_file`, 
+    * :meth:`get_constants`, 
+    * :meth:`get_constants_from_file`, 
+    * :meth:`delete_version`, 
+    * :meth:`delete_version_from_file`, 
+    * :meth:`delete_range`, 
+    * :meth:`delete_range_from_file`, 
+    * :meth:`delete_ctype`
+    * :meth:`delete_ctype_from_file`
+ 
+:See:
+    * :class:`DCStore`
+    * :class:`DCType`
+    * :class:`DCRange`
+    * :class:`DCVersion`
+    * :class:`DCBase`
+    * :class:`DCInterface`
+    * :class:`DCUtils`
+    * :class:`DCDetectorId`
+    * :class:`DCConfigParameters`
+    * :class:`DCFileName`
+    * :class:`DCLogger`
+    * :class:`DCMethods`
+    * :class:`DCEmail`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.

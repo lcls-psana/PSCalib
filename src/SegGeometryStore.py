@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-:py:class:`PSCalib.SegGeometryStore` - is a factory class/method to switch between different device-dependent
-segments/sensors to access their pixel geometry uling :py:class:`PSCalib.SegGeometry` interface.
+:py:class:`SegGeometryStore` - is a factory class/method to switch between different device-dependent
+segments/sensors to access their pixel geometry uling :py:class:`SegGeometry` interface.
 
 Usage::
 
@@ -31,13 +31,22 @@ Usage::
     xmax, ymax, zmax = sg.pixel_coord_mas()
     ...
 
-See other interface methods in :py:class:`PSCalib.SegGeometry`, :py:class:`PSCalib.SegGeometryCspad2x1V1`
+:See:
+ * :py:class:`GeometryObject`, 
+ * :py:class:`SegGeometry`, 
+ * :py:class:`SegGeometryCspad2x1V1`, 
+ * :py:class:`SegGeometryEpix100V1`, 
+ * :py:class:`SegGeometryMatrixV1`, 
+ * :py:class:`SegGeometryStore`
+
+For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 :Created: 2013-03-08
 :Author: Mikhail Dubrovin
+-----------
 """
 #------------------------------
 

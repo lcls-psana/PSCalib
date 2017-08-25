@@ -17,35 +17,18 @@ source conda_setup
 **on pslogin:**
 ```
 git clone https://github.com/lcls-psana/PSCalib.git
-```
-or 
-```
+# or 
 condarel --addpkg --name PSCalib --tag HEAD
 ```
 ### Build 
 ```
 scons
 ```
+Then run your application(s)
 
 ## References
 - [1] https://lcls-psana.github.io/PSCalib/
 - [2] https://github.com/lcls-psana/PSCalib/wiki
 - [3] https://confluence.slac.stanford.edu/display/PSDMInternal/Psana+Developer+Documentation
 - [4] https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
-
-
-
-<!---
-## Markup example
-### header3
-#### header4
-- bul1
-- bul2
-* bold
-#### header4-2
-**bul4**
-
-```
-some code
-```
---->
+- [5] https://github.com/ralsina/rst-cheatsheet/blob/master/rst-cheatsheet.rst

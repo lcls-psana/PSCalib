@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #------------------------------
-""" SegGeometry - abstract class with interface description.
+""" :py:class:`SegGeometry` - abstract class with interface description.
 
 Methods of this class should be re-implemented in derived classes with name pattern SegGeometry<SensorVers> 
 for pixel geometry description of all sensors.
@@ -31,13 +31,21 @@ Usage::
     ...
     print 'X.shape =', X.shape
 
+:See:
+ * :py:class:`GeometryObject`, 
+ * :py:class:`SegGeometry`, 
+ * :py:class:`SegGeometryCspad2x1V1`, 
+ * :py:class:`SegGeometryEpix100V1`, 
+ * :py:class:`SegGeometryMatrixV1`, 
+ * :py:class:`SegGeometryStore`
 
-See :py:class:`PSCalib.SegGeometry`, :py:class:`PSCalib.SegGeometryCspad2x1V1`, :py:class:`PSCalib.SegGeometryStore`
+For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 :Author: Mikhail Dubrovin
+-----------
 """
 #------------------------------
 
