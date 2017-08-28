@@ -95,22 +95,22 @@ html_theme = 'agogo' # Also working: 'alabaster' 'haiku','agogo'
 # documentation.
 #
 html_theme_options = {
-    'pagewidth': '900px',
-    'documentwidth': '850px'
-    'nav_width': '900px', # Fix the width of the content area. Defaults to false
-    'content_fixed': False,
+    'pagewidth': '1200px',
+    'documentwidth': '1000px',
+    #'nav_width': '900px', # Fix the width of the content area. Defaults to false
+    #'content_fixed': False,
     # Set the width of the content area. Defaults to '900px'
-    'content_width': '900px',
+    #'content_width': '900px',
     # Fix the width of the row. Defaults to false
-    'row_fixed': False,
+    #'row_fixed': False,
 
     # Set the Size of Heading text. Defaults to None
-    'h1_size': '3.0em',
-    'h2_size': '2.6em',
-    'h3_size': '2.2em',
-    'h4_size': '1.8em',
-    'h5_size': '1.4em',
-    'h6_size': '1.1em',
+    #'h1_size': '3.0em',
+    #'h2_size': '2.6em',
+    #'h3_size': '2.2em',
+    #'h4_size': '1.8em',
+    #'h5_size': '1.4em',
+    #'h6_size': '1.1em',
                      }
 
 # Add any paths that contain custom static files (such as style sheets) here,

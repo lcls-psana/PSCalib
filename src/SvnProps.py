@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-Class SvnProps stores updated by svn properties.
+----
+:py:class:`SvnProps` stores updated by svn properties.
 
 NOTE: To update revision number in this file when revision changes, use command:
 psvn mktxtprop src/SvnProps.py
@@ -12,16 +13,9 @@ Also see: ~/.subversion/config
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-@version $Id: SvnProps.py 9205 2014-11-05 00:58:52Z dubrovin@SLAC.STANFORD.EDU $
-
-@author Mikhai S. Dubrovin
+Created: 2014-05-05 by Mikhai Dubrovin
 """
 
-#------------------------------
-# Properties substituted by SVN 
-#------------------------------
-# __revision__ = "$Revision$"
-# __author__   = "$Author: dubrovin@SLAC.STANFORD.EDU $"
 #------------------------------
 
 import sys

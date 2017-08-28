@@ -1,6 +1,7 @@
 ####!/usr/bin/env python
 #------------------------------
 """
+---
 :py:class:`DCFileName` - file name object for Detector Calibration Store (DCS) project.
 
 Usage::
@@ -28,7 +29,7 @@ Usage::
     o.log_attrs()  # dump attributes in the logger
     s = o.str_attrs() # returns a string of attributes
 
-:See:
+See:
     * :py:class:`DCStore`
     * :py:class:`DCType`
     * :py:class:`DCRange`
@@ -46,7 +47,9 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail Dubrovin
+Author: Mikhail Dubrovin
+
+---
 """
 
 import os

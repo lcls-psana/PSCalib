@@ -1,6 +1,7 @@
 ####!/usr/bin/env python
 #------------------------------
 """
+---
 :py:class:`DCBase` - base class for the Detector Calibration (DC) project.
 
 Usage::
@@ -48,7 +49,7 @@ Usage::
     t_str = o.tsec_to_tstr(tsec, tsfmt=None) # converts (float) time[sec] to the (str) time stamp
     t_sec = o.tstr_to_tsec(tstr, tsfmt=None) # converts (str) time stamp to (float) time[sec]
 
-:See:
+See:
     * :py:class:`DCStore`
     * :py:class:`DCType`
     * :py:class:`DCRange`
@@ -66,7 +67,9 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail Dubrovin
+Author: Mikhail Dubrovin
+
+---
 """
 #------------------------------
 

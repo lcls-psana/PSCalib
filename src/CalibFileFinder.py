@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`CalibFileFinder` is a python version of CalibFileFinder.cpp - finds calibration file
+"""
+---
+:py:class:`CalibFileFinder` is a python version of CalibFileFinder.cpp - finds calibration file
 
 Usage::
 
@@ -44,7 +46,9 @@ See :py:class:`GlobalUtils`, :py:class:`NDArrIO`
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail Dubrovin
+Author: Mikhail Dubrovin
+
+---
 """
 #------------------------------
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`GeometryObject` - building block for hierarchical geometry.
+"""
+---
+:py:class:`GeometryObject` - building block for hierarchical geometry.
 
 Usage::
 
@@ -62,7 +64,9 @@ For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/dis
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail Dubrovin
+Author: Mikhail Dubrovin
+
+---
 """
 #------------------------------
 

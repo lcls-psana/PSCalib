@@ -1,8 +1,10 @@
 ####!/usr/bin/env python
 #----------------------------
-"""DCConfigParameters - class supporting configuration parameters for application.
+"""
+---
+:py:class:`DCConfigParameters` - class supporting configuration parameters for application.
 
-:See:
+See:
     * :py:class:`DCStore`
     * :py:class:`DCType`
     * :py:class:`DCRange`
@@ -19,8 +21,9 @@
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
-:Created: 2016-05-17
-:Author: Mikhail Dubrovin
+Created: 2016-05-17 by Mikhail Dubrovin
+
+---
 """
 #----------------------------
 

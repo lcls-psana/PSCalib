@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`PSCalib.NDArrIO` - i/o methods to read/write numpy array in the text file
+"""
+----
+:py:class:`NDArrIO` - i/o methods to read/write numpy array in the text file
 
 Usage::
 
@@ -39,22 +41,18 @@ Usage::
     # DIM:3       8
     #------------------------------
 
-@see :py:class:`Detector.AreaDetector`
+See: :py:class:`AreaDetector`
 
 For more detail see `AreaDetector <https://pswww.slac.stanford.edu/swdoc/releases/ana-current/pyana-ref/html/Detector/#module-Detector.AreaDetector>`_.
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-$Revision$
+Author: Mikhail Dubrovin
 
-@version $Id$
-
-@author Mikhail S. Dubrovin
+----
 """
-#--------------------------------
-__version__ = "$Revision$"
-#--------------------------------
+#------------------------------
 
 #import os
 #import sys

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
+---
 :py:class:`DCUtils` - contains a set of utilities.
 
 Usage::
@@ -34,7 +35,7 @@ Usage::
     gu.delete_object(grp, oname)
     gu.save_object_as_dset(grp, name, shape=None, dtype=None, data=0)
 
-:See:
+See:
     * :class:`DCStore`
     * :class:`DCType`
     * :class:`DCRange`
@@ -52,8 +53,9 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Created: 2016
-:Author: Mikhail Dubrovin
+Created: 2016 by Mikhail Dubrovin
+
+---
 """
 #------------------------------
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`GeometryAccess` - holds and access hierarchical geometry for generic pixel detector.
+"""
+---
+:py:class:`GeometryAccess` - holds and access hierarchical geometry for generic pixel detector.
 
 Usage::
  
@@ -86,7 +88,7 @@ Usage::
     psf = geometry.get_psf()
     geometry.print_psf()
 
-:See:
+See:
  * :py:class:`GeometryObject`, 
  * :py:class:`SegGeometry`, 
  * :py:class:`SegGeometryCspad2x1V1`, 
@@ -99,9 +101,9 @@ For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/dis
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail Dubrovin
+Author: Mikhail Dubrovin
 
------------
+---
 """
 #------------------------------
 

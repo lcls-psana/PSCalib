@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`CalibPars` - abstract interface for access to calibration parameters.
+"""
+---
+:py:class:`CalibPars` - abstract interface for access to calibration parameters.
 
 Methods of this class should be re-implemented in derived classes with name pattern CalibPars<Detector>
 for different type of detectore. For example, CSPAD can be implemented in class :py:class:`PSCalib.CalibParsCspadV1`
@@ -30,27 +32,29 @@ Usage of (implemented) interface methods::
     size = cp.shape(ctype)
     size = cp.status(ctype)
 
-:See:
-    :py:class:`GenericCalibPars`
-    :py:class:`GlobalUtils`
-    :py:class:`CalibPars`
-    :py:class:`CalibParsStore` 
-    :py:class:`CalibParsBaseAndorV1`
-    :py:class:`CalibParsBaseAndor3dV1`
-    :py:class:`CalibParsBaseCameraV1`
-    :py:class:`CalibParsBaseCSPad2x2V1`
-    :py:class:`CalibParsBaseCSPadV1`
-    :py:class:`CalibParsBaseEpix100aV1`
-    :py:class:`CalibParsBasePnccdV1`
-    :py:class:`CalibParsBasePrincetonV1`
-    :py:class:`CalibParsBaseAcqirisV1`
-    :py:class:`CalibParsBaseImpV1`
+See:
+  -  :py:class:`GenericCalibPars`
+  -  :py:class:`GlobalUtils`
+  -  :py:class:`CalibPars`
+  -  :py:class:`CalibParsStore` 
+  -  :py:class:`CalibParsBaseAndorV1`
+  -  :py:class:`CalibParsBaseAndor3dV1`
+  -  :py:class:`CalibParsBaseCameraV1`
+  -  :py:class:`CalibParsBaseCSPad2x2V1`
+  -  :py:class:`CalibParsBaseCSPadV1`
+  -  :py:class:`CalibParsBaseEpix100aV1`
+  -  :py:class:`CalibParsBasePnccdV1`
+  -  :py:class:`CalibParsBasePrincetonV1`
+  -  :py:class:`CalibParsBaseAcqirisV1`
+  -  :py:class:`CalibParsBaseImpV1`
 
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail Dubrovin
+Author: Mikhail Dubrovin
+
+---
 """
 #------------------------------
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`SegGeometryCspad2x1V1` - describes the CSPAD 2x1 V1 sensor geometry.
+"""
+---
+:py:class:`SegGeometryCspad2x1V1` - describes the CSPAD 2x1 V1 sensor geometry.
 
 In this class we use natural matrix notations like in data array
 (that is different from the DAQ notations where rows and cols are swapped).
@@ -61,7 +63,7 @@ Usage::
     Xrot, Yrot = rotation(X, Y, C, S)
     ...
 
-:See:
+See:
  * :py:class:`GeometryObject`, 
  * :py:class:`SegGeometry`, 
  * :py:class:`SegGeometryCspad2x1V1`, 
@@ -74,10 +76,9 @@ For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/dis
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Created: 2013-03-08
-:Author: Mikhail Dubrovin
+Created: 2013-03-08 by Mikhail Dubrovin
 
------------
+---
 """
 #------------------------------
 

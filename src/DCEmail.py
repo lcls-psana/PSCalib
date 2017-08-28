@@ -1,6 +1,7 @@
 ####!/usr/bin/env python
 #----------------------------
 """
+---
 :py:class:`DCEmail` - class for Detector Calibration Store (DCS) project.
 
 Usage::
@@ -14,7 +15,7 @@ Usage::
                email_from='do-not-reply@slac.stanford.edu',\
                email_to='do-not-send@slac.stanford.edu')
 
-:See:
+See:
     * :py:class:`DCStore`
     * :py:class:`DCType`
     * :py:class:`DCRange`
@@ -32,7 +33,9 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail Dubrovin
+Author: Mikhail Dubrovin
+
+---
 """
 #------------------------------
 

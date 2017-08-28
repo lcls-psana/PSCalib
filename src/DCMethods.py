@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
+---
 :py:class:`DCMethods` - contains a set of utilities for direct operations with calibration data.
 
 Usage::
@@ -59,7 +60,7 @@ See methods
     * :meth:`delete_ctype`
     * :meth:`delete_ctype_from_file`
  
-:See:
+See classes:
     * :class:`DCStore`
     * :class:`DCType`
     * :class:`DCRange`
@@ -77,8 +78,9 @@ See methods
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Created: 2016-09-23
-:Author: Mikhail Dubrovin
+Created: 2016-09-23 by Mikhail Dubrovin
+
+---
 """
 #------------------------------
 

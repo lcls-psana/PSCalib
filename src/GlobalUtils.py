@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-:py:class:`PSCalib.GlobalUtils` - contains a set of utilities
+---
+:py:class:`GlobalUtils` - a set of utilities
 
 Usage::
 
@@ -30,13 +31,14 @@ Usage::
 
     gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append 
  
-@see other interface methods in :py:class:`PSCalib.CalibPars`, :py:class:`PSCalib.CalibParsStore`
+:See: other methods in :py:class:`CalibPars`, :py:class:`CalibParsStore`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Created: 2013-03-08
-:Author: Mikhail Dubrovin
+Created: 2013-03-08 by Mikhail Dubrovin
+
+---
 """
 #--------------------------------
 

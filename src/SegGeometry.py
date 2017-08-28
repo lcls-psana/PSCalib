@@ -7,7 +7,6 @@ for pixel geometry description of all sensors.
 For example, CSPAD 2x1 sensor is implemented in class :py:class:`PSCalib.SegGeometryCspad2x1V1`.
 Access to all implemented sensors is available through the factory method in class :py:class:`PSCalib.SegGeometryStore`.
 
-
 Usage::
 
     from SegGeometryCspad2x1V1 import cspad2x1_one as sg
@@ -31,7 +30,7 @@ Usage::
     ...
     print 'X.shape =', X.shape
 
-:See:
+See:
  * :py:class:`GeometryObject`, 
  * :py:class:`SegGeometry`, 
  * :py:class:`SegGeometryCspad2x1V1`, 
@@ -44,9 +43,9 @@ For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/dis
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail Dubrovin
+Author: Mikhail Dubrovin
 
------------
+----
 """
 #------------------------------
 

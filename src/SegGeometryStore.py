@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
+---
 :py:class:`SegGeometryStore` - is a factory class/method to switch between different device-dependent
 segments/sensors to access their pixel geometry uling :py:class:`SegGeometry` interface.
 
@@ -31,7 +32,7 @@ Usage::
     xmax, ymax, zmax = sg.pixel_coord_mas()
     ...
 
-:See:
+See:
  * :py:class:`GeometryObject`, 
  * :py:class:`SegGeometry`, 
  * :py:class:`SegGeometryCspad2x1V1`, 
@@ -44,10 +45,9 @@ For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/dis
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Created: 2013-03-08
-:Author: Mikhail Dubrovin
+Created: 2013-03-08 by Mikhail Dubrovin
 
------------
+---
 """
 #------------------------------
 

@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`CalibParsBaseAndorV1` - holds basic calibration metadata parameters for associated detector.
+"""
+---
+:py:class:`CalibParsBaseAndorV1` - holds basic calibration metadata parameters for associated detector.
 
-:See:
+See:
     :py:class:`GenericCalibPars`
     :py:class:`GlobalUtils`
     :py:class:`CalibPars`
@@ -21,7 +23,9 @@
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail S. Dubrovin
+Author: Mikhail S. Dubrovin
+
+---
 """
 #------------------------------
 

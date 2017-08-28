@@ -34,7 +34,7 @@ In this class we use natural matrix notations like in data array
    (Xmin,Ymin)                  (Xmax,Ymin)
 
 
-Usage of interface methods::
+Usage::
 
     from SegGeometryEpix100V1 import epix2x2_one as sg
 
@@ -66,7 +66,7 @@ Usage of interface methods::
     Xrot, Yrot = rotation(X, Y, C, S)
     ...
 
-:See:
+See:
  * :py:class:`GeometryObject`, 
  * :py:class:`SegGeometry`, 
  * :py:class:`SegGeometryCspad2x1V1`, 
@@ -79,10 +79,9 @@ For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/dis
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Created: 2013-03-08
-:Author: Mikhail Dubrovin
+:Created: 2013-03-08 by Mikhail Dubrovin
 
------------
+----
 """
 #------------------------------
 

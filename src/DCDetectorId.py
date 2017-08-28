@@ -1,6 +1,7 @@
 ####!/usr/bin/env python
 #------------------------------
 """
+---
 :py:class:`DCDetectorId` - class for the Detector Calibration (DC) project.
 
 Usage::
@@ -20,7 +21,7 @@ Usage::
     ide = id_epix(env, src)
     idc = id_cspad(env, src)
 
-:See:
+See:
     * :py:class:`DCStore`
     * :py:class:`DCType`
     * :py:class:`DCRange`
@@ -38,7 +39,9 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Author: Mikhail Dubrovin
+Author: Mikhail Dubrovin
+
+---
 """
 
 #------------------------------

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
-""":py:class:`DCStore` class for the Detector Calibration (DC) project.
+"""
+---
+:py:class:`DCStore` class for the Detector Calibration (DC) project.
 
 Usage::
 
@@ -34,7 +36,7 @@ Usage::
     o.load(group)                           # loads object content from the hdf5 file. 
     o.print_obj()                           # print info about this object and its children
 
-:See:
+See:
     * :class:`DCStore`
     * :class:`DCType`
     * :class:`DCRange`
@@ -52,8 +54,9 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Created: 2016
-:Author: Mikhail Dubrovin
+Created: 2016 by Mikhail Dubrovin
+
+---
 """
 #------------------------------
 

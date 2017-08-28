@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
+---
 :py:class:`DCVersion` - class for the Detector Calibration (DC) project.
 
 Usage::
@@ -25,7 +26,7 @@ Usage::
 
     # and all methods inherited from PSCalib.DCBase
 
-:See:
+See:
     * :class:`DCStore`
     * :class:`DCType`
     * :class:`DCRange`
@@ -43,8 +44,9 @@ Usage::
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-:Created: 2016
-:Author: Mikhail Dubrovin
+Created: 2016 by Mikhail Dubrovin
+
+---
 """
 #------------------------------
 
