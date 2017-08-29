@@ -29,20 +29,20 @@ Usage::
     par      = 0. # | evt : psana.Event | float - tsec event time
 
     # Methods with dynamically-reconstructed calib file name
-    dcm.:meth:`add_constants`(nda, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, pred=None, succ=None, cmt=None, verb=False)
-    dcm.:meth:`print_content`(env, src='Epix100a.', calibdir=None)
-    nda = dcm.:meth:`get_constants`(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False)
-    dcm.:meth:`delete_version`(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False)
-    dcm.:meth:`delete_range`  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False)
-    dcm.:meth:`delete_ctype`  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False)
+    dcm.add_constants(nda, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,\nvers=None, pred=None, succ=None, cmt=None, verb=False)
+    dcm.print_content(env, src='Epix100a.', calibdir=None)
+    nda = dcm.get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False)
+    dcm.delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False)
+    dcm.delete_range  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False)
+    dcm.delete_ctype  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False)
 
     # Methods using fname
-    dcm.:meth:`add_constants_to_file`(data, fname, par, env, ctype=gu.PIXEL_MASK, vers=None, pred=None, succ=None, cmt=None, verb=False)
-    dcm.:meth:`print_content_from_file`(fname)`
-    nda = dcm.:meth:`get_constants_from_file`(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=False)
-    dcm.:meth:`delete_version_from_file`(fname, ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False)
-    dcm.:meth:`delete_range_from_file`  (fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)
-    dcm.:meth:`delete_ctype_from_file`  (fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)
+    dcm.add_constants_to_file(data, fname, par, env, ctype=gu.PIXEL_MASK, vers=None, pred=None, succ=None, cmt=None, verb=False)
+    dcm.print_content_from_file(fname)
+    nda = dcm.get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=False)
+    dcm.delete_version_from_file(fname, ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False)
+    dcm.delete_range_from_file  (fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)
+    dcm.delete_ctype_from_file  (fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)
 
 Methods 
     * :meth:`add_constants`, 

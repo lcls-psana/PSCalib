@@ -27,15 +27,17 @@ helpme:
 	@echo "  docdir      to create documentation directory $(BUILDDIR), clone repo"
 	@echo "  html        to generate html documentation"
 	@echo "  gh-pages    to add, commit and push documentation to gh-pages"
+	@echo "  newdoc      sequence of commands: helpme, clean, docdir, html, gh-pages"
 	@echo 
-	@echo "  Sequence of make commands: clean, docdir, html, gh-pages"
 
 printpars:
 	@echo
-	@echo "MYPKGNAME: $(MYPKGNAME)"
+	@echo "MAKE      : $(MAKE)"
+	@echo "MYPKGNAME : $(MYPKGNAME)"
 	@echo "SPHINXPROJ: $(SPHINXPROJ)"
-	@echo "BUILDDIR: $(BUILDDIR)"
+	@echo "BUILDDIR  : $(BUILDDIR)"
 	@echo "Sequence of make commands: clean, docdir, html, gh-pages"
+	@echo
 
 clean:
 	rm -rf $(BUILDDIR)
@@ -50,3 +52,8 @@ gh-pages:
 	cd $(BUILDDIR)/html && git add -A && git commit -m "add/update doc" && git push origin gh-pages -f
 	@echo
 	@echo "Documentation is pushed on gh-pages"
+
+newdoc:
+	$(MAKE) helpme && $(MAKE) clean && $(MAKE) docdir && $(MAKE) html && $(MAKE) gh-pages
+	@echo
+	@echo "Documentation is built and committed"
