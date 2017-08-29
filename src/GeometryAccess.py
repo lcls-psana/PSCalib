@@ -102,7 +102,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 
@@ -130,6 +130,11 @@ class GeometryAccess :
 
     def __init__(self, path=None, pbits=0) : 
         """Constructor of the class :py:class:`GeometryAccess`      
+
+        Parameters
+
+        - path : str - path to the geometry file
+        - pbits : int - verbosity bitword
         """        
         self.path  = path
         self.pbits = pbits

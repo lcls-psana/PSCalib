@@ -27,6 +27,8 @@ clean:
 
 
 gh-pages:
-	cd $(GITROOT) && git checkout --orphan gh-pages && git rm -rf . && mv doc/web/_build/html/* . && rm -rf doc && git add -A && git commit -am "commit new documentation." && @echo "From git repo use command: git push upstream gh-pages -f"
+	cd $(GITROOT) && git checkout --orphan gh-pages && git rm -rf . && mv doc/web/_build/html/* . && rm -rf doc && git add -A && git commit -am "commit new documentation." && git push upstream gh-pages -f
+
+        @echo "If something is wrong then from git repo use command: git push upstream gh-pages -f"
 
 #	cd .. && git checkout --orphan gh-pages && git rm -rf . && touch .nojekyll && mv doc/_build/html/* . && rm -rf doc && git add -A && git commit -am "Makefile is force-commiting new build." && git push upstream gh-pages -f
