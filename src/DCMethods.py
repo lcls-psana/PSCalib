@@ -29,7 +29,7 @@ Usage::
     par      = 0. # | evt : psana.Event | float - tsec event time
 
     # Methods with dynamically-reconstructed calib file name
-    dcm.add_constants(nda, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,\nvers=None, pred=None, succ=None, cmt=None, verb=False)
+    dcm.add_constants(nda, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, pred=None, succ=None, cmt=None, verb=False)
     dcm.print_content(env, src='Epix100a.', calibdir=None)
     nda = dcm.get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False)
     dcm.delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False)
