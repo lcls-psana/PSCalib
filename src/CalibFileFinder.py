@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`CalibFileFinder` is a python version of CalibFileFinder.cpp - finds calibration file
+Class :py:class:`CalibFileFinder` is a python version of CalibFileFinder.cpp - finds calibration file
 
 Usage::
 
@@ -48,7 +47,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

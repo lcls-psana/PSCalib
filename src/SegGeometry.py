@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
-""" :py:class:`SegGeometry` - abstract class with interface description.
+"""
+:py:class:`SegGeometry` - abstract class with interface description.
 
 Methods of this class should be re-implemented in derived classes with name pattern SegGeometry<SensorVers> 
 for pixel geometry description of all sensors.
@@ -45,7 +46,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
-----
+--------
 """
 #------------------------------
 

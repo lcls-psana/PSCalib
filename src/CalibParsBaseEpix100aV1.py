@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
 :py:class:`CalibParsBaseEpix100aV1` - holds basic calibration metadata parameters for associated detector.
 
 See:
@@ -24,7 +23,7 @@ This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
----
+--------
 """
 #------------------------------
 

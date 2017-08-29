@@ -1,8 +1,7 @@
 ####!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`DCLogger` - logger for Detector Calibration Store.
+Class :py:class:`DCLogger` - logger for Detector Calibration Store.
 
 See:
     * :py:class:`DCStore`
@@ -21,9 +20,10 @@ See:
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
+
 Created: 2016-05-17 by Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

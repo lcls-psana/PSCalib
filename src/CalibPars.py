@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`CalibPars` - abstract interface for access to calibration parameters.
+Abstract interface :py:class:`CalibPars` for access to calibration parameters.
 
 Methods of this class should be re-implemented in derived classes with name pattern CalibPars<Detector>
-for different type of detectore. For example, CSPAD can be implemented in class :py:class:`PSCalib.CalibParsCspadV1`
-which enherits from :py:class:`PSCalib.CalibPars`, etc.
-Currently implementation of this interface for all detectors is done in class :py:class:`PSCalib.GenericCalibPars`.
-Access to all detectors is available through the factory method in class :py:class:`PSCalib.CalibParsStore`.
+for different type of detectore. For example, CSPAD can be implemented in class :py:class:`CalibParsCspadV1`
+which enherits from :py:class:`CalibPars`, etc.
+Currently implementation of this interface for all detectors is done in class :py:class:`GenericCalibPars`.
+Access to all detectors is available through the factory method in class :py:class:`CalibParsStore`.
 
 Usage of (implemented) interface methods::
 
@@ -54,7 +53,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

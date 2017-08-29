@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`GeometryObject` - building block for hierarchical geometry.
+Class :py:class:`GeometryObject` is a building block for hierarchical geometry.
 
 Usage::
 
-    # Methods of this class are used internally in PSCalib.GeometryAccess
+    # Methods of this class are used internally in :py:class:`GeometryAccess`
     # and are not supposed to be used directly...
 
     from PSCalib.GeometryObject import GeometryObject
@@ -66,7 +65,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

@@ -1,8 +1,7 @@
 ####!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`DCFileName` - file name object for Detector Calibration Store (DCS) project.
+Class :py:class:`DCFileName` - file name object for Detector Calibration Store (DCS) project.
 
 Usage::
 
@@ -49,7 +48,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
----
+--------
 """
 
 import os

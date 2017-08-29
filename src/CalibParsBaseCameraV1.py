@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`CalibParsBaseCameraV1` - holds basic calibration metadata parameters for associated detector.
+Class :py:class:`CalibParsBaseCameraV1` - holds basic calibration metadata parameters for associated detector.
 
 See:
   -  :py:class:`GenericCalibPars`
@@ -25,7 +24,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

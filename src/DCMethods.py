@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`DCMethods` - contains a set of utilities for direct operations with calibration data.
+Module :py:module:`DCMethods` contains a set of utilities for direct operations with calibration data.
 
 Usage::
 
@@ -11,10 +10,9 @@ Usage::
     import PSCalib.DCMethods as dcm
 
     # Example of parameters
-
-    dsname  = 'exp=cxif5315:run=129'
+    dsname = 'exp=cxif5315:run=129'
     # or:
-    dsname   = '/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc'
+    dsname = '/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc'
     ds = psana.DataSource(dsname)
     env=ds.env()
     evt=ds.events().next()
@@ -31,22 +29,22 @@ Usage::
     par      = 0. # | evt : psana.Event | float - tsec event time
 
     # Methods with dynamically-reconstructed calib file name
-    dcm.add_constants(nda, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, pred=None, succ=None, cmt=None, verb=False)
-    dcm.print_content(env, src='Epix100a.', calibdir=None)
-    nda = dcm.get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False)
-    dcm.delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False)
-    dcm.delete_range  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False)
-    dcm.delete_ctype  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False)
+    dcm.:meth:`add_constants(nda, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, pred=None, succ=None, cmt=None, verb=False)`
+    dcm.:meth:`print_content(env, src='Epix100a.', calibdir=None)`
+    nda = dcm.:meth:`get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False)`
+    dcm.:meth:`delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False)`
+    dcm.:meth:`delete_range  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False)`
+    dcm.:meth:`delete_ctype  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False)`
 
     # Methods using fname
-    dcm.add_constants_to_file(data, fname, par, env, ctype=gu.PIXEL_MASK, vers=None, pred=None, succ=None, cmt=None, verb=False) 
-    dcm.print_content_from_file(fname)
-    nda = dcm.get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=False)
-    dcm.delete_version_from_file(fname, ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False)
-    dcm.delete_range_from_file  (fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)
-    dcm.delete_ctype_from_file  (fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)
+    dcm.:meth:`add_constants_to_file(data, fname, par, env, ctype=gu.PIXEL_MASK, vers=None, pred=None, succ=None, cmt=None, verb=False)` 
+    dcm.:meth:`print_content_from_file(fname)`
+    nda = dcm.:meth:`get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=False)`
+    dcm.:meth:`delete_version_from_file(fname, ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False)`
+    dcm.:meth:`delete_range_from_file  (fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)`
+    dcm.:meth:`delete_ctype_from_file  (fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)`
 
-See methods 
+References to methods 
     * :meth:`add_constants`, 
     * :meth:`add_constants_to_file`, 
     * :meth:`print_content`, 
@@ -80,7 +78,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016-09-23 by Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 
@@ -101,11 +99,16 @@ gu = dcu.gu
 #------------------------------
 
 def is_good_fname(fname, verb=False) :
-    """Checks the hdf5 file name parameter fname validity, returns True or False.
+    """Checks the hdf5 file name validity, returns True or False.
     
     Parameters
     
-    fname : str - full path to the file
+    - fname : str - full path to the file
+    - verb : bool - verbosity, default=False - do not print any message
+
+    Returns
+
+    True/False - for existent or not file
     """
     metname = sys._getframe().f_code.co_name
 
@@ -125,15 +128,21 @@ def is_good_fname(fname, verb=False) :
 
 #------------------------------
 
-def evt_to_tsec(par) :
+def par_to_tsec(par) :
     """Checks if par is float or assumes that it is psana.Event and returns event time in (float) sec or None.
+
     Parameters
 
-    par   : psana.Event | float - tsec event time | None    
+    - par   : psana.Event | psana.Env | float - tsec event time | None
+
+    Returns
+
+    event time in (float) sec or None.
     """
-    return None if par is None else\
-           par if isinstance(par, float) else\
-           dcu.evt_time(par) # for psana.Event
+    return par if isinstance(par, float) else\
+           dcu.evt_time(par) if isinstance(par, psana.Event) else\
+           dcu.env_time(par) if isinstance(par, psana.Env) else\
+           None
 
 #------------------------------
 #------------------------------
@@ -149,18 +158,18 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
 
     Parameters
     
-    data : numpy.array or str - array or string of calibration constants/data to save in file
-    fname: full path to the hdf5 file
-    par  : psana.Event | float - tsec event time
-    env  : psana.Env -> is used to get exp=env.experiment() for comments etc.
-    ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    vers : int - calibration version
-    pred : str - predecessor name
-    succ : str - successor name
-    cmt  : str - comment saved as a history record within DCRange
-    verb : bool - verbosity, default=False - do not prnt any message
+    - data : numpy.array or str - array or string of calibration constants/data to save in file
+    - fname: full path to the hdf5 file
+    - par  : psana.Event | psana.Env | float - tsec event time
+    - env  : psana.Env -> is used to get exp=env.experiment() for comments etc.
+    - ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    - vers : int - calibration version
+    - pred : str - predecessor name
+    - succ : str - successor name
+    - cmt  : str - comment saved as a history record within DCRange
+    - verb : bool - verbosity, default=False - do not print any message
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -173,7 +182,7 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
         if verb : print 'WARNING: file name is not defined - return None'
         return
 
-    tsec_ev = evt_to_tsec(par)
+    tsec_ev = par_to_tsec(par)
 
     cs = DCStore(fname)
 
@@ -232,19 +241,19 @@ def add_constants(data, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir
 
     Parameters
     
-    data : numpy.array or str - array or string of calibration constants/data to save in file
-    env  : psana.Env -> full detector name for psana.Source -> hdf5 file name
-    par  : psana.Event | float time -> event time
-    src  : str - source short/full name, alias or full -> hdf5 file name
-    ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
-    vers : int - calibration version
-    pred : str - predecessor name
-    succ : str - successor name
-    cmt  : str - comment saved as a history record within DCRange
-    verb : bool - verbosity, default=False - do not prnt any message
+    - data : numpy.array or str - array or string of calibration constants/data to save in file
+    - env  : psana.Env -> full detector name for psana.Source -> hdf5 file name
+    - par  : psana.Event | float time -> event time
+    - src  : str - source short/full name, alias or full -> hdf5 file name
+    - ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    - vers : int - calibration version
+    - pred : str - predecessor name
+    - succ : str - successor name
+    - cmt  : str - comment saved as a history record within DCRange
+    - verb : bool - verbosity, default=False - do not prnt any message
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -270,12 +279,16 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
     
     Parameters
 
-    fname : full path to the hdf5 file
-    par   : psana.Event | float - tsec event time
-    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    vers  : int - calibration version
+    - fname : full path to the hdf5 file
+    - par   : psana.Event | float - tsec event time
+    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    - vers  : int - calibration version
 
-    Back to :py:class:`PSCalib.DCMethods`
+    Returns
+
+    - np.array - specified array of calibration constants
+
+    See :py:module:`DCMethods`
     """
     if not is_good_fname(fname, verb) : return None
 
@@ -290,7 +303,7 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
     if ct is None : return None 
     #ct.print_obj()
 
-    tsec = evt_to_tsec(par)
+    tsec = par_to_tsec(par)
     #print 'XXX: get DCRange object for time = %.3f' % tsec
     cr = ct.range_for_tsec(tsec)
     #cr = ct.range_for_evt(evt)
@@ -310,15 +323,26 @@ def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
     """Returns specified array of calibration constants.
     
     Parameters
-    
-    par      : psana.Event | float - tsec event time
-    env      : psana.Env -> full detector name for psana.Source 
-    src      : str - source short/full name, alias or full
-    ctype    : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
-    vers     : int - calibration version
+    ----------
+    par      : psana.Event | float
+        tsec event time
+    env      : psana.Env 
+        to get full detector name for psana.Source 
+    src      : str 
+        source short/full name, alias or full
+    ctype    : gu.CTYPE 
+        enumerated calibration type, e.g.: gu.PIXEL_MASK
+    calibdir : str
+        fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    vers     : int
+        calibration version
 
-    Back to :py:class:`PSCalib.DCMethods`
+    Returns
+    -------
+    numpy.array
+        array of calibratiopn constatnts.
+
+    See :py:module:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -342,14 +366,14 @@ def delete_version_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, cmt=Non
     
     Parameters
     
-    fname : full path to the hdf5 file
-    par   : psana.Event | float - tsec event time
-    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    vers  : int - calibration version
-    cmt   : str - comment
-    verb  : bool - verbousity
+    - fname : full path to the hdf5 file
+    - par   : psana.Event | psana.Env | float - tsec event time
+    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    - vers  : int - calibration version
+    - cmt   : str - comment
+    - verb  : bool - verbousity
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
 
     metname = sys._getframe().f_code.co_name
@@ -367,7 +391,7 @@ def delete_version_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, cmt=Non
     if ct is None : return None 
     #ct.print_obj()
 
-    tsec = evt_to_tsec(par)
+    tsec = par_to_tsec(par)
     cr = ct.range_for_tsec(tsec)
     if cr is None : return None
 
@@ -392,16 +416,16 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
     
     Parameters
     
-    evt : psana.Event -> event time
-    env : psana.Env -> full detector name for psana.Source 
-    src : str - source short/full name, alias or full
-    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
-    vers : int - calibration version
-    cmt  : str - comment
-    verb : bool - verbousity
+    - evt : psana.Event -> event time
+    - env : psana.Env -> full detector name for psana.Source 
+    - src : str - source short/full name, alias or full
+    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    - vers : int - calibration version
+    - cmt  : str - comment
+    - verb : bool - verbousity
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -425,13 +449,13 @@ def delete_range_from_file(fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, ver
     
     Parameters
     
-    fname : full path to the hdf5 file
-    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    range : str - range, e.g. '1474587520-end'
-    cmt   : str - comment
-    verb  : bool - verbousity
+    - fname : full path to the hdf5 file
+    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    - range : str - range, e.g. '1474587520-end'
+    - cmt   : str - comment
+    - verb  : bool - verbousity
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -468,16 +492,16 @@ def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
     
     Parameters
     
-    evt : psana.Event -> event time
-    env : psana.Env -> full detector name for psana.Source 
-    src : str - source short/full name, alias or full
-    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
-    range : str - range, e.g. '1474587520-end'
-    cmt   : str - comment
-    verb  : bool - verbousity
+    - evt : psana.Event -> event time
+    - env : psana.Env -> full detector name for psana.Source 
+    - src : str - source short/full name, alias or full
+    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    - range : str - range, e.g. '1474587520-end'
+    - cmt   : str - comment
+    - verb  : bool - verbousity
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -501,12 +525,12 @@ def delete_ctype_from_file(fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False) :
     
     Parameters
     
-    fname : full path to the hdf5 file
-    ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    cmt   : str - comment
-    verb  : bool - verbousity
+    - fname : full path to the hdf5 file
+    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    - cmt   : str - comment
+    - verb  : bool - verbousity
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -540,15 +564,15 @@ def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
     
     Parameters
     
-    evt      : psana.Event -> event time
-    env      : psana.Env -> full detector name for psana.Source 
-    src      : str - source short/full name, alias or full
-    ctype    : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
-    cmt      : str - comment
-    verb     : bool - verbousity
+    - evt      : psana.Event -> event time
+    - env      : psana.Env -> full detector name for psana.Source 
+    - src      : str - source short/full name, alias or full
+    - ctype    : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    - cmt      : str - comment
+    - verb     : bool - verbousity
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -570,9 +594,9 @@ def print_content_from_file(fname) :
     
     Parameters
     
-    fname : str - full path to the file
+    - fname : str - full path to the file
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -594,11 +618,11 @@ def print_content(env, src='Epix100a.', calibdir=None) :
     
     Parameters
     
-    env : psana.Env -> full detector name for psana.Source 
-    src : str - source short/full name, alias or full
-    calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    - env : psana.Env -> full detector name for psana.Source 
+    - src : str - source short/full name, alias or full
+    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
 
-    Back to :py:class:`PSCalib.DCMethods`
+    See :py:module:`DCMethods`
     """
     #metname = sys._getframe().f_code.co_name
 

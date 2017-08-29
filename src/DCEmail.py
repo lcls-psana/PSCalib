@@ -1,7 +1,6 @@
 ####!/usr/bin/env python
 #----------------------------
 """
----
 :py:class:`DCEmail` - class for Detector Calibration Store (DCS) project.
 
 Usage::
@@ -35,7 +34,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

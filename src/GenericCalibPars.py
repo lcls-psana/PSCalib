@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`GenericCalibPars` - implementation of CalibPars interface methods for generic detectors.
+Class :py:class:`GenericCalibPars` - implementation of :py:class:`CalibPars` interface methods for generic detectors.
 
 Usage::
 
@@ -47,14 +46,14 @@ Usage::
     nda = gcp.constants_dcs(ctype, vers=None, verb=False)
     nda = gcp.constants(ctype, vers=None, verb=False)
     
-See :py:class:`CalibPars`, :py:class:`CalibParsStore`, :py:class:`CalibParsCspad2x1V1, :py:class:`GlobalUtils`
+See :py:class:`CalibPars`, :py:class:`CalibParsStore`, :py:class:`CalibParsCspad2x1V1`, :py:class:`GlobalUtils`
 
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

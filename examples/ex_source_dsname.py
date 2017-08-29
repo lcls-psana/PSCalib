@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-import sys
-
-##-----------------------------
+#------------------------------
 
 def ex_source_dsname(ntest) : 
     """returns source and dataset name/file"""
@@ -71,13 +69,15 @@ def ex_source_dsname(ntest) :
         src, dsn = ':Rayonix.0', '/reg/g/psdm/detector/data_test/types/0017-MfxEndstation.0-Rayonix.0.xtc'
 
     else :
+        import sys
         sys.exit('Non-implemented sample for test number # %d' % ntest)
 
     return src, dsn
 
-##-----------------------------
+#------------------------------
 
 if __name__ == "__main__" :
+    import sys
 
     ntest = int(sys.argv[1]) if len(sys.argv)>1 else 1
     print '%s\nExample # %d' % (80*'_', ntest)
@@ -87,4 +87,4 @@ if __name__ == "__main__" :
 
     sys.exit(0)
 
-##-----------------------------
+#------------------------------

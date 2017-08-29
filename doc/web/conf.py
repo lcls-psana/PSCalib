@@ -95,8 +95,8 @@ html_theme = 'agogo' # Also working: 'alabaster' 'haiku','agogo'
 # documentation.
 #
 html_theme_options = {
-    'pagewidth': '1200px',
-    'documentwidth': '1000px',
+    'pagewidth': '1400px',
+    'documentwidth': '1200px',
     #'nav_width': '900px', # Fix the width of the content area. Defaults to false
     #'content_fixed': False,
     # Set the width of the content area. Defaults to '900px'

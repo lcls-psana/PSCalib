@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`DCStore` class for the Detector Calibration (DC) project.
+Class :py:class:`DCStore` for the Detector Calibration (DC) project.
 
 Usage::
 
@@ -56,7 +55,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016 by Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

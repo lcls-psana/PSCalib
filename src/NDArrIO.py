@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #------------------------------
 """
-----
 :py:class:`NDArrIO` - i/o methods to read/write numpy array in the text file
 
 Usage::
@@ -50,7 +49,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
-----
+--------
 """
 #------------------------------
 

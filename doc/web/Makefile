@@ -6,8 +6,10 @@ SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
 SPHINXPROJ    = PSCalib-doc
 SOURCEDIR     = .
-#BUILDDIR      = _build
-BUILDDIR      = ../../../PSCalib-doc
+BUILDDIR      = _build
+#BUILDDIR      = ../../../PSCalib-doc
+GITROOT       = ../..
+
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -20,3 +22,11 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+clean:
+	rm -rf $(BUILDDIR)/*
+
+
+gh-pages:
+	cd $(GITROOT) && git checkout --orphan gh-pages && git rm -rf . && mv doc/web/_build/html/* . && rm -rf doc && git add -A && git commit -am "commit new documentation." && @echo "To complete use commands: cd $(GITROOT); git checkout gh-pages; git push upstream gh-pages -f"
+
+#	cd .. && git checkout --orphan gh-pages && git rm -rf . && touch .nojekyll && mv doc/_build/html/* . && rm -rf doc && git add -A && git commit -am "Makefile is force-commiting new build." && git push upstream gh-pages -f

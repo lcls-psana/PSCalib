@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`GeometryAccess` - holds and access hierarchical geometry for generic pixel detector.
+Class :py:class:`GeometryAccess` - holds and access hierarchical geometry for generic pixel detector.
 
 Usage::
  

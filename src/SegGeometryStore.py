@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`SegGeometryStore` - is a factory class/method to switch between different device-dependent
+Class :py:class:`SegGeometryStore` is a factory class/method to switch between different device-dependent
 segments/sensors to access their pixel geometry uling :py:class:`SegGeometry` interface.
 
 Usage::
@@ -47,7 +46,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2013-03-08 by Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

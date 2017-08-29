@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`SegGeometryCspad2x1V1` - describes the CSPAD 2x1 V1 sensor geometry.
+Class :py:class:`SegGeometryCspad2x1V1` describes the CSPAD 2x1 V1 sensor geometry.
 
 In this class we use natural matrix notations like in data array
 (that is different from the DAQ notations where rows and cols are swapped).
@@ -78,7 +77,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2013-03-08 by Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

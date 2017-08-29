@@ -113,3 +113,15 @@ for i, evt in enumerate(ds.events()):
         if i>10 : break
 
 #------------------------------
+# get time from psana.Env
+import psana
+ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
+ds = psana.DataSource('/reg/d/psdm/cxi/cxif5315/xtc/e545-r0169-s00-c00.xtc')
+ds = psana.DataSource('exp=cxif5315:run=169')
+ds = psana.DataSource('exp=cxif5315:run=169:smd')
+ds = psana.DataSource('exp=xpptut15:run=54:smd')
+evid = ds.env().configStore().get(psana.EventId).time()
+
+
+
+

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
 :py:class:`CalibParsBaseAndorV1` - holds basic calibration metadata parameters for associated detector.
 
 See:
@@ -25,7 +24,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail S. Dubrovin
 
----
+--------
 """
 #------------------------------
 

@@ -1,7 +1,6 @@
 ####!/usr/bin/env python
 #------------------------------
 """
----
 :py:class:`DCInterface` - abstract interface for the Detector Calibration (DC) project.
 
 See:
@@ -24,7 +23,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`DCRange` - class for the Detector Calibration (DC) project.
+Class :py:class:`DCRange` for the Detector Calibration (DC) project.
 
 Usage::
 
@@ -53,7 +52,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016-09-23 at Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 

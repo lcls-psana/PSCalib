@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
----
-:py:class:`DCUtils` - contains a set of utilities.
+Class :py:class:`DCUtils` contains a set of utilities.
 
 Usage::
 
@@ -27,8 +26,9 @@ Usage::
                                           # 'CxiDs2.0:Cspad.0' from 'DetInfo(CxiDs2.0:Cspad.0)'
     dname  = gu.detector_full_name(env, src)
     source = gu.psana_source(env, srcpar)
-    t_sec  = gu.evt_time(evt)
     fid    = gu.evt_fiducials(evt)
+    t_sec  = gu.evt_time(evt)
+    t_sec  = gu.env_time(env)
 
     # methods for HDF5 
     sg = gu.get_subgroup(grp, subgr_name)
@@ -55,7 +55,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016 by Mikhail Dubrovin
 
----
+--------
 """
 #------------------------------
 
@@ -304,9 +304,19 @@ def save_object_as_dset(grp, name, shape=None, dtype=None, data=0) :
 #------------------------------
 
 def evt_time(evt) :
-    """Returns event (double) time.
+    """Returns event (double) time for input psana.Event object.
     """
     evid = evt.get(psana.EventId)
+    ttuple = evid.time()
+    #print 'XXX time:',  ttuple
+    return float(ttuple[0]) + float(ttuple[1])*1e-9
+
+#------------------------------
+
+def env_time(env) :
+    """Returns event (double) time for input psana.Env object.
+    """
+    evid = env.configStore().get(psana.EventId)
     ttuple = evid.time()
     #print 'XXX time:',  ttuple
     return float(ttuple[0]) + float(ttuple[1])*1e-9
@@ -377,6 +387,15 @@ def test_evt_time() :
 
 #------------------------------
 
+def test_env_time() :
+    ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
+    env=ds.env()
+    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
+    t=env_time(env)
+    print 'env_time(evt) : %.9f' % t
+
+#------------------------------
+
 def test_misc() :
     print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
     print 'get_enviroment(USER) : %s' % get_enviroment()
@@ -397,6 +416,7 @@ def do_test() :
     elif tname == '3' : test_psana_source()
     elif tname == '4' : test_detector_full_name()
     elif tname == '5' : test_evt_time()
+    elif tname == '6' : test_env_time()
     else : print 'Not-recognized test name: %s' % tname
     sys.exit('End of test %s' % tname)
  
