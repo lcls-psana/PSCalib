@@ -2,14 +2,13 @@
 #
 
 # You can set these variables from the command line.
+MYPKGNAME     = PSCalib
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = PSCalib-doc
+SPHINXPROJ    = $(MYPKGNAME)-doc
 SOURCEDIR     = .
-BUILDDIR      = _build
-#BUILDDIR      = ../../../PSCalib-doc
-GITROOT       = ../..
-
+#BUILDDIR      = _build
+BUILDDIR      = ../../../$(MYPKGNAME)-doc
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -22,14 +21,32 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-clean:
-	rm -rf $(BUILDDIR)/*
+helpme:
+	@echo "  helpme      prints this help info"
+	@echo "  clean       to clean build doc directory $(BUILDDIR)"
+	@echo "  docdir      to create documentation directory $(BUILDDIR), clone repo"
+	@echo "  html        to generate html documentation"
+	@echo "  gh-pages    to add, commit and push documentation to gh-pages"
+	@echo 
+	@echo "  Sequence of make commands: clean, docdir, html, gh-pages"
 
+printpars:
+	@echo
+	@echo "MYPKGNAME: $(MYPKGNAME)"
+	@echo "SPHINXPROJ: $(SPHINXPROJ)"
+	@echo "BUILDDIR: $(BUILDDIR)"
+	@echo "Sequence of make commands: clean, docdir, html, gh-pages"
+
+clean:
+	rm -rf $(BUILDDIR)
+	@echo "Documentation directory $(BUILDDIR) is removed"
+
+docdir:
+	mkdir $(BUILDDIR) && cd $(BUILDDIR) && rm -rf * && git clone https://github.com/lcls-psana/$(MYPKGNAME).git html && cd html && git branch gh-pages && git symbolic-ref HEAD refs/heads/gh-pages && rm .git/index && git clean -fdx
+	@echo
+	@echo "Empty documentation directory is ready: $(BUILDDIR)"
 
 gh-pages:
-	cd $(GITROOT) && git checkout gh-pages && git rm -rf . && mv doc/web/_build/html/* . && rm -rf doc && git add -A && git commit -am "commit new documentation." && git push origin gh-pages -f
-        @echo "If something is wrong then from git repo use command: git push origin gh-pages -f"
-
-#	cd $(GITROOT) && git checkout --orphan gh-pages && git rm -rf . && mv doc/web/_build/html/* . && rm -rf doc && git add -A && git commit -am "commit new documentation." && git push origin gh-pages -f
-
-#	cd .. && git checkout --orphan gh-pages && git rm -rf . && touch .nojekyll && mv doc/_build/html/* . && rm -rf doc && git add -A && git commit -am "Makefile is force-commiting new build." && git push upstream gh-pages -f
+	cd $(BUILDDIR)/html && git add -A && git commit -m "add/update doc" && git push origin gh-pages -f
+	@echo
+	@echo "Documentation is pushed on gh-pages"
