@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
-Module :py:module:`DCMethods` contains a set of utilities for direct operations with calibration data.
+Module :py:class:`DCMethods` contains a set of utilities for direct operations with calibration data.
 
 Usage::
 
@@ -169,7 +169,7 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
     - cmt  : str - comment saved as a history record within DCRange
     - verb : bool - verbosity, default=False - do not print any message
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -253,7 +253,7 @@ def add_constants(data, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir
     - cmt  : str - comment saved as a history record within DCRange
     - verb : bool - verbosity, default=False - do not prnt any message
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -288,7 +288,7 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
 
     - np.array - specified array of calibration constants
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     if not is_good_fname(fname, verb) : return None
 
@@ -323,7 +323,7 @@ def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
     """Returns specified array of calibration constants.
     
     Parameters
-    ----------
+
     par      : psana.Event | float
         tsec event time
     env      : psana.Env 
@@ -338,11 +338,11 @@ def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
         calibration version
 
     Returns
-    -------
+
     numpy.array
         array of calibratiopn constatnts.
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -373,7 +373,7 @@ def delete_version_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, cmt=Non
     - cmt   : str - comment
     - verb  : bool - verbousity
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
 
     metname = sys._getframe().f_code.co_name
@@ -425,7 +425,7 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
     - cmt  : str - comment
     - verb : bool - verbousity
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -455,7 +455,7 @@ def delete_range_from_file(fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, ver
     - cmt   : str - comment
     - verb  : bool - verbousity
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -501,7 +501,7 @@ def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
     - cmt   : str - comment
     - verb  : bool - verbousity
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -530,7 +530,7 @@ def delete_ctype_from_file(fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False) :
     - cmt   : str - comment
     - verb  : bool - verbousity
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -572,7 +572,7 @@ def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
     - cmt      : str - comment
     - verb     : bool - verbousity
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -596,7 +596,7 @@ def print_content_from_file(fname) :
     
     - fname : str - full path to the file
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     metname = sys._getframe().f_code.co_name
 
@@ -622,7 +622,7 @@ def print_content(env, src='Epix100a.', calibdir=None) :
     - src : str - source short/full name, alias or full
     - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
 
-    See :py:module:`DCMethods`
+    See :py:class:`DCMethods`
     """
     #metname = sys._getframe().f_code.co_name
 
