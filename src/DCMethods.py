@@ -320,14 +320,15 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
 #------------------------------
 
 def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False) :
-    """Returns specified array of calibration constants.
+    """
+    Returns specified array of calibration constants.
 
     :param par: psana.Event | float - tsec event time
-    :param env      : psana.Env - to get full detector name for psana.Source 
-    :param src      : str - source short/full name, alias or full
-    :param ctype    : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
-    :param calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
-    :param vers     : int - calibration version
+    :param env: psana.Env - to get full detector name for psana.Source 
+    :param src: str - source short/full name, alias or full
+    :param ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK
+    :param calibdir: str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)
+    :param vers: int - calibration version
 
     :return: numpy.array - array of calibratiopn constatnts.
 
