@@ -44,8 +44,8 @@ clean:
 	@echo "Documentation directory $(BUILDDIR) is removed"
 
 update:
-        cd ../.. && ls src && rm src/*.pyc && git pull
-        @echo "Repo is updated from github"
+	cd ../.. && ls src && rm src/*.pyc && git pull
+	@echo "Repo is updated from github"
 
 docdir:
 	mkdir $(BUILDDIR) && cd $(BUILDDIR) && rm -rf * && git clone https://github.com/lcls-psana/$(MYPKGNAME).git html && cd html && git branch gh-pages && git symbolic-ref HEAD refs/heads/gh-pages && rm .git/index && git clean -fdx
@@ -58,6 +58,6 @@ gh-pages:
 	@echo "Documentation is pushed on gh-pages"
 
 newdoc:
-        $(MAKE) helpme && $(MAKE) clean && $(MAKE) docdir && $(MAKE) html && $(MAKE) gh-pages && $(MAKE) -i -k update
-        @echo
-        @echo "Documentation is built and committed, repo is updated."
+	$(MAKE) helpme && $(MAKE) clean && $(MAKE) docdir && $(MAKE) html && $(MAKE) gh-pages && $(MAKE) -i -k update
+	@echo
+	@echo "Documentation is built and committed, repo is updated."
