@@ -95,11 +95,15 @@ class CalibParsStore() :
 
             Parameters
 
-            calibdir : string - calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
-            group    : string - group, ex: PNCCD::CalibV1
-            source   : string - data source, ex: Camp.0:pnCCD.0
-            runnum   : int    - run number, ex: 10
-            pbits=0  : int    - print control bits, ex: 255
+            - calibdir : string - calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
+            - group    : string - group, ex: PNCCD::CalibV1
+            - source   : string - data source, ex: Camp.0:pnCCD.0
+            - runnum   : int    - run number, ex: 10
+            - pbits=0  : int    - print control bits, ex: 255
+
+            Returns
+
+            - GenericCalibPars object
         """        
 
         dettype = gu.det_type_from_source(source)
@@ -140,40 +144,41 @@ class CalibParsStore() :
 
 #------------------------------
 
-    def CreateForEvtEnv(self, calibdir, group, source, evt, env, pbits=0) :
+    def CreateForEvtEnv(self, calibdir, group, source, par, env, pbits=0) :
         """ Factory method
             This method makes access to the calibration store with fallback access to hdf5 file.
 
             Parameters
 
-            calibdir : string - calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
-            group    : string - group, ex: PNCCD::CalibV1
-            source   : string - data source, ex: Camp.0:pnCCD.0
-            evt      : psana.Event - event object - is used to get event time to retrieve DCRange
-            env      : psana.Env   - environment object - is used to retrieve file name
-            pbits=0  : int         - print control bits, ex: 255
+            - calibdir : string - calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
+            - group    : string - group, ex: PNCCD::CalibV1
+            - source   : string - data source, ex: Camp.0:pnCCD.0
+            - par      : int runnum or psana.Event - is used to get run number
+            - env      : psana.Env   - environment object - is used to retrieve file name to get dataset time to retrieve DCRange
+            - pbits=0  : int         - print control bits, ex: 255
+
+            Returns
+
+            - GenericCalibPars object
         """
+        from PSCalib.DCFileName import DCFileName
+        from PSCalib.DCUtils import env_time  #, evt_time
 
-        runnum = evt if isinstance(evt, int) else evt.run()
+        runnum = par if isinstance(par, int) else par.run()
 
-        fnexpc, fnrepo, tsec = None, None, None
+        #fnexpc, fnrepo, tsec = None, None, None
 
-        if not isinstance(evt, int) : # evt is not integer runnum
+        ofn = DCFileName(env, source, calibdir)
+        if pbits & 512 : ofn.print_attrs()
+        fnexpc = ofn.calib_file_path()
+        fnrepo = ofn.calib_file_path_repo()
+        tsec = env_time(env)
 
-            from PSCalib.DCFileName import DCFileName
-            from PSCalib.DCUtils import evt_time
-
-            ofn = DCFileName(env, source, calibdir)
-            if pbits & 512 : ofn.print_attrs()
-            fnexpc = ofn.calib_file_path()
-            fnrepo = ofn.calib_file_path_repo()
-            tsec = evt_time(evt)
-
-            #if True :
-            if pbits :
-                print '%s.CreateForEvtEnv: for tsec: %s' % (self.name, str(tsec))
-                print '  expected hdf5 file name repo : %s' % (fnrepo)
-                print '  expected hdf5 file name local: %s' % (fnexpc)
+        #if True :
+        if pbits :
+            print '%s.CreateForEvtEnv: for tsec: %s' % (self.name, str(tsec))
+            print '  expected hdf5 file name repo : "%s"' % (fnrepo)
+            print '  expected hdf5 file name local: "%s"' % (fnexpc)
 
         return self.Create(calibdir, group, source, runnum, pbits, fnexpc, fnrepo, tsec)
 
@@ -197,9 +202,7 @@ def print_nda(nda, cmt='') :
 
 #------------------------------
 
-def test_cps() :
-
-    if len(sys.argv)==1   : print 'For test(s) use command: python %s <test-number=1-3>' % sys.argv[0]
+def test_Create(tname='0') :
 
     calibdir = '/reg/d/psdm/CXI/cxif5315/calib'
     group    = None # will be substituted from dictionary or 'CsPad::CalibV1' 
@@ -207,34 +210,64 @@ def test_cps() :
     runnum   = 60
     pbits    = 0
  
-    if(sys.argv[1]=='1') :
-        cp = cps.Create(calibdir, group, source, runnum, pbits)
-        cp.print_attrs()
+    if(tname=='0') :
+        o = cps.Create(calibdir, group, source, runnum, pbits)
+        o.print_attrs()
 
-        print_nda(cp.pedestals(),    'pedestals')
-        print_nda(cp.pixel_rms(),    'pixel_rms')
-        print_nda(cp.pixel_mask(),   'pixel_mask')
-        print_nda(cp.pixel_status(), 'pixel_status')
-        print_nda(cp.pixel_gain(),   'pixel_gain')
-        print_nda(cp.common_mode(),  'common_mode')
-        print_nda(cp.pixel_bkgd(),   'pixel_bkgd') 
-        print_nda(cp.shape(),        'shape')
+        print_nda(o.pedestals(),    'pedestals')
+        print_nda(o.pixel_rms(),    'pixel_rms')
+        print_nda(o.pixel_mask(),   'pixel_mask')
+        print_nda(o.pixel_status(), 'pixel_status')
+        print_nda(o.pixel_gain(),   'pixel_gain')
+        print_nda(o.common_mode(),  'common_mode')
+        print_nda(o.pixel_bkgd(),   'pixel_bkgd') 
+        print_nda(o.shape(),        'shape')
  
-        print 'size=%d' % cp.size()
-        print 'ndim=%d' % cp.ndim()
+        print 'size=%d' % o.size()
+        print 'ndim=%d' % o.ndim()
 
-        statval = cp.status(gu.PEDESTALS)
+        statval = o.status(gu.PEDESTALS)
         print 'status(PEDESTALS)=%d: %s' % (statval, gu.dic_calib_status_value_to_name[statval])
 
-        statval = cp.status(gu.PIXEL_GAIN)
+        statval = o.status(gu.PIXEL_GAIN)
         print 'status(PIXEL_GAIN)=%d: %s' % (statval, gu.dic_calib_status_value_to_name[statval])
  
     else : print 'Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv
 
 #------------------------------
 
+def test_CreateForEvtEnv(tname='0') :
+
+    from psana import DataSource
+ 
+    dsname = 'exp=cxif5315:run=129'
+    source = 'CxiDs2.0:Cspad.0'
+
+    if tname == '2' :
+        dsname = '/reg/g/psdm/detector/data_test/types/0019-XppGon.0-Epix100a.0.xtc'
+        source = 'XppGon.0:Epix100a.0'
+
+    ds = DataSource(dsname)
+    env = ds.env()
+
+    calibdir = env.calibDir() # '/reg/d/psdm/CXI/cxif5315/calib'
+    group    = None # will be substituted from dictionary or 'CsPad::CalibV1' 
+    runnum   = 160
+    pbits    = 0
+
+    par      = runnum
+
+    o = cps.CreateForEvtEnv(calibdir, group, source, par, env, pbits)
+    o.print_attrs()
+
+#------------------------------
+
 if __name__ == "__main__" :
-    test_cps()
+    tname = sys.argv[1] if len(sys.argv) > 1 else '0'
+    print 50*'_', '\nTest %s:' % tname
+    if   tname == '0' : test_Create(tname)
+    elif tname in ('1','2') : test_CreateForEvtEnv(tname)
+    else : print 'Non-implemented test: %s' % tname
     sys.exit( 'End of %s test.' % sys.argv[0])
 
 #------------------------------

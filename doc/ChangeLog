@@ -11,6 +11,17 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-10
+2017-09-01 Mikhail S. Dubrovin
+CalibFileFinder - add more protection; CalibParsStore - use env_time
+	modified:   doc/ChangeLog
+	modified:   doc/web/Makefile
+	modified:   examples/ex-ipython.py
+	modified:   src/CalibFileFinder.py
+	modified:   src/CalibParsStore.py
+	modified:   src/DCFileName.py
+	modified:   src/GenericCalibPars.py
+
 Tag: V01-00-09
 2017-08-28 Mikhail S. Dubrovin
 - DCMethods, DCUtils.py get timestamp from par=psanaEvr; add .gitignore, tume docstring

@@ -75,19 +75,19 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def __init__(self, cbase, calibdir, group, source, runnum, pbits=255, fnexpc=None, fnrepo=None, tsec=None) : 
-        """ GenericCalibPars constructor
+        """:py:class:`GenericCalibPars` constructor
 
             Parameters
 
-            cbase    : PSCalib.CalibParsBase* - base-object
-            calibdir : string - calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
-            group    : string - group, ex: PNCCD::CalibV1
-            source   : string - data source, ex: Camp.0:pnCCD.0
-            runnum   : int    - run number, ex: 10
-            pbits    : int    - print control bits, ex: 255
-            fnexpc   : str    - path to experiment calib hdf5 file
-            fnrepo   : str    - path to repository calib hdf5 file
-            tsec     : float  - event time to select calibration file range 
+            - cbase    : PSCalib.CalibParsBase* - base-object
+            - calibdir : string - calibration directory, ex: /reg/d/psdm/AMO/amoa1214/calib
+            - group    : string - group, ex: PNCCD::CalibV1
+            - source   : string - data source, ex: Camp.0:pnCCD.0
+            - runnum   : int    - run number, ex: 10
+            - pbits    : int    - print control bits, ex: 255
+            - fnexpc   : str    - path to experiment calib hdf5 file
+            - fnrepo   : str    - path to repository calib hdf5 file
+            - tsec     : float  - event time to select calibration file range 
         """
         CalibPars.__init__(self)
         self.name = self.__class__.__name__
@@ -113,7 +113,7 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def reset_dicts(self) :
-        """ Re-sets dictionaries with status and constants for cash
+        """Re-sets dictionaries with status and constants for cash
         """
         self.dic_constants = dict([(k, None) for k in gu.calib_types])
         self.dic_status    = dict([(k, gu.UNDEFINED) for k in gu.calib_types])
@@ -127,7 +127,7 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def print_attrs(self) :
-        """ Prints attributes
+        """Prints attributes
         """
         inf = '\nAttributes of %s object:' % self.name \
             + '\n  base object: %s' % self.cbase.__class__.__name__ \
@@ -144,7 +144,7 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def msgh(self, i=3) :
-        """ Returns message header
+        """Returns message header
         """
         if   i==3 : return '%s: source %s run=%d' % (self.name, self.source, self.runnum)
         elif i==2 : return '%s: source %s' % (self.name, self.source) 
@@ -158,15 +158,16 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def constants_default(self, ctype) :
-        """ Returns numpy array with default constants
+        """Returns numpy array with default constants
 
         Logic:
-        0) if detector is undefined and base constants are missing - return None
-        1) if constants for common mode - return default numpy array
-        2) if base size of calibration constants is 0 (for variable image size cameras)
+
+        - 0) if detector is undefined and base constants are missing - return None
+        - 1) if constants for common mode - return default numpy array
+        - 2) if base size of calibration constants is 0 (for variable image size cameras)
            - return None (they can be loaded from file only!
-        3) for PEDESTALS, PIXEL_STATUS, PIXEL_BKGD return numpy array of **zeros** for base shape and dtype
-        4) for all other calibration types return numpy array of **ones** for base shape and dtype
+        - 3) for PEDESTALS, PIXEL_STATUS, PIXEL_BKGD return numpy array of **zeros** for base shape and dtype
+        - 4) for all other calibration types return numpy array of **ones** for base shape and dtype
         """
 
         if self.cbase is None : return None
@@ -197,20 +198,21 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def constants_calib(self, ctype) :
-        """ Returns numpy array with calibration constants for specified type
+        """Returns numpy array with calibration constants for specified type
 
         Logic:
-        a) if detector is undefined and base constants are missing - return None
-        0) if constants are available in cash (self.dic_constants) - return them
-        1) if calib file is not found:
+
+        - a) if detector is undefined and base constants are missing - return None
+        - 0) if constants are available in cash (self.dic_constants) - return them
+        - 1) if calib file is not found:
            - return result from constants_default(ctype)
-        2) try to load numpy array from file
+        - 2) try to load numpy array from file
            -- exception - return result from constants_default(ctype)
-        3) if constants for common mode - return numpy array as is
-        4) if base size==0 - return numpy array as is 
-        5) if base size>0 and loaded size is not equal to the base size
+        - 3) if constants for common mode - return numpy array as is
+        - 4) if base size==0 - return numpy array as is 
+        - 5) if base size>0 and loaded size is not equal to the base size
            - return result from constants_default(ctype)
-        6) reshape numpy array to the base shape and return.
+        - 6) reshape numpy array to the base shape and return.
         """
 
         if self.cbase is None : return None
@@ -271,11 +273,13 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def constants_dcs(self, ctype=gu.PEDESTALS, vers=None) :
-        """ Returns numpy array with calibration constants of specified type from DCS
+        """Returns numpy array with calibration constants of specified type from DCS
+
             See :class:`PSCalib.DCStore`, :class:`PSCalib.DCMethods`
+
             Parameters
     
-            ctype : int - enumerated calibration type from :class:`PSCalib.GlobalUtils`, e.g. gu.PIXEL_STATUS
+            - ctype : int - enumerated calibration type from :class:`PSCalib.GlobalUtils`, e.g. gu.PIXEL_STATUS
         """
         from PSCalib.DCMethods import get_constants_from_file, is_good_fname
 
@@ -293,11 +297,12 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def constants(self, ctype, vers=None) :
-        """ Returns numpy array with calibration constants of specified type
+        """Returns numpy array with calibration constants of specified type
+
             Parameters
     
-            vers  : int - version number
-            ctype : int - enumerated calibration type from :class:`PSCalib.GlobalUtils`, e.g. gu.PIXEL_STATUS
+            - vers  : int - version number
+            - ctype : int - enumerated calibration type from :class:`PSCalib.GlobalUtils`, e.g. gu.PIXEL_STATUS
         """
         arr = self.constants_calib(ctype)
 
@@ -321,49 +326,49 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def pedestals(self, vers=None) :
-        """ Returns pedestals
+        """Returns pedestals
         """
         return self.constants(gu.PEDESTALS, vers)
 
 #------------------------------
 
     def pixel_status(self, vers=None) :
-        """ Returns pixel_status
+        """Returns pixel_status
         """
         return self.constants(gu.PIXEL_STATUS, vers)
 
 #------------------------------
 
     def pixel_rms(self, vers=None) :
-        """ Returns pixel_rms
+        """Returns pixel_rms
         """
         return self.constants(gu.PIXEL_RMS, vers)
 
 #------------------------------
 
     def pixel_gain(self, vers=None) :
-        """ Returns pixel_gain
+        """Returns pixel_gain
         """
         return self.constants(gu.PIXEL_GAIN, vers)
 
 #------------------------------
 
     def pixel_mask(self, vers=None) :
-        """ Returns pixel_mask
+        """Returns pixel_mask
         """
         return self.constants(gu.PIXEL_MASK, vers)
 
 #------------------------------
 
     def pixel_bkgd(self, vers=None) :
-        """ Returns pixel_bkgd
+        """Returns pixel_bkgd
         """
         return self.constants(gu.PIXEL_BKGD, vers)
 
 #------------------------------
 
     def common_mode(self, vers=None) :
-        """ Returns common_mode
+        """Returns common_mode
         """
         return self.constants(gu.COMMON_MODE, vers)
 
@@ -373,7 +378,7 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def retrieve_shape(self) :
-        """ Retrieve shape, size, and ndim parameters and set them as member data
+        """Retrieve shape, size, and ndim parameters and set them as member data
         """        
         # if parameters are already set from base class or at file loading
         if self._size>0 : return
@@ -385,7 +390,7 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def ndim(self, ctype=gu.PEDESTALS) :
-        """ Returns ndim
+        """Returns ndim
         """
         if self.pbits & 128 : print self.msgw() % 'ndim  (%s)' % gu.dic_calib_type_to_name[ctype]
         if ctype == gu.COMMON_MODE : return 1
@@ -396,7 +401,7 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def shape(self, ctype=gu.PEDESTALS) :
-        """ Returns shape
+        """Returns shape
         """
         if self.pbits & 128 : print self.msgw() % 'shape (%s)' % gu.dic_calib_type_to_name[ctype]
         if ctype == gu.COMMON_MODE : return self.cbase.shape_cm
@@ -407,7 +412,7 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def size(self, ctype=gu.PEDESTALS) :
-        """ Returns size
+        """Returns size
         """
         if self.pbits & 128 : print self.msgw() % 'size  (%s)' % gu.dic_calib_type_to_name[ctype]
         if ctype == gu.COMMON_MODE : return self.cbase.size_cm
@@ -418,7 +423,7 @@ class GenericCalibPars(CalibPars) :
 #------------------------------
 
     def status(self, ctype=gu.PEDESTALS) :
-        """ Returns status
+        """Returns status
         """
         if self.pbits & 128 : print self.msgw() % 'status(%s)' % gu.dic_calib_type_to_name[ctype]
         return self.dic_status[ctype]

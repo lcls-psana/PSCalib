@@ -24,6 +24,9 @@ runnum = evt.run()
   
 eo = evt.get(psana.Epix.ElementV3, src)
 
+evid = ds.env().configStore().get(psana.EventId)
+time = ds.env().configStore().get(psana.EventId).time()
+rnum = ds.env().configStore().get(psana.EventId).run()  # returns 0 for moved xtc files
 
 #------------------------------
 # Epix detector id
@@ -33,7 +36,6 @@ src = psana.Source('XppGon.0:Epix100a.0')
 ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0019-XppGon.0-Epix100a.0.xtc')
 co = ds.env().configStore().get(psana.Epix.Config100aV2, src)
 print 'Epix detector Id: %d' % co.version()
-
 
 #------------------------------
 
@@ -120,8 +122,9 @@ ds = psana.DataSource('/reg/d/psdm/cxi/cxif5315/xtc/e545-r0169-s00-c00.xtc')
 ds = psana.DataSource('exp=cxif5315:run=169')
 ds = psana.DataSource('exp=cxif5315:run=169:smd')
 ds = psana.DataSource('exp=xpptut15:run=54:smd')
-evid = ds.env().configStore().get(psana.EventId).time()
+evid = ds.env().configStore().get(psana.EventId)
+time = ds.env().configStore().get(psana.EventId).time()
+rnum = ds.env().configStore().get(psana.EventId).run()
 
-
-
+#------------------------------
 

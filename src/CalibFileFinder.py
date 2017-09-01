@@ -71,13 +71,36 @@ class CalibFile :
         basename = os.path.splitext(fname)[0]
 
         if not ('-' in basename) :
-            if self.pbits : print 'WARNING! FILE NAME "%s" IS NOT VALID - MISSING DASH' % basename
-            self.valid = False
+            self.set_invalid('WARNING! INVALID CALIBRATION FILE NAME "%s" - missing dash' % basename)
             return
             
-        begin, end = basename.split('-')
-        self.begin = int(begin)
-        self.end   = int(end) if end != 'end' else self.rnum_max
+        fields = basename.split('-')
+        if len(fields) != 2 :
+            self.set_invalid('WARNING! INVALID CALIBRATION FILE NAME "%s" - wrong number of dases' % basename)
+            return
+
+        begin, end = fields
+
+        if begin.isdigit() :
+            self.begin = int(begin)
+            if self.begin>self.rnum_max : 
+                self.set_invalid('WARNING! INVALID CALIBRATION FILE NAME "%d" - begin value is too big' % begin)
+                return
+        else : 
+            self.valid = False
+            return
+
+        if end.isdigit() :
+            self.end = int(end)
+            if self.end>self.rnum_max :
+                self.set_invalid('WARNING! INVALID CALIBRATION FILE NAME "%d" - end value is too big' % begin)
+                return
+        elif end == 'end' :
+            self.end = self.rnum_max
+        else :
+            self.set_invalid('WARNING! INVALID CALIBRATION FILE NAME "%d" - end value is not recognized' % begin)
+            return
+
         self.valid = True
 
     def get_path(self) :
@@ -88,6 +111,10 @@ class CalibFile :
 
     def get_end(self) :
         return self.end
+
+    def set_invalid(self, msg) :
+        if self.pbits : print msg
+        self.valid = False
 
     def __cmp__(self, other) :        
         #if self.begin != other.begin : return self.begin < other.begin
@@ -261,7 +288,11 @@ class CalibFileFinder :
 
         # there have been problems with calib-dir mounts on the mon nodes.
         # raise an exception here to try to detect this problem
-        assert os.path.isdir(self.cdir), 'psana calib-dir must exist: '+self.cdir
+        #assert os.path.isdir(self.cdir), 'psana calib-dir must exist: '+self.cdir
+
+        if not os.path.isdir(self.cdir) :
+            print 'WARNING! psana calib-dir is not found: %s' % self.cdir
+            return None
 
         if not self._setGroup(src) :
             return None
@@ -308,7 +339,10 @@ class CalibFileFinder :
 
         # there have been problems with calib-dir mounts on the mon nodes.
         # raise an exception here to try to detect this problem
-        assert os.path.isdir(self.cdir), 'psana calib-dir must exist: '+self.cdir
+        #assert os.path.isdir(self.cdir), 'psana calib-dir must exist: '+self.cdir
+        if not os.path.isdir(self.cdir) :
+            print 'WARNING! psana calib-dir is not found: %s' % self.cdir
+            return None
 
         if not self._setGroup(src) : return ''
 
