@@ -236,8 +236,8 @@ def psana_source(env, srcpar) :
     
        Parameters
 
-       srcpar  : str  - regular source or its alias, ex.: 'XppEndstation.0:Rayonix.0' or 'rayonix'
-       set_sub : bool - default=True - propagates source parameter to low level package  
+       - srcpar  : str  - regular source or its alias, ex.: 'XppEndstation.0:Rayonix.0' or 'rayonix'
+       - set_sub : bool - default=True - propagates source parameter to low level package  
     """
     #print 'type of srcpar: ', type(srcpar)
     
@@ -328,6 +328,24 @@ def evt_fiducials(evt) :
     """
     evid = evt.get(psana.EventId)
     return evid.fiducials()
+
+#------------------------------
+
+def par_to_tsec(par) :
+    """Checks if par is float or assumes that it is psana.Event and returns event time in (float) sec or None.
+
+    Parameters
+
+    - par   : psana.Event | psana.Env | float - tsec event time | None
+
+    Returns
+
+    event time in (float) sec or None.
+    """
+    return par if isinstance(par, float) else\
+           evt_time(par) if isinstance(par, psana.Event) else\
+           env_time(par) if isinstance(par, psana.Env) else\
+           None
 
 #------------------------------
 #------------------------------

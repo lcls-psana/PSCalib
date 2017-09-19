@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-11
+2017-09-19 Mikhail S. Dubrovin
+move method par_to_tsec from DCMethods to DCUtils.py where psana is imported
+
 Tag: V01-00-10
 2017-09-01 Mikhail S. Dubrovin
 CalibFileFinder - add more protection; CalibParsStore - use env_time
