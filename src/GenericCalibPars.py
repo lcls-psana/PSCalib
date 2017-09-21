@@ -187,12 +187,10 @@ class GenericCalibPars(CalibPars) :
 
         self.dic_status[ctype] = gu.DEFAULT
 
-        if ctype == gu.PEDESTALS \
-        or ctype == gu.PIXEL_STATUS \
-        or ctype == gu.PIXEL_BKGD :
+        if ctype in (gu.PEDESTALS, gu.PIXEL_STATUS, gu.PIXEL_BKGD) :
             return np.zeros(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
 
-        else : # for PIXEL_RMS, PIXEL_GAIN, PIXEL_MASK
+        else : # for PIXEL_RMS, PIXEL_GAIN, PIXEL_MASK, etc
             return np.ones(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
 
 #------------------------------
@@ -304,6 +302,9 @@ class GenericCalibPars(CalibPars) :
             - vers  : int - version number
             - ctype : int - enumerated calibration type from :class:`PSCalib.GlobalUtils`, e.g. gu.PIXEL_STATUS
         """
+        if self.dic_constants[ctype] is not None :
+            return self.dic_constants[ctype]
+
         arr = self.constants_calib(ctype)
 
         if arr is None or self.dic_status[ctype] == gu.DEFAULT :

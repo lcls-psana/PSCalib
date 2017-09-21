@@ -30,7 +30,7 @@ Author: Mikhail Dubrovin
 
 class CalibParsBasePnccdV1 :
 
-    ndim = 2 
+    ndim = 3 
     segs = 4
     rows = 512
     cols = 512
