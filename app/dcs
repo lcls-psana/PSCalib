@@ -96,7 +96,7 @@ class DCS_CLI :
 #------------------------------
 
     def load_data_file(self, ctype, verb) :
-        """Returns data loaded from file specified in option -f or None if file do not exist.
+        """Returns data loaded from file specified in option -f or None if file does not exist.
 
            Returned data type for
            - ctype geometry : text

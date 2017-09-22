@@ -11,9 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-13
+2017-09-22 Mikhail S. Dubrovin
+- DCMethods - cleanup code, remove old versions of methods.
+
 Tag: V01-00-12
 2017-09-21 Mikhail S. Dubrovin
-- Return cached constants (even default) directly from GenericCalibPars.constatns() 
+- Return cached constants (even default) directly from GenericCalibPars.constatns()
 
 Tag: V01-00-11
 2017-09-19 Mikhail S. Dubrovin
