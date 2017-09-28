@@ -27,9 +27,32 @@ Usage::
     usr   = gu.get_login()
     host  = gu.get_hostname()
     cwd   = gu.get_cwd()
+    rec   = gu.log_rec_on_start() # e.g. '2017-09-27T10:40:24 user:dubrovin@psanagpu104 cwd:/reg/neh/home4/dubrovin/LCLS/con-jungfrau ...'
 
+    exp  = gu.exp_name(env)
+    cdir = gu.calib_dir(env)
+    #### tsec, tnsec, fiducial, tsdate, tstime = gu.time_pars(evt) # needs in psana...
+
+    gu.create_directory(dir, verb=False)
+    gu.create_directory_with_mode(dir, mode=0777, verb=False)
+    exists = gu.create_path(path, depth=5, mode=0777, verb=True)
+
+    arr  = gu.load_textfile(path)
     gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append 
- 
+
+    path = gu.replace('/path/#YYYY-MM/fname.txt', '#YYYY-MM', gu.str_tstamp(fmt='%Y/%m'))
+
+    ifname = 'fname.txt'
+    ctypedir = '/some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/'
+    ctype = 'pedestals'
+    ofname = '123-end.data'
+    rec = gu.history_record(ifname, ctypedir, ctype, ofname, comment='')
+    path_clb = gu.path_to_calib_file(ctypedir, ctype, ofname)
+    path_his = gu.path_to_history_file(ctypedir, ctype)
+
+    cmd = gu.command_deploy_file(ifname, path_clb)
+    cmd = gu.command_add_record_to_file(rec, path_his)
+
 See: other methods in :py:class:`CalibPars`, :py:class:`CalibParsStore`
 
 This software was developed for the SIT project.
@@ -41,7 +64,7 @@ Created: 2013-03-08 by Mikhail Dubrovin
 """
 #--------------------------------
 
-#import sys
+import sys
 import os
 import getpass
 import socket
@@ -504,6 +527,38 @@ def create_directory(dir, verb=False) :
 
 #------------------------------
 
+def create_directory_with_mode(dir, mode=0777, verb=False) :
+    """Creates directory and sets its mode"""
+
+    if os.path.exists(dir) :
+        if verb : print 'Directory exists: %s' % dir
+    else :
+        os.makedirs(dir)
+        os.chmod(dir, mode)
+        if verb : print 'Directory created: %s' % dir
+
+#------------------------------
+
+def create_path(path, depth=5, mode=0777, verb=False) : 
+    """Creates missing path of specified depth from the beginning
+       e.g. for '/reg/g/psdm/logs/calibman/2016/07/log-file-name.txt'
+       or '/reg/d/psdm/cxi/cxi11216/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data'
+
+       Returns True if path to file exists, False othervise
+    """
+    if verb : print 'create_path: %s' % path
+
+    subdirs = path.strip('/').split('/')
+    cpath = ''
+    for i,sd in enumerate(subdirs[:-1]) :
+        cpath += '/%s'% sd 
+        if i<depth : continue
+        create_directory_with_mode(cpath, mode, verb)
+
+    return os.path.exists(cpath)
+
+#------------------------------
+
 def save_textfile(text, path, mode='w') :
     """Saves text in file specified by path. mode: 'w'-write, 'a'-append 
     """
@@ -539,6 +594,14 @@ def exp_name(env) :
 
 #------------------------------
 
+def log_rec_on_start() :
+    """Returns (str) record containing timestamp, login, host, cwd, and command line
+    """
+    return '\n%s user:%s@%s cwd:%s\n  command:%s'%\
+           (str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'), get_login(), get_hostname(), get_cwd(), ' '.join(sys.argv))
+
+#------------------------------
+
 def alias_for_src_name(env) :
     ckeys = env.configStore().keys()
     srcs  = [k.src()   for k in ckeys]
@@ -547,6 +610,75 @@ def alias_for_src_name(env) :
     for s,a in d.items() : print 'src: %40s   alias: %s' % (s, a)
     #print keysalias
 
+#------------------------------
+
+def replace(template, pattern, subst) :
+    """If pattern in the template replaces it with subst.
+       Returns str object template with replaced patterns. 
+    """
+    fields = template.split(pattern, 1) 
+    if len(fields) > 1 :
+        return '%s%s%s' % (fields[0], subst, fields[1])
+    else :
+        return template
+
+#------------------------------
+
+def history_record(ifname, ctypedir, ctype, ofname, comment='') :
+    """Returns (str) history record about deployed constants.
+
+    Parameters
+
+    - ifname : str - input file name, e.g.: 'fname.txt'
+    - ctypedir : str - path to calibtype directory, e.g. '/some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/'
+    - ctype : str - calibration type, e.g.: 'pedestals'
+    - ofname : str - output file name, e.g.: '123-end.data'
+    - comment : str - any comment
+    - verbos : bool - verbosity
+    """
+    return 'file:%s copy_of:%s ctype:%s user:%s host:%s cptime:%s cwd:%s cmt:%s' % \
+           (ofname.ljust(14),
+           ifname,
+           ctype,
+           get_login(),
+           get_hostname(),
+           str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'),
+           get_cwd(),
+           comment)
+
+#------------------------------
+
+def path_to_history_file(ctypedir, ctype) :
+    """Returns path to HISTORY file in the calib store.
+       e.g. /some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/HYSTORY
+       See parameters description in :method:`history_record`.
+    """
+    return '%s/%s/HISTORY' % (ctypedir, ctype)
+
+#------------------------------
+
+def path_to_calib_file(ctypedir, ctype, ofname) :
+    """Returns path to file wirh calibration constants in the calib store.
+       e.g. /some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data
+       See parameters description in :method:`history_record`.
+    """
+    return '%s/%s/%s' % (ctypedir, ctype, ofname)
+
+#------------------------------
+
+def command_deploy_file(ifname, ofname) :
+    """Returns command to deploys file with calibration constants in the calib store.
+    """
+    return 'cat %s > %s' % (ifname, ofname) # > stands for copy
+
+#------------------------------
+
+def command_add_record_to_file(rec, fname) :
+    """Returns command to add record to file.
+    """
+    return 'echo "%s" >> %s' % (rec, fname) # >> stands for append
+
+#------------------------------
 #------------------------------
 #------------------------------
 #------------------------------

@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-14
+2017-09-27 Mikhail S. Dubrovin
+- GlobalUtils - add methods for file deployment etc.
+
 Tag: V01-00-13
 2017-09-22 Mikhail S. Dubrovin
 - DCMethods - cleanup code, remove old versions of methods.
