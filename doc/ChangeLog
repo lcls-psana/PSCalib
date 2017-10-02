@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-15
+2017-10-02 Mikhail S. Dubrovin
+- GlobalUtils - move methods from jungfrau_ndarr_dark_proc
+
 Tag: V01-00-14
 2017-09-27 Mikhail S. Dubrovin
 - GlobalUtils - add methods for file deployment etc.

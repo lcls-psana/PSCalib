@@ -16,6 +16,7 @@ Usage::
 
     mmask = gu.merge_masks(mask1=None, mask2=None, dtype=np.uint8)
     mask  = gu.mask_neighbors(mask_in, allnbrs=True, dtype=np.uint8)
+    lo,hi = gu.evaluate_limits(arr, nneg=5, npos=5, lim_lo=1, lim_hi=1000, verbos=1, cmt='')
 
     arr2d = gu.reshape_nda_to_2d(nda)
     arr3d = gu.reshape_nda_to_3d(nda)
@@ -28,6 +29,7 @@ Usage::
     host  = gu.get_hostname()
     cwd   = gu.get_cwd()
     rec   = gu.log_rec_on_start() # e.g. '2017-09-27T10:40:24 user:dubrovin@psanagpu104 cwd:/reg/neh/home4/dubrovin/LCLS/con-jungfrau ...'
+    gu.add_rec_to_log(lfname, rec, verbos=False)
 
     exp  = gu.exp_name(env)
     cdir = gu.calib_dir(env)
@@ -35,7 +37,7 @@ Usage::
 
     gu.create_directory(dir, verb=False)
     gu.create_directory_with_mode(dir, mode=0777, verb=False)
-    exists = gu.create_path(path, depth=5, mode=0777, verb=True)
+    exists = gu.create_path(path, depth=6, mode=0777, verb=True)
 
     arr  = gu.load_textfile(path)
     gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append 
@@ -52,6 +54,10 @@ Usage::
 
     cmd = gu.command_deploy_file(ifname, path_clb)
     cmd = gu.command_add_record_to_file(rec, path_his)
+
+    tpl = gu.calib_fname_template(exp, runnum, tsec, tnsec, fid, tsdate, tstime, src, nevts, ofname)
+
+    gu.deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False)
 
 See: other methods in :py:class:`CalibPars`, :py:class:`CalibParsStore`
 
@@ -481,6 +487,22 @@ def mask_edges(mask, mrows=1, mcols=1, dtype=np.uint8) :
 
 ##-----------------------------
 
+def evaluate_limits(arr, nneg=5, npos=5, lim_lo=1, lim_hi=1000, verbos=1, cmt='') :
+    """Evaluates low and high limit of the array, which are used to find bad pixels.
+    """
+    ave, std = (arr.mean(), arr.std()) if (nneg>0 or npos>0) else (None,None)
+    lo = ave-nneg*std if nneg>0 else lim_lo
+    hi = ave+npos*std if npos>0 else lim_hi
+    lo, hi = max(lo, lim_lo), min(hi, lim_hi)
+
+    if verbos & 1 :
+        print '  %s: %s ave, std = %.3f, %.3f  low, high limits = %.3f, %.3f'%\
+              (sys._getframe().f_code.co_name, cmt, ave, std, lo, hi)
+
+    return lo, hi
+
+##-----------------------------
+
 def str_tstamp(fmt='%Y-%m-%dT%H:%M:%S', time_sec=None) :
     """Returns string timestamp for specified format and time in sec or current time by default
     """
@@ -539,7 +561,7 @@ def create_directory_with_mode(dir, mode=0777, verb=False) :
 
 #------------------------------
 
-def create_path(path, depth=5, mode=0777, verb=False) : 
+def create_path(path, depth=6, mode=0777, verb=False) : 
     """Creates missing path of specified depth from the beginning
        e.g. for '/reg/g/psdm/logs/calibman/2016/07/log-file-name.txt'
        or '/reg/d/psdm/cxi/cxi11216/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data'
@@ -548,11 +570,13 @@ def create_path(path, depth=5, mode=0777, verb=False) :
     """
     if verb : print 'create_path: %s' % path
 
-    subdirs = path.strip('/').split('/')
-    cpath = ''
+    #subdirs = path.strip('/').split('/')
+    subdirs = path.split('/')
+    cpath = subdirs[0]
     for i,sd in enumerate(subdirs[:-1]) :
-        cpath += '/%s'% sd 
+        if i>0 : cpath += '/%s'% sd 
         if i<depth : continue
+        if cpath=='' : continue
         create_directory_with_mode(cpath, mode, verb)
 
     return os.path.exists(cpath)
@@ -602,6 +626,21 @@ def log_rec_on_start() :
 
 #------------------------------
 
+def add_rec_to_log(lfname, rec, verbos=False) :
+    """Adds record rec to the log file with path lfname. If path does not exist, it is created beginning from depth=5.
+    """
+    path = replace(lfname, '#YYYY-MM', str_tstamp(fmt='%Y/%m'))
+
+    #print 'XXX:add_rec_to_log, path=%s' % path
+
+    if create_path(path, depth=6, mode=0777, verb=verbos) :
+        cmd = 'echo "%s" >> %s' % (rec, path)
+        if verbos : print 'command: %s' % cmd
+        os.system(cmd)
+        os.chmod(path, 0666)
+
+#------------------------------
+
 def alias_for_src_name(env) :
     ckeys = env.configStore().keys()
     srcs  = [k.src()   for k in ckeys]
@@ -621,6 +660,31 @@ def replace(template, pattern, subst) :
         return '%s%s%s' % (fields[0], subst, fields[1])
     else :
         return template
+
+#------------------------------
+
+def calib_fname_template(exp, runnum, tsec, tnsec, fid, tsdate, tstime, src, nevts, ofname):
+    """Replaces parts of the file name ofname specified as
+       #src, #exp, #run, #evts, #type, #date, #time, #fid, #sec, #nsec
+       with actual values.
+
+       RETURNS
+
+       - template (str) - file name template, e.g.: nda-cxi11216-r0009-CxiEndstation.0:Jungfrau.0-e000010-%s.txt,
+                        where %s stands for supplied late type.
+    """
+    template = replace(ofname,   '#src',  src)
+    template = replace(template, '#exp',  exp)
+    template = replace(template, '#run',  'r%04d'%runnum)
+    template = replace(template, '#type', '%s')
+    template = replace(template, '#date', tsdate)
+    template = replace(template, '#time', tstime)
+    template = replace(template, '#fid',  '%06d'%fid)
+    template = replace(template, '#sec',  '%d' % tsec)
+    template = replace(template, '#nsec', '%09d' % tnsec)
+    template = replace(template, '#evts', 'e%06d' % nevts)
+    if not '%s' in template : template += '-%s'
+    return template
 
 #------------------------------
 
@@ -679,6 +743,36 @@ def command_add_record_to_file(rec, fname) :
     return 'echo "%s" >> %s' % (rec, fname) # >> stands for append
 
 #------------------------------
+
+def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False) :
+    """Deploys file with calibration constants in the calib store, adds history record in file and in logfile.
+
+    Parameters
+
+    - ifname : str - input file name, e.g.: 'fname.txt'
+    - ctypedir : str - path to calibtype directory, e.g. '/some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/'
+    - ctype : str - calibration type, e.g.: 'pedestals'
+    - ofname : str - output file name, e.g.: '123-end.data'
+    - lfname : str - log file path or None, to add history record
+    - verbos : bool - verbosity
+    """
+    path_clb = path_to_calib_file(ctypedir, ctype, ofname)
+    path_his = path_to_history_file(ctypedir, ctype)
+
+    dep = 6 if '/reg/d/psdm/' in path_clb else 0
+
+    if create_path(path_clb, depth=dep, mode=02770, verb=verbos) : # mode=02770 makes drwxrws---+
+
+        cmd = command_deploy_file(ifname, path_clb)
+        print 'cmd: %s' % cmd
+        os.system(cmd)
+
+        rec = history_record(ifname, ctypedir, ctype, ofname, comment='')
+        cmd = command_add_record_to_file(rec, path_his)
+        if verbos : print 'cmd: %s' % cmd
+        os.system(cmd)
+        if lfname is not None : add_rec_to_log(lfname, '  %s' % rec, verbos)
+
 #------------------------------
 #------------------------------
 #------------------------------
