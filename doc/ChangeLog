@@ -11,7 +11,7 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
-Tag: V01-00-15
+Tag: V01-00-16
 2017-10-10 Mikhail S. Dubrovin
 - add stuff for Jungfrau
   - CalibPars*, GlobalUtils - add new type of constants pixel_offset, pixel_datast
