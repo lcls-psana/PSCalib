@@ -12,6 +12,12 @@ Please describe any modifications that you made to the package in the
 reverse time order.
 
 Tag: V01-00-15
+2017-10-10 Mikhail S. Dubrovin
+- add stuff for Jungfrau
+  - CalibPars*, GlobalUtils - add new type of constants pixel_offset, pixel_datast
+  - add ex-get-epix-id.py, RunProcUtils.py
+
+Tag: V01-00-15
 2017-10-02 Mikhail S. Dubrovin
 - GlobalUtils - move methods from jungfrau_ndarr_dark_proc
 

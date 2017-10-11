@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 """
-Abstract interface :py:class:`CalibPars` for access to calibration parameters.
+:py:class:`CalibPars` - abstract interface for access to calibration parameters.
 
 Methods of this class should be re-implemented in derived classes with name pattern CalibPars<Detector>
 for different type of detectore. For example, CSPAD can be implemented in class :py:class:`CalibParsCspadV1`
@@ -19,8 +19,10 @@ Usage of (implemented) interface methods::
 
     size = cp.pedestals()
     size = cp.pixel_status()
+    size = cp.pixel_datast()
     size = cp.pixel_rms()
     size = cp.pixel_gain()
+    size = cp.pixel_offset()
     size = cp.pixel_mask()
     size = cp.pixel_bkgd()
     size = cp.common_mode()
@@ -31,7 +33,23 @@ Usage of (implemented) interface methods::
     size = cp.shape(ctype)
     size = cp.status(ctype)
 
-See:
+Methods:
+  -  :py:meth:`print_attrs`
+  -  :py:meth:`pedestals`
+  -  :py:meth:`pixel_status`
+  -  :py:meth:`pixel_datast`
+  -  :py:meth:`pixel_rms`
+  -  :py:meth:`pixel_gain`
+  -  :py:meth:`pixel_offset`
+  -  :py:meth:`pixel_mask`
+  -  :py:meth:`pixel_bkgd`
+  -  :py:meth:`common_mode`
+  -  :py:meth:`ndim`
+  -  :py:meth:`shape`
+  -  :py:meth:`size`
+  -  :py:meth:`status`
+
+See classes:
   -  :py:class:`GenericCalibPars`
   -  :py:class:`GlobalUtils`
   -  :py:class:`CalibPars`
@@ -47,7 +65,6 @@ See:
   -  :py:class:`CalibParsBaseAcqirisV1`
   -  :py:class:`CalibParsBaseImpV1`
 
-
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
@@ -58,9 +75,6 @@ Author: Mikhail Dubrovin
 #------------------------------
 
 import sys
-#import os
-#import math
-#import numpy as np
 import PSCalib.GlobalUtils as gu
 
 #------------------------------
@@ -99,6 +113,13 @@ class CalibPars :
 
 #------------------------------
 
+    def pixel_datast(self) :
+        """ Returns pixel_datast
+        """
+        print self.wmsg % 'pixel_datast()'
+
+#------------------------------
+
     def pixel_rms(self) :
         """ Returns pixel_rms
         """
@@ -110,6 +131,13 @@ class CalibPars :
         """ Returns pixel_gain
         """
         print self.wmsg % 'pixel_gain()'
+
+#------------------------------
+
+    def pixel_offset(self) :
+        """ Returns pixel_offset
+        """
+        print self.wmsg % 'pixel_offset()'
 
 #------------------------------
 

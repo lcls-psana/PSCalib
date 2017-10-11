@@ -38,7 +38,7 @@ class CalibParsBaseJungfrauV1 :
     shape = (segs, rows, cols)
     size_cm = 16 
     shape_cm = (size_cm,)
-    cmod = (2,10,10,cols,0,0,0,0,0,0,0,0,0,0,0,0)
+    cmod = (7,255,100,0,0,0,0,0,0,0,0,0,0,0,0,0)
         
     def __init__(self) : pass
 

@@ -32,7 +32,9 @@ Usage::
     nda = gcp.pixel_mask()
     nda = gcp.pixel_bkgd()
     nda = gcp.pixel_status()
+    nda = gcp.pixel_datast()
     nda = gcp.pixel_gain()
+    nda = gcp.pixel_offset()
     nda = gcp.common_mode()
 
     status = gcp.get_status(ctype=PEDESTALS) # see  list of ctypes in :py:class:`PSCalib.GlobalUtils`
@@ -187,7 +189,7 @@ class GenericCalibPars(CalibPars) :
 
         self.dic_status[ctype] = gu.DEFAULT
 
-        if ctype in (gu.PEDESTALS, gu.PIXEL_STATUS, gu.PIXEL_BKGD) :
+        if ctype in (gu.PEDESTALS, gu.PIXEL_STATUS, gu.PIXEL_BKGD, gu.PIXEL_DATAST, gu.PIXEL_OFFSET) :
             return np.zeros(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
 
         else : # for PIXEL_RMS, PIXEL_GAIN, PIXEL_MASK, etc
@@ -340,6 +342,13 @@ class GenericCalibPars(CalibPars) :
 
 #------------------------------
 
+    def pixel_datast(self, vers=None) :
+        """Returns pixel_datast
+        """
+        return self.constants(gu.PIXEL_DATAST, vers)
+
+#------------------------------
+
     def pixel_rms(self, vers=None) :
         """Returns pixel_rms
         """
@@ -351,6 +360,13 @@ class GenericCalibPars(CalibPars) :
         """Returns pixel_gain
         """
         return self.constants(gu.PIXEL_GAIN, vers)
+
+#------------------------------
+
+    def pixel_offset(self, vers=None) :
+        """Returns pixel_offset
+        """
+        return self.constants(gu.PIXEL_OFFSET, vers)
 
 #------------------------------
 

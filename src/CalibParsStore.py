@@ -24,9 +24,11 @@ Usage::
     # Access methods
     nda = o.pedestals()
     nda = o.pixel_status()
+    nda = o.pixel_datast()
     nda = o.pixel_rms()
     nda = o.pixel_mask()
     nda = o.pixel_gain()
+    nda = o.pixel_offset()
     nda = o.pixel_bkgd()
     nda = o.common_mode()
 
@@ -34,6 +36,10 @@ Usage::
     shape  = o.shape(ctype)
     size   = o.size(ctype)
     ndim   = o.ndim(ctype)
+
+Methods:
+  -  :py:meth:`Create`
+  -  :py:meth:`CreateForEvtEnv`
 
 See:
   -  :py:class:`GenericCalibPars`
