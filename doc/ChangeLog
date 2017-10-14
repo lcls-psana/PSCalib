@@ -11,6 +11,19 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-17
+2017-10-13 Mikhail S. Dubrovin
+- Jungfrau - add real segment geometry and all masks
+	modified:   src/CalibParsBaseJungfrauV1.py
+	modified:   src/GeometryAccess.py
+	modified:   src/GeometryObject.py
+	modified:   src/RunProcUtils.py
+	modified:   src/SegGeometry.py
+	modified:   src/SegGeometryEpix100V1.py
+	new file:   src/SegGeometryJungfrauV1.py
+	modified:   src/SegGeometryStore.py
+	new file:   src/SubprocUtils.py
+
 Tag: V01-00-16
 2017-10-10 Mikhail S. Dubrovin
 - add stuff for Jungfrau

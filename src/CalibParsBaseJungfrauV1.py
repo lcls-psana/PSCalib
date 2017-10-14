@@ -31,14 +31,14 @@ Author: Mikhail Dubrovin
 class CalibParsBaseJungfrauV1 :
 
     ndim = 3 
-    segs = 1 # (1, 1024, 512)
+    segs = 1 # (1, 512, 1024)
     rows = 0 # - variable size array due to variable number of panels
     cols = 0 # 
     size = segs*rows*cols
     shape = (segs, rows, cols)
     size_cm = 16 
     shape_cm = (size_cm,)
-    cmod = (7,255,100,0,0,0,0,0,0,0,0,0,0,0,0,0)
+    cmod = (7,1,100,0,0,0,0,0,0,0,0,0,0,0,0,0)
         
     def __init__(self) : pass
 

@@ -12,6 +12,7 @@ Usage::
     sg2= sgs.Create('EPIX100:V1', pbits=0377)
     sg3= sgs.Create('PNCCD:V1',   pbits=0377)
     sg4= sgs.Create('ANDOR3D:V1', pbits=0377)
+    sg5= sgs.Create('JUNGFRAU:V1',pbits=0377)
 
     sg.print_seg_info(pbits=0377)
     size_arr = sg.size()
@@ -53,6 +54,7 @@ Created: 2013-03-08 by Mikhail Dubrovin
 from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one
 from PSCalib.SegGeometryEpix100V1  import epix2x2_one
 from PSCalib.SegGeometryMatrixV1   import SegGeometryMatrixV1, segment_one, matrix_pars
+from PSCalib.SegGeometryJungfrauV1 import jungfrau_one
 
 #------------------------------
 
@@ -72,12 +74,13 @@ class SegGeometryStore() :
         if segname=='SENS2X1:V1' : return cspad2x1_one # SegGeometryCspad2x1V1(use_wide_pix_center=False)
         if segname=='EPIX100:V1' : return epix2x2_one  # SegGeometryEpix100V1(use_wide_pix_center=False)
         if segname=='PNCCD:V1'   : return segment_one  # SegGeometryMatrixV1()
-        #if segname=='ANDOR3D:V1' : return seg_andor3d  # SegGeometryMatrixV1(rows=2048, cols=2048, ...)
         if segname[:4]=='MTRX'   :
             rows, cols, psize_row, psize_col = matrix_pars(segname)
             return SegGeometryMatrixV1(rows, cols, psize_row, psize_col,\
                                        pix_size_depth=100,\
                                        pix_scale_size=min(psize_row, psize_col))
+        if segname=='JUNGFRAU:V1': return jungfrau_one  # SegGeometryJungfrauV1()
+        #if segname=='ANDOR3D:V1' : return seg_andor3d  # SegGeometryMatrixV1()
         return None
 
 #------------------------------
@@ -95,7 +98,7 @@ def test_seggeom() :
     from time import time
     t0_sec = time()
 
-    if len(sys.argv)==1   : print 'For test(s) use command: python', sys.argv[0], '<test-number=1-3>'
+    if len(sys.argv)==1   : print 'For test(s) use command: python', sys.argv[0], '<test-number=1-5>'
 
     elif(sys.argv[1]=='1') :
         sg = sgs.Create('SENS2X1:V1', pbits=0377)
@@ -114,6 +117,10 @@ def test_seggeom() :
         print 'Consumed time for MTRX:512:512:54:54 (sec) =', time()-t0_sec
         sg.print_seg_info(pbits=0377)
   
+    elif(sys.argv[1]=='5') :
+        sg = sgs.Create('JUNGFRAU:V1', pbits=0377)
+        sg.print_seg_info(pbits=0377)
+
     else : print 'Non-expected arguments: sys.argv=', sys.argv, ' use 0,1,2,...'
 
 #------------------------------

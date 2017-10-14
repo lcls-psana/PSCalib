@@ -140,7 +140,7 @@ class SegGeometry :
         """ Returns three x,y,z arrays if axis=None, or single array for specified axis 
         """
         if axis is None : return meth()
-        else            : return dict( zip( sp.AXIS, meth() ))[axis]
+        else            : return dict(zip(sp.AXIS, meth()))[axis]
   
 #------------------------------
 

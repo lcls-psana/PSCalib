@@ -431,7 +431,7 @@ class GeometryAccess :
 
     #------------------------------
 
-    def get_pixel_mask(self, oname=None, oindex=0, mbits=0377) :
+    def get_pixel_mask(self, oname=None, oindex=0, mbits=0377, **kwargs) :
         """Returns pixel mask array for top or specified geometry object.
 
         mbits =+1 - mask edges
@@ -442,7 +442,7 @@ class GeometryAccess :
         """
         if not self.valid : return None
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
-        return geo.get_pixel_mask(mbits)
+        return geo.get_pixel_mask(mbits, **kwargs)
 
     #------------------------------
 

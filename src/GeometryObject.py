@@ -330,7 +330,7 @@ class GeometryObject :
 
 #------------------------------
 
-    def get_pixel_mask(self, mbits=0377) :
+    def get_pixel_mask(self, mbits=0377, **kwargs) :
         """ Returns numpy array with pixel mask for self geometry object.
 
         mbits =+1 - mask edges
@@ -341,7 +341,7 @@ class GeometryObject :
         """
 
         if self.algo is not None :
-            return self.algo.pixel_mask_array(mbits)
+            return self.algo.pixel_mask_array(mbits, **kwargs)
 
         oar = None
         for ind, child in enumerate(self.list_of_children) :
@@ -349,7 +349,7 @@ class GeometryObject :
                 print 'WARNING! Geometry object %s:%d has non-consequtive index in calibration file, reconst index:%d' % \
                       (child.oname, child.oindex, ind)
 
-            car = child.get_pixel_mask(mbits)
+            car = child.get_pixel_mask(mbits, **kwargs)
             oar = car if ind==0 else np.vstack((oar, car))
 
         # define shape for output x,y,z arrays
