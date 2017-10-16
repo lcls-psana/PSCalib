@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-18
+2017-10-16 Mikhail S. Dubrovin
+- Documentation improvement - in all modules add titles for better visibility.
+
 Tag: V01-00-17
 2017-10-13 Mikhail S. Dubrovin
 - Jungfrau - add real segment geometry and all masks
