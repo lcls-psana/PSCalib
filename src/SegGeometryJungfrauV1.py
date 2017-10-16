@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #------------------------------
-""".. highlight:: Class :py:class:`SegGeometryJungfrauV1` describes the Jungfrau V1 sensor geometry.
+"""``` Class :py:class:`SegGeometryJungfrauV1` describes the Jungfrau V1 sensor geometry.```
 
 Data array for Jungfrau 512x1024 segment is shaped as (1,512,1024), 
 has a matrix-like numeration for rows and columns with gaps between 2x4 ASICs
