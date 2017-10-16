@@ -1,0 +1,596 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SegGeometryJungfrauV1 &#8212; PSCalib-doc 1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">PSCalib-doc 1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SegGeometryJungfrauV1</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Class :py:class:`SegGeometryJungfrauV1` describes the Jungfrau V1 sensor geometry</span>
+<span class="sd">=================================================================================</span>
+
+<span class="sd">Data array for Jungfrau 512x1024 segment is shaped as (1,512,1024), </span>
+<span class="sd">has a matrix-like numeration for rows and columns with gaps between 2x4 ASICs</span>
+<span class="sd">\n We assume that</span>
+<span class="sd">\n * 1x1 ASICs has 256 rows and 256 columns,</span>
+<span class="sd">\n * Jungfrau has a pixel size 75x75um</span>
+<span class="sd">\n * X-Y coordinate system origin is in the sensor center,</span>
+<span class="sd">\n * pixel (r,c)=(0,0) is in the top left corner of the matrix, has coordinates (xmin,ymax), as shown below</span>
+<span class="sd">\n ::</span>
+
+<span class="sd">   (Xmin,Ymax)                          ^ Y                          (Xmax,Ymax)</span>
+<span class="sd">   (0,0)                                |                               (0,1023)</span>
+<span class="sd">     ----------------- -----------------|----------------- -----------------</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     |     ASIC      | |               |||               | |               |</span>
+<span class="sd">     |    256x256    | |               |||               | |               |</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     ----------------- -----------------|----------------- -----------------</span>
+<span class="sd">   -------------------------------------+-------------------------------------&gt; X</span>
+<span class="sd">     ----------------- -----------------|----------------- -----------------</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     |               | |               |||               | |               |</span>
+<span class="sd">     ----------------- -----------------|----------------- -----------------</span>
+<span class="sd">   (511,0)                              |                             (1023,1023)</span>
+<span class="sd">   (Xmin,Ymin)                                                        (Xmax,Ymin)</span>
+
+
+<span class="sd">Usage::</span>
+
+<span class="sd">    from PSCalib.SegGeometryJungfrauV1 import jungfrau_one as sg</span>
+
+<span class="sd">    sg.print_seg_info(0377)</span>
+
+<span class="sd">    size_arr = sg.size()</span>
+<span class="sd">    rows     = sg.rows()</span>
+<span class="sd">    cols     = sg.cols()</span>
+<span class="sd">    shape    = sg.shape()</span>
+<span class="sd">    pix_size = pixel_scale_size()</span>
+
+<span class="sd">    area     = sg.pixel_area_array()</span>
+<span class="sd">    mask     = sg.pixel_mask_array(mbits=0377, width=1)</span>
+<span class="sd">    # where mbits = +1-edges, +2-wide pixels</span>
+
+<span class="sd">    sizeX = sg.pixel_size_array(&#39;X&#39;)</span>
+<span class="sd">    sizeX, sizeY, sizeZ = sg.pixel_size_array()</span>
+
+<span class="sd">    X     = sg.pixel_coord_array(&#39;X&#39;)</span>
+<span class="sd">    X,Y,Z = sg.pixel_coord_array()</span>
+<span class="sd">    print &#39;X.shape =&#39;, X.shape</span>
+
+<span class="sd">    xmin, ymin, zmin = sg.pixel_coord_min()</span>
+<span class="sd">    xmax, ymax, zmax = sg.pixel_coord_max()</span>
+<span class="sd">    xmin = sg.pixel_coord_min(&#39;X&#39;)</span>
+<span class="sd">    ymax = sg.pixel_coord_max(&#39;Y&#39;)</span>
+
+<span class="sd">    # global method for rotation of numpy arrays:</span>
+<span class="sd">    Xrot, Yrot = rotation(X, Y, C, S)</span>
+<span class="sd">    ...</span>
+
+<span class="sd">See:</span>
+<span class="sd"> * :py:class:`GeometryObject`</span>
+<span class="sd"> * :py:class:`SegGeometry` </span>
+<span class="sd"> * :py:class:`SegGeometryCspad2x1V1`</span>
+<span class="sd"> * :py:class:`SegGeometryEpix100V1` </span>
+<span class="sd"> * :py:class:`SegGeometryJungfrauV1` </span>
+<span class="sd"> * :py:class:`SegGeometryMatrixV1`</span>
+<span class="sd"> * :py:class:`SegGeometryStore`</span>
+
+<span class="sd">For more detail see `Detector Geometry &lt;https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry&gt;`_.</span>
+
+<span class="sd">This software was developed for the SIT project.</span>
+<span class="sd">If you use all or part of it, please give an appropriate acknowledgment.</span>
+
+<span class="sd">Created: 2017-10-12 by Mikhail Dubrovin</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#------------------------------</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+
+<span class="kn">from</span> <span class="nn">PSCalib.SegGeometry</span> <span class="k">import</span> <span class="o">*</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1">[docs]</a><span class="k">class</span> <span class="nc">SegGeometryJungfrauV1</span><span class="p">(</span><span class="n">SegGeometry</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Self-sufficient class for generation of Jungfrau 2x4 sensor pixel coordinate array&quot;&quot;&quot;</span>
+
+    <span class="n">_rasic</span> <span class="o">=</span>  <span class="mi">256</span>    <span class="c1"># Number of rows in ASIC</span>
+    <span class="n">_casic</span> <span class="o">=</span>  <span class="mi">256</span>    <span class="c1"># Number of cols in ASIC</span>
+    <span class="n">_rows</span>  <span class="o">=</span>  <span class="mi">512</span>    <span class="c1"># Number of rows in 2x4</span>
+    <span class="n">_cols</span>  <span class="o">=</span> <span class="mi">1024</span>    <span class="c1"># Number of cols in 2x4</span>
+    <span class="n">_pixs</span>  <span class="o">=</span>   <span class="mi">75</span>    <span class="c1"># Pixel size in um (micrometer)</span>
+    <span class="n">_pixd</span>  <span class="o">=</span> <span class="mf">400.00</span>  <span class="c1"># Pixel depth in um (micrometer)</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="c1">#print &#39;SegGeometryJungfrauV1.__init__()&#39;</span>
+
+        <span class="n">SegGeometry</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span>
+        <span class="c1">#super(SegGeometry, self).__init__()</span>
+
+        <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um_offset</span>  <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">pix_area_arr</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="n">sp</span><span class="o">.</span><span class="n">make_pixel_coord_arrs</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.make_pixel_coord_arrs"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.make_pixel_coord_arrs">[docs]</a>    <span class="k">def</span> <span class="nf">make_pixel_coord_arrs</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Makes [512,1024] maps of x, y, and z pixel coordinates</span>
+<span class="sd">        with origin in the center of 2x4</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="n">x_asic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">_casic</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span>
+        <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="o">-</span><span class="mi">512</span><span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">256.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="mi">256</span><span class="o">+</span><span class="mf">3.5</span><span class="p">))</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">x_arr_um</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">x_asic</span><span class="o">+</span><span class="n">x0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x_asic</span><span class="o">+</span><span class="n">x0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">x_asic</span><span class="o">+</span><span class="n">x0</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">x_asic</span><span class="o">+</span><span class="n">x0</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+
+        <span class="n">y_asic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">_rasic</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="mf">256.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">))</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">y_arr_um</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">([</span><span class="n">y0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">y_asic</span><span class="p">,</span> <span class="n">y0</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">y_asic</span><span class="p">])</span>
+
+        <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">x_arr_um</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_arr_um</span><span class="p">)</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_arr_um</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">sp</span><span class="o">.</span><span class="n">_rows</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">_cols</span><span class="p">))</span></div>
+        
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.make_pixel_size_arrs"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.make_pixel_size_arrs">[docs]</a>    <span class="k">def</span> <span class="nf">make_pixel_size_arrs</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Makes [512,1024] maps of x, y, and z 2x2 pixel size </span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">if</span> <span class="n">sp</span><span class="o">.</span><span class="n">pix_area_arr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+           <span class="n">sh</span> <span class="o">=</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">_rows</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">_cols</span><span class="p">)</span>
+
+           <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_size_um</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span>
+           <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_size_um</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span>
+           <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_size_um</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">_pixd</span>
+           <span class="n">sp</span><span class="o">.</span><span class="n">pix_area_arr</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span></div>
+ 
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">print_member_data</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;SegGeometryJungfrauV1.print_member_data()&#39;</span>
+        <span class="nb">print</span> <span class="s1">&#39;    _rasic : </span><span class="si">%d</span><span class="s1">&#39;</span>    <span class="o">%</span> <span class="n">sp</span><span class="o">.</span><span class="n">_rasic</span>
+        <span class="nb">print</span> <span class="s1">&#39;    _casic : </span><span class="si">%d</span><span class="s1">&#39;</span>    <span class="o">%</span> <span class="n">sp</span><span class="o">.</span><span class="n">_casic</span>
+        <span class="nb">print</span> <span class="s1">&#39;    _rows  : </span><span class="si">%d</span><span class="s1">&#39;</span>    <span class="o">%</span> <span class="n">sp</span><span class="o">.</span><span class="n">_rows</span>
+        <span class="nb">print</span> <span class="s1">&#39;    _cols  : </span><span class="si">%d</span><span class="s1">&#39;</span>    <span class="o">%</span> <span class="n">sp</span><span class="o">.</span><span class="n">_cols</span>
+        <span class="nb">print</span> <span class="s1">&#39;    _pixs  : </span><span class="si">%7.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span> 
+        <span class="nb">print</span> <span class="s1">&#39;    _pixd  : </span><span class="si">%7.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sp</span><span class="o">.</span><span class="n">_pixd</span> 
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">print_pixel_size_arrs</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;SegGeometryJungfrauV1.print_pixel_size_arrs()&#39;</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">make_pixel_size_arrs</span><span class="p">()</span>
+        <span class="nb">print</span> <span class="s1">&#39;sp.x_pix_size_um.shape = &#39;</span><span class="p">,</span>            <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_size_um</span><span class="o">.</span><span class="n">shape</span>
+        <span class="nb">print</span> <span class="s1">&#39;sp.y_pix_size_um:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>                  <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_size_um</span>
+        <span class="nb">print</span> <span class="s1">&#39;sp.y_pix_size_um.shape = &#39;</span><span class="p">,</span>            <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_size_um</span><span class="o">.</span><span class="n">shape</span>
+        <span class="nb">print</span> <span class="s1">&#39;sp.z_pix_size_um:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>                  <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_size_um</span>
+        <span class="nb">print</span> <span class="s1">&#39;sp.z_pix_size_um.shape = &#39;</span><span class="p">,</span>            <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_size_um</span><span class="o">.</span><span class="n">shape</span>
+        <span class="nb">print</span> <span class="s1">&#39;sp.pix_area_arr.shape  = &#39;</span><span class="p">,</span>            <span class="n">sp</span><span class="o">.</span><span class="n">pix_area_arr</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">print_maps_seg_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;SegGeometryJungfrauV1.print_maps_seg_um()&#39;</span>
+        <span class="nb">print</span> <span class="s1">&#39;x_pix_arr_um =</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>      <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um</span>
+        <span class="nb">print</span> <span class="s1">&#39;x_pix_arr_um.shape = &#39;</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um</span><span class="o">.</span><span class="n">shape</span>
+        <span class="nb">print</span> <span class="s1">&#39;y_pix_arr_um =</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>      <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um</span>
+        <span class="nb">print</span> <span class="s1">&#39;y_pix_arr_um.shape = &#39;</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um</span><span class="o">.</span><span class="n">shape</span>
+        <span class="nb">print</span> <span class="s1">&#39;z_pix_arr_um =</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>      <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_arr_um</span>
+        <span class="nb">print</span> <span class="s1">&#39;z_pix_arr_um.shape = &#39;</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_arr_um</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">print_xy_1darr_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;SegGeometryJungfrauV1.print_xy_1darr_um()&#39;</span>
+        <span class="nb">print</span> <span class="s1">&#39;x_arr_um:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>       <span class="n">sp</span><span class="o">.</span><span class="n">x_arr_um</span>
+        <span class="nb">print</span> <span class="s1">&#39;x_arr_um.shape = &#39;</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_arr_um</span><span class="o">.</span><span class="n">shape</span>
+        <span class="nb">print</span> <span class="s1">&#39;y_arr_um:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>       <span class="n">sp</span><span class="o">.</span><span class="n">y_arr_um</span>
+        <span class="nb">print</span> <span class="s1">&#39;y_arr_um.shape = &#39;</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_arr_um</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">print_xyz_min_max_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;SegGeometryJungfrauV1.print_xyz_min_max_um()&#39;</span>
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">zmin</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_xyz_min_um</span><span class="p">()</span>
+        <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_xyz_max_um</span><span class="p">()</span>
+        <span class="nb">print</span> <span class="s1">&#39;In [um] xmin:</span><span class="si">%9.2f</span><span class="s1">, xmax:</span><span class="si">%9.2f</span><span class="s1">, ymin:</span><span class="si">%9.2f</span><span class="s1">, ymax:</span><span class="si">%9.2f</span><span class="s1">, zmin:</span><span class="si">%9.2f</span><span class="s1">, zmax:</span><span class="si">%9.2f</span><span class="s1">&#39;</span> \
+              <span class="o">%</span> <span class="p">(</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmin</span><span class="p">,</span> <span class="n">zmax</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_xyz_min_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_arr_um</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_arr_um</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">get_xyz_max_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_arr_um</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_arr_um</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">0</span>
+
+    <span class="k">def</span> <span class="nf">get_seg_xy_maps_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um</span>
+
+    <span class="k">def</span> <span class="nf">get_seg_xyz_maps_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_arr_um</span>
+
+    <span class="k">def</span> <span class="nf">get_seg_xy_maps_um_with_offset</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="k">if</span>  <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um_offset</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="n">x_min_um</span><span class="p">,</span> <span class="n">y_min_um</span><span class="p">,</span> <span class="n">z_min_um</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_xyz_min_um</span><span class="p">()</span>
+            <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um_offset</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um</span> <span class="o">-</span> <span class="n">x_min_um</span>
+            <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um_offset</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um</span> <span class="o">-</span> <span class="n">y_min_um</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um_offset</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um_offset</span>
+
+    <span class="k">def</span> <span class="nf">get_seg_xyz_maps_um_with_offset</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="k">if</span>  <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um_offset</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="n">x_min_um</span><span class="p">,</span> <span class="n">y_min_um</span><span class="p">,</span> <span class="n">z_min_um</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_xyz_min_um</span><span class="p">()</span>
+            <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um_offset</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um</span> <span class="o">-</span> <span class="n">x_min_um</span>
+            <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um_offset</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um</span> <span class="o">-</span> <span class="n">y_min_um</span>
+            <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_arr_um_offset</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_arr_um</span> <span class="o">-</span> <span class="n">z_min_um</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um_offset</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um_offset</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_arr_um_offset</span>
+
+    <span class="k">def</span> <span class="nf">get_pix_size_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span>
+
+    <span class="k">def</span> <span class="nf">get_pix_depth_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">_pixd</span>
+
+    <span class="k">def</span> <span class="nf">get_pixel_size_arrs_um</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">make_pixel_size_arrs</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_size_um</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_size_um</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">z_pix_size_um</span>
+
+    <span class="k">def</span> <span class="nf">get_pixel_area_arr</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">make_pixel_size_arrs</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">pix_area_arr</span>
+
+    <span class="k">def</span> <span class="nf">get_seg_xy_maps_pix</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_pix</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_um</span><span class="o">/</span><span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span>
+        <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_pix</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_um</span><span class="o">/</span><span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">x_pix_arr_pix</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">y_pix_arr_pix</span>
+
+    <span class="k">def</span> <span class="nf">get_seg_xy_maps_pix_with_offset</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_seg_xy_maps_pix</span><span class="p">()</span>
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">Y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">X</span><span class="o">-</span><span class="n">xmin</span><span class="p">,</span> <span class="n">Y</span><span class="o">-</span><span class="n">ymin</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1"># INTERFACE METHODS</span>
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.print_seg_info"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.print_seg_info">[docs]</a>    <span class="k">def</span> <span class="nf">print_seg_info</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">pbits</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Prints segment info for selected bits</span>
+<span class="sd">        pbits = 0 - nothing,</span>
+<span class="sd">        +1 - member data,</span>
+<span class="sd">        +2 - coordinate maps in um,</span>
+<span class="sd">        +4 - min, max coordinates in um,</span>
+<span class="sd">        +8 - x, y 1-d pixel coordinate arrays in um.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">print_member_data</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">2</span> <span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">print_maps_seg_um</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">4</span> <span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">print_xyz_min_max_um</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">8</span> <span class="p">:</span> <span class="n">sp</span><span class="o">.</span><span class="n">print_xy_1darr_um</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.size"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.size">[docs]</a>    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns number of pixels in segment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">_rows</span><span class="o">*</span><span class="n">sp</span><span class="o">.</span><span class="n">_cols</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.rows"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.rows">[docs]</a>    <span class="k">def</span> <span class="nf">rows</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns number of rows in segment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">_rows</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.cols"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.cols">[docs]</a>    <span class="k">def</span> <span class="nf">cols</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns number of cols in segment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">_cols</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.shape"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.shape">[docs]</a>    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns shape of the segment (rows, cols)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">_rows</span><span class="p">,</span> <span class="n">sp</span><span class="o">.</span><span class="n">_cols</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.pixel_scale_size"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.pixel_scale_size">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_scale_size</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns pixel size in um for indexing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">_pixs</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.pixel_area_array"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.pixel_area_array">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_area_array</span><span class="p">(</span><span class="n">sp</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns pixel area array of shape=(rows, cols)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">get_pixel_area_arr</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.pixel_size_array"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.pixel_size_array">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_size_array</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns numpy array of pixel sizes in um for AXIS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">return_switch</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">get_pixel_size_arrs_um</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.pixel_coord_array"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.pixel_coord_array">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_coord_array</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns numpy array of segment pixel coordinates in um for AXIS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">return_switch</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">get_seg_xyz_maps_um</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.pixel_coord_min"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.pixel_coord_min">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_coord_min</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns minimal value in the array of segment pixel coordinates in um for AXIS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">return_switch</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">get_xyz_min_um</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.pixel_coord_max"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.pixel_coord_max">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_coord_max</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns maximal value in the array of segment pixel coordinates in um for AXIS</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">sp</span><span class="o">.</span><span class="n">return_switch</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">get_xyz_max_um</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SegGeometryJungfrauV1.pixel_mask_array"><a class="viewcode-back" href="../index.html#SegGeometryJungfrauV1.SegGeometryJungfrauV1.pixel_mask_array">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_mask_array</span><span class="p">(</span><span class="n">sp</span><span class="p">,</span> <span class="n">mbits</span><span class="o">=</span><span class="mi">0377</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns numpy array of pixel mask: 1/0 = ok/masked,</span>
+
+<span class="sd">        Parameters</span>
+
+<span class="sd">        mbits: </span>
+<span class="sd">            +1 - mask edges,</span>
+<span class="sd">            +2 - mask central columns </span>
+
+<span class="sd">        width (uint) - width in pixels of masked edge</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">w</span> <span class="o">=</span> <span class="n">width</span>
+        <span class="n">zero_col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">sp</span><span class="o">.</span><span class="n">_rows</span><span class="p">,</span><span class="n">w</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">zero_row</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">w</span><span class="p">,</span><span class="n">sp</span><span class="o">.</span><span class="n">_cols</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+        <span class="n">mask</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">sp</span><span class="o">.</span><span class="n">_rows</span><span class="p">,</span><span class="n">sp</span><span class="o">.</span><span class="n">_cols</span><span class="p">),</span><span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mbits</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="p">:</span> 
+        <span class="c1"># mask edges</span>
+            <span class="n">mask</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">w</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">zero_row</span> <span class="c1"># mask top    edge</span>
+            <span class="n">mask</span><span class="p">[</span><span class="o">-</span><span class="n">w</span><span class="p">:,:]</span> <span class="o">=</span> <span class="n">zero_row</span> <span class="c1"># mask bottom edge</span>
+            <span class="n">mask</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero_col</span> <span class="c1"># mask left   edge</span>
+            <span class="n">mask</span><span class="p">[:,</span><span class="o">-</span><span class="n">w</span><span class="p">:]</span> <span class="o">=</span> <span class="n">zero_col</span> <span class="c1"># mask right  edge</span>
+
+        <span class="k">if</span> <span class="n">mbits</span> <span class="o">&amp;</span> <span class="mi">2</span> <span class="p">:</span> 
+        <span class="c1"># mask central rows and colums - gaps edges</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span> <span class="p">:</span>
+                <span class="n">g</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">_casic</span><span class="o">*</span><span class="n">i</span>
+                <span class="n">mask</span><span class="p">[:,</span><span class="n">g</span><span class="o">-</span><span class="n">w</span><span class="p">:</span><span class="n">g</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero_col</span> <span class="c1"># mask central-left  column</span>
+                <span class="n">mask</span><span class="p">[:,</span><span class="n">g</span><span class="p">:</span><span class="n">g</span><span class="o">+</span><span class="n">w</span><span class="p">]</span> <span class="o">=</span> <span class="n">zero_col</span> <span class="c1"># mask central-right column</span>
+
+            <span class="n">g</span> <span class="o">=</span> <span class="n">sp</span><span class="o">.</span><span class="n">_rasic</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">g</span><span class="o">-</span><span class="n">w</span><span class="p">:</span><span class="n">g</span><span class="p">,:]</span>     <span class="o">=</span> <span class="n">zero_row</span> <span class="c1"># mask central-low   row</span>
+            <span class="n">mask</span><span class="p">[</span><span class="n">g</span><span class="p">:</span><span class="n">g</span><span class="o">+</span><span class="n">w</span><span class="p">,:]</span>     <span class="o">=</span> <span class="n">zero_row</span> <span class="c1"># mask central-high  row</span>
+
+        <span class="k">return</span> <span class="n">mask</span></div></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="n">jungfrau_one</span> <span class="o">=</span> <span class="n">SegGeometryJungfrauV1</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#----------- TEST -------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pyimgalgos.GlobalGraphics</span> <span class="k">as</span> <span class="nn">gg</span> <span class="c1"># For test purpose in main only</span>
+
+
+<span class="k">def</span> <span class="nf">test_xyz_min_max</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">SegGeometryJungfrauV1</span><span class="p">()</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">print_xyz_min_max_um</span><span class="p">()</span> 
+    <span class="nb">print</span> <span class="s1">&#39;Ymin = &#39;</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">pixel_coord_min</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;Ymax = &#39;</span><span class="p">,</span> <span class="n">w</span><span class="o">.</span><span class="n">pixel_coord_max</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_xyz_maps</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="n">w</span> <span class="o">=</span> <span class="n">SegGeometryJungfrauV1</span><span class="p">()</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">print_maps_seg_um</span><span class="p">()</span>
+
+    <span class="n">titles</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;X map&#39;</span><span class="p">,</span><span class="s1">&#39;Y map&#39;</span><span class="p">]</span>
+    <span class="c1">#for i,arr2d in enumerate([w.x_pix_arr,w.y_pix_arr]) :</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">arr2d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span> <span class="n">w</span><span class="o">.</span><span class="n">get_seg_xy_maps_pix</span><span class="p">()</span> <span class="p">)</span> <span class="p">:</span>
+        <span class="n">amp_range</span> <span class="o">=</span> <span class="p">(</span><span class="n">arr2d</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">arr2d</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+        <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span><span class="n">arr2d</span><span class="p">,</span> <span class="n">amp_range</span><span class="o">=</span><span class="n">amp_range</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="n">titles</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">gg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">200</span><span class="o">*</span><span class="n">i</span><span class="p">,</span><span class="mi">100</span><span class="o">*</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_jungfrau_img</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="n">t0_sec</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">SegGeometryJungfrauV1</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;Consumed time for coordinate arrays (sec) =&#39;</span><span class="p">,</span> <span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0_sec</span>
+
+    <span class="n">X</span><span class="p">,</span><span class="n">Y</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_seg_xy_maps_pix</span><span class="p">()</span>
+
+    <span class="n">w</span><span class="o">.</span><span class="n">print_seg_info</span><span class="p">(</span><span class="mi">0377</span><span class="p">)</span>
+
+    <span class="c1">#print &#39;X(pix) :\n&#39;, X</span>
+    <span class="nb">print</span> <span class="s1">&#39;X.shape =&#39;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span><span class="p">,</span> <span class="n">zmin</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_xyz_min_um</span><span class="p">()</span>
+    <span class="n">xmax</span><span class="p">,</span> <span class="n">ymax</span><span class="p">,</span> <span class="n">zmax</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">get_xyz_max_um</span><span class="p">()</span>
+    <span class="n">xmin</span> <span class="o">/=</span> <span class="n">w</span><span class="o">.</span><span class="n">pixel_scale_size</span><span class="p">()</span>
+    <span class="n">xmax</span> <span class="o">/=</span> <span class="n">w</span><span class="o">.</span><span class="n">pixel_scale_size</span><span class="p">()</span>
+    <span class="n">ymin</span> <span class="o">/=</span> <span class="n">w</span><span class="o">.</span><span class="n">pixel_scale_size</span><span class="p">()</span>
+    <span class="n">ymax</span> <span class="o">/=</span> <span class="n">w</span><span class="o">.</span><span class="n">pixel_scale_size</span><span class="p">()</span>
+
+    <span class="n">xsize</span> <span class="o">=</span> <span class="n">xmax</span> <span class="o">-</span> <span class="n">xmin</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">ysize</span> <span class="o">=</span> <span class="n">ymax</span> <span class="o">-</span> <span class="n">ymin</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="nb">print</span> <span class="s1">&#39;xsize =&#39;</span><span class="p">,</span> <span class="n">xsize</span>
+    <span class="nb">print</span> <span class="s1">&#39;ysize =&#39;</span><span class="p">,</span> <span class="n">ysize</span>
+
+<span class="c1">#    H, Xedges, Yedges = np.histogram2d(X.flatten(), Y.flatten(), bins=[xsize,ysize], range=[[xmin, xmax], [ymin, ymax]], normed=False, weights=X.flatten()+Y.flatten()) </span>
+
+<span class="c1">#    print &#39;Xedges:&#39;, Xedges</span>
+<span class="c1">#    print &#39;Yedges:&#39;, Yedges</span>
+<span class="c1">#    print &#39;H.shape:&#39;, H.shape</span>
+
+<span class="c1">#    gg.plotImageLarge(H, amp_range=(-800, 800), figsize=(8,10)) # range=(-1, 2), </span>
+<span class="c1">#    gg.show()</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_jungfrau_img_easy</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">o</span> <span class="o">=</span> <span class="n">SegGeometryJungfrauV1</span><span class="p">()</span>
+    <span class="n">X</span><span class="p">,</span><span class="n">Y</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">get_seg_xy_maps_pix_with_offset</span><span class="p">()</span>
+    <span class="n">iX</span><span class="p">,</span> <span class="n">iY</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="o">+</span><span class="mf">0.25</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="p">(</span><span class="n">Y</span><span class="o">+</span><span class="mf">0.25</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">gg</span><span class="o">.</span><span class="n">getImageFromIndexArrays</span><span class="p">(</span><span class="n">iY</span><span class="p">,</span><span class="n">iX</span><span class="p">,</span><span class="n">iX</span><span class="o">+</span><span class="n">iY</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">amp_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1500</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_pix_sizes</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">SegGeometryJungfrauV1</span><span class="p">()</span>
+    <span class="n">w</span><span class="o">.</span><span class="n">print_pixel_size_arrs</span><span class="p">()</span>
+    <span class="n">size_arrX</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">pixel_size_array</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">)</span>
+    <span class="n">size_arrY</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">pixel_size_array</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+    <span class="n">area_arr</span>  <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">pixel_area_array</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;area_arr[348:358,378:388]:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>   <span class="n">area_arr</span><span class="p">[</span><span class="mi">348</span><span class="p">:</span><span class="mi">358</span><span class="p">,</span><span class="mi">378</span><span class="p">:</span><span class="mi">388</span><span class="p">]</span>
+    <span class="nb">print</span> <span class="s1">&#39;area_arr.shape :&#39;</span><span class="p">,</span>               <span class="n">area_arr</span><span class="o">.</span><span class="n">shape</span>
+    <span class="nb">print</span> <span class="s1">&#39;size_arrX[348:358,378:388]:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="n">size_arrX</span><span class="p">[</span><span class="mi">348</span><span class="p">:</span><span class="mi">358</span><span class="p">,</span><span class="mi">378</span><span class="p">:</span><span class="mi">388</span><span class="p">]</span>
+    <span class="nb">print</span> <span class="s1">&#39;size_arrX.shape :&#39;</span><span class="p">,</span>              <span class="n">size_arrX</span><span class="o">.</span><span class="n">shape</span>
+    <span class="nb">print</span> <span class="s1">&#39;size_arrY[348:358,378:388]:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span>  <span class="n">size_arrY</span><span class="p">[</span><span class="mi">348</span><span class="p">:</span><span class="mi">358</span><span class="p">,</span><span class="mi">378</span><span class="p">:</span><span class="mi">388</span><span class="p">]</span>
+    <span class="nb">print</span> <span class="s1">&#39;size_arrY.shape :&#39;</span><span class="p">,</span>              <span class="n">size_arrY</span><span class="o">.</span><span class="n">shape</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_jungfrau_mask</span><span class="p">(</span><span class="n">mbits</span><span class="o">=</span><span class="mi">0377</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">o</span> <span class="o">=</span> <span class="n">SegGeometryJungfrauV1</span><span class="p">()</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">get_seg_xy_maps_pix_with_offset</span><span class="p">()</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">pixel_mask_array</span><span class="p">(</span><span class="n">mbits</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+    <span class="n">mask</span><span class="p">[</span><span class="n">mask</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="mi">4</span>
+    <span class="n">iX</span><span class="p">,</span> <span class="n">iY</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="o">+</span><span class="mf">0.25</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">),</span> <span class="p">(</span><span class="n">Y</span><span class="o">+</span><span class="mf">0.25</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">gg</span><span class="o">.</span><span class="n">getImageFromIndexArrays</span><span class="p">(</span><span class="n">iY</span><span class="p">,</span><span class="n">iX</span><span class="p">,</span><span class="n">mask</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">amp_range</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+ 
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span>   <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;For test(s) use command: python&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;&lt;test-number=0-5&gt;&#39;</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;0&#39;</span> <span class="p">:</span> <span class="n">test_xyz_min_max</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;1&#39;</span> <span class="p">:</span> <span class="n">test_xyz_maps</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;2&#39;</span> <span class="p">:</span> <span class="n">test_jungfrau_img</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;3&#39;</span> <span class="p">:</span> <span class="n">test_jungfrau_img_easy</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;4&#39;</span> <span class="p">:</span> <span class="n">test_pix_sizes</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;5&#39;</span> <span class="p">:</span> <span class="n">test_jungfrau_mask</span><span class="p">(</span><span class="n">mbits</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;6&#39;</span> <span class="p">:</span> <span class="n">test_jungfrau_mask</span><span class="p">(</span><span class="n">mbits</span><span class="o">=</span><span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">else</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Non-expected arguments: sys.argv=&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span> <span class="s1">&#39;End of test.&#39;</span> <span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Mikhail Dubrovin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

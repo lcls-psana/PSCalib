@@ -1,0 +1,409 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DCInterface &#8212; PSCalib-doc 1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">PSCalib-doc 1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for DCInterface</h1><div class="highlight"><pre>
+<span></span><span class="c1">####!/usr/bin/env python</span>
+<span class="c1">#------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:py:class:`DCInterface` - abstract interface for the Detector Calibration (DC) project</span>
+<span class="sd">======================================================================================</span>
+
+<span class="sd">See:</span>
+<span class="sd">    * :py:class:`DCStore`</span>
+<span class="sd">    * :py:class:`DCType`</span>
+<span class="sd">    * :py:class:`DCRange`</span>
+<span class="sd">    * :py:class:`DCVersion`</span>
+<span class="sd">    * :py:class:`DCBase`</span>
+<span class="sd">    * :py:class:`DCInterface`</span>
+<span class="sd">    * :py:class:`DCUtils`</span>
+<span class="sd">    * :py:class:`DCDetectorId`</span>
+<span class="sd">    * :py:class:`DCConfigParameters`</span>
+<span class="sd">    * :py:class:`DCFileName`</span>
+<span class="sd">    * :py:class:`DCLogger`</span>
+<span class="sd">    * :py:class:`DCMethods`</span>
+<span class="sd">    * :py:class:`DCEmail`</span>
+
+<span class="sd">This software was developed for the SIT project.</span>
+<span class="sd">If you use all or part of it, please give an appropriate acknowledgment.</span>
+
+<span class="sd">Author: Mikhail Dubrovin</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#------------------------------</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">PSCalib.DCBase</span> <span class="k">import</span> <span class="n">DCBase</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">print_warning</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">metframe</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">wng</span> <span class="o">=</span> <span class="s1">&#39;WARNING: </span><span class="si">%s</span><span class="s1">.</span><span class="si">%16s</span><span class="s1"> - abstract interface method needs to be re-implemented in derived class.&#39;</span> \
+          <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">metframe</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="n">wng</span>
+    <span class="c1">#raise NotImplementedError(wng)</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="DCStoreI"><a class="viewcode-back" href="../index.html#DCInterface.DCStoreI">[docs]</a><span class="k">class</span> <span class="nc">DCStoreI</span><span class="p">(</span><span class="n">DCBase</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Abstract interface class for the Detector Calibration (DC) project</span>
+
+<span class="sd">       cs = DCStoreI(fname)</span>
+
+<span class="sd">       tscfile     = cs.tscfile()               # (int) time stamp of the file creation</span>
+<span class="sd">       dettype     = cs.dettype()               # (str) detector type</span>
+<span class="sd">       detid       = cs.detid()                 # (str) detector id</span>
+<span class="sd">       detname     = cs.detname()               # (str) detector name of self object</span>
+<span class="sd">       predecessor = cs.predecessor()           # (str) detname of predecessor or None</span>
+<span class="sd">       successor   = cs.successor()             # (str) detname of successor or None</span>
+<span class="sd">       ctypes      = cs.ctypes()                # (list) calibration types in the file</span>
+<span class="sd">       cto         = cs.ctypeobj(ctype)         # (DCType ~ h5py.Group) calibration type object</span>
+
+<span class="sd">       cs.set_tscfile(ts)                       # set (int) time stamp of the file creation </span>
+<span class="sd">       cs.set_dettype(dettype)                  # set (str) detector type</span>
+<span class="sd">       cs.set_detid(detid)                      # set (str) detector id</span>
+<span class="sd">       cs.set_detname(detname)                  # set (str) detector name of self object</span>
+<span class="sd">       cs.set_predecessor(pred)                 # set (str) detname of predecessor or None</span>
+<span class="sd">       cs.set_successor(succ)                   # set (str) detname of successor or None</span>
+<span class="sd">       cs.add_ctype(ctype)                      # add (str) calibration type to the DCStore object</span>
+<span class="sd">       ct = cs.mark_ctype(ctype)                # mark ctype (str) from the DCStore object, returns (str) ctype or None</span>
+<span class="sd">       cs.mark_ctypes()                         # mark all ctypes from the DCStore object</span>
+<span class="sd">       cs.clear_ctypes(ctype)                   # clear dictionary of ctypes in the DCStore object</span>
+<span class="sd">       cs.save(path, mode)                      # save current calibration in the file specified by path, if path is Null - update current file.</span>
+<span class="sd">       cs.load(path)                            # load content of the file in DCStore object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">DCBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmt</span><span class="p">)</span>
+        <span class="c1">#super(DCStoreI, self).__init__()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="k">def</span> <span class="nf">tscfile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>               <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">dettype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>               <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">detid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                 <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">detname</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>               <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">predecessor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>           <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">successor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>             <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">ctypes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">ctypeobj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctype</span><span class="p">)</span>       <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">set_tscfile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ts</span><span class="p">)</span>       <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">set_dettype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dettype</span><span class="p">)</span>  <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">set_detid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detid</span><span class="p">)</span>      <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">set_detname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detname</span><span class="p">)</span>  <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">set_predecessor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pred</span><span class="p">)</span> <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">set_successor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">succ</span><span class="p">)</span>   <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">add_ctype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>      <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">mark_ctype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctype</span><span class="p">)</span>     <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">mark_ctypes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>           <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">clear_ctypes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>          <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>            <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>            <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">print_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>     <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="DCTypeI"><a class="viewcode-back" href="../index.html#DCInterface.DCTypeI">[docs]</a><span class="k">class</span> <span class="nc">DCTypeI</span><span class="p">(</span><span class="n">DCBase</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Abstract interface class for the Detector Calibration (DC) project</span>
+
+<span class="sd">       cto = DCTypeI(type)</span>
+
+<span class="sd">       ctype       = cto.ctype()                # (str) of ctype name</span>
+<span class="sd">       ranges      = cto.ranges()               # (list) of time ranges for ctype</span>
+<span class="sd">       ro          = cto.rangeobj(begin, end)   # (DCRange ~ h5py.Group) time stamp validity range object</span>
+<span class="sd">       ro          = cto.range_for_tsec(tsec)   # (DCRange) range object for time stamp in (double) sec</span>
+<span class="sd">       ro          = cto.range_for_evt(evt)     # (DCRange) range object for psana.Evt object </span>
+<span class="sd">       cto.add_range(tsr)                       # add (str) of time ranges for ctype</span>
+<span class="sd">       keyr = cto.mark_range(begin, end)        # mark range from the DCType object</span>
+<span class="sd">       keyr = cto.mark_range_for_key(keyr)      # mark range from the DCType object</span>
+<span class="sd">       cto.mark_ranges(tsr)                     # mark all ranges from the DCType object</span>
+<span class="sd">       cto.print_obj()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+ 
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">DCBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="k">def</span> <span class="nf">ctype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                  <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                 <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>      <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">add_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">mark_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span> <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">mark_range_for_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>  <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">mark_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>            <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">clear_ranges</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>           <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">range_for_tsec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsec</span><span class="p">)</span>   <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">range_for_evt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">)</span>     <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>            <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>             <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">print_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>              <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="DCRangeI"><a class="viewcode-back" href="../index.html#DCInterface.DCRangeI">[docs]</a><span class="k">class</span> <span class="nc">DCRangeI</span><span class="p">(</span><span class="n">DCBase</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Abstract interface class for the Detector Calibration (DC) project</span>
+
+<span class="sd">       o = DCRangeI(begin, end)</span>
+
+<span class="sd">       tsbegin     = o.begin()               # (int) time stamp beginning validity range</span>
+<span class="sd">       tsend       = o.end()                 # (int) time stamp ending validity range</span>
+<span class="sd">       dico        = o.versions()            # (list of uint) versions of calibrations</span>
+<span class="sd">       vnum        = o.vnum_def()            # (DCVersion ~ h5py.Group) reference to the default version in the time-range object</span>
+<span class="sd">       vo          = o.version(vers)         # (DCVersion ~ h5py.Group) specified version in the time-range object</span>
+<span class="sd">       bool        = o.tsec_in_range(tsec)   # (bool) True/False if tsec is/not in the validity range</span>
+<span class="sd">       bool        = o.evt_in_range(evt)     # (bool) True/False if evt is/not in the validity range</span>
+<span class="sd">       o.set_begin(tsbegin)                  # set (int) time stamp beginning validity range</span>
+<span class="sd">       o.set_end(tsend)                      # set (int) time stamp ending validity range</span>
+<span class="sd">       o.add_version(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations</span>
+<span class="sd">       o.set_versdef(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations</span>
+<span class="sd">       vnum = o.mark_version(vers)           # del version </span>
+<span class="sd">       o.mark_versions()                     # del all registered versions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">,</span> <span class="n">end</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">DCBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="k">def</span> <span class="nf">begin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">end</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                  <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>             <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnum</span><span class="p">)</span>        <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">vnum_def</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>             <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">vnum_last</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>            <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">set_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">begin</span><span class="p">)</span>     <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">set_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span>         <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">add_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">set_vnum_def</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnum</span><span class="p">)</span>   <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">mark_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnum</span><span class="p">)</span>   <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">mark_versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>        <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">clear_versions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>       <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">tsec_in_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsec</span><span class="p">)</span>  <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">def</span> <span class="nf">evt_in_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">evt</span><span class="p">)</span>    <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>          <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>          <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">print_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>            <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="DCVersionI"><a class="viewcode-back" href="../index.html#DCInterface.DCVersionI">[docs]</a><span class="k">class</span> <span class="nc">DCVersionI</span><span class="p">(</span><span class="n">DCBase</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Abstract interface class for the Detector Calibration (DC) project</span>
+
+<span class="sd">       o = DCVersionI(vnum, tsprod=None, arr=None)</span>
+
+<span class="sd">       o.set_vnum(vnum)            # sets (int) version </span>
+<span class="sd">       o.set_tsprod(tsprod)        # sets (double) time stamp of the version production</span>
+<span class="sd">       o.add_data(nda)             # sets (np.array) calibration array</span>
+<span class="sd">       vnum   = o.vnum()           # returns (int) version number</span>
+<span class="sd">       s_vnum = o.str_vnum()       # returns (str) version number</span>
+<span class="sd">       tsvers = o.tsprod()         # returns (double) time stamp of the version production</span>
+<span class="sd">       nda    = o.data()           # returns (np.array) calibration array</span>
+<span class="sd">       o.save(group)               # saves object content under h5py.group in the hdf5 file. </span>
+<span class="sd">       o.load(group)               # loads object content from the h5py.group of hdf5 file. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnum</span><span class="p">,</span> <span class="n">tsprod</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">arr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">DCBase</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cmt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="k">def</span> <span class="nf">set_vnum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vnum</span><span class="p">)</span>       <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">set_tsprod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tsprod</span><span class="p">)</span>   <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nda</span><span class="p">)</span>        <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">vnum</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                 <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">str_vnum</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>             <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">tsprod</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>               <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>                 <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">());</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>          <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span>          <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span>
+    <span class="k">def</span> <span class="nf">print_obj</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>            <span class="p">:</span> <span class="n">print_warning</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">())</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#----------- TEST -------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_DCStoreI</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="n">o</span> <span class="o">=</span> <span class="n">DCStoreI</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>  <span class="c1"># &#39;cfname.hdf5&#39;</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">tscfile</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">dettype</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">detid</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">detname</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">predecessor</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">successor</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">ctypes</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">ctypeobj</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_tscfile</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_dettype</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_detid</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_detname</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_predecessor</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_successor</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">add_ctype</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">mark_ctype</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">mark_ctypes</span><span class="p">()</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">clear_ctypes</span><span class="p">()</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_DCTypeI</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="n">o</span> <span class="o">=</span> <span class="n">DCTypeI</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">ctype</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">ranges</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">range</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">add_range</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">mark_range</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">mark_range_for_key</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">mark_ranges</span><span class="p">()</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_DCRangeI</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="n">o</span> <span class="o">=</span> <span class="n">DCRangeI</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">b</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">begin</span><span class="p">()</span>
+    <span class="n">e</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">end</span><span class="p">()</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">versions</span><span class="p">()</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">vnum_def</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_begin</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_end</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">add_version</span><span class="p">()</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_vnum_def</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">v</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">del_version</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">del_versions</span><span class="p">()</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_DCVersionI</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="n">o</span> <span class="o">=</span> <span class="n">DCVersionI</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">vnum</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">str_vnum</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">tsprod</span><span class="p">()</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">o</span><span class="o">.</span><span class="n">data</span><span class="p">()</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_vnum</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">set_tsprod</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">add_data</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">o</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">()</span> <span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;For test(s) use command: python </span><span class="si">%s</span><span class="s1"> &lt;test-number=1-4&gt;&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;1&#39;</span><span class="p">)</span> <span class="p">:</span> <span class="n">test_DCStoreI</span><span class="p">()</span>        
+    <span class="k">elif</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;2&#39;</span><span class="p">)</span> <span class="p">:</span> <span class="n">test_DCTypeI</span><span class="p">()</span>        
+    <span class="k">elif</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;3&#39;</span><span class="p">)</span> <span class="p">:</span> <span class="n">test_DCRangeI</span><span class="p">()</span>        
+    <span class="k">elif</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;4&#39;</span><span class="p">)</span> <span class="p">:</span> <span class="n">test_DCVersionI</span><span class="p">()</span>        
+    <span class="k">else</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Non-expected arguments: sys.argv = </span><span class="si">%s</span><span class="s1"> use 1,2,...&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+    <span class="n">test</span><span class="p">()</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span> <span class="s1">&#39;End of </span><span class="si">%s</span><span class="s1"> test.&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1">#------------------------------</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Mikhail Dubrovin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

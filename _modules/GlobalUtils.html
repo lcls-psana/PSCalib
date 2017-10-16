@@ -1,0 +1,1000 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>GlobalUtils &#8212; PSCalib-doc 1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">PSCalib-doc 1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GlobalUtils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:py:class:`GlobalUtils` - a set of utilities</span>
+<span class="sd">============================================</span>
+
+<span class="sd">Usage::</span>
+
+<span class="sd">    # Import</span>
+<span class="sd">    import PSCalib.GlobalUtils as gu</span>
+
+<span class="sd">    # Methods</span>
+<span class="sd">    #resp = gu.&lt;method(pars)&gt;</span>
+
+<span class="sd">    dettype = gu.det_type_from_source(source)</span>
+<span class="sd">    detname = gu.string_from_source(source)</span>
+
+<span class="sd">    mmask = gu.merge_masks(mask1=None, mask2=None, dtype=np.uint8)</span>
+<span class="sd">    mask  = gu.mask_neighbors(mask_in, allnbrs=True, dtype=np.uint8)</span>
+<span class="sd">    lo,hi = gu.evaluate_limits(arr, nneg=5, npos=5, lim_lo=1, lim_hi=1000, verbos=1, cmt=&#39;&#39;)</span>
+
+<span class="sd">    arr2d = gu.reshape_nda_to_2d(nda)</span>
+<span class="sd">    arr3d = gu.reshape_nda_to_3d(nda)</span>
+
+<span class="sd">    # Get string with time stamp, ex: 2016-01-26T10:40:53</span>
+<span class="sd">    ts    = gu.str_tstamp(fmt=&#39;%Y-%m-%dT%H:%M:%S&#39;, time_sec=None)</span>
+
+<span class="sd">    usr   = gu.get_enviroment(env=&#39;USER&#39;)</span>
+<span class="sd">    usr   = gu.get_login()</span>
+<span class="sd">    host  = gu.get_hostname()</span>
+<span class="sd">    cwd   = gu.get_cwd()</span>
+<span class="sd">    rec   = gu.log_rec_on_start() # e.g. &#39;2017-09-27T10:40:24 user:dubrovin@psanagpu104 cwd:/reg/neh/home4/dubrovin/LCLS/con-jungfrau ...&#39;</span>
+<span class="sd">    gu.add_rec_to_log(lfname, rec, verbos=False)</span>
+
+<span class="sd">    exp  = gu.exp_name(env)</span>
+<span class="sd">    cdir = gu.calib_dir(env)</span>
+<span class="sd">    #### tsec, tnsec, fiducial, tsdate, tstime = gu.time_pars(evt) # needs in psana...</span>
+
+<span class="sd">    gu.create_directory(dir, verb=False)</span>
+<span class="sd">    gu.create_directory_with_mode(dir, mode=0777, verb=False)</span>
+<span class="sd">    exists = gu.create_path(path, depth=6, mode=0777, verb=True)</span>
+
+<span class="sd">    arr  = gu.load_textfile(path)</span>
+<span class="sd">    gu.save_textfile(text, path, mode=&#39;w&#39;) # mode: &#39;w&#39;-write, &#39;a&#39;-append </span>
+
+<span class="sd">    path = gu.replace(&#39;/path/#YYYY-MM/fname.txt&#39;, &#39;#YYYY-MM&#39;, gu.str_tstamp(fmt=&#39;%Y/%m&#39;))</span>
+
+<span class="sd">    ifname = &#39;fname.txt&#39;</span>
+<span class="sd">    ctypedir = &#39;/some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/&#39;</span>
+<span class="sd">    ctype = &#39;pedestals&#39;</span>
+<span class="sd">    ofname = &#39;123-end.data&#39;</span>
+<span class="sd">    rec = gu.history_record(ifname, ctypedir, ctype, ofname, comment=&#39;&#39;)</span>
+<span class="sd">    path_clb = gu.path_to_calib_file(ctypedir, ctype, ofname)</span>
+<span class="sd">    path_his = gu.path_to_history_file(ctypedir, ctype)</span>
+
+<span class="sd">    cmd = gu.command_deploy_file(ifname, path_clb)</span>
+<span class="sd">    cmd = gu.command_add_record_to_file(rec, path_his)</span>
+
+<span class="sd">    tpl = gu.calib_fname_template(exp, runnum, tsec, tnsec, fid, tsdate, tstime, src, nevts, ofname)</span>
+
+<span class="sd">    gu.deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False)</span>
+
+<span class="sd">See: other methods in :py:class:`CalibPars`, :py:class:`CalibParsStore`</span>
+
+<span class="sd">This software was developed for the SIT project.</span>
+<span class="sd">If you use all or part of it, please give an appropriate acknowledgment.</span>
+
+<span class="sd">Created: 2013-03-08 by Mikhail Dubrovin</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#--------------------------------</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">getpass</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">strftime</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="c1"># ATTENTION !!!!! ALL LISTS SHOULD BE IN THE SAME ORDER (FOR DICTIONARIES)</span>
+
+<span class="c1"># Enumerated and named parameters</span>
+
+<span class="n">PEDESTALS</span>    <span class="o">=</span> <span class="mi">0</span>
+<span class="n">PIXEL_STATUS</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">PIXEL_RMS</span>    <span class="o">=</span> <span class="mi">2</span>
+<span class="n">PIXEL_GAIN</span>   <span class="o">=</span> <span class="mi">3</span>
+<span class="n">PIXEL_MASK</span>   <span class="o">=</span> <span class="mi">4</span>
+<span class="n">PIXEL_BKGD</span>   <span class="o">=</span> <span class="mi">5</span>
+<span class="n">COMMON_MODE</span>  <span class="o">=</span> <span class="mi">6</span>
+<span class="n">GEOMETRY</span>     <span class="o">=</span> <span class="mi">7</span>
+<span class="n">PIXEL_OFFSET</span> <span class="o">=</span> <span class="mi">8</span>
+<span class="n">PIXEL_DATAST</span> <span class="o">=</span> <span class="mi">9</span>
+
+<span class="n">calib_types</span>  <span class="o">=</span> <span class="p">(</span> <span class="n">PEDESTALS</span><span class="p">,</span>   <span class="n">PIXEL_STATUS</span><span class="p">,</span>   <span class="n">PIXEL_RMS</span><span class="p">,</span>   <span class="n">PIXEL_GAIN</span><span class="p">,</span>   <span class="n">PIXEL_MASK</span><span class="p">,</span>   <span class="n">PIXEL_BKGD</span><span class="p">,</span>   <span class="n">COMMON_MODE</span><span class="p">,</span>   <span class="n">GEOMETRY</span><span class="p">,</span>   <span class="n">PIXEL_OFFSET</span><span class="p">,</span>   <span class="n">PIXEL_DATAST</span><span class="p">)</span>
+<span class="n">calib_names</span>  <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;pedestals&#39;</span><span class="p">,</span> <span class="s1">&#39;pixel_status&#39;</span><span class="p">,</span> <span class="s1">&#39;pixel_rms&#39;</span><span class="p">,</span> <span class="s1">&#39;pixel_gain&#39;</span><span class="p">,</span> <span class="s1">&#39;pixel_mask&#39;</span><span class="p">,</span> <span class="s1">&#39;pixel_bkgd&#39;</span><span class="p">,</span> <span class="s1">&#39;common_mode&#39;</span><span class="p">,</span> <span class="s1">&#39;geometry&#39;</span><span class="p">,</span> <span class="s1">&#39;pixel_offset&#39;</span><span class="p">,</span> <span class="s1">&#39;pixel_datast&#39;</span><span class="p">)</span>
+<span class="n">calib_dtypes</span> <span class="o">=</span> <span class="p">(</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>  <span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">,</span>      <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>  <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>   <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span>     <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>   <span class="n">np</span><span class="o">.</span><span class="n">double</span><span class="p">,</span>     <span class="nb">str</span><span class="p">,</span>        <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>     <span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+
+<span class="n">dic_calib_type_to_name</span>  <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">calib_types</span><span class="p">,</span> <span class="n">calib_names</span><span class="p">))</span>
+<span class="n">dic_calib_name_to_type</span>  <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">calib_names</span><span class="p">,</span> <span class="n">calib_types</span><span class="p">))</span>
+<span class="n">dic_calib_type_to_dtype</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">calib_types</span><span class="p">,</span> <span class="n">calib_dtypes</span><span class="p">))</span>
+
+<span class="n">LOADED</span>     <span class="o">=</span> <span class="mi">1</span>
+<span class="n">DEFAULT</span>    <span class="o">=</span> <span class="mi">2</span>
+<span class="n">UNREADABLE</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">UNDEFINED</span>  <span class="o">=</span> <span class="mi">4</span>
+<span class="n">WRONGSIZE</span>  <span class="o">=</span> <span class="mi">5</span>
+<span class="n">NONFOUND</span>   <span class="o">=</span> <span class="mi">6</span>
+<span class="n">DCSTORE</span>    <span class="o">=</span> <span class="mi">7</span>
+
+<span class="n">calib_statvalues</span> <span class="o">=</span> <span class="p">(</span> <span class="n">LOADED</span><span class="p">,</span>   <span class="n">DEFAULT</span><span class="p">,</span>   <span class="n">UNREADABLE</span><span class="p">,</span>   <span class="n">UNDEFINED</span><span class="p">,</span>   <span class="n">WRONGSIZE</span><span class="p">,</span>   <span class="n">NONFOUND</span><span class="p">,</span>   <span class="n">DCSTORE</span><span class="p">)</span>
+<span class="n">calib_statnames</span>  <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LOADED&#39;</span><span class="p">,</span> <span class="s1">&#39;DEFAULT&#39;</span><span class="p">,</span> <span class="s1">&#39;UNREADABLE&#39;</span><span class="p">,</span> <span class="s1">&#39;UNDEFINED&#39;</span><span class="p">,</span> <span class="s1">&#39;WRONGSIZE&#39;</span><span class="p">,</span> <span class="s1">&#39;NONFOUND&#39;</span><span class="p">,</span> <span class="s1">&#39;DCSTORE&#39;</span><span class="p">)</span>
+
+<span class="n">dic_calib_status_value_to_name</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">calib_statvalues</span><span class="p">,</span> <span class="n">calib_statnames</span><span class="p">))</span>
+<span class="n">dic_calib_status_name_to_value</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">calib_statnames</span><span class="p">,</span>  <span class="n">calib_statvalues</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="n">UNDEFINED</span>   <span class="o">=</span> <span class="mi">0</span>
+<span class="n">CSPAD</span>       <span class="o">=</span> <span class="mi">1</span> 
+<span class="n">CSPAD2X2</span>    <span class="o">=</span> <span class="mi">2</span> 
+<span class="n">PRINCETON</span>   <span class="o">=</span> <span class="mi">3</span> 
+<span class="n">PNCCD</span>       <span class="o">=</span> <span class="mi">4</span> 
+<span class="n">TM6740</span>      <span class="o">=</span> <span class="mi">5</span> 
+<span class="n">OPAL1000</span>    <span class="o">=</span> <span class="mi">6</span> 
+<span class="n">OPAL2000</span>    <span class="o">=</span> <span class="mi">7</span> 
+<span class="n">OPAL4000</span>    <span class="o">=</span> <span class="mi">8</span> 
+<span class="n">OPAL8000</span>    <span class="o">=</span> <span class="mi">9</span> 
+<span class="n">ORCAFL40</span>    <span class="o">=</span> <span class="mi">10</span>
+<span class="n">EPIX</span>        <span class="o">=</span> <span class="mi">11</span>
+<span class="n">EPIX10K</span>     <span class="o">=</span> <span class="mi">12</span>
+<span class="n">EPIX100A</span>    <span class="o">=</span> <span class="mi">13</span>
+<span class="n">FCCD960</span>     <span class="o">=</span> <span class="mi">14</span>
+<span class="n">ANDOR</span>       <span class="o">=</span> <span class="mi">15</span>
+<span class="n">ACQIRIS</span>     <span class="o">=</span> <span class="mi">16</span>
+<span class="n">IMP</span>         <span class="o">=</span> <span class="mi">17</span>
+<span class="n">QUARTZ4A150</span> <span class="o">=</span> <span class="mi">18</span>
+<span class="n">RAYONIX</span>     <span class="o">=</span> <span class="mi">19</span>
+<span class="n">EVR</span>         <span class="o">=</span> <span class="mi">20</span>
+<span class="n">FCCD</span>        <span class="o">=</span> <span class="mi">21</span>
+<span class="n">TIMEPIX</span>     <span class="o">=</span> <span class="mi">22</span>
+<span class="n">FLI</span>         <span class="o">=</span> <span class="mi">23</span>
+<span class="n">PIMAX</span>       <span class="o">=</span> <span class="mi">24</span>
+<span class="n">ANDOR3D</span>     <span class="o">=</span> <span class="mi">25</span>
+<span class="n">JUNGFRAU</span>    <span class="o">=</span> <span class="mi">26</span>
+<span class="n">ZYLA</span>        <span class="o">=</span> <span class="mi">27</span>
+
+<span class="c1">#XAMPS    # N/A data</span>
+<span class="c1">#FEXAMP   # N/A data</span>
+<span class="c1">#PHASICS  # N/A data</span>
+<span class="c1">#OPAL1600 # N/A data</span>
+<span class="c1">#EPIXS    # N/A data</span>
+<span class="c1">#GOTTHARD # N/A data</span>
+<span class="sd">&quot;&quot;&quot; Enumetated detector types&quot;&quot;&quot;</span>
+
+<span class="n">list_of_det_type</span> <span class="o">=</span> <span class="p">(</span><span class="n">UNDEFINED</span><span class="p">,</span> <span class="n">CSPAD</span><span class="p">,</span> <span class="n">CSPAD2X2</span><span class="p">,</span> <span class="n">PRINCETON</span><span class="p">,</span> <span class="n">PNCCD</span><span class="p">,</span> <span class="n">TM6740</span><span class="p">,</span> \
+                    <span class="n">OPAL1000</span><span class="p">,</span> <span class="n">OPAL2000</span><span class="p">,</span> <span class="n">OPAL4000</span><span class="p">,</span> <span class="n">OPAL8000</span><span class="p">,</span> \
+                    <span class="n">ORCAFL40</span><span class="p">,</span> <span class="n">EPIX</span><span class="p">,</span> <span class="n">EPIX10K</span><span class="p">,</span> <span class="n">EPIX100A</span><span class="p">,</span> <span class="n">FCCD960</span><span class="p">,</span> <span class="n">ANDOR</span><span class="p">,</span> <span class="n">ACQIRIS</span><span class="p">,</span> <span class="n">IMP</span><span class="p">,</span> <span class="n">QUARTZ4A150</span><span class="p">,</span> <span class="n">RAYONIX</span><span class="p">,</span>
+                    <span class="n">EVR</span><span class="p">,</span> <span class="n">FCCD</span><span class="p">,</span> <span class="n">TIMEPIX</span><span class="p">,</span> <span class="n">FLI</span><span class="p">,</span> <span class="n">PIMAX</span><span class="p">,</span> <span class="n">ANDOR3D</span><span class="p">,</span> <span class="n">JUNGFRAU</span><span class="p">,</span> <span class="n">ZYLA</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; List of enumetated detector types&quot;&quot;&quot;</span>
+
+<span class="n">list_of_det_names</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;UNDEFINED&#39;</span><span class="p">,</span> <span class="s1">&#39;Cspad&#39;</span><span class="p">,</span> <span class="s1">&#39;Cspad2x2&#39;</span><span class="p">,</span> <span class="s1">&#39;Princeton&#39;</span><span class="p">,</span> <span class="s1">&#39;pnCCD&#39;</span><span class="p">,</span> <span class="s1">&#39;Tm6740&#39;</span><span class="p">,</span> \
+                     <span class="s1">&#39;Opal1000&#39;</span><span class="p">,</span> <span class="s1">&#39;Opal2000&#39;</span><span class="p">,</span> <span class="s1">&#39;Opal4000&#39;</span><span class="p">,</span> <span class="s1">&#39;Opal8000&#39;</span><span class="p">,</span> \
+                     <span class="s1">&#39;OrcaFl40&#39;</span><span class="p">,</span> <span class="s1">&#39;Epix&#39;</span><span class="p">,</span> <span class="s1">&#39;Epix10k&#39;</span><span class="p">,</span> <span class="s1">&#39;Epix100a&#39;</span><span class="p">,</span> <span class="s1">&#39;Fccd960&#39;</span><span class="p">,</span> <span class="s1">&#39;Andor&#39;</span><span class="p">,</span> <span class="s1">&#39;Acqiris&#39;</span><span class="p">,</span> <span class="s1">&#39;Imp&#39;</span><span class="p">,</span> <span class="s1">&#39;Quartz4A150&#39;</span><span class="p">,</span> <span class="s1">&#39;Rayonix&#39;</span><span class="p">,</span>\
+                     <span class="s1">&#39;Evr&#39;</span><span class="p">,</span> <span class="s1">&#39;Fccd&#39;</span><span class="p">,</span> <span class="s1">&#39;Timepix&#39;</span><span class="p">,</span> <span class="s1">&#39;Fli&#39;</span><span class="p">,</span> <span class="s1">&#39;Pimax&#39;</span><span class="p">,</span> <span class="s1">&#39;Andor3d&#39;</span><span class="p">,</span> <span class="s1">&#39;Jungfrau&#39;</span><span class="p">,</span> <span class="s1">&#39;Zyla&#39;</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; List of enumetated detector names&quot;&quot;&quot;</span>
+
+<span class="n">list_of_calib_groups</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;UNDEFINED&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;CsPad::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;CsPad2x2::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Princeton::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;PNCCD::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Epix::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Epix10k::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Epix100a::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Andor::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Acqiris::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Imp::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;EvrData::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Timepix::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Fli::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Pimax::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Andor3d::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Jungfrau::CalibV1&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Camera::CalibV1&#39;</span>
+                        <span class="p">)</span>
+<span class="sd">&quot;&quot;&quot; List of enumetated detector calibration groups&quot;&quot;&quot;</span>
+
+<span class="n">dic_det_type_to_name</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">list_of_det_type</span><span class="p">,</span> <span class="n">list_of_det_names</span><span class="p">))</span>
+<span class="sd">&quot;&quot;&quot; Dictionary for detector type : name&quot;&quot;&quot;</span>
+
+<span class="n">dic_det_type_to_calib_group</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">list_of_det_type</span><span class="p">,</span> <span class="n">list_of_calib_groups</span><span class="p">))</span>
+<span class="sd">&quot;&quot;&quot; Dictionary for detector type : group&quot;&quot;&quot;</span>
+
+<span class="c1">#------------------------------</span>
+<span class="n">bld_names</span> <span class="o">=</span> \
+<span class="p">[</span><span class="s1">&#39;EBeam&#39;</span><span class="p">,</span>
+<span class="s1">&#39;PhaseCavity&#39;</span><span class="p">,</span>
+<span class="s1">&#39;FEEGasDetEnergy&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Nh2Sb1Ipm01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HxxUm6Imb01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HxxUm6Imb02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxDg2Imb01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxDg2Imb02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsDg3Imb03&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsDg3Imb04&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxDg3Imb01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxDg3Imb02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HxxDg1Cam&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxDg2Cam&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxDg3Cam&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsDg3Cam&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxMonCam&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxMonImb01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxMonImb02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HfxMonImb03&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MecLasEm01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MecTctrPip01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MecTcTrDio01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MecXt2Ipm02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MecXt2Ipm03&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MecHxmIpm01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;GMD&#39;</span><span class="p">,</span>
+<span class="s1">&#39;CxiDg1Imb01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;CxiDg2Imb01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;CxiDg2Imb02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;CxiDg4Imb01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;CxiDg1Pim&#39;</span><span class="p">,</span>
+<span class="s1">&#39;CxiDg2Pim&#39;</span><span class="p">,</span>
+<span class="s1">&#39;CxiDg4Pim&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppMonPim0&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppMonPim1&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppSb2Ipm&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppSb3Ipm&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppSb3Pim&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppSb4Pim&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppEndstation0&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppEndstation1&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MecXt2Pim02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;MecXt2Pim03&#39;</span><span class="p">,</span>
+<span class="s1">&#39;CxiDg3Spec&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Nh2Sb1Ipm02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;FeeSpec0&#39;</span><span class="p">,</span>
+<span class="s1">&#39;SxrSpec0&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppSpec0&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsUsrIpm01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsUsrIpm02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsUsrIpm03&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsUsrIpm04&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsSb1Ipm01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsSb1Ipm02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsSb2Ipm01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsSb2Ipm02&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsGonIpm01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsLamIpm01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XppAin01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;XcsAin01&#39;</span><span class="p">,</span>
+<span class="s1">&#39;AmoAin01&#39;</span><span class="p">]</span>
+
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="det_type_from_source"><a class="viewcode-back" href="../index.html#GlobalUtils.det_type_from_source">[docs]</a><span class="k">def</span> <span class="nf">det_type_from_source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Returns enumerated detector type for string source</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">str_src</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="k">if</span>   <span class="s1">&#39;:Cspad.&#39;</span>       <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">CSPAD</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Cspad2x2.&#39;</span>    <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">CSPAD2X2</span>
+    <span class="k">elif</span> <span class="s1">&#39;:pnCCD.&#39;</span>       <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">PNCCD</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Princeton.&#39;</span>   <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">PRINCETON</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Andor.&#39;</span>       <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">ANDOR</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Epix100a.&#39;</span>    <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">EPIX100A</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Epix10k.&#39;</span>     <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">EPIX10K</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Epix.&#39;</span>        <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">EPIX</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Opal1000.&#39;</span>    <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">OPAL1000</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Opal2000.&#39;</span>    <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">OPAL2000</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Opal4000.&#39;</span>    <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">OPAL4000</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Opal8000.&#39;</span>    <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">OPAL8000</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Tm6740.&#39;</span>      <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">TM6740</span>
+    <span class="k">elif</span> <span class="s1">&#39;:OrcaFl40.&#39;</span>    <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">ORCAFL40</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Fccd960.&#39;</span>     <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">FCCD960</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Acqiris.&#39;</span>     <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">ACQIRIS</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Imp.&#39;</span>         <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">IMP</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Quartz4A150.&#39;</span> <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">QUARTZ4A150</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Rayonix.&#39;</span>     <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">RAYONIX</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Evr.&#39;</span>         <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">EVR</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Fccd.&#39;</span>        <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">FCCD</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Timepix.&#39;</span>     <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">TIMEPIX</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Fli.&#39;</span>         <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">FLI</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Pimax.&#39;</span>       <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">PIMAX</span>
+    <span class="k">elif</span> <span class="s1">&#39;:DualAndor.&#39;</span>   <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">ANDOR3D</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Jungfrau.&#39;</span>    <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">JUNGFRAU</span>
+    <span class="k">elif</span> <span class="s1">&#39;:Zyla.&#39;</span>        <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">ZYLA</span>
+    <span class="k">else</span>                            <span class="p">:</span> <span class="k">return</span> <span class="n">UNDEFINED</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">##-----------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="string_from_source"><a class="viewcode-back" href="../index.html#GlobalUtils.string_from_source">[docs]</a><span class="k">def</span> <span class="nf">string_from_source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Returns string like &quot;CxiDs2.0:Cspad.0&quot; from &quot;Source(&#39;DetInfo(CxiDs2.0:Cspad.0)&#39;)&quot; or &quot;Source(&#39;DsaCsPad&#39;)&quot;</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">str_in_quots</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+  <span class="n">str_split</span> <span class="o">=</span> <span class="n">str_in_quots</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span> 
+  <span class="k">return</span> <span class="n">str_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">str_split</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="n">str_in_quots</span></div>
+
+<span class="c1">##-----------------------------</span>
+
+<div class="viewcode-block" id="shape_nda_to_2d"><a class="viewcode-back" href="../index.html#GlobalUtils.shape_nda_to_2d">[docs]</a><span class="k">def</span> <span class="nf">shape_nda_to_2d</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return shape of np.array to reshape to 2-d</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">3</span> <span class="p">:</span> <span class="k">return</span> <span class="n">sh</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+
+<span class="c1">##-----------------------------</span>
+
+<div class="viewcode-block" id="shape_nda_to_3d"><a class="viewcode-back" href="../index.html#GlobalUtils.shape_nda_to_3d">[docs]</a><span class="k">def</span> <span class="nf">shape_nda_to_3d</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return shape of np.array to reshape to 3-d</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">4</span> <span class="p">:</span> <span class="k">return</span> <span class="n">sh</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+
+<span class="c1">##-----------------------------</span>
+
+<div class="viewcode-block" id="reshape_nda_to_2d"><a class="viewcode-back" href="../index.html#GlobalUtils.reshape_nda_to_2d">[docs]</a><span class="k">def</span> <span class="nf">reshape_nda_to_2d</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Reshape np.array to 2-d</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">3</span> <span class="p">:</span> <span class="k">return</span> <span class="n">arr</span>
+    <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">arr</span></div>
+
+<span class="c1">##-----------------------------</span>
+
+<div class="viewcode-block" id="reshape_nda_to_3d"><a class="viewcode-back" href="../index.html#GlobalUtils.reshape_nda_to_3d">[docs]</a><span class="k">def</span> <span class="nf">reshape_nda_to_3d</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Reshape np.array to 3-d</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">4</span> <span class="p">:</span> <span class="k">return</span> <span class="n">arr</span>
+    <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">size</span><span class="o">/</span><span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">sh</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">arr</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="merge_masks"><a class="viewcode-back" href="../index.html#GlobalUtils.merge_masks">[docs]</a><span class="k">def</span> <span class="nf">merge_masks</span><span class="p">(</span><span class="n">mask1</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mask2</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Merging masks using np.logical_and rule: (0,1,0,1)^(0,0,1,1) = (0,0,0,1) </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">mask1</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="n">mask2</span>
+    <span class="k">if</span> <span class="n">mask2</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="n">mask1</span>
+
+    <span class="n">shape1</span> <span class="o">=</span> <span class="n">mask1</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">shape2</span> <span class="o">=</span> <span class="n">mask2</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="k">if</span> <span class="n">shape1</span> <span class="o">!=</span> <span class="n">shape2</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape2</span><span class="p">)</span> <span class="p">:</span> <span class="n">mask2</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape1</span>
+        <span class="k">else</span>                         <span class="p">:</span> <span class="n">mask1</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape2</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask1</span><span class="p">,</span> <span class="n">mask2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mask</span> <span class="k">if</span> <span class="n">dtype</span><span class="o">==</span><span class="n">np</span><span class="o">.</span><span class="n">bool</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="mask_neighbors"><a class="viewcode-back" href="../index.html#GlobalUtils.mask_neighbors">[docs]</a><span class="k">def</span> <span class="nf">mask_neighbors</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">allnbrs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return mask with masked eight neighbor pixels around each 0-bad pixel in input mask.</span>
+
+<span class="sd">       mask    : int - n-dimensional (n&gt;1) array with input mask</span>
+<span class="sd">       allnbrs : bool - False/True - masks 4/8 neighbor pixels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">shape_in</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input mask has less then 2-d, shape = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">shape_in</span><span class="p">))</span>
+
+    <span class="n">mask_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape_in</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="p">:</span>
+        <span class="c1"># mask nearest neighbors</span>
+        <span class="n">mask_out</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span>  <span class="p">:])</span>
+        <span class="n">mask_out</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span>  <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span>  <span class="p">:],</span> <span class="n">mask</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:])</span>
+        <span class="n">mask_out</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mask</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">])</span>
+        <span class="n">mask_out</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">],</span> <span class="n">mask</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">allnbrs</span> <span class="p">:</span>
+          <span class="c1"># mask diagonal neighbors</span>
+          <span class="n">mask_out</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">])</span>
+          <span class="n">mask_out</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mask</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">])</span>
+          <span class="n">mask_out</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">],</span> <span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+          <span class="n">mask_out</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">],</span> <span class="n">mask</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">else</span> <span class="p">:</span> <span class="c1"># shape&gt;2</span>
+
+        <span class="n">mask_out</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape_nda_to_3d</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>       
+
+        <span class="c1"># mask nearest neighbors</span>
+        <span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:],</span> <span class="n">mask</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span>  <span class="p">:])</span>
+        <span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span>  <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:,</span>  <span class="p">:],</span> <span class="n">mask</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,:])</span>
+        <span class="n">mask_out</span><span class="p">[:,</span> <span class="p">:,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span> <span class="p">:,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mask</span><span class="p">[:,</span> <span class="p">:,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">])</span>
+        <span class="n">mask_out</span><span class="p">[:,</span> <span class="p">:,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span> <span class="p">:,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">],</span> <span class="n">mask</span><span class="p">[:,</span> <span class="p">:,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">allnbrs</span> <span class="p">:</span>
+          <span class="c1"># mask diagonal neighbors</span>
+          <span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mask</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">])</span>
+          <span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">mask</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">])</span>
+          <span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">],</span> <span class="n">mask</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+          <span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">mask_out</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:</span>  <span class="p">,</span><span class="mi">1</span><span class="p">:</span>  <span class="p">],</span> <span class="n">mask</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">mask_out</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape_in</span>
+
+    <span class="k">return</span> <span class="n">mask_out</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="mask_edges"><a class="viewcode-back" href="../index.html#GlobalUtils.mask_edges">[docs]</a><span class="k">def</span> <span class="nf">mask_edges</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">mrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mcols</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Return mask with a requested number of row and column pixels masked - set to 0.</span>
+<span class="sd">       mask  : int - n-dimensional (n&gt;1) array with input mask</span>
+<span class="sd">       mrows : int - number of edge rows to mask</span>
+<span class="sd">       mcols : int - number of edge columns to mask</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sh</span> <span class="o">=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Input mask has less then 2-d, shape = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">sh</span><span class="p">))</span>
+
+    <span class="n">mask_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">dtype</span><span class="p">)</span>
+
+    <span class="c1"># print &#39;shape:&#39;, sh</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sh</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="p">:</span>
+        <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">sh</span>
+
+        <span class="k">if</span> <span class="n">mrows</span> <span class="o">&gt;</span> <span class="n">rows</span> <span class="p">:</span> 
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Requested number of edge rows=</span><span class="si">%d</span><span class="s1"> to mask exceeds 2-d, shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mrows</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sh</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">mcols</span> <span class="o">&gt;</span> <span class="n">cols</span> <span class="p">:</span> 
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Requested number of edge columns=</span><span class="si">%d</span><span class="s1"> to mask exceeds 2-d, shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mcols</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sh</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">mrows</span><span class="o">&gt;</span><span class="mi">0</span> <span class="p">:</span>
+          <span class="c1"># mask edge rows</span>
+          <span class="n">mask_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">mrows</span><span class="p">,</span><span class="n">cols</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+          <span class="n">mask_out</span><span class="p">[:</span><span class="n">mrows</span> <span class="p">,:]</span> <span class="o">=</span> <span class="n">mask_rows</span>
+          <span class="n">mask_out</span><span class="p">[</span><span class="o">-</span><span class="n">mrows</span><span class="p">:,:]</span> <span class="o">=</span> <span class="n">mask_rows</span>
+
+        <span class="k">if</span> <span class="n">mcols</span><span class="o">&gt;</span><span class="mi">0</span> <span class="p">:</span>
+          <span class="c1"># mask edge colss</span>
+          <span class="n">mask_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">rows</span><span class="p">,</span><span class="n">mcols</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+          <span class="n">mask_out</span><span class="p">[:,:</span><span class="n">mcols</span> <span class="p">]</span> <span class="o">=</span> <span class="n">mask_cols</span>
+          <span class="n">mask_out</span><span class="p">[:,</span><span class="o">-</span><span class="n">mcols</span><span class="p">:]</span> <span class="o">=</span> <span class="n">mask_cols</span>
+
+    <span class="k">else</span> <span class="p">:</span> <span class="c1"># shape&gt;2</span>
+        <span class="n">mask_out</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape_nda_to_3d</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>       
+
+        <span class="n">segs</span><span class="p">,</span> <span class="n">rows</span><span class="p">,</span> <span class="n">cols</span> <span class="o">=</span> <span class="n">mask_out</span><span class="o">.</span><span class="n">shape</span>
+
+        <span class="k">if</span> <span class="n">mrows</span> <span class="o">&gt;</span> <span class="n">rows</span> <span class="p">:</span> 
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Requested number of edge rows=</span><span class="si">%d</span><span class="s1"> to mask exceeds 2-d, shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mrows</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sh</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">mcols</span> <span class="o">&gt;</span> <span class="n">cols</span> <span class="p">:</span> 
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Requested number of edge columns=</span><span class="si">%d</span><span class="s1"> to mask exceeds 2-d, shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mcols</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sh</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="n">mrows</span><span class="o">&gt;</span><span class="mi">0</span> <span class="p">:</span>
+          <span class="c1"># mask edge rows</span>
+          <span class="n">mask_rows</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">segs</span><span class="p">,</span><span class="n">mrows</span><span class="p">,</span><span class="n">cols</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+          <span class="n">mask_out</span><span class="p">[:,</span> <span class="p">:</span><span class="n">mrows</span> <span class="p">,:]</span> <span class="o">=</span> <span class="n">mask_rows</span>
+          <span class="n">mask_out</span><span class="p">[:,</span> <span class="o">-</span><span class="n">mrows</span><span class="p">:,:]</span> <span class="o">=</span> <span class="n">mask_rows</span>
+
+        <span class="k">if</span> <span class="n">mcols</span><span class="o">&gt;</span><span class="mi">0</span> <span class="p">:</span>
+          <span class="c1"># mask edge colss</span>
+          <span class="n">mask_cols</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">segs</span><span class="p">,</span><span class="n">rows</span><span class="p">,</span><span class="n">mcols</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">mask</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+          <span class="n">mask_out</span><span class="p">[:,</span> <span class="p">:,:</span><span class="n">mcols</span> <span class="p">]</span> <span class="o">=</span> <span class="n">mask_cols</span>
+          <span class="n">mask_out</span><span class="p">[:,</span> <span class="p">:,</span><span class="o">-</span><span class="n">mcols</span><span class="p">:]</span> <span class="o">=</span> <span class="n">mask_cols</span>
+
+        <span class="n">mask_out</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">sh</span>
+
+    <span class="k">return</span> <span class="n">mask_out</span></div>
+
+<span class="c1">##-----------------------------</span>
+
+<div class="viewcode-block" id="evaluate_limits"><a class="viewcode-back" href="../index.html#GlobalUtils.evaluate_limits">[docs]</a><span class="k">def</span> <span class="nf">evaluate_limits</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">nneg</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">npos</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">lim_lo</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">lim_hi</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">verbos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Evaluates low and high limit of the array, which are used to find bad pixels.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ave</span><span class="p">,</span> <span class="n">std</span> <span class="o">=</span> <span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">mean</span><span class="p">(),</span> <span class="n">arr</span><span class="o">.</span><span class="n">std</span><span class="p">())</span> <span class="k">if</span> <span class="p">(</span><span class="n">nneg</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">npos</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">lo</span> <span class="o">=</span> <span class="n">ave</span><span class="o">-</span><span class="n">nneg</span><span class="o">*</span><span class="n">std</span> <span class="k">if</span> <span class="n">nneg</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="n">lim_lo</span>
+    <span class="n">hi</span> <span class="o">=</span> <span class="n">ave</span><span class="o">+</span><span class="n">npos</span><span class="o">*</span><span class="n">std</span> <span class="k">if</span> <span class="n">npos</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="n">lim_hi</span>
+    <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">lim_lo</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">hi</span><span class="p">,</span> <span class="n">lim_hi</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verbos</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1"> ave, std = </span><span class="si">%.3f</span><span class="s1">, </span><span class="si">%.3f</span><span class="s1">  low, high limits = </span><span class="si">%.3f</span><span class="s1">, </span><span class="si">%.3f</span><span class="s1">&#39;</span><span class="o">%</span>\
+              <span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">ave</span><span class="p">,</span> <span class="n">std</span><span class="p">,</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span></div>
+
+<span class="c1">##-----------------------------</span>
+
+<div class="viewcode-block" id="str_tstamp"><a class="viewcode-back" href="../index.html#GlobalUtils.str_tstamp">[docs]</a><span class="k">def</span> <span class="nf">str_tstamp</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span> <span class="n">time_sec</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns string timestamp for specified format and time in sec or current time by default</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">strftime</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">localtime</span><span class="p">(</span><span class="n">time_sec</span><span class="p">))</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_enviroment"><a class="viewcode-back" href="../index.html#GlobalUtils.get_enviroment">[docs]</a><span class="k">def</span> <span class="nf">get_enviroment</span><span class="p">(</span><span class="n">env</span><span class="o">=</span><span class="s1">&#39;USER&#39;</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns the value of specified by string name environment variable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">env</span><span class="p">]</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_login"><a class="viewcode-back" href="../index.html#GlobalUtils.get_login">[docs]</a><span class="k">def</span> <span class="nf">get_login</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns login name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#return os.getlogin()</span>
+    <span class="k">return</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_hostname"><a class="viewcode-back" href="../index.html#GlobalUtils.get_hostname">[docs]</a><span class="k">def</span> <span class="nf">get_hostname</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns login name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#return os.uname()[1]</span>
+    <span class="k">return</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_cwd"><a class="viewcode-back" href="../index.html#GlobalUtils.get_cwd">[docs]</a><span class="k">def</span> <span class="nf">get_cwd</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns current working directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">create_directory</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span> 
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Directory exists: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dir</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Directory created: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dir</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="create_directory_with_mode"><a class="viewcode-back" href="../index.html#GlobalUtils.create_directory_with_mode">[docs]</a><span class="k">def</span> <span class="nf">create_directory_with_mode</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0777</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Creates directory and sets its mode&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Directory exists: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dir</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Directory created: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dir</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="create_path"><a class="viewcode-back" href="../index.html#GlobalUtils.create_path">[docs]</a><span class="k">def</span> <span class="nf">create_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0777</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span> 
+    <span class="sd">&quot;&quot;&quot;Creates missing path of specified depth from the beginning</span>
+<span class="sd">       e.g. for &#39;/reg/g/psdm/logs/calibman/2016/07/log-file-name.txt&#39;</span>
+<span class="sd">       or &#39;/reg/d/psdm/cxi/cxi11216/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data&#39;</span>
+
+<span class="sd">       Returns True if path to file exists, False othervise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;create_path: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span>
+
+    <span class="c1">#subdirs = path.strip(&#39;/&#39;).split(&#39;/&#39;)</span>
+    <span class="n">subdirs</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">cpath</span> <span class="o">=</span> <span class="n">subdirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">sd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subdirs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">i</span><span class="o">&gt;</span><span class="mi">0</span> <span class="p">:</span> <span class="n">cpath</span> <span class="o">+=</span> <span class="s1">&#39;/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span> <span class="n">sd</span> 
+        <span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">depth</span> <span class="p">:</span> <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">cpath</span><span class="o">==</span><span class="s1">&#39;&#39;</span> <span class="p">:</span> <span class="k">continue</span>
+        <span class="n">create_directory_with_mode</span><span class="p">(</span><span class="n">cpath</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cpath</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="save_textfile"><a class="viewcode-back" href="../index.html#GlobalUtils.save_textfile">[docs]</a><span class="k">def</span> <span class="nf">save_textfile</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Saves text in file specified by path. mode: &#39;w&#39;-write, &#39;a&#39;-append </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> </div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="load_textfile"><a class="viewcode-back" href="../index.html#GlobalUtils.load_textfile">[docs]</a><span class="k">def</span> <span class="nf">load_textfile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns text file as a str object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">recs</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c1"># f.readlines()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span> 
+    <span class="k">return</span> <span class="n">recs</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">calib_dir</span><span class="p">(</span><span class="n">env</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">cdir</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">calibDir</span><span class="p">()</span>
+    <span class="c1">#if cdir == &#39;/reg/d/psdm///calib&#39; :</span>
+    <span class="c1">#    return None</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cdir</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="n">cdir</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">exp_name</span><span class="p">(</span><span class="n">env</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">exp</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">experiment</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">exp</span><span class="o">==</span><span class="s1">&#39;&#39;</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">exp</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="log_rec_on_start"><a class="viewcode-back" href="../index.html#GlobalUtils.log_rec_on_start">[docs]</a><span class="k">def</span> <span class="nf">log_rec_on_start</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns (str) record containing timestamp, login, host, cwd, and command line</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> user:</span><span class="si">%s</span><span class="s1">@</span><span class="si">%s</span><span class="s1"> cwd:</span><span class="si">%s</span><span class="se">\n</span><span class="s1">  command:</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+           <span class="p">(</span><span class="n">str_tstamp</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">),</span> <span class="n">get_login</span><span class="p">(),</span> <span class="n">get_hostname</span><span class="p">(),</span> <span class="n">get_cwd</span><span class="p">(),</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">))</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="add_rec_to_log"><a class="viewcode-back" href="../index.html#GlobalUtils.add_rec_to_log">[docs]</a><span class="k">def</span> <span class="nf">add_rec_to_log</span><span class="p">(</span><span class="n">lfname</span><span class="p">,</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verbos</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Adds record rec to the log file with path lfname. If path does not exist, it is created beginning from depth=5.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">lfname</span><span class="p">,</span> <span class="s1">&#39;#YYYY-MM&#39;</span><span class="p">,</span> <span class="n">str_tstamp</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;%Y/%m&#39;</span><span class="p">))</span>
+
+    <span class="c1">#print &#39;XXX:add_rec_to_log, path=%s&#39; % path</span>
+
+    <span class="k">if</span> <span class="n">create_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0777</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="n">verbos</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;echo &quot;</span><span class="si">%s</span><span class="s1">&quot; &gt;&gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbos</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;command: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cmd</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="mi">0666</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">alias_for_src_name</span><span class="p">(</span><span class="n">env</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">ckeys</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">configStore</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="n">srcs</span>  <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">src</span><span class="p">()</span>   <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ckeys</span><span class="p">]</span>
+    <span class="n">alias</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">alias</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ckeys</span><span class="p">]</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">srcs</span><span class="p">,</span> <span class="n">alias</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">s</span><span class="p">,</span><span class="n">a</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;src: </span><span class="si">%40s</span><span class="s1">   alias: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+    <span class="c1">#print keysalias</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="replace"><a class="viewcode-back" href="../index.html#GlobalUtils.replace">[docs]</a><span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="n">pattern</span><span class="p">,</span> <span class="n">subst</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;If pattern in the template replaces it with subst.</span>
+<span class="sd">       Returns str object template with replaced patterns. </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span> 
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">subst</span><span class="p">,</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="n">template</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="calib_fname_template"><a class="viewcode-back" href="../index.html#GlobalUtils.calib_fname_template">[docs]</a><span class="k">def</span> <span class="nf">calib_fname_template</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">runnum</span><span class="p">,</span> <span class="n">tsec</span><span class="p">,</span> <span class="n">tnsec</span><span class="p">,</span> <span class="n">fid</span><span class="p">,</span> <span class="n">tsdate</span><span class="p">,</span> <span class="n">tstime</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">nevts</span><span class="p">,</span> <span class="n">ofname</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replaces parts of the file name ofname specified as</span>
+<span class="sd">       #src, #exp, #run, #evts, #type, #date, #time, #fid, #sec, #nsec</span>
+<span class="sd">       with actual values.</span>
+
+<span class="sd">       RETURNS</span>
+
+<span class="sd">       - template (str) - file name template, e.g.: nda-cxi11216-r0009-CxiEndstation.0:Jungfrau.0-e000010-%s.txt,</span>
+<span class="sd">                        where %s stands for supplied late type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">ofname</span><span class="p">,</span>   <span class="s1">&#39;#src&#39;</span><span class="p">,</span>  <span class="n">src</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;#exp&#39;</span><span class="p">,</span>  <span class="n">exp</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;#run&#39;</span><span class="p">,</span>  <span class="s1">&#39;r</span><span class="si">%04d</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">runnum</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;#type&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;#date&#39;</span><span class="p">,</span> <span class="n">tsdate</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;#time&#39;</span><span class="p">,</span> <span class="n">tstime</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;#fid&#39;</span><span class="p">,</span>  <span class="s1">&#39;</span><span class="si">%06d</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">fid</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;#sec&#39;</span><span class="p">,</span>  <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tsec</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;#nsec&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%09d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tnsec</span><span class="p">)</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">template</span><span class="p">,</span> <span class="s1">&#39;#evts&#39;</span><span class="p">,</span> <span class="s1">&#39;e</span><span class="si">%06d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nevts</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="ow">in</span> <span class="n">template</span> <span class="p">:</span> <span class="n">template</span> <span class="o">+=</span> <span class="s1">&#39;-</span><span class="si">%s</span><span class="s1">&#39;</span>
+    <span class="k">return</span> <span class="n">template</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="history_record"><a class="viewcode-back" href="../index.html#GlobalUtils.history_record">[docs]</a><span class="k">def</span> <span class="nf">history_record</span><span class="p">(</span><span class="n">ifname</span><span class="p">,</span> <span class="n">ctypedir</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">ofname</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns (str) history record about deployed constants.</span>
+
+<span class="sd">    Parameters</span>
+
+<span class="sd">    - ifname : str - input file name, e.g.: &#39;fname.txt&#39;</span>
+<span class="sd">    - ctypedir : str - path to calibtype directory, e.g. &#39;/some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/&#39;</span>
+<span class="sd">    - ctype : str - calibration type, e.g.: &#39;pedestals&#39;</span>
+<span class="sd">    - ofname : str - output file name, e.g.: &#39;123-end.data&#39;</span>
+<span class="sd">    - comment : str - any comment</span>
+<span class="sd">    - verbos : bool - verbosity</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;file:</span><span class="si">%s</span><span class="s1"> copy_of:</span><span class="si">%s</span><span class="s1"> ctype:</span><span class="si">%s</span><span class="s1"> user:</span><span class="si">%s</span><span class="s1"> host:</span><span class="si">%s</span><span class="s1"> cptime:</span><span class="si">%s</span><span class="s1"> cwd:</span><span class="si">%s</span><span class="s1"> cmt:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> \
+           <span class="p">(</span><span class="n">ofname</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">14</span><span class="p">),</span>
+           <span class="n">ifname</span><span class="p">,</span>
+           <span class="n">ctype</span><span class="p">,</span>
+           <span class="n">get_login</span><span class="p">(),</span>
+           <span class="n">get_hostname</span><span class="p">(),</span>
+           <span class="n">str_tstamp</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">),</span>
+           <span class="n">get_cwd</span><span class="p">(),</span>
+           <span class="n">comment</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="path_to_history_file"><a class="viewcode-back" href="../index.html#GlobalUtils.path_to_history_file">[docs]</a><span class="k">def</span> <span class="nf">path_to_history_file</span><span class="p">(</span><span class="n">ctypedir</span><span class="p">,</span> <span class="n">ctype</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns path to HISTORY file in the calib store.</span>
+<span class="sd">       e.g. /some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/HYSTORY</span>
+<span class="sd">       See parameters description in :py:meth:`history_record`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/HISTORY&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ctypedir</span><span class="p">,</span> <span class="n">ctype</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="path_to_calib_file"><a class="viewcode-back" href="../index.html#GlobalUtils.path_to_calib_file">[docs]</a><span class="k">def</span> <span class="nf">path_to_calib_file</span><span class="p">(</span><span class="n">ctypedir</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">ofname</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns path to file wirh calibration constants in the calib store.</span>
+<span class="sd">       e.g. /some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data</span>
+<span class="sd">       See parameters description in :py:meth:`history_record`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ctypedir</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">ofname</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="command_deploy_file"><a class="viewcode-back" href="../index.html#GlobalUtils.command_deploy_file">[docs]</a><span class="k">def</span> <span class="nf">command_deploy_file</span><span class="p">(</span><span class="n">ifname</span><span class="p">,</span> <span class="n">ofname</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns command to deploys file with calibration constants in the calib store.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;cat </span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ifname</span><span class="p">,</span> <span class="n">ofname</span><span class="p">)</span> <span class="c1"># &gt; stands for copy</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="command_add_record_to_file"><a class="viewcode-back" href="../index.html#GlobalUtils.command_add_record_to_file">[docs]</a><span class="k">def</span> <span class="nf">command_add_record_to_file</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns command to add record to file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s1">&#39;echo &quot;</span><span class="si">%s</span><span class="s1">&quot; &gt;&gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span> <span class="c1"># &gt;&gt; stands for append</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="deploy_file"><a class="viewcode-back" href="../index.html#GlobalUtils.deploy_file">[docs]</a><span class="k">def</span> <span class="nf">deploy_file</span><span class="p">(</span><span class="n">ifname</span><span class="p">,</span> <span class="n">ctypedir</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">ofname</span><span class="p">,</span> <span class="n">lfname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verbos</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Deploys file with calibration constants in the calib store, adds history record in file and in logfile.</span>
+
+<span class="sd">    Parameters</span>
+
+<span class="sd">    - ifname : str - input file name, e.g.: &#39;fname.txt&#39;</span>
+<span class="sd">    - ctypedir : str - path to calibtype directory, e.g. &#39;/some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/&#39;</span>
+<span class="sd">    - ctype : str - calibration type, e.g.: &#39;pedestals&#39;</span>
+<span class="sd">    - ofname : str - output file name, e.g.: &#39;123-end.data&#39;</span>
+<span class="sd">    - lfname : str - log file path or None, to add history record</span>
+<span class="sd">    - verbos : bool - verbosity</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path_clb</span> <span class="o">=</span> <span class="n">path_to_calib_file</span><span class="p">(</span><span class="n">ctypedir</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">ofname</span><span class="p">)</span>
+    <span class="n">path_his</span> <span class="o">=</span> <span class="n">path_to_history_file</span><span class="p">(</span><span class="n">ctypedir</span><span class="p">,</span> <span class="n">ctype</span><span class="p">)</span>
+
+    <span class="n">dep</span> <span class="o">=</span> <span class="mi">6</span> <span class="k">if</span> <span class="s1">&#39;/reg/d/psdm/&#39;</span> <span class="ow">in</span> <span class="n">path_clb</span> <span class="k">else</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="n">create_path</span><span class="p">(</span><span class="n">path_clb</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">dep</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">02770</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="n">verbos</span><span class="p">)</span> <span class="p">:</span> <span class="c1"># mode=02770 makes drwxrws---+</span>
+
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">command_deploy_file</span><span class="p">(</span><span class="n">ifname</span><span class="p">,</span> <span class="n">path_clb</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s1">&#39;cmd: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cmd</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+        <span class="n">rec</span> <span class="o">=</span> <span class="n">history_record</span><span class="p">(</span><span class="n">ifname</span><span class="p">,</span> <span class="n">ctypedir</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">ofname</span><span class="p">,</span> <span class="n">comment</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">command_add_record_to_file</span><span class="p">(</span><span class="n">rec</span><span class="p">,</span> <span class="n">path_his</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbos</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;cmd: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cmd</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lfname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span> <span class="n">add_rec_to_log</span><span class="p">(</span><span class="n">lfname</span><span class="p">,</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">rec</span><span class="p">,</span> <span class="n">verbos</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_mask_neighbors_2d</span><span class="p">(</span><span class="n">allnbrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pyimgalgos.NDArrGenerators</span> <span class="k">import</span> <span class="n">random_exponential</span>
+    <span class="kn">import</span> <span class="nn">pyimgalgos.Graphics</span> <span class="k">as</span> <span class="nn">gr</span>
+
+    <span class="n">randexp</span> <span class="o">=</span> <span class="n">random_exponential</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">40</span><span class="p">,</span><span class="mi">60</span><span class="p">),</span> <span class="n">a0</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fig</span>  <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Random 2-d mask&#39;</span><span class="p">)</span>
+    <span class="n">axim1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span>  <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+    <span class="n">axcb1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.452</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+
+    <span class="n">axim2</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.55</span><span class="p">,</span>  <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+    <span class="n">axcb2</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.952</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">select</span><span class="p">((</span><span class="n">randexp</span><span class="o">&gt;</span><span class="mi">6</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mask_nbrs</span> <span class="o">=</span> <span class="n">mask_neighbors</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">allnbrs</span><span class="p">)</span>
+    <span class="n">img1</span> <span class="o">=</span> <span class="n">mask</span> <span class="c1"># mask # randexp</span>
+    <span class="n">img2</span> <span class="o">=</span> <span class="n">mask_nbrs</span> <span class="c1"># mask # randexp</span>
+    
+    <span class="n">imsh1</span><span class="p">,</span> <span class="n">cbar1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">imshow_cbar</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axim1</span><span class="p">,</span> <span class="n">axcb1</span><span class="p">,</span> <span class="n">img1</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+    <span class="n">imsh2</span><span class="p">,</span> <span class="n">cbar2</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">imshow_cbar</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axim2</span><span class="p">,</span> <span class="n">axcb2</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span>  <span class="n">amin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+    <span class="n">gr</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_mask_neighbors_3d</span><span class="p">(</span><span class="n">allnbrs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pyimgalgos.NDArrGenerators</span> <span class="k">import</span> <span class="n">random_exponential</span>
+    <span class="kn">import</span> <span class="nn">pyimgalgos.Graphics</span> <span class="k">as</span> <span class="nn">gr</span>
+
+    <span class="c1">#randexp = random_exponential(shape=(2,2,30,80), a0=1)</span>
+    <span class="n">randexp</span> <span class="o">=</span> <span class="n">random_exponential</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">30</span><span class="p">,</span><span class="mi">80</span><span class="p">),</span> <span class="n">a0</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">fig</span>  <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Random &gt; 2-d mask&#39;</span><span class="p">)</span>
+    <span class="n">axim1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span>  <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+    <span class="n">axcb1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.452</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+
+    <span class="n">axim2</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.55</span><span class="p">,</span>  <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.40</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+    <span class="n">axcb2</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.952</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">select</span><span class="p">((</span><span class="n">randexp</span><span class="o">&gt;</span><span class="mi">6</span><span class="p">,),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mask_nbrs</span> <span class="o">=</span> <span class="n">mask_neighbors</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">allnbrs</span><span class="p">)</span>
+
+    <span class="n">img1</span> <span class="o">=</span> <span class="n">reshape_nda_to_2d</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+    <span class="n">img2</span> <span class="o">=</span> <span class="n">reshape_nda_to_2d</span><span class="p">(</span><span class="n">mask_nbrs</span><span class="p">)</span>
+    
+    <span class="n">imsh1</span><span class="p">,</span> <span class="n">cbar1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">imshow_cbar</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axim1</span><span class="p">,</span> <span class="n">axcb1</span><span class="p">,</span> <span class="n">img1</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+    <span class="n">imsh2</span><span class="p">,</span> <span class="n">cbar2</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">imshow_cbar</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axim2</span><span class="p">,</span> <span class="n">axcb2</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+    <span class="n">gr</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_mask_edges_2d</span><span class="p">(</span><span class="n">mrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mcols</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pyimgalgos.NDArrGenerators</span> <span class="k">import</span> <span class="n">random_exponential</span>
+    <span class="kn">import</span> <span class="nn">pyimgalgos.Graphics</span> <span class="k">as</span> <span class="nn">gr</span>
+
+    <span class="n">fig</span>  <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Mask edges 2-d&#39;</span><span class="p">)</span>
+    <span class="n">axim1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span>  <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.87</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+    <span class="n">axcb1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.922</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">20</span><span class="p">,</span><span class="mi">30</span><span class="p">))</span>
+    <span class="n">mask_out</span> <span class="o">=</span> <span class="n">mask_edges</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">mrows</span><span class="p">,</span> <span class="n">mcols</span><span class="p">)</span>
+
+    <span class="n">img1</span> <span class="o">=</span> <span class="n">mask_out</span>
+    <span class="n">imsh1</span><span class="p">,</span> <span class="n">cbar1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">imshow_cbar</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axim1</span><span class="p">,</span> <span class="n">axcb1</span><span class="p">,</span> <span class="n">img1</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+    <span class="n">gr</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_mask_edges_3d</span><span class="p">(</span><span class="n">mrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mcols</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pyimgalgos.NDArrGenerators</span> <span class="k">import</span> <span class="n">random_exponential</span>
+    <span class="kn">import</span> <span class="nn">pyimgalgos.Graphics</span> <span class="k">as</span> <span class="nn">gr</span>
+
+    <span class="n">fig</span>  <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">6</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Mask edges 2-d&#39;</span><span class="p">)</span>
+    <span class="n">axim1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span>  <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.87</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+    <span class="n">axcb1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">add_axes</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axwin</span><span class="o">=</span><span class="p">(</span><span class="mf">0.922</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.91</span><span class="p">))</span>
+
+    <span class="c1">#mask = np.ones((2,2,20,30))</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">30</span><span class="p">))</span>
+    <span class="n">mask_out</span> <span class="o">=</span> <span class="n">mask_edges</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">mrows</span><span class="p">,</span> <span class="n">mcols</span><span class="p">)</span>
+
+    <span class="n">img1</span> <span class="o">=</span> <span class="n">reshape_nda_to_2d</span><span class="p">(</span><span class="n">mask_out</span><span class="p">)</span>
+    <span class="n">imsh1</span><span class="p">,</span> <span class="n">cbar1</span> <span class="o">=</span> <span class="n">gr</span><span class="o">.</span><span class="n">imshow_cbar</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">axim1</span><span class="p">,</span> <span class="n">axcb1</span><span class="p">,</span> <span class="n">img1</span><span class="p">,</span> <span class="n">amin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">amax</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+    <span class="n">gr</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    
+<span class="c1">#------------------------------</span>
+
+<span class="c1">#def src_name_from_alias(env, alias=&#39;&#39;) :</span>
+<span class="c1">#    amap = env.aliasMap()</span>
+<span class="c1">#    for s in amap.srcs() :</span>
+<span class="c1">#        str_s = str(s) # &#39;MfxEndstation.0:Rayonix.0&#39;</span>
+<span class="c1">#        print s, amap.src(str_s), &#39; alias =&quot;%s&quot;&#39; % amap.alias(amap.src(str_s))</span>
+<span class="c1">#</span>
+<span class="c1">#    #psasrc = amap.src(str_src)</span>
+<span class="c1">#    #source  = src if amap.alias(psasrc) == &#39;&#39; else amap.src(str_src)</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">do_test</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;get_enviroment(USER) : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">get_enviroment</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_login()          : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">get_login</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_hostname()       : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">get_hostname</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_cwd()            : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">get_cwd</span><span class="p">()</span>
+    <span class="c1">#print &#39;: %s&#39; % </span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
+
+      <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span> <span class="p">:</span> <span class="n">test_mask_neighbors_2d</span><span class="p">(</span><span class="n">allnbrs</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;2&#39;</span> <span class="p">:</span> <span class="n">test_mask_neighbors_2d</span><span class="p">(</span><span class="n">allnbrs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;3&#39;</span> <span class="p">:</span> <span class="n">test_mask_neighbors_3d</span><span class="p">(</span><span class="n">allnbrs</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;4&#39;</span> <span class="p">:</span> <span class="n">test_mask_neighbors_3d</span><span class="p">(</span><span class="n">allnbrs</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;5&#39;</span> <span class="p">:</span> <span class="n">test_mask_edges_2d</span><span class="p">(</span><span class="n">mrows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">mcols</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;6&#39;</span> <span class="p">:</span> <span class="n">test_mask_edges_2d</span><span class="p">(</span><span class="n">mrows</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mcols</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;7&#39;</span> <span class="p">:</span> <span class="n">test_mask_edges_3d</span><span class="p">(</span><span class="n">mrows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">mcols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;8&#39;</span> <span class="p">:</span> <span class="n">test_mask_edges_3d</span><span class="p">(</span><span class="n">mrows</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">mcols</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+    <span class="n">do_test</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Mikhail Dubrovin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

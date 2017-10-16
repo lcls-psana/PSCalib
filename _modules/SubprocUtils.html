@@ -1,0 +1,236 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>SubprocUtils &#8212; PSCalib-doc 1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">PSCalib-doc 1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for SubprocUtils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#------------------------------</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="nn">subprocess</span> <span class="c1"># for subprocess.Popen</span>
+<span class="c1">#import PSCalib.GlobalUtils as gu</span>
+<span class="kn">from</span> <span class="nn">PSCalib.RunProcUtils</span> <span class="k">import</span> <span class="n">log_file</span><span class="p">,</span> <span class="n">append_log_file</span><span class="p">,</span> <span class="n">exp_run_new</span><span class="p">,</span> <span class="n">exp_run_new_under_control</span><span class="p">,</span> <span class="n">dict_exp_run_old</span><span class="p">,</span> <span class="n">print_exp_runs_old</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:py:class:`SubprocUtils` contains utils to use subproccesses in specific apps</span>
+<span class="sd">=============================================================================</span>
+
+<span class="sd">Usage::</span>
+
+<span class="sd">    # Import</span>
+<span class="sd">    import PSCalib.SubprocUtils as su</span>
+
+<span class="sd">    # Parameters</span>
+
+<span class="sd">    # Methods</span>
+<span class="sd">    dsn   = su.dsname(exp=&#39;xpptut15&#39;, run=&#39;0001&#39;)</span>
+
+<span class="sd">Methods </span>
+<span class="sd">  * :meth:`dsname`</span>
+<span class="sd">  * ...</span>
+
+<span class="sd">This software was developed for the SIT project.</span>
+<span class="sd">If you use all or part of it, please give an appropriate acknowledgment.</span>
+
+<span class="sd">Created on 2017-10-11 by Mikhail Dubrovin</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">shell</span><span class="o">=</span><span class="n">shell</span><span class="p">)</span> <span class="c1"># , stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="subproc"><a class="viewcode-back" href="../index.html#SubprocUtils.subproc">[docs]</a><span class="k">def</span> <span class="nf">subproc</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;e.g., command=&#39;bsub -q psananehq -o log-ls.txt ls -l]</span>
+<span class="sd">       command_seq=[&#39;bsub&#39;, &#39;-q&#39;, cp.batch_queue, &#39;-o&#39;, &#39;log-ls.txt&#39;, &#39;ls -l&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="n">shell</span><span class="p">)</span> <span class="c1">#, stdin=subprocess.STDIN</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c1"># reads entire file</span>
+    <span class="n">err</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c1"># reads entire file</span>
+    <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">err</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">proc_exp_runs</span><span class="p">(</span><span class="n">exp_runs</span><span class="p">,</span> <span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">,</span> <span class="n">add_to_log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,(</span><span class="n">exp</span><span class="p">,</span><span class="n">run</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">exp_runs</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">dsname</span> <span class="o">=</span> <span class="s1">&#39;exp=</span><span class="si">%s</span><span class="s1">:run=</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">run</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">))</span>
+        <span class="n">logname</span> <span class="o">=</span> <span class="n">log_file</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">procname</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%4d</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%4s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">exp</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">10</span><span class="p">),</span> <span class="n">run</span><span class="p">,</span> <span class="n">dsname</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">22</span><span class="p">),</span> <span class="n">logname</span><span class="p">)</span>
+        <span class="c1">#--------------</span>
+        <span class="k">if</span> <span class="n">add_to_log</span> <span class="p">:</span> <span class="n">append_log_file</span><span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="n">procname</span><span class="p">,</span> <span class="p">[</span><span class="n">run</span><span class="p">,])</span>
+        <span class="c1">#--------------</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> new runs found&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">exp_runs</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">proc_datasets_new</span><span class="p">(</span><span class="n">ins</span><span class="o">=</span><span class="s1">&#39;CXI&#39;</span><span class="p">,</span> <span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">,</span> <span class="n">add_to_log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">exp_runs</span> <span class="o">=</span> <span class="n">exp_run_new</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">procname</span><span class="p">)</span>
+    <span class="c1">#print &#39;XXX:\n&#39;, exp_runs</span>
+    <span class="n">proc_exp_runs</span><span class="p">(</span><span class="n">exp_runs</span><span class="p">,</span> <span class="n">procname</span><span class="p">,</span> <span class="n">add_to_log</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">proc_datasets_new_under_control</span><span class="p">(</span><span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">,</span> <span class="n">add_to_log</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">exp_runs</span> <span class="o">=</span> <span class="n">exp_run_new_under_control</span><span class="p">(</span><span class="n">procname</span><span class="p">)</span>
+    <span class="n">proc_exp_runs</span><span class="p">(</span><span class="n">exp_runs</span><span class="p">,</span> <span class="n">procname</span><span class="p">,</span> <span class="n">add_to_log</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">proc_datasets_old</span><span class="p">(</span><span class="n">ins</span><span class="o">=</span><span class="s1">&#39;CXI&#39;</span><span class="p">,</span> <span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">,</span> <span class="n">move_to_archive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">dic_exp_runs</span> <span class="o">=</span> <span class="n">dict_exp_run_old</span><span class="p">(</span><span class="n">ins</span><span class="p">,</span> <span class="n">procname</span><span class="p">)</span>
+    <span class="n">print_exp_runs_old</span><span class="p">(</span><span class="n">dic_exp_runs</span><span class="p">,</span> <span class="n">procname</span><span class="p">,</span> <span class="n">move_to_archive</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_cmd</span><span class="p">(</span><span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;ls -ltra&#39;</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">out</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">subproc</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;Command: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">cmd</span>
+    <span class="nb">print</span> <span class="s1">&#39;out:</span><span class="se">\n</span><span class="s1">&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">out</span>
+    <span class="nb">print</span> <span class="s1">&#39;err:</span><span class="se">\n</span><span class="s1">&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">err</span>
+ 
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test01</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">cmd</span> <span class="o">=</span> <span class="s1">&#39;bsub -q psanaq -o log-ls.txt ls -l&#39;</span>
+    <span class="n">test_cmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">usage</span><span class="p">()</span> <span class="p">:</span>
+    <span class="k">return</span>  <span class="s1">&#39;python PSCalib/src/RunProcUtils.py &lt;test_name&gt;</span><span class="se">\n</span><span class="s1">&#39;</span>\
+           <span class="o">+</span><span class="s1">&#39;       &lt;test_name&gt; = 1  - print new files in experiments listed in control file</span><span class="se">\n</span><span class="s1">&#39;</span>\
+           <span class="o">+</span><span class="s1">&#39;                   = 10 - the same as 1 and save record for each new run in log file</span><span class="se">\n</span><span class="s1">&#39;</span>\
+           <span class="o">+</span><span class="s1">&#39;                   = 2  - print new files in all experiments</span><span class="se">\n</span><span class="s1">&#39;</span>\
+           <span class="o">+</span><span class="s1">&#39;                   = 20 - the same as 2 and save record for each new run in log file</span><span class="se">\n</span><span class="s1">&#39;</span>\
+           <span class="o">+</span><span class="s1">&#39;                   = 4  - print old (available in log but missing in xtc-dir) files for all experiments</span><span class="se">\n</span><span class="s1">&#39;</span>\
+           <span class="o">+</span><span class="s1">&#39;                   = 40 - the same as 4 and move old run records from log to archive file</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+    <span class="nb">print</span> <span class="mi">80</span><span class="o">*</span><span class="s1">&#39;_&#39;</span>
+    <span class="n">tname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;1&#39;</span>
+    <span class="n">t0_sec</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+    <span class="k">if</span>   <span class="n">tname</span><span class="o">==</span><span class="s1">&#39;1&#39;</span> <span class="p">:</span> <span class="n">proc_datasets_new_under_control</span><span class="p">(</span><span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">tname</span><span class="o">==</span><span class="s1">&#39;10&#39;</span><span class="p">:</span> <span class="n">proc_datasets_new_under_control</span><span class="p">(</span><span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">,</span> <span class="n">add_to_log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">tname</span><span class="o">==</span><span class="s1">&#39;2&#39;</span> <span class="p">:</span> <span class="n">proc_datasets_new</span><span class="p">(</span><span class="n">ins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">tname</span><span class="o">==</span><span class="s1">&#39;20&#39;</span><span class="p">:</span> <span class="n">proc_datasets_new</span><span class="p">(</span><span class="n">ins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">,</span> <span class="n">add_to_log</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">tname</span><span class="o">==</span><span class="s1">&#39;4&#39;</span> <span class="p">:</span> <span class="n">proc_datasets_old</span><span class="p">(</span><span class="n">ins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">tname</span><span class="o">==</span><span class="s1">&#39;40&#39;</span><span class="p">:</span> <span class="n">proc_datasets_old</span><span class="p">(</span><span class="n">ins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">procname</span><span class="o">=</span><span class="s1">&#39;pixel_status&#39;</span><span class="p">,</span> <span class="n">move_to_archive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">else</span> <span class="p">:</span> <span class="n">sys</span><span class="o">.</span><span class="n">exit</span> <span class="p">(</span><span class="s1">&#39;Not recognized test name: &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">tname</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;Test </span><span class="si">%s</span><span class="s1"> time (sec) = </span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tname</span><span class="p">,</span> <span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0_sec</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">2</span> <span class="p">:</span> <span class="nb">print</span> <span class="n">usage</span><span class="p">()</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span> <span class="p">(</span><span class="s1">&#39;End of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1">#------------------------------</span>
+  
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Mikhail Dubrovin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

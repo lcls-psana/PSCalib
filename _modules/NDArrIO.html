@@ -1,0 +1,377 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>NDArrIO &#8212; PSCalib-doc 1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">PSCalib-doc 1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for NDArrIO</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:py:class:`NDArrIO` - i/o methods to read/write numpy array in the text file</span>
+<span class="sd">============================================================================</span>
+
+<span class="sd">Usage::</span>
+
+<span class="sd">    # Import</span>
+<span class="sd">    from PSCalib.NDArrIO import save_txt, load_txt, list_of_comments</span>
+
+<span class="sd">    # Save n-dimensional numpy array in the text file.</span>
+<span class="sd">    save_txt(fname, arr, cmts=(), fmt=&#39;%.1f&#39;)</span>
+
+<span class="sd">    # Load 1-, 2-, n-dimensional array (if metadata available) from file .</span>
+<span class="sd">    arr = load_txt(fname)    # this version unpacks data directly in this script</span>
+<span class="sd">    # or</span>
+<span class="sd">    arr = load_txt_v2(fname) # v2 uses numpy.loadtxt(...) to load data (~30% slower then the load_txt) </span>
+
+<span class="sd">    # Get list of str objects - comment records with &#39;#&#39; in 1st position from file.</span>
+<span class="sd">    cmts = list_of_comments(fname)</span>
+
+<span class="sd">    #------------------------------</span>
+<span class="sd">    # Example of the file header:</span>
+<span class="sd">    #------------------------------</span>
+<span class="sd">    # TITLE      File to load ndarray of calibration parameters</span>
+<span class="sd">    # </span>
+<span class="sd">    # EXPERIMENT amo12345</span>
+<span class="sd">    # DETECTOR   Camp.0:pnCCD.1</span>
+<span class="sd">    # CALIB_TYPE pedestals</span>
+
+<span class="sd">    # DATE_TIME  2014-05-06 15:24:10</span>
+<span class="sd">    # AUTHOR     &lt;user-login-name&gt;</span>
+
+<span class="sd">    # line of comment always begins with # </span>
+<span class="sd">    # Mandatory fields to define the ndarray&lt;TYPE,NDIM&gt; and its shape as unsigned shape[NDIM] = (DIM1,DIM2,DIM3)</span>
+<span class="sd">    # DTYPE       float</span>
+<span class="sd">    # NDIM        3</span>
+<span class="sd">    # DIM:1       3</span>
+<span class="sd">    # DIM:2       4</span>
+<span class="sd">    # DIM:3       8</span>
+<span class="sd">    #------------------------------</span>
+
+<span class="sd">See: :py:class:`AreaDetector`</span>
+
+<span class="sd">For more detail see `AreaDetector &lt;https://pswww.slac.stanford.edu/swdoc/releases/ana-current/pyana-ref/html/Detector/#module-Detector.AreaDetector&gt;`_.</span>
+
+<span class="sd">This software was developed for the SIT project.</span>
+<span class="sd">If you use all or part of it, please give an appropriate acknowledgment.</span>
+
+<span class="sd">Author: Mikhail Dubrovin</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#------------------------------</span>
+
+<span class="c1">#import os</span>
+<span class="c1">#import sys</span>
+<span class="c1">#import math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">PSCalib.GlobalUtils</span> <span class="k">as</span> <span class="nn">gu</span>
+
+  
+<div class="viewcode-block" id="save_txt"><a class="viewcode-back" href="../index.html#NDArrIO.save_txt">[docs]</a><span class="k">def</span> <span class="nf">save_txt</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="s1">&#39;nda.txt&#39;</span><span class="p">,</span> <span class="n">arr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmts</span><span class="o">=</span><span class="p">(),</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%.1f</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">verbos</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">addmetad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Save n-dimensional numpy array to text file with metadata.</span>
+<span class="sd">       - fname - file name for text file,</span>
+<span class="sd">       - arr - numpy array,</span>
+<span class="sd">       - cmts -list of comments which will be saved in the file header.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#recs = [&#39;# %03d %s&#39; % (i,cmt) for i, cmt in enumerate(cmts)]</span>
+    <span class="n">recs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;# </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cmt</span> <span class="k">for</span> <span class="n">cmt</span> <span class="ow">in</span> <span class="n">cmts</span><span class="p">]</span>
+    <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># HOST        </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">gu</span><span class="o">.</span><span class="n">get_hostname</span><span class="p">())</span>
+    <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# WORK_DIR    </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">gu</span><span class="o">.</span><span class="n">get_cwd</span><span class="p">())</span>
+    <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# FILE_NAME   </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span>
+    <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# DATE_TIME   </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">gu</span><span class="o">.</span><span class="n">str_tstamp</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">))</span>
+    <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# UID         </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">gu</span><span class="o">.</span><span class="n">get_login</span><span class="p">())</span>
+    <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# SHAPE       </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">))</span>
+    <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# DATATYPE    </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">addmetad</span> <span class="p">:</span>
+        <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"># DTYPE       </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">))</span>
+        <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# NDIM        </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span> <span class="p">:</span>
+            <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;# DIM:</span><span class="si">%d</span><span class="s1">       </span><span class="si">%s</span><span class="s1">&#39;</span>   <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+    <span class="n">arr2d</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">reshape_nda_to_2d</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="c1"># pretty formatting</span>
+    <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">nline</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39; &#39;</span>
+
+    <span class="n">hdr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span>
+    <span class="c1">#print hdr</span>
+
+    <span class="n">np</span><span class="o">.</span><span class="n">savetxt</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">arr</span><span class="p">,</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="n">nline</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="n">hdr</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="c1">#, footer=&#39;\n&#39;) #, comments=&#39;# &#39;)</span>
+    <span class="k">if</span> <span class="n">verbos</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;File </span><span class="si">%s</span><span class="s1"> is saved&#39;</span> <span class="o">%</span> <span class="n">fname</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">_unpack_data</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Reconstruct data records from file to 2-d (or 1-d) list of values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span> 
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="p">:</span> 
+        <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">recs</span> <span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="k">return</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+        
+    <span class="n">arr</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">recs</span> <span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+        <span class="n">arr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vals</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">arr</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">_metadata_from_comments</span><span class="p">(</span><span class="n">cmts</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns metadata from the list of comments</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">str_dtype</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">dtype</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ndim</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">cmts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">cmts</span> <span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">3</span> <span class="p">:</span> <span class="k">continue</span>
+            <span class="k">if</span>   <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DTYPE&#39;</span>    <span class="p">:</span> <span class="n">str_dtype</span> <span class="o">=</span> <span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;NDIM&#39;</span>     <span class="p">:</span> <span class="n">ndim</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">][:</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;DIM:&#39;</span> <span class="p">:</span> <span class="n">shape</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+    <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="n">str_dtype</span><span class="p">)</span> <span class="k">if</span> <span class="n">str_dtype</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span>
+
+    <span class="k">return</span> <span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="list_of_comments"><a class="viewcode-back" href="../index.html#NDArrIO.list_of_comments">[docs]</a><span class="k">def</span> <span class="nf">list_of_comments</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns list of str objects - comment records from file.</span>
+<span class="sd">       - fname - file name for text file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#if not os.path.lexists(fname) : raise IOError(&#39;File %s is not available&#39; % fname)</span>
+
+    <span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="n">cmts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">f</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">rec</span><span class="o">.</span><span class="n">isspace</span><span class="p">()</span> <span class="p">:</span> <span class="k">continue</span> <span class="c1"># ignore empty lines</span>
+        <span class="k">elif</span> <span class="n">rec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;#&#39;</span> <span class="p">:</span> <span class="n">cmts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">))</span>
+        <span class="k">else</span> <span class="p">:</span> <span class="k">break</span>
+
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmts</span><span class="p">)</span><span class="o">==</span><span class="mi">0</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="n">cmts</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="load_txt_v2"><a class="viewcode-back" href="../index.html#NDArrIO.load_txt_v2">[docs]</a><span class="k">def</span> <span class="nf">load_txt_v2</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Reads n-dimensional numpy array from text file with metadata.</span>
+<span class="sd">       - fname - file name for text file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">cmts</span> <span class="o">=</span> <span class="n">list_of_comments</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">_metadata_from_comments</span><span class="p">(</span><span class="n">cmts</span><span class="p">)</span>
+
+    <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">comments</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">ndim</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">shape</span><span class="o">==</span><span class="p">[]</span> <span class="p">:</span>
+        <span class="c1"># Retun data as is shaped in the text file for 1-d or 2-d</span>
+        <span class="k">return</span> <span class="n">nparr</span>
+
+    <span class="k">if</span> <span class="n">ndim</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">str_metad</span> <span class="o">=</span> <span class="s1">&#39;dtype=</span><span class="si">%s</span><span class="s1"> ndim=</span><span class="si">%d</span><span class="s1"> shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">),</span> <span class="n">ndim</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Inconsistent metadata (ndim != len(shape)) in file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">str_metad</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span> <span class="n">nparr</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+
+    <span class="k">return</span> <span class="n">nparr</span></div>
+    
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="load_txt"><a class="viewcode-back" href="../index.html#NDArrIO.load_txt">[docs]</a><span class="k">def</span> <span class="nf">load_txt</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Reads n-dimensional numpy array from text file with metadata.</span>
+<span class="sd">       - fname - file name for text file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#if not os.path.lexists(fname) : raise IOError(&#39;File %s is not available&#39; % fname)</span>
+
+    <span class="c1"># Load all records from file</span>
+    <span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">recs</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># Sort records for comments and data, discard empty records</span>
+    <span class="n">cmts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">recs</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">rec</span><span class="o">.</span><span class="n">isspace</span><span class="p">()</span> <span class="p">:</span> <span class="k">continue</span> <span class="c1"># ignore empty lines</span>
+        <span class="k">if</span> <span class="n">rec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;#&#39;</span> <span class="p">:</span> <span class="n">cmts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+        <span class="k">else</span>             <span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="p">[]</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Data is missing in the file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fname</span><span class="p">)</span>
+
+    <span class="c1"># Get metadata from comments</span>
+    <span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">_metadata_from_comments</span><span class="p">(</span><span class="n">cmts</span><span class="p">)</span>
+
+    <span class="c1"># Unpack data records to 2-d list of values and convert it to np.array</span>
+    <span class="n">nparr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">_unpack_data</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">dtype</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ndim</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">shape</span><span class="o">==</span><span class="p">[]</span> <span class="ow">or</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="c1"># Retun data as is shaped in the text file for 1-d or 2-d</span>
+        <span class="k">return</span> <span class="n">nparr</span>
+
+    <span class="k">if</span> <span class="n">ndim</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">str_metad</span> <span class="o">=</span> <span class="s1">&#39;dtype=</span><span class="si">%s</span><span class="s1"> ndim=</span><span class="si">%d</span><span class="s1"> shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">),</span> <span class="n">ndim</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">shape</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Inconsistent metadata (NDIM != len(shape)) in file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">str_metad</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ndim</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span> <span class="n">nparr</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+
+    <span class="k">return</span> <span class="n">nparr</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#----------  TEST  ------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_save_txt</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="n">arr3</span> <span class="o">=</span> <span class="p">(((</span><span class="mi">111</span><span class="p">,</span><span class="mi">112</span><span class="p">,</span><span class="mi">113</span><span class="p">),</span>
+             <span class="p">(</span><span class="mi">121</span><span class="p">,</span><span class="mi">122</span><span class="p">,</span><span class="mi">123</span><span class="p">)),</span>
+            <span class="p">((</span><span class="mi">211</span><span class="p">,</span><span class="mi">212</span><span class="p">,</span><span class="mi">213</span><span class="p">),</span>
+             <span class="p">(</span><span class="mi">221</span><span class="p">,</span><span class="mi">222</span><span class="p">,</span><span class="mi">223</span><span class="p">)))</span>
+
+    <span class="n">arr2</span> <span class="o">=</span> <span class="p">((</span><span class="mi">11</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">),</span>
+            <span class="p">(</span><span class="mi">21</span><span class="p">,</span><span class="mi">22</span><span class="p">,</span><span class="mi">23</span><span class="p">))</span>
+
+    <span class="n">arr1</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">npa</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">arr3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">save_txt</span><span class="p">(</span><span class="s1">&#39;nda.txt&#39;</span><span class="p">,</span> <span class="n">npa</span><span class="p">,</span> <span class="n">cmts</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;Test of PSCalib.NDArrIO.save_txt(...)&#39;</span><span class="p">,</span> <span class="s1">&#39;save numpy array in the text file&#39;</span><span class="p">),</span> <span class="n">verbos</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+             
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_load_txt</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;nda.txt&#39;</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;/reg/g/psdm/detector/alignment/andor3d/calib-andor3d-2016-02-09/calib/Andor3d::CalibV1/SxrEndstation.0:DualAndor.0/pedestals/7-end.data&#39;</span>
+    <span class="c1">#fname = &#39;/reg/d/psdm/cxi/cxif5315/calib/CsPad::CalibV1/CxiDs2.0:Cspad.0/pedestals/1-end.data&#39;</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;Test list_of_comments:&#39;</span>
+    <span class="n">t0_sec</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">cmts</span> <span class="o">=</span> <span class="n">list_of_comments</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;Consumed time for list_of_comments = </span><span class="si">%10.6f</span><span class="s1"> sec&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0_sec</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cmts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="k">for</span> <span class="n">cmt</span> <span class="ow">in</span> <span class="n">cmts</span><span class="p">:</span> <span class="nb">print</span> <span class="n">cmt</span>
+
+    <span class="n">t0_sec</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">nparr</span> <span class="o">=</span> <span class="n">load_txt</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="c1">#nparr = load_txt_v1(fname)</span>
+    <span class="c1">#nparr = load_txt_v2(fname)</span>
+    <span class="nb">print</span> <span class="s1">&#39;Consumed time for load_txt = </span><span class="si">%10.6f</span><span class="s1"> sec&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0_sec</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;Test np.array from file:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">nparr</span>
+    <span class="nb">print</span> <span class="s1">&#39;nparr.shape:&#39;</span><span class="p">,</span> <span class="n">nparr</span><span class="o">.</span><span class="n">shape</span>
+    <span class="nb">print</span> <span class="s1">&#39;nparr.dtype:&#39;</span><span class="p">,</span> <span class="n">nparr</span><span class="o">.</span><span class="n">dtype</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+    <span class="n">test_save_txt</span><span class="p">()</span>
+    <span class="n">test_load_txt</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Mikhail Dubrovin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

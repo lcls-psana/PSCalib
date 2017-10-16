@@ -1,0 +1,595 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>GeometryObject &#8212; PSCalib-doc 1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">PSCalib-doc 1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GeometryObject</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Class :py:class:`GeometryObject` is a building block for hierarchical geometry</span>
+<span class="sd">==============================================================================</span>
+
+<span class="sd">Usage::</span>
+
+<span class="sd">    # Methods of this class are used internally in :py:class:`GeometryAccess`</span>
+<span class="sd">    # and are not supposed to be used directly...</span>
+
+<span class="sd">    from PSCalib.GeometryObject import GeometryObject</span>
+
+<span class="sd">    # Instatiation of the geometry object</span>
+<span class="sd">    # d = &lt;dictionary-of-input-parameters&gt;</span>
+<span class="sd">    geo = GeometryObject(**d)</span>
+
+<span class="sd">    # test print methods:</span>
+<span class="sd">    geo.print_geo()</span>
+<span class="sd">    geo.print_geo_children()</span>
+
+<span class="sd">    # modification methods:</span>
+<span class="sd">    geo.set_geo_pars(self, x0, y0, z0, rot_z, rot_y, rot_x, tilt_z, tilt_y, tilt_x)</span>
+<span class="sd">    geo.move_geo(dx, dy, dz)</span>
+<span class="sd">    geo.tilt_geo(dt_x, dt_y, dt_z)</span>
+
+<span class="sd">    # access methods:</span>
+<span class="sd">    s      = geo.str_data()</span>
+<span class="sd">    parent = geo.get_parent()</span>
+<span class="sd">    list_of_children = geo.get_list_of_children()</span>
+<span class="sd">    oname  = geo.get_geo_name()</span>
+<span class="sd">    oindex = geo.get_geo_index()</span>
+<span class="sd">    pname  = geo.get_parent_name()</span>
+<span class="sd">    pindex = geo.get_parent_index()</span>
+<span class="sd">    X,Y,Z  = geo.get_pixel_coords(do_tilt=true)</span>
+<span class="sd">    X,Y    = geo.get_2d_pixel_coords(do_tilt=true)</span>
+<span class="sd">    area   = geo.get_pixel_area()</span>
+<span class="sd">    #mbits = +1-edges, +2-wide pixels, +4-non-bonded pixels, +8/+16 - four/eight neighbours of non-bonded</span>
+<span class="sd">    mask   = geo.get_pixel_mask(mbits=0377)</span>
+<span class="sd">    npixels= geo.get_size_geo_array()</span>
+<span class="sd">    pixsize= geo.get_pixel_scale_size()</span>
+<span class="sd">    x0, y0, z0             = geo.get_origin()</span>
+<span class="sd">    rot_z, rot_y, rot_x    = geo.get_rot()</span>
+<span class="sd">    tilt_z, tilt_y, tilt_x = geo.get_tilt()</span>
+<span class="sd">    </span>
+<span class="sd">    # private methods for internal consumption:</span>
+<span class="sd">    geo.set_parent(parent)</span>
+<span class="sd">    geo.add_child(child)</span>
+<span class="sd">    Xt, Yt, Zt = geo.transform_geo_coord_arrays(X, Y, Z, do_tilt=True)</span>
+<span class="sd">    Xt, Yt     = geo.transform_2d_geo_coord_arrays(X, Y, do_tilt=True)</span>
+
+<span class="sd">    # global methods:</span>
+<span class="sd">    Xrot, Yrot = rotation_cs(X, Y, C, S)</span>
+<span class="sd">    Xrot, Yrot = rotation(X, Y, angle_deg)</span>
+
+<span class="sd">    # global methods only for CSPAD2x2 array conversion between (2,185,388) and (185,388,2):</span>
+<span class="sd">    arrTwo2x1 = data2x2ToTwo2x1(asData2x2)</span>
+<span class="sd">    asData2x2 = two2x1ToData2x2(arrTwo2x1)</span>
+
+<span class="sd">See :py:class:`GeometryAccess`</span>
+
+<span class="sd">For more detail see `Detector Geometry &lt;https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry&gt;`_.</span>
+
+<span class="sd">This software was developed for the SIT project.</span>
+<span class="sd">If you use all or part of it, please give an appropriate acknowledgment.</span>
+
+<span class="sd">Author: Mikhail Dubrovin</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#------------------------------</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="c1">#from PyCSPadImage.PixCoords2x1 import cspad2x1_one</span>
+<span class="kn">from</span> <span class="nn">PSCalib.SegGeometryStore</span> <span class="k">import</span> <span class="n">sgs</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="rotation_cs"><a class="viewcode-back" href="../index.html#GeometryObject.rotation_cs">[docs]</a><span class="k">def</span> <span class="nf">rotation_cs</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;For numpy arrays X and Y returns the numpy arrays of Xrot and Yrot</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Xrot</span> <span class="o">=</span> <span class="n">X</span><span class="o">*</span><span class="n">C</span> <span class="o">-</span> <span class="n">Y</span><span class="o">*</span><span class="n">S</span> 
+    <span class="n">Yrot</span> <span class="o">=</span> <span class="n">Y</span><span class="o">*</span><span class="n">C</span> <span class="o">+</span> <span class="n">X</span><span class="o">*</span><span class="n">S</span> 
+    <span class="k">return</span> <span class="n">Xrot</span><span class="p">,</span> <span class="n">Yrot</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="rotation"><a class="viewcode-back" href="../index.html#GeometryObject.rotation">[docs]</a><span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">angle_deg</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;For numpy arrays X and Y returns the numpy arrays of Xrot and Yrot rotated by angle_deg</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">angle_rad</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">angle_deg</span><span class="p">)</span>
+    <span class="n">S</span><span class="p">,</span> <span class="n">C</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle_rad</span><span class="p">),</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle_rad</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rotation_cs</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">S</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">class</span> <span class="nc">GeometryObject</span> <span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pindex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> \
+                 <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> \
+                 <span class="n">x0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> \
+                 <span class="n">rot_z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rot_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rot_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> \
+                 <span class="n">tilt_z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tilt_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tilt_x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pname</span>  <span class="o">=</span> <span class="n">pname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pindex</span> <span class="o">=</span> <span class="n">pindex</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">oname</span>  <span class="o">=</span> <span class="n">oname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oindex</span> <span class="o">=</span> <span class="n">oindex</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_geo_pars</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">z0</span><span class="p">,</span> <span class="n">rot_z</span><span class="p">,</span> <span class="n">rot_y</span><span class="p">,</span> <span class="n">rot_x</span><span class="p">,</span> <span class="n">tilt_z</span><span class="p">,</span> <span class="n">tilt_y</span><span class="p">,</span> <span class="n">tilt_x</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">algo</span> <span class="o">=</span> <span class="n">sgs</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">pbits</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="c1"># ex.: SegGeometryCspad2x1V1(...)</span>
+
+        <span class="c1"># ---- 2-nd stage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span> <span class="o">=</span> <span class="p">[]</span>
+        
+<span class="c1">#------------------------------</span>
+        
+    <span class="k">def</span> <span class="nf">set_geo_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> \
+                     <span class="n">x0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> \
+                     <span class="n">rot_z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rot_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rot_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> \
+                     <span class="n">tilt_z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tilt_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tilt_x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="sd">&quot;&quot;&quot; Sets self object geometry parameters</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">=</span> <span class="n">x0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y0</span> <span class="o">=</span> <span class="n">y0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z0</span> <span class="o">=</span> <span class="n">z0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_z</span>  <span class="o">=</span> <span class="n">rot_z</span>  
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_y</span>  <span class="o">=</span> <span class="n">rot_y</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">rot_x</span>  <span class="o">=</span> <span class="n">rot_x</span> 
+                            
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilt_z</span> <span class="o">=</span> <span class="n">tilt_z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilt_y</span> <span class="o">=</span> <span class="n">tilt_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilt_x</span> <span class="o">=</span> <span class="n">tilt_x</span>
+
+<span class="c1">#------------------------------</span>
+        
+    <span class="k">def</span> <span class="nf">move_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dz</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Adds offset for origin of the self object w.r.t. current position</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x0</span> <span class="o">+=</span> <span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y0</span> <span class="o">+=</span> <span class="n">dy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z0</span> <span class="o">+=</span> <span class="n">dz</span>
+
+<span class="c1">#------------------------------</span>
+        
+    <span class="k">def</span> <span class="nf">tilt_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dt_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dt_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dt_z</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Tilts the self object w.r.t. current orientation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilt_z</span> <span class="o">+=</span> <span class="n">dt_z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilt_y</span> <span class="o">+=</span> <span class="n">dt_y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilt_x</span> <span class="o">+=</span> <span class="n">dt_x</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">print_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Print info about self geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span> <span class="s1">&#39;parent:</span><span class="si">%10s</span><span class="s1"> </span><span class="si">%2d</span><span class="s1">   geo: </span><span class="si">%10s</span><span class="s1"> </span><span class="si">%2d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pindex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oindex</span><span class="p">)</span> <span class="o">+</span> \
+              <span class="s1">&#39;  x0:</span><span class="si">%8.0f</span><span class="s1">  y0:</span><span class="si">%8.0f</span><span class="s1">  z0:</span><span class="si">%8.0f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0</span><span class="p">)</span> <span class="o">+</span> \
+              <span class="s1">&#39;  rot_z:</span><span class="si">%8.3f</span><span class="s1">  rot_y:</span><span class="si">%8.3f</span><span class="s1">  rot_x:</span><span class="si">%8.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rot_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_x</span><span class="p">)</span> <span class="o">+</span> \
+              <span class="s1">&#39;  tilt_z:</span><span class="si">%8.5f</span><span class="s1">  tilt_y:</span><span class="si">%8.5f</span><span class="s1">  tilt_x:</span><span class="si">%8.5f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tilt_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_x</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">str_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns a string of data to save in file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s_rot_x</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%8.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_x</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">s_rot_y</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%8.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_y</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="n">s_rot_z</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%8.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_z</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;0&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%3d</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%3d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pname</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">pindex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oname</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">11</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">oindex</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="s1">&#39;  </span><span class="si">%8.0f</span><span class="s1"> </span><span class="si">%8.0f</span><span class="s1"> </span><span class="si">%8.0f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="s1">&#39;  </span><span class="si">%8s</span><span class="s1">   </span><span class="si">%8s</span><span class="s1">   </span><span class="si">%8s</span><span class="s1">  &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">s_rot_z</span><span class="p">,</span> <span class="n">s_rot_y</span><span class="p">,</span> <span class="n">s_rot_x</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="s1">&#39;  </span><span class="si">%8.5f</span><span class="s1"> </span><span class="si">%8.5f</span><span class="s1"> </span><span class="si">%8.5f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tilt_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_x</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">print_geo_children</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Print info about children of self geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;parent:</span><span class="si">%10s</span><span class="s1"> </span><span class="si">%2d</span><span class="s1">   geo: </span><span class="si">%10s</span><span class="s1"> </span><span class="si">%2d</span><span class="s1"> #children: </span><span class="si">%d</span><span class="s1">:&#39;</span> <span class="o">%</span> \
+              <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pindex</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">oindex</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">geo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span> <span class="p">:</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39; </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">geo</span><span class="o">.</span><span class="n">oindex</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="n">msg</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">set_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Set parent geometry object for self</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">add_child</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">child</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Add children geometry object to the list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns parent geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_list_of_children</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns list of children geometry objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_geo_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns self geometry object name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">oname</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_geo_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns self geometry object index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">oindex</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_parent_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns parent geometry object name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pname</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_parent_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns parent geometry object index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pindex</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">transform_geo_coord_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Transform geometry object coordinates to the parent frame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">angle_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_z</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_z</span> <span class="k">if</span> <span class="n">do_tilt</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_z</span>
+        <span class="n">angle_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_y</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_y</span> <span class="k">if</span> <span class="n">do_tilt</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_y</span>
+        <span class="n">angle_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_x</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_x</span> <span class="k">if</span> <span class="n">do_tilt</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_x</span>
+
+        <span class="n">X1</span><span class="p">,</span> <span class="n">Y1</span> <span class="o">=</span> <span class="n">rotation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span>  <span class="n">Y</span><span class="p">,</span>  <span class="n">angle_z</span><span class="p">)</span>
+        <span class="n">Z2</span><span class="p">,</span> <span class="n">X2</span> <span class="o">=</span> <span class="n">rotation</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span>  <span class="n">X1</span><span class="p">,</span> <span class="n">angle_y</span><span class="p">)</span>
+        <span class="n">Y3</span><span class="p">,</span> <span class="n">Z3</span> <span class="o">=</span> <span class="n">rotation</span><span class="p">(</span><span class="n">Y1</span><span class="p">,</span> <span class="n">Z2</span><span class="p">,</span> <span class="n">angle_x</span><span class="p">)</span>
+
+        <span class="n">Zt</span> <span class="o">=</span> <span class="n">Z3</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0</span>
+        <span class="n">Yt</span> <span class="o">=</span> <span class="n">Y3</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span>
+        <span class="n">Xt</span> <span class="o">=</span> <span class="n">X2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span>
+
+        <span class="k">return</span> <span class="n">Xt</span><span class="p">,</span> <span class="n">Yt</span><span class="p">,</span> <span class="n">Zt</span> 
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_pixel_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns three numpy arrays with pixel X, Y, Z coordinates for self geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="n">xac</span><span class="p">,</span> <span class="n">yac</span><span class="p">,</span> <span class="n">zac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span><span class="o">.</span><span class="n">pixel_coord_array</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_geo_coord_arrays</span><span class="p">(</span><span class="n">xac</span><span class="p">,</span> <span class="n">yac</span><span class="p">,</span> <span class="n">zac</span><span class="p">,</span> <span class="n">do_tilt</span><span class="p">)</span>
+
+        <span class="n">xac</span><span class="p">,</span> <span class="n">yac</span><span class="p">,</span> <span class="n">zac</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">oindex</span> <span class="o">!=</span> <span class="n">ind</span> <span class="p">:</span>
+                <span class="nb">print</span> <span class="s1">&#39;WARNING! Geometry object </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> has non-consequtive index in calibration file, reconst index:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> \
+                      <span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">oindex</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+
+            <span class="n">xch</span><span class="p">,</span> <span class="n">ych</span><span class="p">,</span> <span class="n">zch</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">get_pixel_coords</span><span class="p">(</span><span class="n">do_tilt</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ind</span><span class="o">==</span><span class="mi">0</span> <span class="p">:</span>
+                <span class="n">xac</span> <span class="o">=</span> <span class="n">xch</span>
+                <span class="n">yac</span> <span class="o">=</span> <span class="n">ych</span>
+                <span class="n">zac</span> <span class="o">=</span> <span class="n">zch</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="n">xac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">xac</span><span class="p">,</span> <span class="n">xch</span><span class="p">))</span>
+                <span class="n">yac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">yac</span><span class="p">,</span> <span class="n">ych</span><span class="p">))</span>
+                <span class="n">zac</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">zac</span><span class="p">,</span> <span class="n">zch</span><span class="p">))</span>
+
+        <span class="c1"># define shape for output x,y,z arrays</span>
+        <span class="n">shape_child</span> <span class="o">=</span> <span class="n">xch</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">len_child</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span><span class="p">)</span>
+        <span class="n">geo_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(([</span><span class="n">len_child</span><span class="p">],</span> <span class="n">xch</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="c1">#print &#39;geo_shape = &#39;, geo_shape        </span>
+        <span class="n">xac</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">geo_shape</span>
+        <span class="n">yac</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">geo_shape</span>
+        <span class="n">zac</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">geo_shape</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_geo_coord_arrays</span><span class="p">(</span><span class="n">xac</span><span class="p">,</span> <span class="n">yac</span><span class="p">,</span> <span class="n">zac</span><span class="p">,</span> <span class="n">do_tilt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span> 
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_pixel_areas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns numpy array with pixel areas for self geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span><span class="o">.</span><span class="n">pixel_area_array</span><span class="p">()</span>
+
+        <span class="n">aar</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">oindex</span> <span class="o">!=</span> <span class="n">ind</span> <span class="p">:</span>
+                <span class="nb">print</span> <span class="s1">&#39;WARNING! Geometry object </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> has non-consequtive index in calibration file, reconst index:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> \
+                      <span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">oindex</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+
+            <span class="n">ach</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">get_pixel_areas</span><span class="p">()</span>
+            <span class="n">aar</span> <span class="o">=</span> <span class="n">ach</span> <span class="k">if</span> <span class="n">ind</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">aar</span><span class="p">,</span> <span class="n">ach</span><span class="p">))</span>
+
+        <span class="c1"># define shape for output x,y,z arrays</span>
+        <span class="n">shape_child</span> <span class="o">=</span> <span class="n">ach</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">len_child</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span><span class="p">)</span>
+        <span class="n">geo_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(([</span><span class="n">len_child</span><span class="p">],</span> <span class="n">ach</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="c1">#print &#39;geo_shape = &#39;, geo_shape        </span>
+        <span class="n">aar</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">geo_shape</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape</span><span class="p">(</span><span class="n">aar</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_pixel_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mbits</span><span class="o">=</span><span class="mi">0377</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns numpy array with pixel mask for self geometry object.</span>
+
+<span class="sd">        mbits =+1 - mask edges</span>
+<span class="sd">               +2 - two wide-pixel central columns</span>
+<span class="sd">               +4 - non-bonded pixels</span>
+<span class="sd">               +8 - nearest four neighbours of non-bonded pixels</span>
+<span class="sd">               +16- eight neighbours of non-bonded pixels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span><span class="o">.</span><span class="n">pixel_mask_array</span><span class="p">(</span><span class="n">mbits</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">oar</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">oindex</span> <span class="o">!=</span> <span class="n">ind</span> <span class="p">:</span>
+                <span class="nb">print</span> <span class="s1">&#39;WARNING! Geometry object </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> has non-consequtive index in calibration file, reconst index:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> \
+                      <span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">child</span><span class="o">.</span><span class="n">oindex</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+
+            <span class="n">car</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">get_pixel_mask</span><span class="p">(</span><span class="n">mbits</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">oar</span> <span class="o">=</span> <span class="n">car</span> <span class="k">if</span> <span class="n">ind</span><span class="o">==</span><span class="mi">0</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">oar</span><span class="p">,</span> <span class="n">car</span><span class="p">))</span>
+
+        <span class="c1"># define shape for output x,y,z arrays</span>
+        <span class="n">shape_child</span> <span class="o">=</span> <span class="n">car</span><span class="o">.</span><span class="n">shape</span>
+        <span class="n">len_child</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span><span class="p">)</span>
+        <span class="n">geo_shape</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(([</span><span class="n">len_child</span><span class="p">],</span> <span class="n">car</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="c1">#print &#39;geo_shape = &#39;, geo_shape        </span>
+        <span class="n">oar</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">geo_shape</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape</span><span class="p">(</span><span class="n">oar</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_size_geo_array</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns size of  self geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
+
+        <span class="n">size_arr</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span> <span class="p">:</span>
+            <span class="n">size_arr</span> <span class="o">+=</span> <span class="n">child</span><span class="o">.</span><span class="n">get_size_geo_array</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">size_arr</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_pixel_scale_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns pixel scale size of the geometry object from the first found segment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span><span class="o">.</span><span class="n">pixel_scale_size</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="n">child</span><span class="o">.</span><span class="n">get_pixel_scale_size</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+        
+    <span class="k">def</span> <span class="nf">get_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns object origin x, y, z coordinates [um] relative to parent frame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">x0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z0</span>
+
+<span class="c1">#------------------------------</span>
+        
+    <span class="k">def</span> <span class="nf">get_rot</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns object tilt angles [degree] around z, y, and x axes, respectively</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_x</span>
+
+<span class="c1">#------------------------------</span>
+        
+    <span class="k">def</span> <span class="nf">get_tilt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Returns object rotation angles [degree] around z, y, and x axes, respectively</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_z</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_x</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1"># Additional to interface 2-d methods</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">transform_2d_geo_coord_arrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Simplified version of transform_geo_coord_arrays(...) for 2-d case</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">angle_z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_z</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_z</span> <span class="k">if</span> <span class="n">do_tilt</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rot_z</span>
+        <span class="n">X1</span><span class="p">,</span> <span class="n">Y1</span> <span class="o">=</span> <span class="n">rotation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span>  <span class="n">Y</span><span class="p">,</span>  <span class="n">angle_z</span><span class="p">)</span>
+        <span class="n">Xt</span> <span class="o">=</span> <span class="n">X1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">x0</span>
+        <span class="n">Yt</span> <span class="o">=</span> <span class="n">Y1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">y0</span>
+        <span class="k">return</span> <span class="n">Xt</span><span class="p">,</span> <span class="n">Yt</span>
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">get_2d_pixel_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Simplified version of get_pixel_coords() for 2-d case </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#if self.oname == &#39;SENS2X1:V1&#39; : </span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="c1">#xac, yac, zac = self.algo.get_xyz_maps_um()</span>
+            <span class="n">xac</span><span class="p">,</span> <span class="n">yac</span><span class="p">,</span> <span class="n">zac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">algo</span><span class="o">.</span><span class="n">pixel_coord_array</span><span class="p">()</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_2d_geo_coord_arrays</span><span class="p">(</span><span class="n">xac</span><span class="p">,</span> <span class="n">yac</span><span class="p">,</span> <span class="n">do_tilt</span><span class="p">)</span>
+
+        <span class="n">xac</span><span class="p">,</span> <span class="n">yac</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_children</span> <span class="p">:</span>
+            <span class="n">xch</span><span class="p">,</span> <span class="n">ych</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">get_2d_pixel_coords</span><span class="p">(</span><span class="n">do_tilt</span><span class="p">)</span>
+            <span class="n">xac</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">xch</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+            <span class="n">yac</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">ych</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform_2d_geo_coord_arrays</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xac</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">yac</span><span class="p">),</span> <span class="n">do_tilt</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">det_shape</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> 
+
+<span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">det_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arr</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Check detector dependency and re-shape array if necessary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#print &#39;PSCalib.GeometryObject.det_shape(...):  arr.size: %d   self.oname: %s&#39; % (arr.size, self.oname)</span>
+        <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">143560</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">oname</span> <span class="o">==</span> <span class="s1">&#39;CSPAD2X2:V1&#39;</span> <span class="p">:</span> <span class="c1"># Shuffle pixels once for 2*185*388 and CSPAD2X2:V1 ONLY:</span>
+            <span class="c1"># shaffle array for cspad2x2</span>
+            <span class="k">return</span> <span class="n">two2x1ToData2x2</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">arr</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------ Global Method(s) ------</span>
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="data2x2ToTwo2x1"><a class="viewcode-back" href="../index.html#GeometryObject.data2x2ToTwo2x1">[docs]</a><span class="k">def</span> <span class="nf">data2x2ToTwo2x1</span><span class="p">(</span><span class="n">arr2x2</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Converts array shaped as CSPAD2x2 data (185,388,2)</span>
+<span class="sd">    to two 2x1 arrays with shape=(2,185,388)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">arr2x2</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">2</span><span class="o">*</span><span class="mi">185</span><span class="o">*</span><span class="mi">388</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Expected n-d array size=185*388*2, input size=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">arr2x2</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">arr2x2</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Expected n-d array shape=(185,388,2), input shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">arr2x2</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+    <span class="n">arr2x2</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">185</span><span class="p">,</span><span class="mi">388</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> 
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">arr2x2</span><span class="p">[:,:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">arr2x2</span><span class="p">[:,:,</span><span class="mi">1</span><span class="p">]])</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="two2x1ToData2x2"><a class="viewcode-back" href="../index.html#GeometryObject.two2x1ToData2x2">[docs]</a><span class="k">def</span> <span class="nf">two2x1ToData2x2</span><span class="p">(</span><span class="n">arrTwo2x1</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Converts array shaped as two 2x1 arrays (2,185,388) or (2*185,388)</span>
+<span class="sd">    to CSPAD2x2 data shape=(185,388,2)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">arrTwo2x1</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">2</span><span class="o">*</span><span class="mi">185</span><span class="o">*</span><span class="mi">388</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Expected n-d array size=2*185*388, input size=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">arrTwo2x1</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">arrTwo2x1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">388</span> <span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Expected n-d array shape=(2,185,388), input shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">arrTwo2x1</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+    <span class="n">arrTwo2x1</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">185</span><span class="p">,</span><span class="mi">388</span><span class="p">)</span>
+    <span class="n">arr2x2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">arrTwo2x1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">arrTwo2x1</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()))</span>
+    <span class="n">arr2x2</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">185</span><span class="p">,</span><span class="mi">388</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">arr2x2</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+    <span class="nb">print</span> <span class="mi">78</span><span class="o">*</span><span class="s1">&#39;=&#39;</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">==  Tests for this module are available in pyimgalgos/src/GeometryAccess.py ==</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="mi">78</span><span class="o">*</span><span class="s1">&#39;=&#39;</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span> <span class="p">(</span><span class="s1">&#39;End of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Mikhail Dubrovin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

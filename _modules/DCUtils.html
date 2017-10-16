@@ -1,0 +1,543 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DCUtils &#8212; PSCalib-doc 1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">PSCalib-doc 1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for DCUtils</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Class :py:class:`DCUtils` contains a set of utilities</span>
+<span class="sd">=====================================================</span>
+
+<span class="sd">Usage::</span>
+
+<span class="sd">    # Import</span>
+<span class="sd">    import PSCalib.DCUtils as gu</span>
+
+<span class="sd">    # Methods</span>
+<span class="sd">    # Get string with time stamp, ex: 2016-01-26T10:40:53</span>
+<span class="sd">    ts    = gu.str_tstamp(fmt=&#39;%Y-%m-%dT%H:%M:%S&#39;, time_sec=None)</span>
+
+<span class="sd">    usr   = gu.get_enviroment(env=&#39;USER&#39;)</span>
+<span class="sd">    usr   = gu.get_login()</span>
+<span class="sd">    host  = gu.get_hostname()</span>
+<span class="sd">    cwd   = gu.get_cwd()</span>
+<span class="sd">    gu.create_directory(dir, mode=0775)</span>
+<span class="sd">    gu.create_path(path, depth=2, mode=0775)</span>
+<span class="sd">    gu.save_string_as_dset(grp, name, s)</span>
+<span class="sd">    src   = gu.source_full_name(env, src)</span>
+<span class="sd">    dtype = gu.dettype_from_str_source(src)</span>
+
+<span class="sd">    src   = gu.string_from_source(source) # source is psana.Source object or string like</span>
+<span class="sd">                                          # &#39;CxiDs2.0:Cspad.0&#39; from &#39;DetInfo(CxiDs2.0:Cspad.0)&#39;</span>
+<span class="sd">    dname  = gu.detector_full_name(env, src)</span>
+<span class="sd">    source = gu.psana_source(env, srcpar)</span>
+<span class="sd">    fid    = gu.evt_fiducials(evt)</span>
+<span class="sd">    t_sec  = gu.evt_time(evt)</span>
+<span class="sd">    t_sec  = gu.env_time(env)</span>
+
+<span class="sd">    # methods for HDF5 </span>
+<span class="sd">    sg = gu.get_subgroup(grp, subgr_name)</span>
+<span class="sd">    gu.delete_object(grp, oname)</span>
+<span class="sd">    gu.save_object_as_dset(grp, name, shape=None, dtype=None, data=0)</span>
+
+<span class="sd">See:</span>
+<span class="sd">    * :class:`DCStore`</span>
+<span class="sd">    * :class:`DCType`</span>
+<span class="sd">    * :class:`DCRange`</span>
+<span class="sd">    * :class:`DCVersion`</span>
+<span class="sd">    * :class:`DCBase`</span>
+<span class="sd">    * :class:`DCInterface`</span>
+<span class="sd">    * :class:`DCUtils`</span>
+<span class="sd">    * :class:`DCDetectorId`</span>
+<span class="sd">    * :class:`DCConfigParameters`</span>
+<span class="sd">    * :class:`DCFileName`</span>
+<span class="sd">    * :class:`DCLogger`</span>
+<span class="sd">    * :class:`DCMethods`</span>
+<span class="sd">    * :class:`DCEmail`</span>
+
+<span class="sd">This software was developed for the SIT project.</span>
+<span class="sd">If you use all or part of it, please give an appropriate acknowledgment.</span>
+
+<span class="sd">Created: 2016 by Mikhail Dubrovin</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#------------------------------</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">getpass</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">strftime</span><span class="p">,</span> <span class="n">time</span>
+<span class="kn">import</span> <span class="nn">psana</span>
+<span class="kn">from</span> <span class="nn">PSCalib.DCLogger</span> <span class="k">import</span> <span class="n">log</span>
+<span class="kn">import</span> <span class="nn">PSCalib.GlobalUtils</span> <span class="k">as</span> <span class="nn">gu</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">class</span> <span class="nc">h5py_proxy</span> <span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">h5py</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Group</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">File</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">fetch_h5py</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5py</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">h5py</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">h5py</span> <span class="o">=</span> <span class="n">h5py</span>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#h5py = h5py_proxy()</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">class</span> <span class="nc">Storage</span> <span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_t</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">group_t</span>   <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">Group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">File</span>      <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="n">sp</span> <span class="o">=</span> <span class="n">Storage</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="str_tstamp"><a class="viewcode-back" href="../index.html#DCUtils.str_tstamp">[docs]</a><span class="k">def</span> <span class="nf">str_tstamp</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">,</span> <span class="n">time_sec</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns string timestamp for specified format and time in sec or current time by default</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">strftime</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">localtime</span><span class="p">(</span><span class="n">time_sec</span><span class="p">))</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_enviroment"><a class="viewcode-back" href="../index.html#DCUtils.get_enviroment">[docs]</a><span class="k">def</span> <span class="nf">get_enviroment</span><span class="p">(</span><span class="n">env</span><span class="o">=</span><span class="s1">&#39;USER&#39;</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns the value of specified by string name environment variable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">env</span><span class="p">]</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_login"><a class="viewcode-back" href="../index.html#DCUtils.get_login">[docs]</a><span class="k">def</span> <span class="nf">get_login</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns login name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#return os.getlogin()</span>
+    <span class="k">return</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getuser</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_hostname"><a class="viewcode-back" href="../index.html#DCUtils.get_hostname">[docs]</a><span class="k">def</span> <span class="nf">get_hostname</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns login name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#return os.uname()[1]</span>
+    <span class="k">return</span> <span class="n">socket</span><span class="o">.</span><span class="n">gethostname</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_cwd"><a class="viewcode-back" href="../index.html#DCUtils.get_cwd">[docs]</a><span class="k">def</span> <span class="nf">get_cwd</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns current working directory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">create_directory_v0</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span> 
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Directory exists: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dir</span>
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Directory created: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dir</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">create_directory</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0775</span><span class="p">)</span> <span class="p">:</span>
+    <span class="c1">#print &#39;create_directory: %s&#39; % dir</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="nb">dir</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Directory exists: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dir</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span> 
+    <span class="k">else</span> <span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="nb">dir</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="c1">#os.chmod(dir, mode)</span>
+        <span class="c1">#os.system(cmd)</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Directory created: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">dir</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span> 
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">create_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mi">0775</span><span class="p">)</span> <span class="p">:</span> 
+    <span class="c1"># Creates missing path for /reg/d/psdm/&lt;INS&gt;/&lt;EXP&gt;/calib/&lt;dtype&gt; beginning from calib</span>
+    <span class="n">subdirs</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="n">depth</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;subdirs: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">subdirs</span><span class="p">),</span> <span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">cpath</span> <span class="o">=</span> <span class="n">subdirs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">subdirs</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">sd</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">subdirs</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="p">:</span>
+        <span class="n">cpath</span> <span class="o">+=</span> <span class="s1">&#39;/</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span> <span class="n">sd</span> 
+        <span class="c1">#if i&lt;length-depth : continue</span>
+        <span class="n">create_directory</span><span class="p">(</span><span class="n">cpath</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
+        <span class="c1">#print &#39;create_path: %s&#39; % cpath</span>
+
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cpath</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="save_string_as_dset"><a class="viewcode-back" href="../index.html#DCUtils.save_string_as_dset">[docs]</a><span class="k">def</span> <span class="nf">save_string_as_dset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Creates and returns the h5py dataset object with name for single string s</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="c1">#size = len(s)</span>
+    <span class="c1">#create_dataset(name, shape=None, dtype=None, data=None, **kwds) </span>
+    <span class="n">dset</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,),</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;S</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="c1">#, data=s)</span>
+    <span class="n">dset</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+    <span class="k">return</span> <span class="n">dset</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="source_full_name"><a class="viewcode-back" href="../index.html#DCUtils.source_full_name">[docs]</a><span class="k">def</span> <span class="nf">source_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns full name like &#39;DetInfo(XppGon.0:Cspad2x2.0)&#39; of the brief source or its alias</span>
+<span class="sd">       using env.configStore().keys()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">str_src</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">env</span><span class="o">.</span><span class="n">configStore</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">str_src</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">src</span><span class="p">())</span>\
+        <span class="ow">or</span> <span class="n">str_src</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">alias</span><span class="p">())</span> <span class="p">:</span> <span class="k">return</span> <span class="n">k</span><span class="o">.</span><span class="n">src</span><span class="p">()</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="dettype_from_str_source"><a class="viewcode-back" href="../index.html#DCUtils.dettype_from_str_source">[docs]</a><span class="k">def</span> <span class="nf">dettype_from_str_source</span><span class="p">(</span><span class="n">src</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns the detector type from full psana source name (Ex.: Cspad2x2 from DetInfo(XppGon.0:Cspad2x2.0) </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">str_src</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+    <span class="n">str_split</span> <span class="o">=</span> <span class="n">str_src</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> 
+    <span class="n">detname</span> <span class="o">=</span> <span class="n">str_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">str_split</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">detname</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">detname</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="string_from_source"><a class="viewcode-back" href="../index.html#DCUtils.string_from_source">[docs]</a><span class="k">def</span> <span class="nf">string_from_source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> <span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Returns string like &#39;CxiDs2.0:Cspad.0&#39; from &#39;DetInfo(CxiDs2.0:Cspad.0)&#39;</span>
+<span class="sd">     or &#39;DsaCsPad&#39; from &#39;Source(&#39;DsaCsPad&#39;)&#39; form input string or psana.Source object</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">str_src</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">)</span> 
+  <span class="k">if</span> <span class="s1">&#39;&quot;&#39;</span> <span class="ow">in</span> <span class="n">str_src</span> <span class="p">:</span> <span class="k">return</span> <span class="n">str_src</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># case of psana.String object</span>
+  <span class="n">str_split</span> <span class="o">=</span> <span class="n">str_src</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> 
+  <span class="k">return</span> <span class="n">str_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">str_split</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span> <span class="k">else</span> <span class="n">str_src</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="detector_full_name"><a class="viewcode-back" href="../index.html#DCUtils.detector_full_name">[docs]</a><span class="k">def</span> <span class="nf">detector_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns full detector name like &#39;XppGon.0:Cspad2x2.0&#39; for short src, alias src, or psana.Source.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">str_src</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+    <span class="n">str_src</span> <span class="o">=</span> <span class="n">string_from_source</span><span class="p">(</span><span class="n">str_src</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">str_src</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">str_src</span> <span class="o">=</span> <span class="n">source_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">str_src</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">str_src</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">string_from_source</span><span class="p">(</span><span class="n">str_src</span><span class="p">)</span></div>
+
+<span class="c1">##------------------------------</span>
+
+<div class="viewcode-block" id="psana_source"><a class="viewcode-back" href="../index.html#DCUtils.psana_source">[docs]</a><span class="k">def</span> <span class="nf">psana_source</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">srcpar</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;returns psana.Source(src) from other psana.Source brief src or alias.</span>
+<span class="sd">    </span>
+<span class="sd">       Parameters</span>
+
+<span class="sd">       - srcpar  : str  - regular source or its alias, ex.: &#39;XppEndstation.0:Rayonix.0&#39; or &#39;rayonix&#39;</span>
+<span class="sd">       - set_sub : bool - default=True - propagates source parameter to low level package  </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#print &#39;type of srcpar: &#39;, type(srcpar)</span>
+    
+    <span class="n">src</span> <span class="o">=</span> <span class="n">srcpar</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">srcpar</span><span class="p">,</span> <span class="n">psana</span><span class="o">.</span><span class="n">Source</span><span class="p">)</span> <span class="k">else</span> <span class="n">psana</span><span class="o">.</span><span class="n">Source</span><span class="p">(</span><span class="n">srcpar</span><span class="p">)</span>
+    <span class="n">str_src</span> <span class="o">=</span> <span class="n">string_from_source</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
+
+    <span class="n">amap</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">aliasMap</span><span class="p">()</span>
+    <span class="n">psasrc</span> <span class="o">=</span> <span class="n">amap</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="n">str_src</span><span class="p">)</span>
+    <span class="n">source</span>  <span class="o">=</span> <span class="n">src</span> <span class="k">if</span> <span class="n">amap</span><span class="o">.</span><span class="n">alias</span><span class="p">(</span><span class="n">psasrc</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="n">amap</span><span class="o">.</span><span class="n">src</span><span class="p">(</span><span class="n">str_src</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">psana</span><span class="o">.</span><span class="n">Source</span><span class="p">)</span> <span class="p">:</span> <span class="n">source</span> <span class="o">=</span> <span class="n">psana</span><span class="o">.</span><span class="n">Source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">source</span></div>
+ 
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_subgroup"><a class="viewcode-back" href="../index.html#DCUtils.get_subgroup">[docs]</a><span class="k">def</span> <span class="nf">get_subgroup</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">subgr_name</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;For hdf5:</span>
+<span class="sd">       returns subgroup of the group if it exists or creates and returns new subgroup</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="c1">#print &#39;YYY grp.name:&#39;, grp.name, &#39;  subgr_name:&#39;, subgr_name</span>
+    <span class="k">if</span> <span class="n">subgr_name</span> <span class="ow">in</span> <span class="n">grp</span> <span class="p">:</span> <span class="k">return</span> <span class="n">grp</span><span class="p">[</span><span class="n">subgr_name</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">subgr_name</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="delete_object"><a class="viewcode-back" href="../index.html#DCUtils.delete_object">[docs]</a><span class="k">def</span> <span class="nf">delete_object</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">oname</span><span class="p">)</span> <span class="p">:</span>    
+    <span class="sd">&quot;&quot;&quot;For hdf5: removes object from group.</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="c1">#print &#39;TTT grp.name: %s  delete object with name: %s&#39; % (grp.name, oname)</span>
+    <span class="c1">#t0_sec = time()</span>
+    <span class="k">if</span> <span class="n">oname</span> <span class="ow">in</span> <span class="n">grp</span> <span class="p">:</span> <span class="k">del</span> <span class="n">grp</span><span class="p">[</span><span class="n">oname</span><span class="p">]</span></div>
+    <span class="c1">#print &#39;TTT %s: time (sec) = %.6f&#39; % (sys._getframe().f_code.co_name, time()-t0_sec)</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="save_object_as_dset"><a class="viewcode-back" href="../index.html#DCUtils.save_object_as_dset">[docs]</a><span class="k">def</span> <span class="nf">save_object_as_dset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Saves object as h5py dataset</span>
+
+<span class="sd">       Currently supports scalar int, double, string and numpy.array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#print &#39;XXX: save_object_as_dset &#39;</span>
+    <span class="c1">#print &#39;XXX grp.keys():&#39;,  grp.keys()</span>
+    <span class="c1">#print &#39;XXX %s in grp.keys(): &#39; % name, name in grp.keys()</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">grp</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="p">:</span> <span class="k">return</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">sh</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span> <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">shape</span>
+    <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">sh</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="n">save_string_as_dset</span><span class="p">(</span><span class="n">grp</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">sh</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">sh</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;double&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Can&#39;t save parameter: </span><span class="si">%s</span><span class="s2"> of </span><span class="si">%s</span><span class="s2"> in the h5py group: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">),</span> <span class="n">grp</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="s1">&#39;DCUtils.save_object_as_dset&#39;</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="evt_time"><a class="viewcode-back" href="../index.html#DCUtils.evt_time">[docs]</a><span class="k">def</span> <span class="nf">evt_time</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns event (double) time for input psana.Event object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">evid</span> <span class="o">=</span> <span class="n">evt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">psana</span><span class="o">.</span><span class="n">EventId</span><span class="p">)</span>
+    <span class="n">ttuple</span> <span class="o">=</span> <span class="n">evid</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="c1">#print &#39;XXX time:&#39;,  ttuple</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">ttuple</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">ttuple</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="mf">1e-9</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="env_time"><a class="viewcode-back" href="../index.html#DCUtils.env_time">[docs]</a><span class="k">def</span> <span class="nf">env_time</span><span class="p">(</span><span class="n">env</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns event (double) time for input psana.Env object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">evid</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">configStore</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">psana</span><span class="o">.</span><span class="n">EventId</span><span class="p">)</span>
+    <span class="n">ttuple</span> <span class="o">=</span> <span class="n">evid</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="c1">#print &#39;XXX time:&#39;,  ttuple</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">ttuple</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">ttuple</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span><span class="mf">1e-9</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="evt_fiducials"><a class="viewcode-back" href="../index.html#DCUtils.evt_fiducials">[docs]</a><span class="k">def</span> <span class="nf">evt_fiducials</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns event fiducials.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">evid</span> <span class="o">=</span> <span class="n">evt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">psana</span><span class="o">.</span><span class="n">EventId</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">evid</span><span class="o">.</span><span class="n">fiducials</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="par_to_tsec"><a class="viewcode-back" href="../index.html#DCUtils.par_to_tsec">[docs]</a><span class="k">def</span> <span class="nf">par_to_tsec</span><span class="p">(</span><span class="n">par</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Checks if par is float or assumes that it is psana.Event and returns event time in (float) sec or None.</span>
+
+<span class="sd">    Parameters</span>
+
+<span class="sd">    - par   : psana.Event | psana.Env | float - tsec event time | None</span>
+
+<span class="sd">    Returns</span>
+
+<span class="sd">    event time in (float) sec or None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">par</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="k">else</span>\
+           <span class="n">evt_time</span><span class="p">(</span><span class="n">par</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">psana</span><span class="o">.</span><span class="n">Event</span><span class="p">)</span> <span class="k">else</span>\
+           <span class="n">env_time</span><span class="p">(</span><span class="n">par</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">psana</span><span class="o">.</span><span class="n">Env</span><span class="p">)</span> <span class="k">else</span>\
+           <span class="kc">None</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_source_full_name</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">psana</span><span class="o">.</span><span class="n">DataSource</span><span class="p">(</span><span class="s1">&#39;/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc&#39;</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">env</span><span class="p">()</span>    
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="s1">&#39;src=&quot;Epix&quot;    :&#39;</span><span class="p">,</span> <span class="n">source_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;Epix&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;src=&quot;Cspad.&quot;  :&#39;</span><span class="p">,</span> <span class="n">source_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;Cspad.&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;src=&quot;Cspad&quot;   :&#39;</span><span class="p">,</span> <span class="n">source_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;Cspad&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;src=&quot;cs140_0&quot; :&#39;</span><span class="p">,</span> <span class="n">source_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;cs140_0&#39;</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_string_from_source</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">psana</span><span class="o">.</span><span class="n">DataSource</span><span class="p">(</span><span class="s1">&#39;/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc&#39;</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">env</span><span class="p">()</span>    
+    <span class="n">source</span> <span class="o">=</span> <span class="n">psana_source</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;cs140_0&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="n">source</span>
+    <span class="nb">print</span> <span class="s1">&#39;string_from_source&#39;</span><span class="p">,</span> <span class="n">string_from_source</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_psana_source</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">psana</span><span class="o">.</span><span class="n">DataSource</span><span class="p">(</span><span class="s1">&#39;/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc&#39;</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">env</span><span class="p">()</span>    
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="s1">&#39;psana_source(env, &quot;Epix&quot;)    :&#39;</span><span class="p">,</span> <span class="n">psana_source</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;Epix&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;psana_source(env, &quot;Cspad.&quot;)  :&#39;</span><span class="p">,</span> <span class="n">psana_source</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;Cspad.&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;psana_source(env, &quot;Cspad&quot;)   :&#39;</span><span class="p">,</span> <span class="n">psana_source</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;Cspad&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;psana_source(env, &quot;cs140_0&quot;) :&#39;</span><span class="p">,</span> <span class="n">psana_source</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;cs140_0&#39;</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_detector_full_name</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">psana</span><span class="o">.</span><span class="n">DataSource</span><span class="p">(</span><span class="s1">&#39;/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc&#39;</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">env</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="s1">&#39;src=&quot;Epix&quot;                            :&#39;</span><span class="p">,</span> <span class="n">detector_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s2">&quot;Epix&quot;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;src=psana.Source(&quot;Epix&quot;))             :&#39;</span><span class="p">,</span> <span class="n">detector_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">psana</span><span class="o">.</span><span class="n">Source</span><span class="p">(</span><span class="s1">&#39;Epix&#39;</span><span class="p">))</span>
+    <span class="nb">print</span> <span class="s1">&#39;src=&quot;DetInfo(NoDetector.0:Epix100a.0)&quot;:&#39;</span><span class="p">,</span> <span class="n">detector_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;DetInfo(NoDetector.0:Epix100a.0)&#39;</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;for alias src=&quot;cs140_0&quot;               :&#39;</span><span class="p">,</span> <span class="n">detector_full_name</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="s1">&#39;cs140_0&#39;</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_evt_time</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">psana</span><span class="o">.</span><span class="n">DataSource</span><span class="p">(</span><span class="s1">&#39;/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc&#39;</span><span class="p">)</span>
+    <span class="n">evt</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">events</span><span class="p">()</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="n">t</span><span class="o">=</span><span class="n">evt_time</span><span class="p">(</span><span class="n">evt</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;evt_time(evt) : </span><span class="si">%.9f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">t</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_env_time</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">psana</span><span class="o">.</span><span class="n">DataSource</span><span class="p">(</span><span class="s1">&#39;/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc&#39;</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">env</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="n">t</span><span class="o">=</span><span class="n">env_time</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;env_time(evt) : </span><span class="si">%.9f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">t</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_misc</span><span class="p">()</span> <span class="p">:</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_enviroment(USER) : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">get_enviroment</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_login()          : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">get_login</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_hostname()       : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">get_hostname</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_cwd()            : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">get_cwd</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">do_test</span><span class="p">()</span> <span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">sys</span><span class="p">;</span> <span class="k">global</span> <span class="n">sys</span>
+    <span class="n">tname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;0&#39;</span>
+    <span class="nb">print</span> <span class="mi">50</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Test </span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">tname</span>
+    <span class="k">if</span>   <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span> <span class="p">:</span> <span class="n">test_misc</span><span class="p">();</span> <span class="n">test_source_full_name</span><span class="p">();</span> <span class="n">test_string_from_source</span><span class="p">();</span>\
+                        <span class="n">test_psana_source</span><span class="p">();</span> <span class="n">test_detector_full_name</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span> <span class="p">:</span> <span class="n">test_source_full_name</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;2&#39;</span> <span class="p">:</span> <span class="n">test_string_from_source</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;3&#39;</span> <span class="p">:</span> <span class="n">test_psana_source</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;4&#39;</span> <span class="p">:</span> <span class="n">test_detector_full_name</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;5&#39;</span> <span class="p">:</span> <span class="n">test_evt_time</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;6&#39;</span> <span class="p">:</span> <span class="n">test_env_time</span><span class="p">()</span>
+    <span class="k">else</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Not-recognized test name: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tname</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="s1">&#39;End of test </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tname</span><span class="p">)</span>
+ 
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+    <span class="n">do_test</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Mikhail Dubrovin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

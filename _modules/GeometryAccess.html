@@ -1,0 +1,1162 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>GeometryAccess &#8212; PSCalib-doc 1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">PSCalib-doc 1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for GeometryAccess</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Class :py:class:`GeometryAccess` - holds and access hierarchical geometry for generic pixel detector</span>
+<span class="sd">====================================================================================================</span>
+
+<span class="sd">Usage::</span>
+<span class="sd"> </span>
+<span class="sd">    from PSCalib.GeometryAccess import GeometryAccess, img_from_pixel_arrays</span>
+
+<span class="sd">    fname_geometry = &#39;/reg/d/psdm/CXI/cxitut13/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data&#39;</span>
+<span class="sd">    geometry = GeometryAccess(fname_geometry, 0377)</span>
+
+<span class="sd">    # load constants from geometry file</span>
+<span class="sd">    geometry.load_pars_from_file(path=None)</span>
+
+<span class="sd">    # load constants from next-line-symbol separated str / text object</span>
+<span class="sd">    geometry.load_pars_from_str(s)</span>
+
+<span class="sd">    # check if geometry info is available, returns bool</span>
+<span class="sd">    status = geometry.is_valid()</span>
+
+<span class="sd">    # get pixel coordinate [um] arrays</span>
+<span class="sd">    X, Y, Z = geometry.get_pixel_coords(oname=None, oindex=0, do_tilt=True)</span>
+
+<span class="sd">    # get pixel x,y coordinate [um] arrays projected toward origin on specified zplane, if zplane=None then zplane=Z.mean()</span>
+<span class="sd">    X, Y = geometry.get_pixel_xy_at_z(zplane=None, oname=None, oindex=0, do_tilt=True)</span>
+
+<span class="sd">    # print a portion of pixel X, Y, and Z coordinate arrays</span>
+<span class="sd">    geometry.print_pixel_coords(oname=None, oindex=0)</span>
+
+<span class="sd">    # get pixel area array; A=1 for regular pixels, =2.5 for wide.</span>
+<span class="sd">    area = geometry.get_pixel_areas(oname=None, oindex=0)</span>
+
+<span class="sd">    # returns (smallest) pixel size [um]</span>
+<span class="sd">    pixel_size = geometry.get_pixel_scale_size(oname=None, oindex=0)</span>
+
+<span class="sd">    # returns dictionary of comments associated with geometry (file)</span>
+<span class="sd">    dict_of_comments = geometry.get_dict_of_comments()</span>
+
+<span class="sd">    # print comments associated with geometry (file) </span>
+<span class="sd">    geometry.print_comments_from_dict()</span>
+
+<span class="sd">    # print list of geometry objects</span>
+<span class="sd">    geometry.print_list_of_geos()</span>
+
+<span class="sd">    # print list of geometry object children</span>
+<span class="sd">    geometry.print_list_of_geos_children()</span>
+
+<span class="sd">    # get pixel mask array;</span>
+<span class="sd">    # mbits = +1-mask edges, +2-wide pixels, +4-non-bonded pixels, +8/+16 - four/eight neighbours of non-bonded</span>
+<span class="sd">    mask = geometry.get_pixel_mask(oname=None, oindex=0, mbits=0377)</span>
+
+<span class="sd">    # get index arrays for entire detector</span>
+<span class="sd">    iX, iY = geometry.get_pixel_coord_indexes(do_tilt=True)</span>
+
+<span class="sd">    # get index arrays for specified quad with offset</span>
+<span class="sd">    iX, iY = geometry.get_pixel_coord_indexes(&#39;QUAD:V1&#39;, 1, pix_scale_size_um=None, xy0_off_pix=(1000,1000), do_tilt=True)</span>
+
+<span class="sd">    # get index arrays for pixel coordinates projected toward origin on specified zplane</span>
+<span class="sd">    iX, iY = geometry.get_pixel_xy_inds_at_z(zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)</span>
+
+<span class="sd">    # get ix and iy indexes for specified point in [um]. By default p_um=(0,0) - detector origin coordinates (center).</span>
+<span class="sd">    ix, iy = geometry.point_coord_indexes(p_um=(0,0))</span>
+<span class="sd">    # all other parameters should be the same as in get_pixel_coord_indexes method</span>
+<span class="sd">    ix, iy = geometry.point_coord_indexes(p_um=(0,0), &#39;QUAD:V1&#39;, 1, pix_scale_size_um=None, xy0_off_pix=(1000,1000), do_tilt=True)</span>
+
+<span class="sd">    # get 2-d image from index arrays</span>
+<span class="sd">    img = img_from_pixel_arrays(iX,iY,W=arr)</span>
+
+<span class="sd">    # Get specified object of the class GeometryObject, all objects are kept in the list self.list_of_geos</span>
+<span class="sd">    geo = geometry.get_geo(&#39;QUAD:V1&#39;, 1) </span>
+<span class="sd">    # Get top GeometryObject - the object which includes all other geometry objects</span>
+<span class="sd">    geo = geometry.get_top_geo()</span>
+
+<span class="sd">    # modify currect geometry objects&#39; parameters</span>
+<span class="sd">    geometry.set_geo_pars(&#39;QUAD:V1&#39;, 1, x0, y0, z0, rot_z, rot_y, rot_x, tilt_z, tilt_y, tilt_x)</span>
+<span class="sd">    geometry.move_geo(&#39;QUAD:V1&#39;, 1, 10, 20, 0)</span>
+<span class="sd">    geometry.tilt_geo(&#39;QUAD:V1&#39;, 1, 0.01, 0, 0)</span>
+
+<span class="sd">    # save current geometry parameters in file</span>
+<span class="sd">    geometry.save_pars_in_file(fname_geometry_new)</span>
+
+<span class="sd">    # change verbosity bit-control word; to print everythisg use pbits = 0xffff</span>
+<span class="sd">    geometry.set_print_bits(pbits=0)</span>
+
+<span class="sd">    # return geometry parameters in &quot;psf&quot; format as a tuple psf[32][3][3]</span>
+<span class="sd">    psf = geometry.get_psf()</span>
+<span class="sd">    geometry.print_psf()</span>
+
+<span class="sd">See:</span>
+<span class="sd"> * :py:class:`GeometryObject`, </span>
+<span class="sd"> * :py:class:`SegGeometry`, </span>
+<span class="sd"> * :py:class:`SegGeometryCspad2x1V1`, </span>
+<span class="sd"> * :py:class:`SegGeometryEpix100V1`, </span>
+<span class="sd"> * :py:class:`SegGeometryMatrixV1`, </span>
+<span class="sd"> * :py:class:`SegGeometryStore`</span>
+
+<span class="sd">For more detail see `Detector Geometry &lt;https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry&gt;`_.</span>
+
+<span class="sd">This software was developed for the SIT project.</span>
+<span class="sd">If you use all or part of it, please give an appropriate acknowledgment.</span>
+
+<span class="sd">Author: Mikhail Dubrovin</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#------------------------------</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">PSCalib.GeometryObject</span> <span class="k">import</span> <span class="n">GeometryObject</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">floor</span><span class="p">,</span> <span class="n">fabs</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="divide_protected"><a class="viewcode-back" href="../index.html#GeometryAccess.divide_protected">[docs]</a><span class="k">def</span> <span class="nf">divide_protected</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">den</span><span class="p">,</span> <span class="n">vsub_zero</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns result of devision of numpy arrays num/den with substitution of value vsub_zero for zero den elements.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pro_num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">select</span><span class="p">((</span><span class="n">den</span><span class="o">!=</span><span class="mi">0</span><span class="p">,),</span> <span class="p">(</span><span class="n">num</span><span class="p">,),</span> <span class="n">default</span><span class="o">=</span><span class="n">vsub_zero</span><span class="p">)</span>
+    <span class="n">pro_den</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">select</span><span class="p">((</span><span class="n">den</span><span class="o">!=</span><span class="mi">0</span><span class="p">,),</span> <span class="p">(</span><span class="n">den</span><span class="p">,),</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pro_num</span> <span class="o">/</span> <span class="n">pro_den</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess">[docs]</a><span class="k">class</span> <span class="nc">GeometryAccess</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; :py:class:`GeometryAccess`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GeometryAccess.__init__"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pbits</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> 
+        <span class="sd">&quot;&quot;&quot;Constructor of the class :py:class:`GeometryAccess`      </span>
+
+<span class="sd">        Parameters</span>
+
+<span class="sd">        - path : str - path to the geometry file</span>
+<span class="sd">        - pbits : int - verbosity bitword</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span>  <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">=</span> <span class="n">pbits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">pbits</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: geometry file &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_pars_from_file</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">1</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_list_of_geos</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">2</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_list_of_geos_children</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">4</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_comments_from_dict</span><span class="p">()</span></div>
+    
+    <span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">reset_cash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="c1"># Parameters for caching</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">geo_old</span>    <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oname_old</span>  <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">oindex_old</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilt_old</span>   <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_old</span>      <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Y_old</span>      <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Z_old</span>      <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iX_old</span>     <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iY_old</span>     <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipx_old</span>    <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ipy_old</span>    <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">p_um_old</span>   <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.is_valid"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.is_valid">[docs]</a>    <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;returns True if geometry is loaded and presumably valid, otherwise False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.load_pars_from_file"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.load_pars_from_file">[docs]</a>    <span class="k">def</span> <span class="nf">load_pars_from_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reads input &quot;geometry&quot; file, discards empty lines and comments, fills the list of geometry objects for data lines</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_cash</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">32</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Load file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+
+        <span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">linef</span> <span class="ow">in</span> <span class="n">f</span> <span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">linef</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">128</span> <span class="p">:</span> <span class="nb">print</span> <span class="n">line</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="p">:</span> <span class="k">continue</span>   <span class="c1"># discard empty strings</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;#&#39;</span> <span class="p">:</span>      <span class="c1"># process line of comments</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_comment_to_dict</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1">#geo=self._parse_line(line)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parse_line</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+    
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_relations</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span></div>
+    
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.load_pars_from_str"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.load_pars_from_str">[docs]</a>    <span class="k">def</span> <span class="nf">load_pars_from_str</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reads input geometry from str, discards empty lines and comments, fills the list of geometry objects for data lines</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">pbits</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.load_pars_from_str input parameter is not a str, s: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+            <span class="k">return</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">reset_cash</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">32</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Load text: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">s</span>
+
+        <span class="k">for</span> <span class="n">linef</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">linef</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">128</span> <span class="p">:</span> <span class="nb">print</span> <span class="n">line</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span> <span class="p">:</span> <span class="k">continue</span>   <span class="c1"># discard empty strings</span>
+            <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;#&#39;</span> <span class="p">:</span>      <span class="c1"># process line of comments</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_add_comment_to_dict</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="c1">#geo=self._parse_line(line)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parse_line</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+    
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_relations</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="o">=</span> <span class="kc">True</span></div>
+    
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.save_pars_in_file"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.save_pars_in_file">[docs]</a>    <span class="k">def</span> <span class="nf">save_pars_in_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Save geometry file with current content</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">32</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Save file: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">path</span>
+
+        <span class="n">txt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="c1"># save comments</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span><span class="p">)</span> <span class="p">:</span>
+            <span class="c1">#txt += &#39;# %10s  %s\n&#39; % (k.ljust(10), self.dict_of_comments[k])</span>
+            <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;# </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+        <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>        
+
+        <span class="c1"># save data</span>
+        <span class="k">for</span> <span class="n">geo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_parent_name</span><span class="p">()</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">continue</span>
+            <span class="n">txt</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">str_data</span><span class="p">())</span>
+
+        <span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">64</span> <span class="p">:</span> <span class="nb">print</span> <span class="n">txt</span></div>
+    
+    <span class="c1">#------------------------------</span>
+    
+    <span class="k">def</span> <span class="nf">_add_comment_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Splits the line of comments for keyward and value and store it in the dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#cmt = line.lstrip(&#39;# &#39;).split(&#39; &#39;, 1)</span>
+        <span class="n">cmt</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmt</span><span class="p">)</span><span class="o">&lt;</span><span class="mi">1</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmt</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span> <span class="p">:</span>
+            <span class="c1">#self.dict_of_comments[cmt[0]] = &#39;&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">return</span>
+
+        <span class="c1">#beginline, endline = cmt</span>
+        <span class="c1">#print &#39;  cmt      : &quot;%s&quot;&#39; % cmt</span>
+        <span class="c1">#print &#39;  len(cmt) : %d&#39; % len(cmt)        </span>
+        <span class="c1">#print &#39;  line     : &quot;%s&quot;&#39; % line</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">cmt</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="c1">#------------------------------</span>
+    
+    <span class="k">def</span> <span class="nf">_parse_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Gets the string line with data from input file,</span>
+<span class="sd">           creates and returns the geometry object for this string.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pname&#39;</span><span class="p">,</span><span class="s1">&#39;pindex&#39;</span><span class="p">,</span><span class="s1">&#39;oname&#39;</span><span class="p">,</span><span class="s1">&#39;oindex&#39;</span><span class="p">,</span><span class="s1">&#39;x0&#39;</span><span class="p">,</span><span class="s1">&#39;y0&#39;</span><span class="p">,</span><span class="s1">&#39;z0&#39;</span><span class="p">,</span><span class="s1">&#39;rot_z&#39;</span><span class="p">,</span><span class="s1">&#39;rot_y&#39;</span><span class="p">,</span><span class="s1">&#39;rot_x&#39;</span><span class="p">,</span><span class="s1">&#39;tilt_z&#39;</span><span class="p">,</span><span class="s1">&#39;tilt_y&#39;</span><span class="p">,</span><span class="s1">&#39;tilt_x&#39;</span><span class="p">]</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="p">:</span>
+            <span class="nb">print</span> <span class="s1">&#39;The list length for fields from file: </span><span class="si">%d</span><span class="s1"> is not equal to expected: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">))</span>
+            <span class="k">return</span>
+    
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span>  <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="nb">int</span>  <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="nb">str</span>  <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>
+                <span class="nb">int</span>  <span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">4</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">5</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">6</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">7</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">8</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">9</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">10</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">11</span><span class="p">]),</span>
+                <span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">[</span><span class="mi">12</span><span class="p">])</span>
+               <span class="p">]</span>
+
+        <span class="c1">#print &#39;keys: &#39;, keys</span>
+        <span class="c1">#print &#39;vals: &#39;, vals</span>
+    
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">vals</span><span class="p">))</span>
+        <span class="c1">#print &#39;d=&#39;, d</span>
+        <span class="c1">#return d</span>
+        <span class="k">return</span> <span class="n">GeometryObject</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
+    
+    <span class="c1">#------------------------------</span>
+    
+    <span class="k">def</span> <span class="nf">_find_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geobj</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Finds and returns parent for geobj geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>           
+        <span class="k">for</span> <span class="n">geo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span> <span class="p">:</span>
+            <span class="k">if</span> <span class="n">geo</span> <span class="o">==</span> <span class="n">geobj</span> <span class="p">:</span> <span class="k">continue</span>
+            <span class="k">if</span>  <span class="n">geo</span><span class="o">.</span><span class="n">oindex</span> <span class="o">==</span> <span class="n">geobj</span><span class="o">.</span><span class="n">pindex</span> \
+            <span class="ow">and</span> <span class="n">geo</span><span class="o">.</span><span class="n">oname</span>  <span class="o">==</span> <span class="n">geobj</span><span class="o">.</span><span class="n">pname</span> <span class="p">:</span>
+                <span class="k">return</span> <span class="n">geo</span>
+    
+        <span class="c1"># The name of parent object is not found among geo names in the self.list_of_geos</span>
+        <span class="c1"># add top parent object to the list</span>
+        <span class="k">if</span> <span class="n">geobj</span><span class="o">.</span><span class="n">pname</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="n">top_parent</span> <span class="o">=</span> <span class="n">GeometryObject</span><span class="p">(</span><span class="n">pname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="n">geobj</span><span class="o">.</span><span class="n">pname</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="n">geobj</span><span class="o">.</span><span class="n">pindex</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">top_parent</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">top_parent</span>
+                   
+        <span class="k">return</span> <span class="kc">None</span> <span class="c1"># for top parent itself</span>
+       
+    <span class="c1">#------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">_set_relations</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set relations between geometry objects in the list_of_geos</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">geo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span> <span class="p">:</span>
+            <span class="c1">#geo.print_geo()</span>
+            <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_parent</span><span class="p">(</span><span class="n">geo</span><span class="p">)</span>        
+
+            <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">continue</span>
+
+            <span class="n">geo</span><span class="o">.</span><span class="n">set_parent</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+            <span class="n">parent</span><span class="o">.</span><span class="n">add_child</span><span class="p">(</span><span class="n">geo</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">16</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;geo:</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> has parent:</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">geo</span><span class="o">.</span><span class="n">oindex</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">oindex</span><span class="p">)</span>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.get_geo"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_geo">[docs]</a>    <span class="k">def</span> <span class="nf">get_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns specified geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">oindex</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">oindex_old</span> <span class="ow">and</span> <span class="n">oname</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">oname_old</span> <span class="p">:</span> <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geo_old</span>
+
+        <span class="k">for</span> <span class="n">geo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span> <span class="p">:</span>
+            <span class="k">if</span>  <span class="n">geo</span><span class="o">.</span><span class="n">oindex</span> <span class="o">==</span> <span class="n">oindex</span> \
+            <span class="ow">and</span> <span class="n">geo</span><span class="o">.</span><span class="n">oname</span>  <span class="o">==</span> <span class="n">oname</span> <span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">oindex_old</span> <span class="o">=</span> <span class="n">oindex</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">oname_old</span>  <span class="o">=</span> <span class="n">oname</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">geo_old</span>    <span class="o">=</span> <span class="n">geo</span>
+                <span class="k">return</span> <span class="n">geo</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+    
+    <span class="c1">#------------------------------</span>
+    
+<div class="viewcode-block" id="GeometryAccess.get_top_geo"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_top_geo">[docs]</a>    <span class="k">def</span> <span class="nf">get_top_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns top geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+    
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.get_pixel_coords"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_pixel_coords">[docs]</a>    <span class="k">def</span> <span class="nf">get_pixel_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns three pixel X,Y,Z coordinate arrays for top or specified geometry object </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span>  <span class="n">oindex</span>  <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">oindex_old</span>\
+        <span class="ow">and</span> <span class="n">oname</span>   <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">oname_old</span>\
+        <span class="ow">and</span> <span class="n">do_tilt</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_old</span> <span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z_old</span>
+
+        <span class="n">geo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_geo</span><span class="p">()</span> <span class="k">if</span> <span class="n">oname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geo</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">&amp;</span> <span class="mi">8</span> <span class="p">:</span>
+            <span class="nb">print</span> <span class="s1">&#39;get_pixel_coords(...) for geo:&#39;</span><span class="p">,</span>
+            <span class="n">geo</span><span class="o">.</span><span class="n">print_geo_children</span><span class="p">();</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">X_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z_old</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_pixel_coords</span><span class="p">(</span><span class="n">do_tilt</span><span class="p">)</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilt</span> <span class="o">=</span> <span class="n">do_tilt</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Y_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Z_old</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.get_pixel_xy_at_z"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_pixel_xy_at_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_pixel_xy_at_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zplane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns pixel coordinate arrays XatZ, YatZ, for specified zplane and geometry object.</span>
+
+<span class="sd">           This method projects pixel X, Y coordinates in 3-D</span>
+<span class="sd">           on the specified Z plane along direction to origin.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pixel_coords</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">,</span> <span class="n">do_tilt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="n">Z0</span> <span class="o">=</span> <span class="n">Z</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="k">if</span> <span class="n">zplane</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">zplane</span>
+        <span class="k">if</span> <span class="n">fabs</span><span class="p">(</span><span class="n">Z0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1000</span> <span class="p">:</span> <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span>
+
+        <span class="n">XatZ</span> <span class="o">=</span> <span class="n">Z0</span> <span class="o">*</span> <span class="n">divide_protected</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span>
+        <span class="n">YatZ</span> <span class="o">=</span> <span class="n">Z0</span> <span class="o">*</span> <span class="n">divide_protected</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">XatZ</span><span class="p">,</span> <span class="n">YatZ</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.get_pixel_areas"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_pixel_areas">[docs]</a>    <span class="k">def</span> <span class="nf">get_pixel_areas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns pixel areas array for top or specified geometry object </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_geo</span><span class="p">()</span> <span class="k">if</span> <span class="n">oname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geo</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_pixel_areas</span><span class="p">()</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.get_pixel_mask"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_pixel_mask">[docs]</a>    <span class="k">def</span> <span class="nf">get_pixel_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">mbits</span><span class="o">=</span><span class="mi">0377</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns pixel mask array for top or specified geometry object.</span>
+
+<span class="sd">        mbits =+1 - mask edges</span>
+<span class="sd">               +2 - two wide-pixel central columns</span>
+<span class="sd">               +4 - non-bonded pixels</span>
+<span class="sd">               +8 - four nearest neighbours of non-bonded pixels</span>
+<span class="sd">               +16- eight neighbours of non-bonded pixels</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_geo</span><span class="p">()</span> <span class="k">if</span> <span class="n">oname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geo</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_pixel_mask</span><span class="p">(</span><span class="n">mbits</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.get_pixel_scale_size"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_pixel_scale_size">[docs]</a>    <span class="k">def</span> <span class="nf">get_pixel_scale_size</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns pixel scale size for top or specified geometry object </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_geo</span><span class="p">()</span> <span class="k">if</span> <span class="n">oname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geo</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">)</span>        
+        <span class="k">return</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_pixel_scale_size</span><span class="p">()</span></div>
+
+    <span class="c1">#------------------------------</span>
+    
+<div class="viewcode-block" id="GeometryAccess.get_dict_of_comments"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_dict_of_comments">[docs]</a>    <span class="k">def</span> <span class="nf">get_dict_of_comments</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns dictionary of comments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.set_geo_pars"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.set_geo_pars">[docs]</a>    <span class="k">def</span> <span class="nf">set_geo_pars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">y0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rot_z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rot_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rot_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tilt_z</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tilt_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">tilt_x</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Sets geometry parameters for specified or top geometry object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_geo</span><span class="p">()</span> <span class="k">if</span> <span class="n">oname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geo</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geo</span><span class="o">.</span><span class="n">set_geo_pars</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">z0</span><span class="p">,</span> <span class="n">rot_z</span><span class="p">,</span> <span class="n">rot_y</span><span class="p">,</span> <span class="n">rot_x</span><span class="p">,</span> <span class="n">tilt_z</span><span class="p">,</span> <span class="n">tilt_y</span><span class="p">,</span> <span class="n">tilt_x</span><span class="p">)</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.move_geo"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.move_geo">[docs]</a>    <span class="k">def</span> <span class="nf">move_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dz</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Moves specified or top geometry object by dx, dy, dz</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_geo</span><span class="p">()</span> <span class="k">if</span> <span class="n">oname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geo</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geo</span><span class="o">.</span><span class="n">move_geo</span><span class="p">(</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="p">,</span> <span class="n">dz</span><span class="p">)</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.tilt_geo"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.tilt_geo">[docs]</a>    <span class="k">def</span> <span class="nf">tilt_geo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dt_x</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dt_y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dt_z</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Tilts specified or top geometry object by dt_x, dt_y, dt_z</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_geo</span><span class="p">()</span> <span class="k">if</span> <span class="n">oname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_geo</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geo</span><span class="o">.</span><span class="n">tilt_geo</span><span class="p">(</span><span class="n">dt_x</span><span class="p">,</span> <span class="n">dt_y</span><span class="p">,</span> <span class="n">dt_z</span><span class="p">)</span></div>
+
+    <span class="c1">#------------------------------</span>
+    
+    <span class="k">def</span> <span class="nf">print_list_of_geos</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">print_list_of_geos():&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> List_of_geos is empty...&#39;</span> <span class="o">%</span> <span class="n">ss</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="k">for</span> <span class="n">geo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span> <span class="p">:</span> <span class="n">geo</span><span class="o">.</span><span class="n">print_geo</span><span class="p">()</span>
+
+    <span class="c1">#------------------------------</span>
+    
+    <span class="k">def</span> <span class="nf">print_list_of_geos_children</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">print_list_of_geos_children():&#39;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> List_of_geos is empty...&#39;</span> <span class="o">%</span> <span class="n">ss</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="k">for</span> <span class="n">geo</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_geos</span> <span class="p">:</span> <span class="n">geo</span><span class="o">.</span><span class="n">print_geo_children</span><span class="p">()</span>
+
+    <span class="c1">#------------------------------</span>
+    
+    <span class="k">def</span> <span class="nf">print_comments_from_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">print_comments_from_dict():&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="c1">#for k,v in self.dict_of_comments.iteritems():</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="s1">&#39;key: </span><span class="si">%3d</span><span class="s1">  val: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dict_of_comments</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.print_pixel_coords"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.print_pixel_coords">[docs]</a>    <span class="k">def</span> <span class="nf">print_pixel_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Partial print of pixel coordinate X,Y,Z arrays for selected or top(by default) geo</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pixel_coords</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="nb">print</span> <span class="s1">&#39;size=&#39;</span><span class="p">,</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span>
+        <span class="nb">print</span> <span class="s1">&#39;X: </span><span class="si">%s</span><span class="s1">...&#39;</span><span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">%10.1f</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">X</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">9</span><span class="p">]])</span>
+        <span class="nb">print</span> <span class="s1">&#39;Y: </span><span class="si">%s</span><span class="s1">...&#39;</span><span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">%10.1f</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">Y</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">9</span><span class="p">]])</span>
+        <span class="nb">print</span> <span class="s1">&#39;Z: </span><span class="si">%s</span><span class="s1">...&#39;</span><span class="o">%</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;</span><span class="si">%10.1f</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">Z</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">0</span><span class="p">:</span><span class="mi">9</span><span class="p">]])</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.get_pixel_coord_indexes"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_pixel_coord_indexes">[docs]</a>    <span class="k">def</span> <span class="nf">get_pixel_coord_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pix_scale_size_um</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xy0_off_pix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns two pixel X,Y coordinate index arrays for top or specified geometry object </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">if</span>  <span class="n">oindex</span>  <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">oindex_old</span>\
+        <span class="ow">and</span> <span class="n">oname</span>   <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">oname_old</span>\
+        <span class="ow">and</span> <span class="n">do_tilt</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_old</span>\
+        <span class="ow">and</span> <span class="n">pix_scale_size_um</span> <span class="ow">is</span> <span class="kc">None</span>\
+        <span class="ow">and</span> <span class="n">xy0_off_pix</span> <span class="ow">is</span> <span class="kc">None</span>\
+        <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">iX_old</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iX_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iY_old</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pixel_coords</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">,</span> <span class="n">do_tilt</span><span class="p">)</span>
+
+        <span class="n">pix_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pixel_scale_size</span><span class="p">()</span> <span class="k">if</span> <span class="n">pix_scale_size_um</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">pix_scale_size_um</span>
+        <span class="n">pix_half</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">pix_size</span>
+
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">-</span><span class="n">pix_half</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">-</span><span class="n">pix_half</span> 
+
+        <span class="k">if</span> <span class="n">xy0_off_pix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="c1"># Offset in pix -&gt; um</span>
+            <span class="n">x_off_um</span> <span class="o">=</span> <span class="n">xy0_off_pix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">pix_size</span>
+            <span class="n">y_off_um</span> <span class="o">=</span> <span class="n">xy0_off_pix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">pix_size</span>
+            <span class="c1"># Protection against wrong offset bringing negative indexes</span>
+            <span class="n">xmin</span> <span class="o">+=</span> <span class="n">x_off_um</span>
+            <span class="n">ymin</span> <span class="o">+=</span> <span class="n">y_off_um</span>
+            <span class="n">x_off_um</span> <span class="o">=</span> <span class="n">x_off_um</span> <span class="o">+</span> <span class="n">pix_half</span> <span class="k">if</span> <span class="n">xmin</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="n">x_off_um</span> <span class="o">-</span> <span class="n">xmin</span>
+            <span class="n">y_off_um</span> <span class="o">=</span> <span class="n">y_off_um</span> <span class="o">+</span> <span class="n">pix_half</span> <span class="k">if</span> <span class="n">ymin</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="n">y_off_um</span> <span class="o">-</span> <span class="n">ymin</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">iX_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iY_old</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">X</span><span class="o">+</span><span class="n">x_off_um</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">Y</span><span class="o">+</span><span class="n">y_off_um</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint</span><span class="p">)</span>
+
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">iX_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iY_old</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">X</span><span class="o">-</span><span class="n">xmin</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">Y</span><span class="o">-</span><span class="n">ymin</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iX_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iY_old</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.get_pixel_xy_inds_at_z"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_pixel_xy_inds_at_z">[docs]</a>    <span class="k">def</span> <span class="nf">get_pixel_xy_inds_at_z</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zplane</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pix_scale_size_um</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xy0_off_pix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns pixel coordinate index arrays iX, iY of size for specified zplane and geometry object  </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pixel_xy_at_z</span><span class="p">(</span><span class="n">zplane</span><span class="p">,</span> <span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">,</span> <span class="n">do_tilt</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">X</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">pix_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pixel_scale_size</span><span class="p">()</span> <span class="k">if</span> <span class="n">pix_scale_size_um</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">pix_scale_size_um</span>
+        <span class="n">pix_half</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">pix_size</span>
+
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">-</span><span class="n">pix_half</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">-</span><span class="n">pix_half</span> 
+
+        <span class="k">if</span> <span class="n">xy0_off_pix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="c1"># Offset in pix -&gt; um</span>
+            <span class="n">x_off_um</span> <span class="o">=</span> <span class="n">xy0_off_pix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">pix_size</span>
+            <span class="n">y_off_um</span> <span class="o">=</span> <span class="n">xy0_off_pix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">pix_size</span>
+            <span class="c1"># Protection against wrong offset bringing negative indexes</span>
+            <span class="n">xmin</span> <span class="o">+=</span> <span class="n">x_off_um</span>
+            <span class="n">ymin</span> <span class="o">+=</span> <span class="n">y_off_um</span>
+            <span class="n">x_off_um</span> <span class="o">=</span> <span class="n">x_off_um</span> <span class="o">+</span> <span class="n">pix_half</span> <span class="k">if</span> <span class="n">xmin</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="n">x_off_um</span> <span class="o">-</span> <span class="n">xmin</span>
+            <span class="n">y_off_um</span> <span class="o">=</span> <span class="n">y_off_um</span> <span class="o">+</span> <span class="n">pix_half</span> <span class="k">if</span> <span class="n">ymin</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="n">y_off_um</span> <span class="o">-</span> <span class="n">ymin</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">iX_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iY_old</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">X</span><span class="o">+</span><span class="n">x_off_um</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">Y</span><span class="o">+</span><span class="n">y_off_um</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint</span><span class="p">)</span>
+
+        <span class="k">else</span> <span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">iX_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iY_old</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">X</span><span class="o">-</span><span class="n">xmin</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">((</span><span class="n">Y</span><span class="o">-</span><span class="n">ymin</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iX_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">iY_old</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.point_coord_indexes"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.point_coord_indexes">[docs]</a>    <span class="k">def</span> <span class="nf">point_coord_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p_um</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">oname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">oindex</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">pix_scale_size_um</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xy0_off_pix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Converts point (x_um, y_um) corrdinates [um] to pixel (ix, iy) indexes.</span>
+<span class="sd">           All other parameters are the same as in get_pixel_coord_indexes.</span>
+<span class="sd">           WARNING: indexes are not required to be inside the image. They are integer, may be negative or exceed pixel maximal index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="k">if</span>  <span class="n">oindex</span>  <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">oindex_old</span>\
+        <span class="ow">and</span> <span class="n">oname</span>   <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">oname_old</span>\
+        <span class="ow">and</span> <span class="n">do_tilt</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">tilt_old</span>\
+        <span class="ow">and</span> <span class="n">p_um</span>    <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_um_old</span>\
+        <span class="ow">and</span> <span class="n">pix_scale_size_um</span> <span class="ow">is</span> <span class="kc">None</span>\
+        <span class="ow">and</span> <span class="n">xy0_off_pix</span> <span class="ow">is</span> <span class="kc">None</span>\
+        <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipx_old</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipx_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipy_old</span>
+
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pixel_coords</span><span class="p">(</span><span class="n">oname</span><span class="p">,</span> <span class="n">oindex</span><span class="p">,</span> <span class="n">do_tilt</span><span class="p">)</span>
+
+        <span class="n">pix_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pixel_scale_size</span><span class="p">()</span> <span class="k">if</span> <span class="n">pix_scale_size_um</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">pix_scale_size_um</span>
+        <span class="n">pix_half</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">pix_size</span>
+
+        <span class="n">xmin</span><span class="p">,</span> <span class="n">ymin</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">-</span><span class="n">pix_half</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="o">-</span><span class="n">pix_half</span> 
+        <span class="n">x_um</span><span class="p">,</span> <span class="n">y_um</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_um_old</span> <span class="o">=</span> <span class="n">p_um</span>
+
+        <span class="k">if</span> <span class="n">xy0_off_pix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="p">:</span>
+            <span class="c1"># Offset in pix -&gt; um</span>
+            <span class="n">x_off_um</span> <span class="o">=</span> <span class="n">xy0_off_pix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">pix_size</span>
+            <span class="n">y_off_um</span> <span class="o">=</span> <span class="n">xy0_off_pix</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">pix_size</span>
+            <span class="c1"># Protection against wrong offset bringing negative indexes</span>
+            <span class="n">xmin</span> <span class="o">+=</span> <span class="n">x_off_um</span>
+            <span class="n">ymin</span> <span class="o">+=</span> <span class="n">y_off_um</span>
+            <span class="n">x_off_um</span> <span class="o">=</span> <span class="n">x_off_um</span> <span class="o">+</span> <span class="n">pix_half</span> <span class="k">if</span> <span class="n">xmin</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="n">x_off_um</span> <span class="o">-</span> <span class="n">xmin</span>
+            <span class="n">y_off_um</span> <span class="o">=</span> <span class="n">y_off_um</span> <span class="o">+</span> <span class="n">pix_half</span> <span class="k">if</span> <span class="n">ymin</span><span class="o">&gt;</span><span class="mi">0</span> <span class="k">else</span> <span class="n">y_off_um</span> <span class="o">-</span> <span class="n">ymin</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ipx_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipy_old</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">floor</span><span class="p">((</span><span class="n">x_um</span><span class="o">+</span><span class="n">x_off_um</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">floor</span><span class="p">((</span><span class="n">y_um</span><span class="o">+</span><span class="n">y_off_um</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">))</span>
+
+        <span class="k">else</span> <span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">ipx_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipy_old</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">floor</span><span class="p">((</span><span class="n">x_um</span><span class="o">-</span><span class="n">xmin</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">)),</span> <span class="nb">int</span><span class="p">(</span><span class="n">floor</span><span class="p">((</span><span class="n">y_um</span><span class="o">-</span><span class="n">ymin</span><span class="p">)</span><span class="o">/</span><span class="n">pix_size</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipx_old</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ipy_old</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.set_print_bits"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.set_print_bits">[docs]</a>    <span class="k">def</span> <span class="nf">set_print_bits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pbits</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Sets printout control bitword</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pbits</span> <span class="o">=</span> <span class="n">pbits</span></div>
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.get_psf"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.get_psf">[docs]</a>    <span class="k">def</span> <span class="nf">get_psf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Returns array of vectors in TJ format (psf stands for position-slow-fast vectors)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pixel_coords</span><span class="p">()</span> <span class="c1"># pixel positions for top level object</span>
+        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="mi">32</span><span class="o">*</span><span class="mi">185</span><span class="o">*</span><span class="mi">388</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="c1"># For now it works for CSPAD only</span>
+        <span class="n">shape_cspad</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span><span class="mi">185</span><span class="p">,</span><span class="mi">388</span><span class="p">)</span>
+        <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>  <span class="o">=</span> <span class="n">shape_cspad</span><span class="p">,</span> <span class="n">shape_cspad</span><span class="p">,</span> <span class="n">shape_cspad</span>
+
+        <span class="n">psf</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span> <span class="p">:</span>
+            <span class="n">vp</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Y</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Z</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">vs</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">X</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> \
+                  <span class="n">Y</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Y</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> \
+                  <span class="n">Z</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Z</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">vf</span> <span class="o">=</span> <span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">X</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> \
+                  <span class="n">Y</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Y</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> \
+                  <span class="n">Z</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Z</span><span class="p">[</span><span class="n">s</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="n">psf</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">vp</span><span class="p">,</span><span class="n">vs</span><span class="p">,</span><span class="n">vf</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">psf</span></div>
+
+
+    <span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="GeometryAccess.print_psf"><a class="viewcode-back" href="../index.html#GeometryAccess.GeometryAccess.print_psf">[docs]</a>    <span class="k">def</span> <span class="nf">print_psf</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot; Gets and prints psf array for test purpose</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">valid</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">psf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_psf</span><span class="p">())</span>
+        <span class="nb">print</span> <span class="s1">&#39;print_psf(): psf.shape: </span><span class="si">%s</span><span class="s1"> </span><span class="se">\n</span><span class="s1">psf vectors:&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">psf</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span> 
+        <span class="k">for</span> <span class="p">(</span><span class="n">px</span><span class="p">,</span><span class="n">py</span><span class="p">,</span><span class="n">pz</span><span class="p">),</span> <span class="p">(</span><span class="n">sx</span><span class="p">,</span><span class="n">xy</span><span class="p">,</span><span class="n">xz</span><span class="p">),</span> <span class="p">(</span><span class="n">fx</span><span class="p">,</span><span class="n">fy</span><span class="p">,</span><span class="n">fz</span><span class="p">)</span> <span class="ow">in</span> <span class="n">psf</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="s1">&#39;    p=(</span><span class="si">%12.2f</span><span class="s1">, </span><span class="si">%12.2f</span><span class="s1">, </span><span class="si">%12.2f</span><span class="s1">),    s=(</span><span class="si">%8.2f</span><span class="s1">, </span><span class="si">%8.2f</span><span class="s1">, </span><span class="si">%8.2f</span><span class="s1">)   f=(</span><span class="si">%8.2f</span><span class="s1">, </span><span class="si">%8.2f</span><span class="s1">, </span><span class="si">%8.2f</span><span class="s1">)&#39;</span> \
+                  <span class="o">%</span> <span class="p">(</span><span class="n">px</span><span class="p">,</span><span class="n">py</span><span class="p">,</span><span class="n">pz</span><span class="p">,</span>  <span class="n">sx</span><span class="p">,</span><span class="n">xy</span><span class="p">,</span><span class="n">xz</span><span class="p">,</span>  <span class="n">fx</span><span class="p">,</span><span class="n">fy</span><span class="p">,</span><span class="n">fz</span><span class="p">)</span></div></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------ Global Method(s) ------</span>
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="img_default"><a class="viewcode-back" href="../index.html#GeometryAccess.img_default">[docs]</a><span class="k">def</span> <span class="nf">img_default</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span> <span class="n">dtype</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns default image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">shape</span>
+    <span class="k">return</span> <span class="n">arr</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="img_from_pixel_arrays"><a class="viewcode-back" href="../index.html#GeometryAccess.img_from_pixel_arrays">[docs]</a><span class="k">def</span> <span class="nf">img_from_pixel_arrays</span><span class="p">(</span><span class="n">iX</span><span class="p">,</span> <span class="n">iY</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="n">vbase</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns image from iX, iY coordinate index arrays and associated weights W.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">iX</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span> <span class="n">iY</span><span class="o">.</span><span class="n">size</span> \
+    <span class="ow">or</span> <span class="p">(</span><span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">iX</span><span class="o">.</span><span class="n">size</span> <span class="o">!=</span>  <span class="n">W</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;img_from_pixel_arrays(): WARNING input array sizes are different;&#39;</span> \
+            <span class="o">+</span> <span class="s1">&#39; iX.size=</span><span class="si">%d</span><span class="s1">, iY.size=</span><span class="si">%d</span><span class="s1">, W.size=</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">iX</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">iY</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">W</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="n">msg</span>
+        <span class="k">return</span> <span class="n">img_default</span><span class="p">()</span>
+
+    <span class="n">iXfl</span> <span class="o">=</span> <span class="n">iX</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="n">iYfl</span> <span class="o">=</span> <span class="n">iY</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+    <span class="n">xsize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">iXfl</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">+</span><span class="mi">1</span> 
+    <span class="n">ysize</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">iYfl</span><span class="o">.</span><span class="n">max</span><span class="p">())</span><span class="o">+</span><span class="mi">1</span>
+
+    <span class="n">weight</span> <span class="o">=</span> <span class="n">W</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span> <span class="k">if</span> <span class="n">W</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">iXfl</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">vbase</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">xsize</span><span class="p">,</span><span class="n">ysize</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
+    <span class="n">img</span><span class="p">[</span><span class="n">iXfl</span><span class="p">,</span><span class="n">iYfl</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight</span> <span class="c1"># Fill image array with data </span>
+    <span class="k">return</span> <span class="n">img</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#----------- TESTS ------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span> <span class="c1"># for test purpose only</span>
+
+    <span class="c1">#from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one</span>
+    <span class="kn">import</span> <span class="nn">pyimgalgos.GlobalGraphics</span> <span class="k">as</span> <span class="nn">gg</span> <span class="c1"># for test purpose</span>
+    <span class="kn">import</span> <span class="nn">pyimgalgos.TestImageGenerator</span> <span class="k">as</span> <span class="nn">tig</span> <span class="c1"># for test purpose only</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_access"><a class="viewcode-back" href="../index.html#GeometryAccess.test_access">[docs]</a><span class="k">def</span> <span class="nf">test_access</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Tests geometry acess methods of the class GeometryAccess</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">print_list_of_geos</span><span class="p">()</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">print_list_of_geos_children</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">TOP GEO:&#39;</span>
+    <span class="n">top_geo</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_top_geo</span><span class="p">()</span>
+    <span class="n">top_geo</span><span class="o">.</span><span class="n">print_geo_children</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">INTERMEDIATE GEO (QUAD):&#39;</span>
+    <span class="n">geo</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_geo</span><span class="p">(</span><span class="s1">&#39;QUAD:V1&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> 
+    <span class="c1">#geo = geometry.get_top_geo() </span>
+    <span class="n">geo</span><span class="o">.</span><span class="n">print_geo_children</span><span class="p">()</span>
+
+    <span class="n">t0_sec</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_pixel_coords</span><span class="p">(</span><span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="c1">#X,Y = geo.get_2d_pixel_coords()</span>
+    <span class="nb">print</span> <span class="s1">&#39;X:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">X</span>
+    <span class="nb">print</span> <span class="s1">&#39;Consumed time to get 3d pixel coordinates = </span><span class="si">%7.3f</span><span class="s1"> sec&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0_sec</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;Geometry object: </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> X.shape:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">geo</span><span class="o">.</span><span class="n">oindex</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Test of print_pixel_coords() for quad:&#39;</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">print_pixel_coords</span><span class="p">(</span><span class="s1">&#39;QUAD:V1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Test of print_pixel_coords() for CSPAD:&#39;</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">print_pixel_coords</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Test of get_pixel_areas() for QUAD:&#39;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_pixel_areas</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;Geometry object: </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> A.shape:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">geo</span><span class="o">.</span><span class="n">oindex</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+    <span class="nb">print</span> <span class="s1">&#39;A[0,0:5,190:198]:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="mi">190</span><span class="p">:</span><span class="mi">198</span><span class="p">]</span>
+ 
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Test of get_pixel_areas() for CSPAD:&#39;</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">top_geo</span><span class="o">.</span><span class="n">get_pixel_areas</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;Geometry object: </span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1"> A.shape:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">geo</span><span class="o">.</span><span class="n">oname</span><span class="p">,</span> <span class="n">geo</span><span class="o">.</span><span class="n">oindex</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+    <span class="nb">print</span> <span class="s1">&#39;A[0,0,0:5,190:198]:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span><span class="mi">190</span><span class="p">:</span><span class="mi">198</span><span class="p">]</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Test of get_size_geo_array()&#39;</span>
+    <span class="nb">print</span> <span class="s1">&#39;for QUAD : </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_size_geo_array</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;for CSPAD: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">top_geo</span><span class="o">.</span><span class="n">get_size_geo_array</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Test of get_pixel_scale_size()&#39;</span>
+    <span class="nb">print</span> <span class="s1">&#39;for QUAD    : </span><span class="si">%8.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">geo</span><span class="o">.</span><span class="n">get_pixel_scale_size</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;for CSPAD   : </span><span class="si">%8.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">top_geo</span><span class="o">.</span><span class="n">get_pixel_scale_size</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;for geometry: </span><span class="si">%8.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_pixel_scale_size</span><span class="p">()</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Test of get_dict_of_comments():&#39;</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_dict_of_comments</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s2">&quot;d[0] = </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_plot_quad"><a class="viewcode-back" href="../index.html#GeometryAccess.test_plot_quad">[docs]</a><span class="k">def</span> <span class="nf">test_plot_quad</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Tests geometry acess methods of the class GeometryAccess object for CSPAD quad</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">## get index arrays</span>
+    <span class="n">iX</span><span class="p">,</span> <span class="n">iY</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_pixel_coord_indexes</span><span class="p">(</span><span class="s1">&#39;QUAD:V1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pix_scale_size_um</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xy0_off_pix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># get intensity array</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">tig</span><span class="o">.</span><span class="n">cspad_nparr</span><span class="p">(</span><span class="n">n2x1</span><span class="o">=</span><span class="n">iX</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">185</span><span class="p">,</span><span class="mi">388</span><span class="p">)</span>
+    <span class="n">amp_range</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">185</span><span class="o">+</span><span class="mi">388</span><span class="p">)</span>
+ 
+    <span class="nb">print</span> <span class="s1">&#39;iX, iY, W shape:&#39;</span><span class="p">,</span> <span class="n">iX</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">iY</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> 
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img_from_pixel_arrays</span><span class="p">(</span><span class="n">iX</span><span class="p">,</span><span class="n">iY</span><span class="p">,</span><span class="n">W</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">amp_range</span><span class="o">=</span><span class="n">amp_range</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_mask_quad"><a class="viewcode-back" href="../index.html#GeometryAccess.test_mask_quad">[docs]</a><span class="k">def</span> <span class="nf">test_mask_quad</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">mbits</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Tests geometry acess methods of the class GeometryAccess object for CSPAD quad</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">## get index arrays</span>
+    <span class="n">iX</span><span class="p">,</span> <span class="n">iY</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_pixel_coord_indexes</span><span class="p">(</span><span class="s1">&#39;QUAD:V1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">pix_scale_size_um</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xy0_off_pix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># get intensity array</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_pixel_mask</span><span class="p">(</span><span class="s1">&#39;QUAD:V1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mbits</span><span class="p">)</span>
+    <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span><span class="mi">185</span><span class="p">,</span><span class="mi">388</span><span class="p">)</span>
+    <span class="n">amp_range</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+ 
+    <span class="nb">print</span> <span class="s1">&#39;iX, iY, W shape:&#39;</span><span class="p">,</span> <span class="n">iX</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">iY</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> 
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img_from_pixel_arrays</span><span class="p">(</span><span class="n">iX</span><span class="p">,</span> <span class="n">iY</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="n">arr</span><span class="p">,</span> <span class="n">vbase</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+
+    <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">amp_range</span><span class="o">=</span><span class="n">amp_range</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_plot_cspad"><a class="viewcode-back" href="../index.html#GeometryAccess.test_plot_cspad">[docs]</a><span class="k">def</span> <span class="nf">test_plot_cspad</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">fname_data</span><span class="p">,</span> <span class="n">amp_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">))</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; The same test as previous, but use get_pixel_coord_indexes(...) method</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#rad1 =  93</span>
+    <span class="c1">#rad2 = 146</span>
+    <span class="n">rad1</span> <span class="o">=</span> <span class="mi">655</span>
+    <span class="n">rad2</span> <span class="o">=</span> <span class="mi">670</span>
+
+    <span class="c1"># get pixel coordinate index arrays:</span>
+    <span class="n">xc</span><span class="p">,</span> <span class="n">yc</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span>
+    <span class="n">xyc</span> <span class="o">=</span> <span class="n">xc</span><span class="p">,</span> <span class="n">yc</span> <span class="c1"># None </span>
+
+    <span class="c1">#iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=None)</span>
+    <span class="n">iX</span><span class="p">,</span> <span class="n">iY</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_pixel_coord_indexes</span><span class="p">(</span><span class="n">xy0_off_pix</span><span class="o">=</span><span class="n">xyc</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">ixo</span><span class="p">,</span> <span class="n">iyo</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">point_coord_indexes</span><span class="p">(</span><span class="n">xy0_off_pix</span><span class="o">=</span><span class="n">xyc</span><span class="p">,</span> <span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;Detector origin indexes ixo, iyo:&#39;</span><span class="p">,</span> <span class="n">ixo</span><span class="p">,</span> <span class="n">iyo</span>
+
+    <span class="n">root</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname_data</span><span class="p">)</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fname_data</span><span class="p">)</span> <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.npy&#39;</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> 
+    <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="o">=</span> <span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">185</span><span class="p">,</span><span class="mi">388</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;iX, iY, W shape:&#39;</span><span class="p">,</span> <span class="n">iX</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">iY</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> <span class="o">=</span> <span class="n">iX</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img_from_pixel_arrays</span><span class="p">(</span><span class="n">iX</span><span class="p">,</span> <span class="n">iY</span><span class="p">,</span> <span class="n">W</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="n">xyc_ring</span> <span class="o">=</span> <span class="p">(</span><span class="n">yc</span><span class="p">,</span> <span class="n">xc</span><span class="p">)</span>
+    <span class="n">axim</span> <span class="o">=</span> <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">amp_range</span><span class="o">=</span><span class="n">amp_range</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">drawCircle</span><span class="p">(</span><span class="n">axim</span><span class="p">,</span> <span class="n">xyc_ring</span><span class="p">,</span> <span class="n">rad1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> 
+    <span class="n">gg</span><span class="o">.</span><span class="n">drawCircle</span><span class="p">(</span><span class="n">axim</span><span class="p">,</span> <span class="n">xyc_ring</span><span class="p">,</span> <span class="n">rad2</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> 
+    <span class="n">gg</span><span class="o">.</span><span class="n">drawCenter</span><span class="p">(</span><span class="n">axim</span><span class="p">,</span> <span class="n">xyc_ring</span><span class="p">,</span> <span class="n">rad1</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> 
+    <span class="n">gg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_img_default"><a class="viewcode-back" href="../index.html#GeometryAccess.test_img_default">[docs]</a><span class="k">def</span> <span class="nf">test_img_default</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Test default image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">axim</span> <span class="o">=</span> <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span> <span class="n">img_default</span><span class="p">()</span> <span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_save_pars_in_file"><a class="viewcode-back" href="../index.html#GeometryAccess.test_save_pars_in_file">[docs]</a><span class="k">def</span> <span class="nf">test_save_pars_in_file</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Test default image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># change one line of parameters</span>
+    <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">z0</span><span class="p">,</span> <span class="n">rot_z</span><span class="p">,</span> <span class="n">rot_y</span><span class="p">,</span> <span class="n">rot_x</span><span class="p">,</span> <span class="n">tilt_z</span><span class="p">,</span> <span class="n">tilt_y</span><span class="p">,</span> <span class="n">tilt_x</span> <span class="o">=</span> <span class="o">-</span><span class="mi">3500</span><span class="p">,</span> <span class="mi">5800</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.123</span><span class="p">,</span> <span class="mf">0.123</span><span class="p">,</span> <span class="mf">0.123</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">set_geo_pars</span><span class="p">(</span><span class="s1">&#39;QUAD:V1&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">z0</span><span class="p">,</span> <span class="n">rot_z</span><span class="p">,</span> <span class="n">rot_y</span><span class="p">,</span> <span class="n">rot_x</span><span class="p">,</span> <span class="n">tilt_z</span><span class="p">,</span> <span class="n">tilt_y</span><span class="p">,</span> <span class="n">tilt_x</span><span class="p">)</span>
+
+    <span class="n">geometry</span><span class="o">.</span><span class="n">set_print_bits</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">save_pars_in_file</span><span class="p">(</span><span class="s1">&#39;./test.txt&#39;</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_load_pars_from_file"><a class="viewcode-back" href="../index.html#GeometryAccess.test_load_pars_from_file">[docs]</a><span class="k">def</span> <span class="nf">test_load_pars_from_file</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Test default image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">set_print_bits</span><span class="p">(</span><span class="mi">32</span><span class="o">+</span><span class="mi">64</span><span class="p">)</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">load_pars_from_file</span><span class="p">(</span><span class="s1">&#39;./test.txt&#39;</span><span class="p">)</span>
+    <span class="n">geometry</span><span class="o">.</span><span class="n">print_list_of_geos</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_cspad2x2"><a class="viewcode-back" href="../index.html#GeometryAccess.test_cspad2x2">[docs]</a><span class="k">def</span> <span class="nf">test_cspad2x2</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Test cspad2x2 geometry table</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">## MecTargetChamber.0:Cspad2x2.1</span>
+    <span class="n">basedir</span> <span class="o">=</span> <span class="s1">&#39;/reg/neh/home1/dubrovin/LCLS/CSPad2x2Alignment/calib-cspad2x2-01-2013-02-13/&#39;</span>    
+    <span class="n">fname_geometry</span> <span class="o">=</span> <span class="n">basedir</span> <span class="o">+</span> <span class="s1">&#39;calib/CsPad2x2::CalibV1/MecTargetChamber.0:Cspad2x2.1/geometry/0-end.data&#39;</span>
+    <span class="n">fname_data</span>     <span class="o">=</span> <span class="n">basedir</span> <span class="o">+</span> <span class="s1">&#39;cspad2x2.1-ndarr-ave-meca6113-r0028.dat&#39;</span>    
+
+    <span class="c1">## MecTargetChamber.0:Cspad2x2.2 </span>
+    <span class="c1">#basedir = &#39;/reg/neh/home1/dubrovin/LCLS/CSPad2x2Alignment/calib-cspad2x2-02-2013-02-13/&#39;    </span>
+    <span class="c1">#fname_geometry = basedir + &#39;calib/CsPad2x2::CalibV1/MecTargetChamber.0:Cspad2x2.2/geometry/0-end.data&#39;</span>
+    <span class="c1">#fname_data     = basedir + &#39;cspad2x2.2-ndarr-ave-meca6113-r0028.dat&#39;    </span>
+
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryAccess</span><span class="p">(</span><span class="n">fname_geometry</span><span class="p">,</span> <span class="mi">0377</span><span class="p">)</span>
+    <span class="n">amp_range</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">15000</span><span class="p">)</span>
+
+    <span class="c1"># get pixel coordinate index arrays:</span>
+    <span class="c1">#xyc = xc, yc = 1000, 1000</span>
+    <span class="c1">#iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc)</span>
+
+    <span class="n">iX</span><span class="p">,</span> <span class="n">iY</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_pixel_coord_indexes</span><span class="p">(</span><span class="n">do_tilt</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">root</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname_data</span><span class="p">)</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fname_data</span><span class="p">)</span> <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.npy&#39;</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> 
+    <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="o">=</span> <span class="p">(</span><span class="mi">185</span><span class="p">,</span><span class="mi">388</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;iX, iY, W shape:&#39;</span><span class="p">,</span> <span class="n">iX</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">iY</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> 
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img_from_pixel_arrays</span><span class="p">(</span><span class="n">iX</span><span class="p">,</span><span class="n">iY</span><span class="p">,</span><span class="n">W</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="n">axim</span> <span class="o">=</span> <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">amp_range</span><span class="o">=</span><span class="n">amp_range</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_epix100a"><a class="viewcode-back" href="../index.html#GeometryAccess.test_epix100a">[docs]</a><span class="k">def</span> <span class="nf">test_epix100a</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Test test_epix100a geometry table</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">basedir</span> <span class="o">=</span> <span class="s1">&#39;/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-05-15/&#39;</span>    
+    <span class="n">fname_geometry</span> <span class="o">=</span> <span class="n">basedir</span> <span class="o">+</span> <span class="s1">&#39;calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/2-end.data&#39;</span>
+    <span class="n">fname_data</span>     <span class="o">=</span> <span class="n">basedir</span> <span class="o">+</span> <span class="s1">&#39;cspad-arr-cxid2714-r0023-lysozyme-rings.txt&#39;</span>    
+
+    <span class="c1">#basedir = &#39;/reg/neh/home1/dubrovin/LCLS/GeometryCalib/calib-xpp-Epix100a-2014-11-05/&#39;    </span>
+    <span class="c1">#fname_geometry = basedir + &#39;calib/Epix100a::CalibV1/NoDetector.0:Epix100a.0/geometry/0-end.data&#39;</span>
+    <span class="c1">#fname_data     = basedir + &#39;epix100a-ndarr-ave-clb-xppi0614-r0073.dat&#39;    </span>
+
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryAccess</span><span class="p">(</span><span class="n">fname_geometry</span><span class="p">,</span> <span class="mi">0177777</span><span class="p">)</span>
+    <span class="n">amp_range</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">iX</span><span class="p">,</span> <span class="n">iY</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_pixel_coord_indexes</span><span class="p">()</span>
+
+    <span class="n">root</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname_data</span><span class="p">)</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fname_data</span><span class="p">)</span> <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.npy&#39;</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> 
+
+    <span class="nb">print</span> <span class="s1">&#39;iX, iY, W shape:&#39;</span><span class="p">,</span> <span class="n">iX</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">iY</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> 
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img_from_pixel_arrays</span><span class="p">(</span><span class="n">iX</span><span class="p">,</span><span class="n">iY</span><span class="p">,</span><span class="n">W</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="n">axim</span> <span class="o">=</span> <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">amp_range</span><span class="o">=</span><span class="n">amp_range</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="test_cspad_xy_at_z"><a class="viewcode-back" href="../index.html#GeometryAccess.test_cspad_xy_at_z">[docs]</a><span class="k">def</span> <span class="nf">test_cspad_xy_at_z</span><span class="p">()</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Test cspad geometry table</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">## &#39;CxiDs1.0:Cspad.0)&#39; or &#39;DscCsPad&#39; </span>
+    <span class="n">basedir</span> <span class="o">=</span> <span class="s1">&#39;/reg/g/psdm/detector/alignment/cspad/calib-cxi-camera1-2014-09-24/&#39;</span>    
+    <span class="n">fname_geometry</span> <span class="o">=</span> <span class="n">basedir</span> <span class="o">+</span> <span class="s1">&#39;2016-06-03-geometry-cxi06216-r25-camera1-z175mm.txt&#39;</span>
+    <span class="n">fname_data</span>     <span class="o">=</span> <span class="n">basedir</span> <span class="o">+</span> <span class="s1">&#39;2016-06-03-chun-cxi06216-0025-DscCsPad-max.txt&#39;</span>    
+
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryAccess</span><span class="p">(</span><span class="n">fname_geometry</span><span class="p">,</span> <span class="mi">0377</span><span class="p">)</span>
+
+    <span class="c1"># get pixel coordinate index arrays:</span>
+    <span class="n">xyc</span> <span class="o">=</span> <span class="n">xc</span><span class="p">,</span> <span class="n">yc</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span> <span class="mi">1000</span>
+    <span class="c1">#iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc)</span>
+    <span class="c1">#iX, iY = geometry.get_pixel_coord_indexes(do_tilt=True)</span>
+    <span class="c1">#iX, iY = geometry.get_pixel_xy_inds_at_z(zplane=None, xy0_off_pix=xyc)</span>
+    <span class="n">iX</span><span class="p">,</span> <span class="n">iY</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">get_pixel_xy_inds_at_z</span><span class="p">(</span><span class="n">zplane</span><span class="o">=</span><span class="mi">150000</span><span class="p">)</span>
+
+    <span class="n">root</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">fname_data</span><span class="p">)</span>
+    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">fname_data</span><span class="p">)</span> <span class="k">if</span> <span class="n">ext</span> <span class="o">==</span> <span class="s1">&#39;.npy&#39;</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">fname_data</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span> 
+
+    <span class="c1">#print &#39;arr.shape=&#39;, arr.shape</span>
+    <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span><span class="mi">185</span><span class="p">,</span><span class="mi">388</span><span class="p">)</span>
+
+    <span class="c1">#ave, rms = arr.mean(), arr.std()</span>
+    <span class="c1">#amp_range = (ave-rms, ave+3*rms)</span>
+    <span class="n">amp_range</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;amp_range&#39;</span><span class="p">,</span> <span class="n">amp_range</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;iX, iY, W shape:&#39;</span><span class="p">,</span> <span class="n">iX</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">iY</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span> 
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img_from_pixel_arrays</span><span class="p">(</span><span class="n">iX</span><span class="p">,</span><span class="n">iY</span><span class="p">,</span><span class="n">W</span><span class="o">=</span><span class="n">arr</span><span class="p">)</span>
+
+    <span class="n">axim</span> <span class="o">=</span> <span class="n">gg</span><span class="o">.</span><span class="n">plotImageLarge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">amp_range</span><span class="o">=</span><span class="n">amp_range</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+    <span class="n">gg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+
+    <span class="c1">##fname = &#39;/reg/d/psdm/cxi/cxii0114/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data&#39;</span>
+    <span class="c1">#basedir = &#39;/reg/neh/home1/dubrovin/LCLS/CSPadAlignment-v01/calib-cxi-ds1-2013-12-20/&#39;</span>
+    <span class="c1">#fname_geometry = basedir + &#39;calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/1-end.data&#39;</span>
+    <span class="c1">#fname_data     = basedir + &#39;cspad-ndarr-ave-cxi83714-r0136.dat&#39;</span>
+    <span class="c1">#amp_range = (0,0.5)</span>
+
+    <span class="c1"># CXI</span>
+    <span class="n">basedir</span> <span class="o">=</span> <span class="s1">&#39;/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-03-19/&#39;</span>
+    <span class="n">fname_data</span>     <span class="o">=</span> <span class="n">basedir</span> <span class="o">+</span> <span class="s1">&#39;cspad-ndarr-ave-cxii0114-r0227.dat&#39;</span>
+    <span class="n">fname_geometry</span> <span class="o">=</span> <span class="n">basedir</span> <span class="o">+</span> <span class="s1">&#39;calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data&#39;</span>
+    <span class="c1">#fname_geometry = &#39;/reg/d/psdm/CXI/cxitut13/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data&#39;</span>
+    <span class="n">amp_range</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">500</span><span class="p">)</span>
+
+    <span class="c1">## XPP</span>
+    <span class="c1">#basedir = &#39;/reg/neh/home1/dubrovin/LCLS/CSPadAlignment-v01/calib-xpp-2013-01-29/&#39;</span>
+    <span class="c1">#fname_data     = basedir + &#39;cspad-xpptut13-r1437-nda.dat&#39;</span>
+    <span class="c1">#fname_geometry = basedir + &#39;calib/CsPad::CalibV1/XppGon.0:Cspad.0/geometry/0-end.data&#39;</span>
+    <span class="c1">#amp_range = (1500,2500)</span>
+
+
+    <span class="c1">#basedir = &#39;/home/pcds/LCLS/calib/geometry/&#39;</span>
+    <span class="c1">#fname_geometry = basedir + &#39;0-end.data&#39;</span>
+    <span class="c1">#fname_geometry = basedir + &#39;2-end.data&#39;</span>
+    <span class="c1">#fname_data     = basedir + &#39;cspad-ndarr-ave-cxii0114-r0227.dat&#39;</span>
+    <span class="c1">#fname_geometry = &#39;/reg/d/psdm/cxi/cxii0114/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data&#39;</span>
+    <span class="c1">#amp_range = (0,500)</span>
+
+    <span class="c1">#basedir = &#39;/reg/neh/home1/dubrovin/LCLS/CSPadAlignment-v01/calib-cxi-ds1-2014-05-15/&#39;</span>
+    <span class="c1">#fname_geometry = basedir + &#39;calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/2-end.data&#39;</span>
+    <span class="c1">#fname_data     = basedir + &#39;cspad-arr-cxid2714-r0023-lysozyme-rings.npy&#39;</span>
+    <span class="c1">#amp_range = (0,500)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">fname_geometry: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">fname_data: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="mi">120</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="n">fname_geometry</span><span class="p">,</span> <span class="n">fname_geometry</span><span class="p">)</span>
+
+    <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryAccess</span><span class="p">(</span><span class="n">fname_geometry</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Use command: sys.argv[0] &lt;num&gt;, wher num=1,2,3,...,10&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span>   <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;App needs in input parameter.&#39;</span> <span class="o">+</span> <span class="n">msg</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;1&#39;</span> <span class="p">:</span> <span class="n">test_access</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;2&#39;</span> <span class="p">:</span> <span class="n">test_plot_quad</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;3&#39;</span> <span class="p">:</span> <span class="n">test_plot_cspad</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">fname_data</span><span class="p">,</span> <span class="n">amp_range</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;4&#39;</span> <span class="p">:</span> <span class="n">test_img_default</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;5&#39;</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="s1">&#39;Init GeometryAccess is silent? (see below)&#39;</span>
+        <span class="n">ga0</span> <span class="o">=</span> <span class="n">GeometryAccess</span><span class="p">(</span><span class="n">fname_geometry</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;6&#39;</span> <span class="p">:</span> <span class="n">ga0377</span> <span class="o">=</span> <span class="n">GeometryAccess</span><span class="p">(</span><span class="n">fname_geometry</span><span class="p">,</span> <span class="mi">0377</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;7&#39;</span> <span class="p">:</span> <span class="n">test_save_pars_in_file</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;8&#39;</span> <span class="p">:</span> <span class="n">test_load_pars_from_file</span><span class="p">(</span><span class="n">geometry</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;9&#39;</span> <span class="p">:</span> <span class="n">test_mask_quad</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="mi">1</span><span class="o">+</span><span class="mi">2</span><span class="o">+</span><span class="mi">8</span><span class="p">)</span> <span class="c1">#+16</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;10&#39;</span><span class="p">:</span> <span class="n">geometry</span><span class="o">.</span><span class="n">print_psf</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;11&#39;</span><span class="p">:</span> <span class="n">test_cspad2x2</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;12&#39;</span><span class="p">:</span> <span class="n">test_epix100a</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;13&#39;</span><span class="p">:</span> <span class="n">geometry</span><span class="o">.</span><span class="n">print_comments_from_dict</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;14&#39;</span><span class="p">:</span> <span class="n">test_cspad_xy_at_z</span><span class="p">()</span>
+    <span class="k">else</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Wrong input parameter.&#39;</span> <span class="o">+</span> <span class="n">msg</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span> <span class="p">(</span><span class="s1">&#39;End of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1">#------------------------------</span>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Mikhail Dubrovin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>

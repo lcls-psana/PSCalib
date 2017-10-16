@@ -1,0 +1,1001 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>DCMethods &#8212; PSCalib-doc 1 documentation</title>
+    <link rel="stylesheet" href="../_static/agogo.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head>
+  <body>
+    <div class="header-wrapper" role="banner">
+      <div class="header">
+        <div class="headertitle"><a
+          href="../index.html">PSCalib-doc 1 documentation</a></div>
+        <div class="rel" role="navigation" aria-label="related navigation">
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a>
+        </div>
+       </div>
+    </div>
+
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="document">
+            
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for DCMethods</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="c1">#------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:py:class:`DCMethods` is a set of utilities for direct operations with calibration data</span>
+<span class="sd">=======================================================================================</span>
+
+<span class="sd">Usage::</span>
+
+<span class="sd">    # Import</span>
+<span class="sd">    import psana</span>
+<span class="sd">    import PSCalib.DCMethods as dcm</span>
+
+<span class="sd">    # Example of parameters</span>
+<span class="sd">    dsname = &#39;exp=cxif5315:run=129&#39;</span>
+<span class="sd">    # or:</span>
+<span class="sd">    dsname = &#39;/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc&#39;</span>
+<span class="sd">    ds = psana.DataSource(dsname)</span>
+<span class="sd">    env=ds.env()</span>
+<span class="sd">    evt=ds.events().next()</span>
+
+<span class="sd">    src      = &#39;Cspad.&#39; # &#39;Epix100a.&#39;, etc</span>
+<span class="sd">    ctype    = gu.PIXEL_MASK # | gu.PEDESTALS | gu.PIXEL_STATUS, etc.</span>
+<span class="sd">    vers     = None # or e.g. 5</span>
+<span class="sd">    calibdir = None # or e.g. &#39;./calib&#39;</span>
+<span class="sd">    nda      = np.zeros((32,185,388))</span>
+<span class="sd">    pred     = &#39;CxiDs2.0:Cspad.0&#39;</span>
+<span class="sd">    succ     = &#39;CxiDs2.0:Cspad.0&#39;</span>
+<span class="sd">    range    = &#39;1474587520-end&#39;</span>
+
+<span class="sd">    par      = evt # psana.Event | float - tsec event time</span>
+<span class="sd">    parts    = env # psana.Env | psana.Event | float - tsec event time</span>
+
+<span class="sd">    # Methods with dynamically-reconstructed calib file name</span>
+<span class="sd">    dcm.add_constants(nda, par, env, src=&#39;Epix100a.&#39;, ctype=gu.PIXEL_MASK, calibdir=None, vers=None, pred=None, succ=None, cmt=None, verb=False)</span>
+<span class="sd">    dcm.print_content(env, src=&#39;Epix100a.&#39;, calibdir=None)</span>
+<span class="sd">    nda = dcm.get_constants(par, env, src=&#39;Epix100a.&#39;, ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False)</span>
+<span class="sd">    dcm.delete_version(evt, env, src=&#39;Epix100a.&#39;, ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False)</span>
+<span class="sd">    dcm.delete_range  (evt, env, src=&#39;Epix100a.&#39;, ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False)</span>
+<span class="sd">    dcm.delete_ctype  (evt, env, src=&#39;Epix100a.&#39;, ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False)</span>
+
+<span class="sd">    # Methods using fname</span>
+<span class="sd">    dcm.add_constants_to_file(data, fname, parts, env, ctype=gu.PIXEL_MASK, vers=None, pred=None, succ=None, cmt=None, verb=False)</span>
+<span class="sd">    dcm.print_content_from_file(fname)</span>
+<span class="sd">    nda = dcm.get_constants_from_file(fname, parts, ctype=gu.PIXEL_MASK, vers=None, verb=False)</span>
+<span class="sd">    dcm.delete_version_from_file(fname, parts, ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False)</span>
+<span class="sd">    dcm.delete_range_from_file  (fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)</span>
+<span class="sd">    dcm.delete_ctype_from_file  (fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)</span>
+
+<span class="sd">Methods </span>
+<span class="sd">    * :meth:`add_constants`, </span>
+<span class="sd">    * :meth:`add_constants_to_file`, </span>
+<span class="sd">    * :meth:`print_content`, </span>
+<span class="sd">    * :meth:`print_content_from_file`, </span>
+<span class="sd">    * :meth:`get_constants`, </span>
+<span class="sd">    * :meth:`get_constants_from_file`, </span>
+<span class="sd">    * :meth:`delete_version`, </span>
+<span class="sd">    * :meth:`delete_version_from_file`, </span>
+<span class="sd">    * :meth:`delete_range`, </span>
+<span class="sd">    * :meth:`delete_range_from_file`, </span>
+<span class="sd">    * :meth:`delete_ctype`</span>
+<span class="sd">    * :meth:`delete_ctype_from_file`</span>
+<span class="sd"> </span>
+<span class="sd">Classes:</span>
+<span class="sd">    * :class:`DCStore`</span>
+<span class="sd">    * :class:`DCType`</span>
+<span class="sd">    * :class:`DCRange`</span>
+<span class="sd">    * :class:`DCVersion`</span>
+<span class="sd">    * :class:`DCBase`</span>
+<span class="sd">    * :class:`DCInterface`</span>
+<span class="sd">    * :class:`DCUtils`</span>
+<span class="sd">    * :class:`DCDetectorId`</span>
+<span class="sd">    * :class:`DCConfigParameters`</span>
+<span class="sd">    * :class:`DCFileName`</span>
+<span class="sd">    * :class:`DCLogger`</span>
+<span class="sd">    * :class:`DCMethods`</span>
+<span class="sd">    * :class:`DCEmail`</span>
+
+<span class="sd">This software was developed for the SIT project.</span>
+<span class="sd">If you use all or part of it, please give an appropriate acknowledgment.</span>
+
+<span class="sd">Created: 2016-09-23 by Mikhail Dubrovin</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#------------------------------</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="c1">#import numpy as np</span>
+<span class="c1">#import h5py</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span> <span class="c1">#localtime, strftime</span>
+
+<span class="kn">from</span> <span class="nn">PSCalib.DCLogger</span> <span class="k">import</span> <span class="n">log</span>
+<span class="kn">from</span> <span class="nn">PSCalib.DCFileName</span> <span class="k">import</span> <span class="n">DCFileName</span>
+<span class="kn">import</span> <span class="nn">PSCalib.DCUtils</span> <span class="k">as</span> <span class="nn">dcu</span>
+<span class="kn">from</span> <span class="nn">PSCalib.DCStore</span> <span class="k">import</span> <span class="n">DCStore</span>
+
+<span class="n">sp</span> <span class="o">=</span> <span class="n">dcu</span><span class="o">.</span><span class="n">sp</span>
+<span class="n">gu</span> <span class="o">=</span> <span class="n">dcu</span><span class="o">.</span><span class="n">gu</span>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="is_good_fname"><a class="viewcode-back" href="../index.html#DCMethods.is_good_fname">[docs]</a><span class="k">def</span> <span class="nf">is_good_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Checks the hdf5 file name validity, returns True or False.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - fname : str - full path to the file</span>
+<span class="sd">    - verb : bool - verbosity, default=False - do not print any message</span>
+
+<span class="sd">    Returns</span>
+
+<span class="sd">    True/False - for existing or not file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WARNING: file name is None&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WARNING: parameter fname is not str&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WARNING: file </span><span class="si">%s</span><span class="s1"> does not exist&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">fname</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="add_constants_to_file"><a class="viewcode-back" href="../index.html#DCMethods.add_constants_to_file">[docs]</a><span class="k">def</span> <span class="nf">add_constants_to_file</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span>\
+                          <span class="n">vers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>\
+                          <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>\
+                          <span class="n">succ</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>\
+                          <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>\
+                          <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Adds specified numpy array to the hdf5 file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - data : numpy.array or str - array or string of calibration constants/data to save in file</span>
+<span class="sd">    - fname: full path to the hdf5 file</span>
+<span class="sd">    - par  : psana.Event | psana.Env | float - tsec event time</span>
+<span class="sd">    - env  : psana.Env -&gt; is used to get exp=env.experiment() for comments etc.</span>
+<span class="sd">    - ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - vers : int - calibration version</span>
+<span class="sd">    - pred : str - predecessor name</span>
+<span class="sd">    - succ : str - successor name</span>
+<span class="sd">    - cmt  : str - comment saved as a history record within DCRange</span>
+<span class="sd">    - verb : bool - verbosity, default=False - do not print any message</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">.add_constants_to_file  ctype: </span><span class="si">%s</span><span class="s1">  vers: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+                    <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">str_ctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fname</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span>
+        <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;WARNING: file name is not defined - return None&#39;</span>
+        <span class="k">return</span>
+
+    <span class="n">tsec_ev</span> <span class="o">=</span> <span class="n">dcu</span><span class="o">.</span><span class="n">par_to_tsec</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">DCStore</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">setPrintBits</span><span class="p">(</span><span class="mi">0377</span><span class="p">)</span> <span class="c1"># 0377</span>
+
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="p">:</span> <span class="n">cs</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+    <span class="n">cs</span><span class="o">.</span><span class="n">set_tscfile</span><span class="p">(</span><span class="n">tsec</span><span class="o">=</span><span class="n">tsec_ev</span><span class="p">)</span>
+    <span class="n">cs</span><span class="o">.</span><span class="n">set_predecessor</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+    <span class="n">cs</span><span class="o">.</span><span class="n">set_successor</span><span class="p">(</span><span class="n">succ</span><span class="p">)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;detname:</span><span class="si">%s</span><span class="s1"> predecessor:</span><span class="si">%s</span><span class="s1"> successor:</span><span class="si">%s</span><span class="s1"> ts:</span><span class="si">%.0f</span><span class="s1">&#39;</span> <span class="o">%</span>\
+          <span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">detname</span><span class="p">(),</span> <span class="n">cs</span><span class="o">.</span><span class="n">predecessor</span><span class="p">(),</span> <span class="n">cs</span><span class="o">.</span><span class="n">successor</span><span class="p">(),</span> <span class="n">cs</span><span class="o">.</span><span class="n">tscfile</span><span class="p">())</span>
+    <span class="c1">#cs.add_history_record(&#39;%s for %s&#39; % (metname, msg))</span>
+    <span class="c1">#cs.add_par(&#39;par-1-in-DCStore&#39;, 1)</span>
+
+    <span class="n">ct</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">add_ctype</span><span class="p">(</span><span class="n">str_ctype</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ct</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span>
+    <span class="c1">#ct.add_history_record(&#39;%s - add DCType %s&#39; % (metname,str_ctype))</span>
+    <span class="c1">#ct.add_par(&#39;par-1-in-DCType&#39;, 1)</span>
+
+    <span class="n">exp</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">experiment</span><span class="p">()</span> <span class="k">if</span> <span class="n">env</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">exp</span> <span class="o">=</span> <span class="n">exp</span> <span class="k">if</span> <span class="n">exp</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="s1">&#39;unknown&#39;</span>
+    <span class="n">runnum</span> <span class="o">=</span> <span class="n">par</span><span class="o">.</span><span class="n">run</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">par</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span> 
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;exp=</span><span class="si">%s</span><span class="s1">:run=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">exp</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">runnum</span><span class="p">))</span>
+    <span class="n">cr</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">add_range</span><span class="p">(</span><span class="n">tsec_ev</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span>
+    <span class="n">cr</span><span class="o">.</span><span class="n">add_par</span><span class="p">(</span><span class="s1">&#39;experiment&#39;</span><span class="p">,</span> <span class="n">exp</span><span class="p">)</span>
+    <span class="n">cr</span><span class="o">.</span><span class="n">add_par</span><span class="p">(</span><span class="s1">&#39;run&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">runnum</span><span class="p">))</span>
+    <span class="c1">#cr.set_vnum_def(vnum=None)</span>
+
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">cmt</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cmt</span>
+    <span class="n">cv</span> <span class="o">=</span> <span class="n">cr</span><span class="o">.</span><span class="n">add_version</span><span class="p">(</span><span class="n">vnum</span><span class="o">=</span><span class="n">vers</span><span class="p">,</span> <span class="n">tsec_prod</span><span class="o">=</span><span class="n">time</span><span class="p">(),</span> <span class="n">nda</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="n">msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span>
+    <span class="c1">#v = cr.vnum_last() if vers is None else vers</span>
+    <span class="c1">#rec=&#39;%s vers=%d: %s&#39; % (metname, v, cmt if cmt is not None else &#39;no-comments&#39;) </span>
+    <span class="c1">#cr.add_history_record(rec)</span>
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> 
+        <span class="nb">print</span> <span class="mi">50</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">In </span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+        <span class="n">cs</span><span class="o">.</span><span class="n">print_obj</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">setPrintBits</span><span class="p">(</span><span class="mi">02</span><span class="p">)</span> <span class="c1"># 0377</span>
+
+    <span class="n">cs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="add_constants"><a class="viewcode-back" href="../index.html#DCMethods.add_constants">[docs]</a><span class="k">def</span> <span class="nf">add_constants</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="s1">&#39;Epix100a.&#39;</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span> <span class="n">calibdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>\
+                  <span class="n">vers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>\
+                  <span class="n">pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>\
+                  <span class="n">succ</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>\
+                  <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>\
+                  <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Adds specified numpy array to the hdf5 file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - data : numpy.array or str - array or string of calibration constants/data to save in file</span>
+<span class="sd">    - env  : psana.Env -&gt; full detector name for psana.Source -&gt; hdf5 file name</span>
+<span class="sd">    - par  : psana.Event | float time -&gt; event time</span>
+<span class="sd">    - src  : str - source short/full name, alias or full -&gt; hdf5 file name</span>
+<span class="sd">    - ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)</span>
+<span class="sd">    - vers : int - calibration version</span>
+<span class="sd">    - pred : str - predecessor name</span>
+<span class="sd">    - succ : str - successor name</span>
+<span class="sd">    - cmt  : str - comment saved as a history record within DCRange</span>
+<span class="sd">    - verb : bool - verbosity, default=False - do not prnt any message</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">.add_constants  src: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  ctype: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  vers: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  calibdir:</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+                    <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">str_ctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+
+    <span class="n">ofn</span> <span class="o">=</span> <span class="n">DCFileName</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">ofn</span><span class="o">.</span><span class="n">print_attrs</span><span class="p">()</span>
+    <span class="n">ofn</span><span class="o">.</span><span class="n">make_path_to_calib_file</span><span class="p">()</span> <span class="c1"># depth=2, mode=0775)</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">ofn</span><span class="o">.</span><span class="n">calib_file_path</span><span class="p">()</span>
+
+    <span class="n">add_constants_to_file</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">succ</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_constants_from_file"><a class="viewcode-back" href="../index.html#DCMethods.get_constants_from_file">[docs]</a><span class="k">def</span> <span class="nf">get_constants_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span> <span class="n">vers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns specified array of calibration constants.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+
+<span class="sd">    - fname : full path to the hdf5 file</span>
+<span class="sd">    - par   : psana.Event | psana.Env | float - tsec event time</span>
+<span class="sd">    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - vers  : int - calibration version</span>
+
+<span class="sd">    Returns</span>
+
+<span class="sd">    - np.array - specified array of calibration constants</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_good_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">DCStore</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">cs</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="mi">50</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DCStore.print_obj()&#39;</span> 
+        <span class="n">cs</span><span class="o">.</span><span class="n">print_obj</span><span class="p">()</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+    <span class="n">ct</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">ctypeobj</span><span class="p">(</span><span class="n">str_ctype</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ct</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span> 
+    <span class="c1">#ct.print_obj()</span>
+
+    <span class="n">tsec</span> <span class="o">=</span> <span class="n">dcu</span><span class="o">.</span><span class="n">par_to_tsec</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+    <span class="c1">#print &#39;XXX: get DCRange object for time = %.3f&#39; % tsec</span>
+    <span class="n">cr</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">range_for_tsec</span><span class="p">(</span><span class="n">tsec</span><span class="p">)</span>
+    <span class="c1">#cr = ct.range_for_evt(evt)</span>
+
+
+    <span class="k">if</span> <span class="n">cr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="c1">#cr.print_obj()</span>
+
+    <span class="n">cv</span> <span class="o">=</span> <span class="n">cr</span><span class="o">.</span><span class="n">version</span><span class="p">(</span><span class="n">vnum</span><span class="o">=</span><span class="n">vers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cv</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+    <span class="c1">#cv.print_obj()</span>
+
+    <span class="k">return</span> <span class="n">cv</span><span class="o">.</span><span class="n">data</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="get_constants"><a class="viewcode-back" href="../index.html#DCMethods.get_constants">[docs]</a><span class="k">def</span> <span class="nf">get_constants</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="s1">&#39;Epix100a.&#39;</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span> <span class="n">calibdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns specified array of calibration constants.</span>
+
+<span class="sd">    Parameters</span>
+
+<span class="sd">    - par: psana.Event | float - tsec event time</span>
+<span class="sd">    - env: psana.Env - to get full detector name for psana.Source </span>
+<span class="sd">    - src: str - source short/full name, alias or full</span>
+<span class="sd">    - ctype: gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - calibdir: str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)</span>
+<span class="sd">    - vers: int - calibration version</span>
+
+<span class="sd">    Return </span>
+
+<span class="sd">    numpy.array - array of calibratiopn constatnts.</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">.get_constants  src: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  ctype: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  vers: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  calibdir:</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+                    <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">str_ctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+
+    <span class="n">ofn</span> <span class="o">=</span> <span class="n">DCFileName</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">ofn</span><span class="o">.</span><span class="n">print_attrs</span><span class="p">()</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">ofn</span><span class="o">.</span><span class="n">calib_file_path</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">get_constants_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="delete_version_from_file"><a class="viewcode-back" href="../index.html#DCMethods.delete_version_from_file">[docs]</a><span class="k">def</span> <span class="nf">delete_version_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span> <span class="n">vers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Delete specified version from calibration constants.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - fname : full path to the hdf5 file</span>
+<span class="sd">    - par   : psana.Event | psana.Env | float - tsec event time</span>
+<span class="sd">    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - vers  : int - calibration version</span>
+<span class="sd">    - cmt   : str - comment</span>
+<span class="sd">    - verb  : bool - verbousity</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">.delete_version_from_file:  ctype: </span><span class="si">%s</span><span class="s1">  vers: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+                    <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">str_ctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_good_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">DCStore</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">cs</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+    <span class="n">ct</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">ctypeobj</span><span class="p">(</span><span class="n">str_ctype</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ct</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span> 
+    <span class="c1">#ct.print_obj()</span>
+
+    <span class="n">tsec</span> <span class="o">=</span> <span class="n">dcu</span><span class="o">.</span><span class="n">par_to_tsec</span><span class="p">(</span><span class="n">par</span><span class="p">)</span>
+    <span class="n">cr</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">range_for_tsec</span><span class="p">(</span><span class="n">tsec</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">v</span> <span class="o">=</span> <span class="n">vers</span> <span class="k">if</span> <span class="n">vers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cr</span><span class="o">.</span><span class="n">vnum_last</span><span class="p">()</span>
+
+    <span class="n">vdel</span> <span class="o">=</span> <span class="n">cr</span><span class="o">.</span><span class="n">mark_version</span><span class="p">(</span><span class="n">vnum</span><span class="o">=</span><span class="n">vers</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="n">cmt</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">setPrintBits</span><span class="p">(</span><span class="mi">02</span><span class="p">)</span> <span class="c1"># 0377</span>
+
+    <span class="n">cs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="mi">50</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DCStore.print_obj() after delete version </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdel</span><span class="p">)</span>
+        <span class="n">cs</span><span class="o">.</span><span class="n">print_obj</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">vdel</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="delete_version"><a class="viewcode-back" href="../index.html#DCMethods.delete_version">[docs]</a><span class="k">def</span> <span class="nf">delete_version</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="s1">&#39;Epix100a.&#39;</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span> <span class="n">calibdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">vers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Delete specified version from calibration constants.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - evt : psana.Event -&gt; event time</span>
+<span class="sd">    - env : psana.Env -&gt; full detector name for psana.Source </span>
+<span class="sd">    - src : str - source short/full name, alias or full</span>
+<span class="sd">    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)</span>
+<span class="sd">    - vers : int - calibration version</span>
+<span class="sd">    - cmt  : str - comment</span>
+<span class="sd">    - verb : bool - verbousity</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">.delete_version:</span><span class="se">\n</span><span class="s1">  src: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  ctype: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  vers: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  calibdir:</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+                    <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">str_ctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+
+    <span class="n">ofn</span> <span class="o">=</span> <span class="n">DCFileName</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">ofn</span><span class="o">.</span><span class="n">print_attrs</span><span class="p">()</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">ofn</span><span class="o">.</span><span class="n">calib_file_path</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">delete_version_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">evt</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="delete_range_from_file"><a class="viewcode-back" href="../index.html#DCMethods.delete_range_from_file">[docs]</a><span class="k">def</span> <span class="nf">delete_range_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Delete specified time range from calibration constants.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - fname : full path to the hdf5 file</span>
+<span class="sd">    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - range : str - range, e.g. &#39;1474587520-end&#39;</span>
+<span class="sd">    - cmt   : str - comment</span>
+<span class="sd">    - verb  : bool - verbousity</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">.delete_range_from_file  ctype: </span><span class="si">%s</span><span class="s1">  range: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+                    <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">str_ctype</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_good_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">DCStore</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">cs</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="c1">#cs.print_obj()</span>
+
+    <span class="n">ct</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">ctypeobj</span><span class="p">(</span><span class="n">str_ctype</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ct</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span> 
+
+    <span class="n">rdel</span> <span class="o">=</span> <span class="n">ct</span><span class="o">.</span><span class="n">mark_range_for_key</span><span class="p">(</span><span class="nb">range</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="n">cmt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">rdel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">setPrintBits</span><span class="p">(</span><span class="mi">02</span><span class="p">)</span> <span class="c1"># 0377</span>
+
+    <span class="n">cs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="mi">50</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DCStore.print_obj() after delete range </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">rdel</span>
+        <span class="n">cs</span><span class="o">.</span><span class="n">print_obj</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">rdel</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="delete_range"><a class="viewcode-back" href="../index.html#DCMethods.delete_range">[docs]</a><span class="k">def</span> <span class="nf">delete_range</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="s1">&#39;Epix100a.&#39;</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span> <span class="n">calibdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Delete specified time range from calibration constants.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - evt : psana.Event -&gt; event time</span>
+<span class="sd">    - env : psana.Env -&gt; full detector name for psana.Source </span>
+<span class="sd">    - src : str - source short/full name, alias or full</span>
+<span class="sd">    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)</span>
+<span class="sd">    - range : str - range, e.g. &#39;1474587520-end&#39;</span>
+<span class="sd">    - cmt   : str - comment</span>
+<span class="sd">    - verb  : bool - verbousity</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">.delete_range  src: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  ctype: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  range: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  calibdir:</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+                    <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">str_ctype</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+
+    <span class="n">ofn</span> <span class="o">=</span> <span class="n">DCFileName</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">ofn</span><span class="o">.</span><span class="n">print_attrs</span><span class="p">()</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">ofn</span><span class="o">.</span><span class="n">calib_file_path</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">delete_range_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="delete_ctype_from_file"><a class="viewcode-back" href="../index.html#DCMethods.delete_ctype_from_file">[docs]</a><span class="k">def</span> <span class="nf">delete_ctype_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Delete specified ctype from calibration constants.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - fname : full path to the hdf5 file</span>
+<span class="sd">    - ctype : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - cmt   : str - comment</span>
+<span class="sd">    - verb  : bool - verbousity</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">.delete_ctype  ctype: </span><span class="si">%s</span><span class="s1">  range: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+                    <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">str_ctype</span><span class="p">,</span> <span class="nb">range</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_good_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">DCStore</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+    <span class="n">cs</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="c1">#cs.print_obj()</span>
+
+    <span class="n">tdel</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">mark_ctype</span><span class="p">(</span><span class="n">str_ctype</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="n">cmt</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tdel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="p">:</span> <span class="k">return</span> <span class="kc">None</span> 
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">log</span><span class="o">.</span><span class="n">setPrintBits</span><span class="p">(</span><span class="mi">02</span><span class="p">)</span> <span class="c1"># 0377</span>
+
+    <span class="n">cs</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span>
+        <span class="nb">print</span> <span class="mi">50</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DCStore.print_obj() after delete ctype </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tdel</span>
+        <span class="n">cs</span><span class="o">.</span><span class="n">print_obj</span><span class="p">()</span>
+    
+    <span class="k">return</span> <span class="n">tdel</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="delete_ctype"><a class="viewcode-back" href="../index.html#DCMethods.delete_ctype">[docs]</a><span class="k">def</span> <span class="nf">delete_ctype</span><span class="p">(</span><span class="n">evt</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="s1">&#39;Epix100a.&#39;</span><span class="p">,</span> <span class="n">ctype</span><span class="o">=</span><span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span><span class="p">,</span> <span class="n">calibdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">cmt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">verb</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Delete specified ctype from calibration constants.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - evt      : psana.Event -&gt; event time</span>
+<span class="sd">    - env      : psana.Env -&gt; full detector name for psana.Source </span>
+<span class="sd">    - src      : str - source short/full name, alias or full</span>
+<span class="sd">    - ctype    : gu.CTYPE - enumerated calibration type, e.g.: gu.PIXEL_MASK</span>
+<span class="sd">    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)</span>
+<span class="sd">    - cmt      : str - comment</span>
+<span class="sd">    - verb     : bool - verbousity</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="n">str_ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">dic_calib_type_to_name</span><span class="p">[</span><span class="n">ctype</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">.delete_ctype  src: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  ctype: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  range: </span><span class="si">%s</span><span class="se">\n</span><span class="s1">  calibdir:</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span>\
+                    <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">str_ctype</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+
+    <span class="n">ofn</span> <span class="o">=</span> <span class="n">DCFileName</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verb</span> <span class="p">:</span> <span class="n">ofn</span><span class="o">.</span><span class="n">print_attrs</span><span class="p">()</span>
+
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">ofn</span><span class="o">.</span><span class="n">calib_file_path</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">delete_ctype_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">verb</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="print_content_from_file"><a class="viewcode-back" href="../index.html#DCMethods.print_content_from_file">[docs]</a><span class="k">def</span> <span class="nf">print_content_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Prints content of the file.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - fname : str - full path to the file</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_good_fname</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span> <span class="p">:</span> <span class="k">return</span>
+
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">DCStore</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>
+
+    <span class="n">t0_sec</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="n">cs</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;File content loading time (sec) = </span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0_sec</span><span class="p">)</span>
+    
+    <span class="nb">print</span> <span class="mi">50</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DCStore.print_obj()&#39;</span> 
+    <span class="n">cs</span><span class="o">.</span><span class="n">print_obj</span><span class="p">()</span></div>
+
+<span class="c1">#------------------------------</span>
+
+<div class="viewcode-block" id="print_content"><a class="viewcode-back" href="../index.html#DCMethods.print_content">[docs]</a><span class="k">def</span> <span class="nf">print_content</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="o">=</span><span class="s1">&#39;Epix100a.&#39;</span><span class="p">,</span> <span class="n">calibdir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Defines the file name and prints file content.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters</span>
+<span class="sd">    </span>
+<span class="sd">    - env : psana.Env -&gt; full detector name for psana.Source </span>
+<span class="sd">    - src : str - source short/full name, alias or full</span>
+<span class="sd">    - calibdir : str - fallback path to calib dir (if xtc file is copied - calib and experiment name are lost)</span>
+
+<span class="sd">    See :py:class:`DCMethods`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#metname = sys._getframe().f_code.co_name</span>
+
+    <span class="n">ofn</span> <span class="o">=</span> <span class="n">DCFileName</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">src</span><span class="p">,</span> <span class="n">calibdir</span><span class="p">)</span>
+    <span class="n">fname</span> <span class="o">=</span> <span class="n">ofn</span><span class="o">.</span><span class="n">calib_file_path</span><span class="p">()</span>
+    <span class="n">ofn</span><span class="o">.</span><span class="n">print_attrs</span><span class="p">()</span>
+
+    <span class="n">print_content_from_file</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span></div>
+
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">get_constants_v0</span><span class="p">(</span><span class="o">*</span><span class="n">par</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)</span> <span class="p">:</span>
+    <span class="n">ofn</span> <span class="o">=</span> <span class="n">DCFileName</span><span class="p">(</span><span class="n">par</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">opt</span><span class="p">[</span><span class="s1">&#39;src&#39;</span><span class="p">])</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_add_constants</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="n">vers</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#nda  = np.zeros((32,185,388), dtype=np.float32)</span>
+    <span class="n">nda</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1000</span><span class="p">,</span><span class="mi">1000</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">succ</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    
+    <span class="n">add_constants</span><span class="p">(</span><span class="n">nda</span><span class="p">,</span> <span class="n">gevt</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">succ</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: constants added nda.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">nda</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_add_constants_to_file</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="n">vers</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1">#data  = np.zeros((32,185,388), dtype=np.float32)</span>
+    <span class="n">data</span>  <span class="o">=</span> <span class="mi">11</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">500</span><span class="p">,</span><span class="mi">500</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">succ</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">par</span> <span class="o">=</span> <span class="n">gevt</span> <span class="c1"># 1474587525.3 # gevt</span>
+
+    <span class="n">add_constants_to_file</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gfname</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">succ</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: constants added data.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_add_text</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;Now we are going to save</span><span class="se">\n</span><span class="s1"> this little piece of text&#39;</span>
+    <span class="n">vers</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="s1">&#39;Predecessor_name&#39;</span>
+    <span class="n">succ</span> <span class="o">=</span> <span class="s1">&#39;Successor_name&#39;</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">GEOMETRY</span>
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    
+    <span class="n">add_constants</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gevt</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">ctype</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">succ</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: text is added to the file&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_add_text_to_file</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="s1">&#39;Now we are going to save</span><span class="se">\n</span><span class="s1"> this little piece of text&#39;</span>
+    <span class="n">vers</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pred</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">succ</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ctype</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">GEOMETRY</span>
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">par</span> <span class="o">=</span> <span class="n">gevt</span>
+    
+    <span class="n">add_constants_to_file</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">gfname</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">succ</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+    
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: text is added to the file</span><span class="se">\n</span><span class="s1">  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="n">gfname</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_add_constants_two</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="n">vers</span>   <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">pred</span>   <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">succ</span>   <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">ctype1</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_STATUS</span>
+    <span class="n">ctype2</span> <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_MASK</span>
+    <span class="c1">#nda   = np.zeros((32,185,388), dtype=np.float32)</span>
+    <span class="n">nda1</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1000</span><span class="p">,</span><span class="mi">1000</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">nda2</span>   <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">nda1</span>
+    <span class="n">cmt1</span>   <span class="o">=</span> <span class="s1">&#39;my comment 1: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">cmt2</span>   <span class="o">=</span> <span class="s1">&#39;my comment 2: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    
+    <span class="n">add_constants</span><span class="p">(</span><span class="n">nda1</span><span class="p">,</span> <span class="n">gevt</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">ctype1</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">succ</span><span class="p">,</span> <span class="n">cmt1</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+    <span class="n">add_constants</span><span class="p">(</span><span class="n">nda2</span><span class="p">,</span> <span class="n">gevt</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">ctype2</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">pred</span><span class="p">,</span> <span class="n">succ</span><span class="p">,</span> <span class="n">cmt2</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: constants added ctype1=</span><span class="si">%s</span><span class="s1"> nda1.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ctype1</span><span class="p">),</span> <span class="n">nda1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: constants added ctype2=</span><span class="si">%s</span><span class="s1"> nda2.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ctype2</span><span class="p">),</span> <span class="n">nda2</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_get_constants</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="n">vers</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">get_constants</span><span class="p">(</span><span class="n">gevt</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: retrieved constants for vers </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">vers</span><span class="p">))</span>
+    <span class="nb">print</span> <span class="s1">&#39;data:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">data</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;data.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_get_constants_from_file</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="n">vers</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">get_constants_from_file</span><span class="p">(</span><span class="n">gfname</span><span class="p">,</span> <span class="n">gevt</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: retrieved constants for vers </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">vers</span><span class="p">))</span>
+    <span class="nb">print</span> <span class="s1">&#39;data:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">data</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;data.shape=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_delete_version</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="n">vers</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># for default - last version</span>
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">vdel</span> <span class="o">=</span> <span class="n">delete_version</span><span class="p">(</span><span class="n">gevt</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: deleted version </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdel</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_delete_version_from_file</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="n">vers</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># for default - last version</span>
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">vdel</span> <span class="o">=</span> <span class="n">delete_version_from_file</span><span class="p">(</span><span class="n">gfname</span><span class="p">,</span> <span class="n">gevt</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">vers</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: deleted version </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">vdel</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_delete_range</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="nb">range</span> <span class="o">=</span> <span class="s1">&#39;1474587520-end&#39;</span>
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">rdel</span> <span class="o">=</span> <span class="n">delete_range</span><span class="p">(</span><span class="n">gevt</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: deleted range </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">rdel</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_delete_range_from_file</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="nb">range</span> <span class="o">=</span> <span class="s1">&#39;1474587520-end&#39;</span>
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">rdel</span> <span class="o">=</span> <span class="n">delete_range_from_file</span><span class="p">(</span><span class="n">gfname</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="nb">range</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>    
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: deleted range </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">rdel</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_delete_ctype</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">tdel</span> <span class="o">=</span> <span class="n">delete_ctype</span><span class="p">(</span><span class="n">gevt</span><span class="p">,</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: deleted ctype </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tdel</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_delete_ctype_from_file</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+
+    <span class="n">cmt</span>  <span class="o">=</span> <span class="s1">&#39;my comment: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">tdel</span> <span class="o">=</span> <span class="n">delete_ctype_from_file</span><span class="p">(</span><span class="n">gfname</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">cmt</span><span class="p">,</span> <span class="n">gverb</span><span class="p">)</span>
+    
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: deleted ctype </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">tdel</span><span class="p">))</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_print_content</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">print_content</span><span class="p">(</span><span class="n">genv</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is completed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_print_content_from_file</span><span class="p">()</span> <span class="p">:</span>
+    <span class="n">metname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metname</span>
+    <span class="n">print_content_from_file</span><span class="p">(</span><span class="n">gfname</span><span class="p">)</span>
+    <span class="nb">print</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> is completed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metname</span><span class="p">)</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">test_misc</span><span class="p">()</span> <span class="p">:</span>
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+
+    <span class="kn">import</span> <span class="nn">PSCalib.DCUtils</span> <span class="k">as</span> <span class="nn">dcu</span>
+
+    <span class="nb">print</span> <span class="mi">20</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">sys</span><span class="o">.</span><span class="n">_getframe</span><span class="p">()</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_name</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_enviroment(USER) : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dcu</span><span class="o">.</span><span class="n">get_enviroment</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_login()          : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dcu</span><span class="o">.</span><span class="n">get_login</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_hostname()       : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dcu</span><span class="o">.</span><span class="n">get_hostname</span><span class="p">()</span>
+    <span class="nb">print</span> <span class="s1">&#39;get_cwd()            : </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dcu</span><span class="o">.</span><span class="n">get_cwd</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">set_parameters</span><span class="p">()</span> <span class="p">:</span>
+
+    <span class="kn">import</span> <span class="nn">psana</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span><span class="p">;</span> <span class="k">global</span> <span class="n">np</span>
+
+    <span class="k">global</span> <span class="n">genv</span><span class="p">,</span> <span class="n">gevt</span><span class="p">,</span> <span class="n">gsrc</span><span class="p">,</span> <span class="n">gctype</span><span class="p">,</span> <span class="n">gcalibdir</span><span class="p">,</span> <span class="n">gverb</span><span class="p">,</span> <span class="n">gfname</span>
+
+    <span class="c1">#dsname  = &#39;exp=cxif5315:run=129&#39;</span>
+    <span class="c1">#dsname   = &#39;/reg/g/psdm/detector/data_test/xtc/cxif5315-e545-r0169-s00-c00.xtc&#39;</span>
+    <span class="c1">#gsrc      = &#39;Cspad.&#39;</span>
+
+    <span class="c1">#dsname = &#39;exp=mfxn8316:run=11&#39;</span>
+    <span class="n">dsname</span> <span class="o">=</span> <span class="s1">&#39;/reg/g/psdm/detector/data_test/types/0021-MfxEndstation.0-Epix100a.0.xtc&#39;</span>
+    <span class="n">gsrc</span>      <span class="o">=</span> <span class="s1">&#39;:Epix100a.&#39;</span>
+
+    <span class="n">gcalibdir</span> <span class="o">=</span> <span class="s1">&#39;./calib&#39;</span>
+    <span class="n">gctype</span>    <span class="o">=</span> <span class="n">gu</span><span class="o">.</span><span class="n">PIXEL_STATUS</span> <span class="c1"># gu.PIXEL_MASK, gu.PEDESTALS, etc.</span>
+    <span class="n">gverb</span>     <span class="o">=</span> <span class="kc">True</span>
+    <span class="c1">#gverb     = False</span>
+
+    <span class="n">gfname</span> <span class="o">=</span> <span class="s1">&#39;./calib/epix100a/epix100a-3925999616-0996663297-3791650826-1232098304-0953206283-2655595777-0520093719.h5&#39;</span>
+
+    <span class="n">ds</span> <span class="o">=</span> <span class="n">psana</span><span class="o">.</span><span class="n">DataSource</span><span class="p">(</span><span class="n">dsname</span><span class="p">)</span>
+    <span class="n">genv</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">env</span><span class="p">()</span>
+    <span class="n">gevt</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">events</span><span class="p">()</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+
+<span class="k">def</span> <span class="nf">do_test</span><span class="p">()</span> <span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+
+    <span class="n">set_parameters</span><span class="p">()</span>
+
+    <span class="c1">#log.setPrintBits(0377)</span>
+
+    <span class="n">tname</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;0&#39;</span>
+    <span class="nb">print</span> <span class="mi">50</span><span class="o">*</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Test </span><span class="si">%s</span><span class="s1">:&#39;</span> <span class="o">%</span> <span class="n">tname</span>
+    <span class="n">t0_sec</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+    <span class="k">if</span>   <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span> <span class="p">:</span> <span class="n">test_misc</span><span class="p">();</span> 
+
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span>  <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="n">test_add_constants</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span>  <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="n">test_add_constants_two</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span>  <span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="n">test_add_text</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span>  <span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="n">test_print_content</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span>  <span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="n">test_get_constants</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span>  <span class="s1">&#39;6&#39;</span><span class="p">:</span> <span class="n">test_delete_version</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span>  <span class="s1">&#39;7&#39;</span><span class="p">:</span> <span class="n">test_delete_range</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span>  <span class="s1">&#39;8&#39;</span><span class="p">:</span> <span class="n">test_delete_ctype</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;11&#39;</span><span class="p">:</span> <span class="n">test_add_constants_to_file</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;12&#39;</span><span class="p">:</span> <span class="n">test_add_constants_to_file</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;13&#39;</span><span class="p">:</span> <span class="n">test_add_text_to_file</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;14&#39;</span><span class="p">:</span> <span class="n">test_print_content_from_file</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;15&#39;</span><span class="p">:</span> <span class="n">test_get_constants_from_file</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;16&#39;</span><span class="p">:</span> <span class="n">test_delete_version_from_file</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;17&#39;</span><span class="p">:</span> <span class="n">test_delete_range_from_file</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">tname</span> <span class="o">==</span> <span class="s1">&#39;18&#39;</span><span class="p">:</span> <span class="n">test_delete_ctype_from_file</span><span class="p">()</span>
+
+    <span class="k">else</span> <span class="p">:</span> <span class="nb">print</span> <span class="s1">&#39;Not-recognized test name: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">tname</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;End of test </span><span class="si">%s</span><span class="s1">, consumed time (sec) = </span><span class="si">%.6f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tname</span><span class="p">,</span> <span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">t0_sec</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+ 
+<span class="c1">#------------------------------</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span> <span class="p">:</span>
+    <span class="n">do_test</span><span class="p">()</span>
+
+<span class="c1">#------------------------------</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+        </div>
+        <div class="sidebar">
+          <h3>Table Of Contents</h3>
+          
+          <div role="search">
+            <h3 style="margin-top: 1.5em;">Search</h3>
+            <form class="search" action="../search.html" method="get">
+                <input type="text" name="q" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+            </form>
+          </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+    <div class="footer-wrapper">
+      <div class="footer">
+        <div class="left">
+          <div role="navigation" aria-label="related navigaton">
+            <a href="../py-modindex.html" title="Python Module Index"
+              >modules</a> |
+            <a href="../genindex.html" title="General Index"
+              >index</a>
+          </div>
+          <div role="note" aria-label="source link">
+          </div>
+        </div>
+
+        <div class="right">
+          
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2017, Mikhail Dubrovin.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+    </div>
+        </div>
+        <div class="clearer"></div>
+      </div>
+    </div>
+
+  </body>
+</html>
