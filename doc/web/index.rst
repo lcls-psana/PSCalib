@@ -45,6 +45,11 @@ PSCalib documentation
    :show-inheritance:
    :special-members:
 
+.. automodule:: SegGeometryJungfrauV1
+   :members:
+   :show-inheritance:
+   :special-members:
+
 .. automodule:: DCMethods
    :members:
    :show-inheritance:
@@ -191,6 +196,16 @@ PSCalib documentation
    :special-members:
 
 .. automodule:: GlobalUtils
+   :members:
+   :show-inheritance:
+   :special-members:
+
+.. automodule:: RunProcUtils
+   :members:
+   :show-inheritance:
+   :special-members:
+
+.. automodule:: SubprocUtils
    :members:
    :show-inheritance:
    :special-members:
