@@ -9,7 +9,8 @@ import subprocess # for subprocess.Popen
 from PSCalib.RunProcUtils import log_file, append_log_file, exp_run_new, exp_run_new_under_control, dict_exp_run_old, print_exp_runs_old
 
 """
-:py:class:`SubprocUtils` contains utils to use subproccesses in specific apps.
+:py:class:`SubprocUtils` contains utils to use subproccesses in specific apps
+=============================================================================
 
 Usage::
 

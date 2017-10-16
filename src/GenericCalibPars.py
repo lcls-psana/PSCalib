@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-Class :py:class:`GenericCalibPars` - implementation of :py:class:`CalibPars` interface methods for generic detectors.
+Class :py:class:`GenericCalibPars` - implementation of :py:class:`CalibPars` interface methods for generic detectors
+====================================================================================================================
 
 Usage::
 
@@ -54,8 +55,6 @@ This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
-
---------
 """
 #------------------------------
 

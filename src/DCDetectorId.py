@@ -1,7 +1,8 @@
 ####!/usr/bin/env python
 #------------------------------
 """
-Class :py:class:`DCDetectorId` for the Detector Calibration (DC) project.
+Class :py:class:`DCDetectorId` for the Detector Calibration (DC) project
+========================================================================
 
 Usage::
 
@@ -39,8 +40,6 @@ This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
-
---------
 """
 
 #------------------------------

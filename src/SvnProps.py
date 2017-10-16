@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-:py:class:`SvnProps` stores updated by svn properties.
+:py:class:`SvnProps` stores updated by svn properties
+=====================================================
 
 NOTE: To update revision number in this file when revision changes, use command:
 psvn mktxtprop src/SvnProps.py

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-Class :py:class:`GeometryAccess` - holds and access hierarchical geometry for generic pixel detector.
+Class :py:class:`GeometryAccess` - holds and access hierarchical geometry for generic pixel detector
+====================================================================================================
 
 Usage::
  
@@ -101,8 +102,6 @@ This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
-
---------
 """
 #------------------------------
 

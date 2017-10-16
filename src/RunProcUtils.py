@@ -8,7 +8,8 @@ from expmon.EMUtils import list_of_runs_in_xtc_dir #, list_of_files_in_dir_for_e
 import PSCalib.GlobalUtils as gu
 
 """
-Module :py:class:`NewRunFinderUtils` contains a set of utilities helping find new runs in xtc directory for data processing.
+:py:class:`NewRunFinderUtils` contains a set of utilities helping find new runs in xtc directory for data processing
+====================================================================================================================
 
 Content of files in the xtc directory is conmpared with log file in static DIR_LOG place 
 for specified process name. New runs available in the xtc directory and not listed in the log file 

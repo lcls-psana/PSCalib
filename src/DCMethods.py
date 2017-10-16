@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-Module :py:class:`DCMethods` contains a set of utilities for direct operations with calibration data.
+:py:class:`DCMethods` is a set of utilities for direct operations with calibration data
+=======================================================================================
 
 Usage::
 
@@ -78,8 +79,6 @@ This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016-09-23 by Mikhail Dubrovin
-
---------
 """
 #------------------------------
 

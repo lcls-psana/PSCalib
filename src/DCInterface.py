@@ -1,7 +1,8 @@
 ####!/usr/bin/env python
 #------------------------------
 """
-:py:class:`DCInterface` - abstract interface for the Detector Calibration (DC) project.
+:py:class:`DCInterface` - abstract interface for the Detector Calibration (DC) project
+======================================================================================
 
 See:
     * :py:class:`DCStore`
@@ -22,8 +23,6 @@ This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
-
---------
 """
 #------------------------------
 

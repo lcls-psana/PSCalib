@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 #------------------------------
 """
-:py:class:`CalibParsStore` - a factory class/method to switch between different device-dependent
-segments/sensors to access their pixel geometry uling :py:class:`SegGeometry` interface.
+:py:class:`CalibParsStore` - a factory class/method
+===================================================
+
+Switches between different device-dependent calibration constants using :py:class:`CalibPars` interface.
 
 Usage::
 
@@ -61,8 +63,6 @@ This software was developed for the SIT project.  If you use all or
 part of it, please give an appropriate acknowledgment.
 
 Created: 2013-03-08 by Mikhail Dubrovin
-
---------
 """
 
 import sys

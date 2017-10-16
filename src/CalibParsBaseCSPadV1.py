@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-Class :py:class:`CalibParsBaseCSPadV1` holds basic calibration metadata parameters for associated detector.
+Class :py:class:`CalibParsBaseCSPadV1` holds basic calibration metadata parameters for associated detector
+==========================================================================================================
 
 See:
   -  :py:class:`GenericCalibPars`
@@ -23,8 +24,6 @@ This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
-
---------
 """
 #------------------------------
 

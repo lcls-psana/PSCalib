@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-Class :py:class:`DCUtils` contains a set of utilities.
+Class :py:class:`DCUtils` contains a set of utilities
+=====================================================
 
 Usage::
 
@@ -54,8 +55,6 @@ This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016 by Mikhail Dubrovin
-
---------
 """
 #------------------------------
 
