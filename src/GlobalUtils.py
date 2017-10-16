@@ -717,7 +717,7 @@ def history_record(ifname, ctypedir, ctype, ofname, comment='') :
 def path_to_history_file(ctypedir, ctype) :
     """Returns path to HISTORY file in the calib store.
        e.g. /some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/HYSTORY
-       See parameters description in :method:`history_record`.
+       See parameters description in :py:meth:`history_record`.
     """
     return '%s/%s/HISTORY' % (ctypedir, ctype)
 
@@ -726,7 +726,7 @@ def path_to_history_file(ctypedir, ctype) :
 def path_to_calib_file(ctypedir, ctype, ofname) :
     """Returns path to file wirh calibration constants in the calib store.
        e.g. /some-path/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data
-       See parameters description in :method:`history_record`.
+       See parameters description in :py:meth:`history_record`.
     """
     return '%s/%s/%s' % (ctypedir, ctype, ofname)
 
