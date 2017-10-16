@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-H2 -- Class :py:class:`SegGeometryEpix100V1` describes the Epix100 V1 sensor geometry.
-======================================================================================
+Class :py:class:`SegGeometryEpix100V1` describes the Epix100 V1 sensor geometry
+===============================================================================
 
 In this class we use natural matrix notations like in data array
 \n We assume that

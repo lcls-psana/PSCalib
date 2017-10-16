@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 #------------------------------
 """
-Class :py:class:`SegGeometryMatrixV1` defines the matrix V1 (pnCCD, 512x512) sensor pixel coordinates in its local frame.
+Class :py:class:`SegGeometryMatrixV1` defines the matrix V1 (pnCCD, 512x512) sensor pixel coordinates in its local frame
+========================================================================================================================
 
 Default constructor parameters are set for pnCCD; 512x512 pixels with 75x75um pixel size.
 In this class we use natural matrix notations like in data array
@@ -16,7 +17,7 @@ In this class we use natural matrix notations like in data array
  
   @code
     (Xmin,Ymin)        (Xmin,Ymax)
-    (0,0)              (0,512)
+    (0,0)              (0,511)
        +-----------------+----> Y
        |                 |
        |                 |
@@ -29,7 +30,7 @@ In this class we use natural matrix notations like in data array
        +-----------------+
        |
      X V
-    (512,0)           (512,512)
+    (511,0)           (511,511)
     (Xmax,Ymin)       (Xmax,Ymax)
   @endcode
 
