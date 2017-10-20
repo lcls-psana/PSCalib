@@ -491,7 +491,7 @@ def mask_edges(mask, mrows=1, mcols=1, dtype=np.uint8) :
 def evaluate_limits(arr, nneg=5, npos=5, lim_lo=1, lim_hi=1000, verbos=1, cmt='') :
     """Evaluates low and high limit of the array, which are used to find bad pixels.
     """
-    ave, std = (arr.mean(), arr.std()) if (nneg>0 or npos>0) else (None,None)
+    ave, std = (arr.mean(), arr.std()) # if (nneg>0 or npos>0) else (-1,-1)
     lo = ave-nneg*std if nneg>0 else lim_lo
     hi = ave+npos*std if npos>0 else lim_hi
     lo, hi = max(lo, lim_lo), min(hi, lim_hi)
