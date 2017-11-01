@@ -48,9 +48,9 @@ Usage::
     d_exp_run = rpu.dict_exp_run_old(ins='CXI', procname='pixel_status')
 
     # Example methods
-    rpu.proc_new_runs(exp='xpptut15', procname='pixel_status', verb=1)
-    rpu.proc_experiments_under_control(procname='pixel_status')
-    rpu.proc_experiments_all(procname='pixel_status', ins=None)
+    rpu.print_new_runs(exp='xpptut15', procname='pixel_status', verb=1)
+    rpu.print_experiments_under_control(procname='pixel_status')
+    rpu.print_experiments_all(procname='pixel_status', ins=None)
     rpu.print_experiments(ins='CXI')
     rpu.print_experiments_under_control(procname='pixel_status')
     rpu.print_all_experiments()
@@ -87,7 +87,11 @@ DIR_LOG = '/reg/g/psdm/logs/run_proc'
 #------------------------------
 
 def dsname(exp='xpptut15', run='0001') :
-    return 'exp=%s:run=%s' % (exp, run.lstrip('0'))
+    """Returns (str) control file name, e.g. 'exp=xpptut15:run=1' for (str) exp and (str) of (int) run
+    """
+    if   isinstance(run, str) : return 'exp=%s:run=%s' % (exp, run.lstrip('0'))
+    elif isinstance(run, int) : return 'exp=%s:run=%d' % (exp, run)
+    else : return None
 
 #------------------------------
 
@@ -99,14 +103,21 @@ def control_file(procname='pixel_status') :
 #------------------------------
 
 def log_file(exp='xpptut15', procname='pixel_status') :
-    """Returns (str) log file name, e.g. '/reg/g/psdm/logs/run_proc/pixel_status/CXI/xpptut15-proc-runs.txt'
+    """Returns (str) log file name, e.g. '/reg/g/psdm/logs/run_proc/pixel_status/XPP/xpptut15-proc-runs.txt'
     """
     return '%s/%s/%s/%s-proc-runs.txt' % (DIR_LOG, procname, exp[:3].upper(), exp)
 
 #------------------------------
 
+def log_batch_prefix(exp='xpptut15', run='0001', procname='pixel_status') :
+    """Returns (str) log file template, e.g. '/reg/g/psdm/logs/run_proc/pixel_status/XPP/xpptut15/log-xpptut15-r0001'
+    """
+    return '%s/%s/%s/%s/log-%s-r%s' % (DIR_LOG, procname, exp[:3].upper(), exp, exp, run)
+
+#------------------------------
+
 def arc_file(exp='xpptut15', procname='pixel_status') :
-    """Returns (str) arcive log file name, e.g. '/reg/g/psdm/logs/run_proc/pixel_status/CXI/xpptut15-proc-arch.txt'
+    """Returns (str) arcive log file name, e.g. '/reg/g/psdm/logs/run_proc/pixel_status/XPP/xpptut15-proc-arch.txt'
     """
     return '%s/%s/%s/%s-proc-arch.txt' % (DIR_LOG, procname, exp[:3].upper(), exp)
 
@@ -180,7 +191,7 @@ def append_log_file(exp='xpptut15', procname='pixel_status', runs=[], verb=0) :
     """
     fname_log = log_file(exp, procname)
     if verb : print 'Append log file: %s' % fname_log
-    gu.create_path(fname_log, depth=6, mode=0774, verb=True)
+    gu.create_path(fname_log, depth=6, mode=0774, verb=False)
     text = msg_to_log(runs)
     if text is None : return
     #print 'Save in file text "%s"' % text
@@ -344,7 +355,7 @@ def dict_exp_run_old(ins='CXI', procname='pixel_status') :
 #------------------------------
 #------------------------------
 
-def proc_new_runs(exp='xpptut15', procname='pixel_status', verb=1) :
+def print_new_runs(exp='xpptut15', procname='pixel_status', verb=1) :
     runs_new = runs_new_in_exp(exp, procname, verb)
     if len(runs_new) :
         print 'New runs found in %s for process %s:' % (exp, procname)
@@ -361,17 +372,17 @@ def proc_new_runs(exp='xpptut15', procname='pixel_status', verb=1) :
 
 #------------------------------
 
-def proc_experiments_under_control(procname='pixel_status') :
+def print_experiments_under_control(procname='pixel_status') :
     for exp in experiments_under_control(procname) :
         print '%s\nProcess new runs for %s' % (50*'=', exp)
-        proc_new_runs(exp, procname)
+        print_new_runs(exp, procname)
 
 #------------------------------
 
-def proc_experiments_all(procname='pixel_status', ins=None) :
+def print_experiments_all(procname='pixel_status', ins=None) :
     for exp in experiments(ins) :
         print '%s\nProcess new runs for %s' % (50*'=', exp)
-        proc_new_runs(exp, procname)
+        print_new_runs(exp, procname)
 
 #------------------------------
 #------------------------------
@@ -384,6 +395,33 @@ def print_experiments(ins='CXI') :
         print exp
     dname = '%s/<all-ins>/<all-exp>/'%DIR_INS if ins is None else instrument_dir(ins)
     print '%d experiments found in %s' % (len(exps), dname)
+
+#------------------------------
+
+def print_experiments_count_runs() : # ins='CXI'
+    d_ins_nruns = {}
+    d_ins_nexps = {}
+    nruns_tot = 0
+    nexps = 0
+    for ins in INSTRUMENTS :
+        nruns_ins = 0
+        exps = experiments(ins)
+        nexps += len(exps)
+        for exp in exps :
+            runs = runs_in_xtc_dir(exp)
+            nruns = len(runs)
+            nruns_ins += nruns
+            nruns_tot += nruns
+            print '  %10s  nruns:%4d' % (exp, nruns)
+        d_ins_nruns[ins] = nruns_ins
+        d_ins_nexps[ins] = len(exps)
+
+    print '\nSummary\n%s'%(20*'_')
+    for ins,nruns in d_ins_nruns.iteritems() :
+        print '%6d runs in %4d experiments of %s' % (nruns, d_ins_nexps[ins], ins)
+
+    dname = '%s/<all-ins>/<all-exp>/'%DIR_INS
+    print '%d experiments found in %s, total number of runs %d' % (nexps, dname, nruns_tot)
 
 #------------------------------
 
@@ -499,12 +537,14 @@ if __name__ == "__main__" :
     elif tname=='4' : print_datasets_old(ins=None, procname='pixel_status')
     elif tname=='40': print_datasets_old(ins=None, procname='pixel_status', move_to_archive=True)
 
-    #elif tname=='6': proc_new_runs(exp='xpptut15', procname='pixel_status', verb=1)
-    #elif tname=='7': proc_new_runs(exp='xpptut15', procname='pixel_status', verb=2)
+    elif tname=='5' : print_experiments_count_runs()
+
+    #elif tname=='6': print_new_runs(exp='xpptut15', procname='pixel_status', verb=1)
+    #elif tname=='7': print_new_runs(exp='xpptut15', procname='pixel_status', verb=2)
     #elif tname=='8': print_experiments_under_control(procname='pixel_status')
 
-    #elif tname=='01': proc_experiments_under_control(procname='pixel_status')
-    #elif tname=='02': proc_experiments_all(procname='pixel_status', ins=None)
+    #elif tname=='01': print_experiments_under_control(procname='pixel_status')
+    #elif tname=='02': print_experiments_all(procname='pixel_status', ins=None)
 
     else : sys.exit ('Not recognized test name: "%s"' % tname)
     print 'Test %s time (sec) = %.3f' % (tname, time()-t0_sec)

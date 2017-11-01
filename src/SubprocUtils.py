@@ -8,6 +8,7 @@ import subprocess # for subprocess.Popen
 #import PSCalib.GlobalUtils as gu
 from PSCalib.RunProcUtils import log_file, append_log_file, exp_run_new, exp_run_new_under_control, dict_exp_run_old, print_exp_runs_old
 
+from PSCalib.GlobalUtils import get_login
 """
 :py:class:`SubprocUtils` contains utils to use subproccesses in specific apps
 =============================================================================
@@ -38,17 +39,88 @@ def call(cmd, shell=False) :
 
 #------------------------------
 
-def subproc(cmd, env=None, shell=False) :
+def subproc(cmd, env=None, shell=False, do_wait=True) :
     """e.g., command='bsub -q psananehq -o log-ls.txt ls -l]
        command_seq=['bsub', '-q', cp.batch_queue, '-o', 'log-ls.txt', 'ls -l']
     """
     p = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, shell=shell) #, stdin=subprocess.STDIN
-    p.wait()
-    out = p.stdout.read() # reads entire file
-    err = p.stderr.read() # reads entire file
+    out, err = '', ''
+    if do_wait : 
+        p.wait()
+        out = p.stdout.read() # reads entire file
+        err = p.stderr.read() # reads entire file
     return out, err
 
 #------------------------------
+
+def str_jobid(msg) :
+    """Returns (str) job Id from input string.
+
+       E.g. returns '849160' from msg='Job <849160> is submitted to queue <psnehq>.'
+    """
+    fields = msg.split()
+    if len(fields)<2 : return None
+    if fields[0] !='Job' : return None
+    return fields[1].lstrip('<').rstrip('>')
+
+#------------------------------
+
+def batch_job_submit(cmd='bsub -q psnehq -o log-%%J.txt ls -l', env=None, shell=False) :
+    out, err = subproc(cmd, env, shell)
+    jobid = str_jobid(out)
+    return out, err, jobid
+
+#------------------------------
+
+def str_status(msg) :
+    lines  = msg.split('\n')
+    #for line in lines : print 'batch_job_status: ' + line
+    if len(lines)<2 : return None
+    line   = lines[1].strip('\n')
+    status = line.split()[2]
+    #print 'status: ', status
+    return status # it might None, 'RUN', 'PEND', 'EXIT', 'DONE', etc 
+
+#------------------------------
+
+def batch_job_status(jobid, qname='psnehq') :
+    """ Returns batch job (str) status, e.g. None, 'RUN', 'PEND', 'EXIT', 'DONE', etc 
+
+        E.g.: strip responce of the bjobs command like
+
+        JOBID   USER    STAT  QUEUE      FROM_HOST   EXEC_HOST   JOB_NAME   SUBMIT_TIME
+        847941  dubrovi DONE  psnehq     psanaphi106 psana1507   *17:run=25 Oct 30 13:21
+
+        and returns 'DONE'
+    """
+    cmd = 'bjobs -q %s %s' % (qname, jobid)
+    out, err = subproc(cmd, env=None, shell=False)
+    status = str_status(out)
+    return out, err, status
+
+#------------------------------
+
+def number_of_records(txt) :
+    lines  = txt.rstrip('\n').split('\n')
+    return len(lines)
+
+#------------------------------
+
+def number_of_batch_jobs(usr=None, qname=None) : # qname='psnehq'
+    """ Returns number of batch jobs.
+    """
+    cmd = 'bjobs -u %s' % (get_login() if usr is None else usr)
+    if qname is not None : cmd += ' -q %s' % qname
+    out, err = subproc(cmd, env=None, shell=False)
+    return number_of_records(out) - 1
+
+#------------------------------
+
+def batch_job_kill(jobid, qname='psnehq') :
+    cmd = 'kill -q %s %s' % (qname, jobid)
+    out, err = subproc(cmd)
+    return out, err
+
 #------------------------------
 #------------------------------
 #------------------------------
@@ -66,20 +138,32 @@ def proc_exp_runs(exp_runs, procname='pixel_status', add_to_log=False) :
 
 #------------------------------
 
-def proc_datasets_new(ins='CXI', procname='pixel_status', add_to_log=False) :
+def print_exp_runs(exp_runs, procname='pixel_status', add_to_log=False) :
+    for i,(exp,run) in enumerate(exp_runs) :
+        dsname = 'exp=%s:run=%s'%(exp, run.lstrip('0'))
+        logname = log_file(exp, procname)
+        print '%4d %s %4s %s %s'%(i+1, exp.ljust(10), run, dsname.ljust(22), logname)
+        #--------------
+        if add_to_log : append_log_file(exp, procname, [run,])
+        #--------------
+    print '%d new runs found' % (len(exp_runs))
+
+#------------------------------
+
+def print_datasets_new(ins='CXI', procname='pixel_status', add_to_log=False) :
     exp_runs = exp_run_new(ins, procname)
     #print 'XXX:\n', exp_runs
-    proc_exp_runs(exp_runs, procname, add_to_log)
+    print_exp_runs(exp_runs, procname, add_to_log)
 
 #------------------------------
 
-def proc_datasets_new_under_control(procname='pixel_status', add_to_log=False) :
+def print_datasets_new_under_control(procname='pixel_status', add_to_log=False) :
     exp_runs = exp_run_new_under_control(procname)
-    proc_exp_runs(exp_runs, procname, add_to_log)
+    print_exp_runs(exp_runs, procname, add_to_log)
 
 #------------------------------
 
-def proc_datasets_old(ins='CXI', procname='pixel_status', move_to_archive=False) :
+def print_datasets_old(ins='CXI', procname='pixel_status', move_to_archive=False) :
     dic_exp_runs = dict_exp_run_old(ins, procname)
     print_exp_runs_old(dic_exp_runs, procname, move_to_archive)
 
@@ -118,14 +202,16 @@ if __name__ == "__main__" :
     tname = sys.argv[1] if len(sys.argv)>1 else '1'
     t0_sec = time()
 
-    if   tname=='1' : proc_datasets_new_under_control(procname='pixel_status')
-    elif tname=='10': proc_datasets_new_under_control(procname='pixel_status', add_to_log=True)
+    if   tname=='1' : print_datasets_new_under_control(procname='pixel_status')
+    elif tname=='10': print_datasets_new_under_control(procname='pixel_status', add_to_log=True)
 
-    elif tname=='2' : proc_datasets_new(ins=None, procname='pixel_status')
-    elif tname=='20': proc_datasets_new(ins=None, procname='pixel_status', add_to_log=True)
+    elif tname=='2' : print_datasets_new(ins=None, procname='pixel_status')
+    elif tname=='20': print_datasets_new(ins=None, procname='pixel_status', add_to_log=True)
 
-    elif tname=='4' : proc_datasets_old(ins=None, procname='pixel_status')
-    elif tname=='40': proc_datasets_old(ins=None, procname='pixel_status', move_to_archive=True)
+    elif tname=='4' : print_datasets_old(ins=None, procname='pixel_status')
+    elif tname=='40': print_datasets_old(ins=None, procname='pixel_status', move_to_archive=True)
+
+    elif tname=='6' : print 'number_of_batch_jobs: %d' % number_of_batch_jobs(usr=None, qname=None)
 
     else : sys.exit ('Not recognized test name: "%s"' % tname)
     print 'Test %s time (sec) = %.3f' % (tname, time()-t0_sec)
