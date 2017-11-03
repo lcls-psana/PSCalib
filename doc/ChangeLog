@@ -11,6 +11,9 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+2017-11-03 Mikhail S. Dubrovin
+- RunProcUtils.py - fix issue in saving records in the log file
+
 Tag: V01-00-20
 2017-11-02 Mikhail S. Dubrovin
 - cosmetic update in apps, add #!@PYTHON@

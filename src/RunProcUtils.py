@@ -182,7 +182,8 @@ def msg_to_log(runs=[]) :
     cmd    = sys.argv[0].split('/')[-1]
     recs = ['%s %s %s %s cwd:%s cmd:%s'%(s, tstamp, login, host, cwd, cmd) for s in runs]
     text = '\n'.join(recs)
-    return text if len(runs)>1 else text+'\n'
+    return text+'\n'
+    #return text if len(runs)>1 else text+'\n'
 
 #------------------------------
 
@@ -212,10 +213,12 @@ def move_recs_to_archive(procname, exp, runs) :
     recs_arc = [rec for rec in recs if     rec[:4] in runs]
 
     text_log = '\n'.join(recs_log)
-    if len(runs)==1 : text_log+='\n'
+    text_log+='\n'
+    #if len(runs)==1 : text_log+='\n'
 
     text_arc = '\n'.join(recs_arc)
-    if len(runs)==1 : text_arc+='\n'
+    text_arc+='\n'
+    #if len(runs)==1 : text_arc+='\n'
 
     #print '  ==> log\n%s' % text_log
     #print '  ==> arc\n%s' % text_arc
