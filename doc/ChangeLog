@@ -11,6 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-22
+2017-11-06 Daniel Damiani
+- Support for ControlsCamera type added
+	modified:   include/CalibParsStore.h
+	modified:   src/CalibParsStore.py
+	modified:   src/GlobalUtils.py
+
 Tag: V01-00-21
 2017-11-06 Mikhail S. Dubrovin
 - RunProcUtils - update docstring
