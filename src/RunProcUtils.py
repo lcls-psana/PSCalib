@@ -179,7 +179,7 @@ def msg_to_log(runs=[]) :
     login  = gu.get_login()
     cwd    = gu.get_cwd()
     host   = gu.get_hostname()
-    cmd    = sys.argv[0]
+    cmd    = sys.argv[0].split('/')[-1]
     recs = ['%s %s %s %s cwd:%s cmd:%s'%(s, tstamp, login, host, cwd, cmd) for s in runs]
     text = '\n'.join(recs)
     return text if len(runs)>1 else text+'\n'
@@ -422,6 +422,13 @@ def print_experiments_count_runs() : # ins='CXI'
 
     dname = '%s/<all-ins>/<all-exp>/'%DIR_INS
     print '%d experiments found in %s, total number of runs %d' % (nexps, dname, nruns_tot)
+
+#------------------------------
+
+def print_explogs_under_control(procname='pixel_status') :
+    print '%s\nExperiments under control:' % (110*'_')
+    for i, exp in enumerate(experiments_under_control(procname)) :
+        print '%4d %s %s'%(i+1, exp.ljust(10), log_file(exp, procname))
 
 #------------------------------
 

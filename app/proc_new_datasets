@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!@PYTHON@
+#####!/usr/bin/env python
 #------------------------------
 
 import os
@@ -13,10 +14,10 @@ from PSCalib.SubprocUtils import subproc, number_of_batch_jobs
 #------------------------------
 
 def subprocess_command(exp='xpptut15', run='0260', procname='pixel_status', qname='psnehq') :
-    """Returns command like 'proc_control -e xpptut15 -r 0260 -p pixel_status -q psnehq -t 5'
+    """Returns command like 'proc_control -e xpptut15 -r 0260 -p pixel_status -q psnehq -t 60'
     """
     if procname == 'pixel_status' :
-        return 'proc_control -e %s -r %s -p %s -q %s -t 5' % (exp, str(run), procname, qname)
+        return 'proc_control -e %s -r %s -p %s -q %s -t 60' % (exp, str(run), procname, qname)
     else :
         return None
 
@@ -72,9 +73,12 @@ def proc_new_datasets(parser) :
     #print 'default command: %s' % subprocess_command()
     #print_datasets_new_under_control(procname, add_to_log=False)
 
+    rpu.print_explogs_under_control(procname)
+
     exp_runs = rpu.exp_run_new(None, procname) if mode == 'ALL' else\
                rpu.exp_run_new_under_control(procname)
     proc_exp_runs(exp_runs, procname, submit, qname, njobs)
+
 
 #------------------------------
 

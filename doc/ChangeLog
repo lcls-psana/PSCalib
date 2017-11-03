@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-20
+2017-11-02 Mikhail S. Dubrovin
+- cosmetic update in apps, add #!@PYTHON@
+
 Tag: V01-00-19
 2017-10-31 Mikhail S. Dubrovin
 - update data status processing
