@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-21
+2017-11-06 Mikhail S. Dubrovin
+- RunProcUtils - update docstring
+- SubprocUtils - get rid of RunProcUtils utils and update tests
+
 2017-11-03 Mikhail S. Dubrovin
 - RunProcUtils.py - fix issue in saving records in the log file
 

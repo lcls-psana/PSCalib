@@ -419,12 +419,12 @@ def print_experiments_count_runs() : # ins='CXI'
         d_ins_nruns[ins] = nruns_ins
         d_ins_nexps[ins] = len(exps)
 
-    print '\nSummary\n%s'%(20*'_')
+    print '\nSummary\n%s'%(40*'_')
     for ins,nruns in d_ins_nruns.iteritems() :
         print '%6d runs in %4d experiments of %s' % (nruns, d_ins_nexps[ins], ins)
 
     dname = '%s/<all-ins>/<all-exp>/'%DIR_INS
-    print '%d experiments found in %s, total number of runs %d' % (nexps, dname, nruns_tot)
+    print '%s\n%6d runs in %4d experiments of %s' % (40*'_', nruns_tot, nexps, dname)
 
 #------------------------------
 
@@ -520,7 +520,8 @@ def usage() :
            +'                   = 20 - the same as 2 and save record for each new run in log file\n'\
            +'                   = 3  - print all experiments\n'\
            +'                   = 4  - print old (available in log but missing in xtc-dir) files for all experiments\n'\
-           +'                   = 40 - the same as 4 and move old run records from log to archive file\n'
+           +'                   = 40 - the same as 4 and move old run records from log to archive file\n'\
+           +'                   = 5  - statistics of all instruments, experiments/runs in xtc directories\n'
 
 #------------------------------
 
@@ -548,13 +549,6 @@ if __name__ == "__main__" :
     elif tname=='40': print_datasets_old(ins=None, procname='pixel_status', move_to_archive=True)
 
     elif tname=='5' : print_experiments_count_runs()
-
-    #elif tname=='6': print_new_runs(exp='xpptut15', procname='pixel_status', verb=1)
-    #elif tname=='7': print_new_runs(exp='xpptut15', procname='pixel_status', verb=2)
-    #elif tname=='8': print_experiments_under_control(procname='pixel_status')
-
-    #elif tname=='01': print_experiments_under_control(procname='pixel_status')
-    #elif tname=='02': print_experiments_all(procname='pixel_status', ins=None)
 
     else : sys.exit ('Not recognized test name: "%s"' % tname)
     print 'Test %s time (sec) = %.3f' % (tname, time()-t0_sec)
