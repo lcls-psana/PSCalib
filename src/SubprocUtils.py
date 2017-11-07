@@ -163,15 +163,25 @@ def test_number_of_batch_jobs(usr=None, qname='psnehq') :
     print 'njobs: %d' % njobs
 
 #------------------------------
+
+def test_batch_job_kill(jobid, qname='psnehq') :
+    out, err = batch_job_kill(jobid, qname)
+    print 'qname: %s' % qname
+    print 'jobid:"%s"' % jobid
+    print 'out:\n"%s"' % out
+    print 'err:\n"%s"' % err
+
+
 #------------------------------
 #------------------------------
 #------------------------------
 
 def usage() :
-    return  'python PSCalib/src/SubprocUtils.py <test_name>\n'\
+    return  'python PSCalib/src/SubprocUtils.py <test_name> [<jobid>]\n'\
            +'       <test_name> = 1  - test subproc\n'\
            +'                   = 2  - test batch_job_submit\n'\
-           +'                   = 3  - test number_of_batch_jobs\n'
+           +'                   = 3  - test number_of_batch_jobs\n'\
+           +'                   = 4  - test batch_job_kill, NEEDS IN PARAMETER <jobid>\n'
 
 #------------------------------
 
@@ -183,6 +193,7 @@ if __name__ == "__main__" :
     if   tname=='1': test_subproc(cmd='ls -ltra')
     elif tname=='2': test_batch_job_submit(cmd='bsub -q psnehq -o log-%J.txt ls -l', env=None, shell=False)
     elif tname=='3': test_number_of_batch_jobs(usr=None, qname='psnehq')
+    elif tname=='4': test_batch_job_kill(sys.argv[2], qname='psnehq')
 
     else : sys.exit ('Not recognized test name: "%s"' % tname)
     print 'Test %s time (sec) = %.3f' % (tname, time()-t0_sec)

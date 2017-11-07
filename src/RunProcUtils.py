@@ -31,6 +31,7 @@ Usage::
     fname = rpu.log_file(exp='xpptut15', procname='pixel_status')
     fname = rpu.arc_file(exp='xpptut15', procname='pixel_status')
     dname = rpu.xtc_dir(exp='xpptut15')
+    dname = rpu.work_dir(exp='xpptut15', procname='pixel_status')
     dname = rpu.instrument_dir(ins='CXI')
     runs  = rpu.runs_in_xtc_dir(exp='xpptut15', verb=0)
     recs  = rpu.recs_in_log_file(exp='xpptut15', procname='pixel_status', verb=0)
@@ -65,6 +66,7 @@ Methods
   * :meth:`dsname`
   * :meth:`log_file`
   * :meth:`xtc_dir`
+  * :meth:`work_dir`
   * :meth:`runs_in_xtc_dir`
   * :meth:`recs_in_log_file`
   * :meth:`runs_in_log_file`
@@ -130,7 +132,16 @@ def xtc_dir(exp='xpptut15') :
 
 #------------------------------
 
+def work_dir(exp='xpptut15', procname='pixel_status') :
+    """Returns (str) work directory, e.g. '/reg/g/psdm/logs/run_proc/pixel_status/XPP/xpptut15/work'
+    """
+    return '%s/%s/%s/%s/work' % (DIR_LOG, procname, exp[:3].upper(), exp)
+
+#------------------------------
+
 def instrument_dir(ins='CXI') :
+    """Returns (str) instrument directory, e.g. '/reg/g/psdm/logs/run_proc/pixel_status/CXI'
+    """
     _ins = ins.upper()
     if not(_ins in INSTRUMENTS): raise IOError('Unknown instrument "%s"' % ins)
     return '%s/%s' % (DIR_INS, _ins)
@@ -419,7 +430,7 @@ def print_experiments_count_runs() : # ins='CXI'
         d_ins_nruns[ins] = nruns_ins
         d_ins_nexps[ins] = len(exps)
 
-    print '\nSummary\n%s'%(40*'_')
+    print '\nSummary on %s\n%s'%(gu.str_tstamp('%Y-%m-%dT%H:%M:%S', time()), 40*'_')
     for ins,nruns in d_ins_nruns.iteritems() :
         print '%6d runs in %4d experiments of %s' % (nruns, d_ins_nexps[ins], ins)
 
@@ -521,13 +532,13 @@ def usage() :
            +'                   = 3  - print all experiments\n'\
            +'                   = 4  - print old (available in log but missing in xtc-dir) files for all experiments\n'\
            +'                   = 40 - the same as 4 and move old run records from log to archive file\n'\
-           +'                   = 5  - statistics of all instruments, experiments/runs in xtc directories\n'
+           +'                   = 5  - print statistics of all instruments, experiments/runs in xtc directories\n'
 
 #------------------------------
 
 if __name__ == "__main__" :
     print 80*'_'
-    tname = sys.argv[1] if len(sys.argv)>1 else '2' # 'CXI'
+    tname = sys.argv[1] if len(sys.argv)>1 else '5' # 'CXI'
     cname = tname.upper()
     t0_sec = time()
 

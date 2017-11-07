@@ -543,7 +543,8 @@ def get_cwd() :
 
 def create_directory(dir, verb=False) : 
     if os.path.exists(dir) :
-        if verb : print 'Directory exists: %s' % dir
+        pass
+        #if verb : print 'Directory exists: %s' % dir
     else :
         os.makedirs(dir)
         if verb : print 'Directory created: %s' % dir
@@ -554,11 +555,12 @@ def create_directory_with_mode(dir, mode=0777, verb=False) :
     """Creates directory and sets its mode"""
 
     if os.path.exists(dir) :
-        if verb : print 'Directory exists: %s' % dir
+        pass
+        #if verb : print 'Directory exists: %s' % dir
     else :
         os.makedirs(dir)
         os.chmod(dir, mode)
-        if verb : print 'Directory created: %s' % dir
+        if verb : print 'Directory created: %s, mode(oct)=%s' % (dir, oct(mode))
 
 #------------------------------
 

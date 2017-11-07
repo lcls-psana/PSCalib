@@ -138,7 +138,8 @@ def get_cwd() :
 
 def create_directory_v0(dir, verb=False) : 
     if os.path.exists(dir) :
-        if verb : print 'Directory exists: %s' % dir
+        pass
+        #if verb : print 'Directory exists: %s' % dir
     else :
         os.makedirs(dir)
         if verb : print 'Directory created: %s' % dir

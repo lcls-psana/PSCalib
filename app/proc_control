@@ -12,7 +12,8 @@ import PSCalib.GlobalUtils as gu
 
 #------------------------------
 
-def batch_submit_command(exp='xpptut15', run='0260', procname='pixel_status', qname='psnehq', logfname='log.txt') :
+def _batch_submit_command(exp='xpptut15', run='0260', procname='pixel_status', qname='psnehq', logfname='log.txt',\
+                          ofprefix='work/nda-#exp-#run-#src-#evts-#type.txt') :
     dsname = rpu.dsname(exp, run)
 
     if procname == 'pixel_status' :
@@ -21,7 +22,7 @@ def batch_submit_command(exp='xpptut15', run='0260', procname='pixel_status', qn
         #return 'bsub -q %s -o %s which det_ndarr_data_status' % (qname, logfname)
         #return 'bsub -q %s -o %s env' % (qname, logfname)
         #return 'bsub -q %s -o %s det_ndarr_data_status -d %s -S 4' % (qname, logfname, dsname)
-        return 'bsub -q %s -o %s det_ndarr_data_status -d %s -S 4 -u 4' % (qname, logfname, dsname)
+        return 'bsub -q %s -o %s det_ndarr_data_status -d %s -f %s -S 4 -u 4' % (qname, logfname, dsname, ofprefix)
     else :
         return None
 
@@ -51,7 +52,11 @@ def proc_control(parser) :
     print 'Log file: %s' % logfname
     gu.create_path(logfname, depth=6, mode=0774, verb=False)
 
-    cmd = batch_submit_command(exp, run, procname, qname, logfname)
+    ofprefix='%s/nda-#exp-#run-#src-#evts-#type.txt' % rpu.work_dir(exp, procname)
+    print 'Output work files: %s' % ofprefix
+    gu.create_path(ofprefix, depth=8, mode=0774, verb=False)
+
+    cmd = _batch_submit_command(exp, run, procname, qname, logfname, ofprefix)
     print 'proc_control exp: %s run: %s procname: %s qname: %s logfname %s'%\
           (exp, str(run), procname, qname, logfname)
     if cmd is None : raise IOError('ERROR: batch submission command is None...')
