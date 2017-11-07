@@ -11,12 +11,22 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-23
+2017-11-07 Mikhail S. Dubrovin
+- resolving conflict with Dan
+
 Tag: V01-00-22
 2017-11-07 Mikhail S. Dubrovin
 - Improve run proccessing control
   - app/proc_control - add parameter ofprefix to redirect work files
   - src/DCUtils, GlobalUtils - do not print msg about existing directory
   - src/RunProcUtils, SubprocUtils - cosmetic update for docstring
+
+2017-11-06 Daniel Damiani
+- Support for ControlsCamera type added
+	modified:   include/CalibParsStore.h
+	modified:   src/CalibParsStore.py
+	modified:   src/GlobalUtils.py
 
 Tag: V01-00-21
 2017-11-06 Mikhail S. Dubrovin

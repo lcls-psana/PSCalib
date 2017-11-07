@@ -149,6 +149,7 @@ PIMAX       = 24
 ANDOR3D     = 25
 JUNGFRAU    = 26
 ZYLA        = 27
+EPICSCAM    = 28
 
 #XAMPS    # N/A data
 #FEXAMP   # N/A data
@@ -161,13 +162,13 @@ ZYLA        = 27
 list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740, \
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000, \
                     ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX,
-                    EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU, ZYLA)
+                    EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU, ZYLA, EPICSCAM)
 """ List of enumetated detector types"""
 
 list_of_det_names = ('UNDEFINED', 'Cspad', 'Cspad2x2', 'Princeton', 'pnCCD', 'Tm6740', \
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
                      'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150', 'Rayonix',\
-                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d', 'Jungfrau', 'Zyla')
+                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d', 'Jungfrau', 'Zyla', 'ControlsCamera')
 """ List of enumetated detector names"""
 
 list_of_calib_groups = ('UNDEFINED',
@@ -197,6 +198,7 @@ list_of_calib_groups = ('UNDEFINED',
                         'Pimax::CalibV1',
                         'Andor3d::CalibV1',
                         'Jungfrau::CalibV1',
+                        'Camera::CalibV1',
                         'Camera::CalibV1'
                         )
 """ List of enumetated detector calibration groups"""
@@ -279,34 +281,35 @@ def det_type_from_source(source) :
     """ Returns enumerated detector type for string source
     """
     str_src = str(source)
-    if   ':Cspad.'       in str_src : return CSPAD
-    elif ':Cspad2x2.'    in str_src : return CSPAD2X2
-    elif ':pnCCD.'       in str_src : return PNCCD
-    elif ':Princeton.'   in str_src : return PRINCETON
-    elif ':Andor.'       in str_src : return ANDOR
-    elif ':Epix100a.'    in str_src : return EPIX100A
-    elif ':Epix10k.'     in str_src : return EPIX10K
-    elif ':Epix.'        in str_src : return EPIX
-    elif ':Opal1000.'    in str_src : return OPAL1000
-    elif ':Opal2000.'    in str_src : return OPAL2000
-    elif ':Opal4000.'    in str_src : return OPAL4000
-    elif ':Opal8000.'    in str_src : return OPAL8000
-    elif ':Tm6740.'      in str_src : return TM6740
-    elif ':OrcaFl40.'    in str_src : return ORCAFL40
-    elif ':Fccd960.'     in str_src : return FCCD960
-    elif ':Acqiris.'     in str_src : return ACQIRIS
-    elif ':Imp.'         in str_src : return IMP
-    elif ':Quartz4A150.' in str_src : return QUARTZ4A150
-    elif ':Rayonix.'     in str_src : return RAYONIX
-    elif ':Evr.'         in str_src : return EVR
-    elif ':Fccd.'        in str_src : return FCCD
-    elif ':Timepix.'     in str_src : return TIMEPIX
-    elif ':Fli.'         in str_src : return FLI
-    elif ':Pimax.'       in str_src : return PIMAX
-    elif ':DualAndor.'   in str_src : return ANDOR3D
-    elif ':Jungfrau.'    in str_src : return JUNGFRAU
-    elif ':Zyla.'        in str_src : return ZYLA
-    else                            : return UNDEFINED
+    if   ':Cspad.'          in str_src : return CSPAD
+    elif ':Cspad2x2.'       in str_src : return CSPAD2X2
+    elif ':pnCCD.'          in str_src : return PNCCD
+    elif ':Princeton.'      in str_src : return PRINCETON
+    elif ':Andor.'          in str_src : return ANDOR
+    elif ':Epix100a.'       in str_src : return EPIX100A
+    elif ':Epix10k.'        in str_src : return EPIX10K
+    elif ':Epix.'           in str_src : return EPIX
+    elif ':Opal1000.'       in str_src : return OPAL1000
+    elif ':Opal2000.'       in str_src : return OPAL2000
+    elif ':Opal4000.'       in str_src : return OPAL4000
+    elif ':Opal8000.'       in str_src : return OPAL8000
+    elif ':Tm6740.'         in str_src : return TM6740
+    elif ':OrcaFl40.'       in str_src : return ORCAFL40
+    elif ':Fccd960.'        in str_src : return FCCD960
+    elif ':Acqiris.'        in str_src : return ACQIRIS
+    elif ':Imp.'            in str_src : return IMP
+    elif ':Quartz4A150.'    in str_src : return QUARTZ4A150
+    elif ':Rayonix.'        in str_src : return RAYONIX
+    elif ':Evr.'            in str_src : return EVR
+    elif ':Fccd.'           in str_src : return FCCD
+    elif ':Timepix.'        in str_src : return TIMEPIX
+    elif ':Fli.'            in str_src : return FLI
+    elif ':Pimax.'          in str_src : return PIMAX
+    elif ':DualAndor.'      in str_src : return ANDOR3D
+    elif ':Jungfrau.'       in str_src : return JUNGFRAU
+    elif ':Zyla.'           in str_src : return ZYLA
+    elif ':ControlsCamera.' in str_src : return EPICSCAM
+    else                               : return UNDEFINED
 
 #------------------------------
 ##-----------------------------
