@@ -13,7 +13,7 @@ reverse time order.
 
 Tag: V01-00-22
 2017-11-07 Mikhail S. Dubrovin
-- Improve of run proccessing control
+- Improve run proccessing control
   - app/proc_control - add parameter ofprefix to redirect work files
   - src/DCUtils, GlobalUtils - do not print msg about existing directory
   - src/RunProcUtils, SubprocUtils - cosmetic update for docstring
