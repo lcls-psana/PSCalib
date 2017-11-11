@@ -11,6 +11,12 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+2017-11-10 Mikhail S. Dubrovin
+- improve run auto processing
+  - add SubprocUtils.batch_job_ids, add parameter user to other methods
+  - app/proc_new_datasets.proc_exp_runs - kill SSUSP jobs in batch
+  - app/proc_control, proc_new_datasets - add parameters dts and srs
+
 Tag: V01-00-23
 2017-11-07 Mikhail S. Dubrovin
 - resolving conflict with Dan

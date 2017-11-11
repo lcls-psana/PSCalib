@@ -13,7 +13,8 @@ import PSCalib.GlobalUtils as gu
 #------------------------------
 
 def _batch_submit_command(exp='xpptut15', run='0260', procname='pixel_status', qname='psnehq', logfname='log.txt',\
-                          ofprefix='work/nda-#exp-#run-#src-#evts-#type.txt') :
+                          ofprefix='work/nda-#exp-#run-#src-#evts-#type.txt',\
+                          sources='cspad,opal,epix100,pnccd,princeton,andor') :
     dsname = rpu.dsname(exp, run)
 
     if procname == 'pixel_status' :
@@ -22,7 +23,8 @@ def _batch_submit_command(exp='xpptut15', run='0260', procname='pixel_status', q
         #return 'bsub -q %s -o %s which det_ndarr_data_status' % (qname, logfname)
         #return 'bsub -q %s -o %s env' % (qname, logfname)
         #return 'bsub -q %s -o %s det_ndarr_data_status -d %s -S 4' % (qname, logfname, dsname)
-        return 'bsub -q %s -o %s det_ndarr_data_status -d %s -f %s -S 4 -u 4' % (qname, logfname, dsname, ofprefix)
+        return 'bsub -q %s -o %s det_ndarr_data_status -d %s -s %s -f %s -S 4 -u 4' %\
+                     (qname, logfname, dsname, sources, ofprefix)
     else :
         return None
 
@@ -43,6 +45,7 @@ def proc_control(parser) :
     procname = popts.pro
     qname    = popts.que
     dt_sec   = popts.dts
+    sources  = popts.srs
 
     tstamp = gu.str_tstamp('%Y-%m-%dT%H:%M:%S', time())
 
@@ -56,7 +59,7 @@ def proc_control(parser) :
     print 'Output work files: %s' % ofprefix
     gu.create_path(ofprefix, depth=8, mode=0774, verb=False)
 
-    cmd = _batch_submit_command(exp, run, procname, qname, logfname, ofprefix)
+    cmd = _batch_submit_command(exp, run, procname, qname, logfname, sources, ofprefix)
     print 'proc_control exp: %s run: %s procname: %s qname: %s logfname %s'%\
           (exp, str(run), procname, qname, logfname)
     if cmd is None : raise IOError('ERROR: batch submission command is None...')
@@ -81,7 +84,7 @@ def proc_control(parser) :
     counter = 0
     while status in (None, 'RUN', 'PEND') :
         counter+=1
-        out, err, status = spu.batch_job_status(jobid, qname)
+        out, err, status = spu.batch_job_status(jobid, user=None, qname=qname)
         ts = gu.str_tstamp('%Y-%m-%dT%H:%M:%S', time())
         msg = '%4d %s %s job %s status %s' % (counter, ts, qname, jobid, status)
         #print msg
@@ -99,8 +102,8 @@ def proc_control(parser) :
 #------------------------------
 
 def usage() : 
-    return "\n%prog -e <experiment> -r <run-number> [-p <process-name> -q <queue-name> -t <wait-sec>]"\
-           "\n  Ex.: %prog -e xpptut15 -r 0260 -p pixel_status -q psnehq -t 5"
+    return "\n%prog -e <experiment> -r <run-number> [-p <process-name> -q <queue-name> -t <wait-sec> -s <sources>]"\
+           "\n  Ex.: %prog -e xpptut15 -r 0260 -p pixel_status -q psnehq -t 5 -s cspad,pnccd"
 
 #------------------------------
 
@@ -112,12 +115,14 @@ def input_option_parser() :
     d_pro = 'pixel_status'
     d_que = 'psnehq'
     d_dts = 60 # sec
+    d_srs = 'cspad,opal,epix100,pnccd,princeton,andor'
 
     h_exp = 'experiment name, default = %s' % d_exp
     h_run = 'run number, default = %s' % d_run
     h_pro = 'data processor name, default = %s' % d_pro
     h_que = 'batch queue name, default = %s' % d_que
     h_dts = 'wait time (sec) between job status check, default = %.1f' % d_dts
+    h_srs = 'sources of data (detector types), default = %s' % d_srs
 
     parser = OptionParser(description='Control process for dataset processing.', usage=usage())
     parser.add_option('-e', '--exp', default=d_exp, action='store', type='string', help=h_exp)
@@ -125,6 +130,7 @@ def input_option_parser() :
     parser.add_option('-p', '--pro', default=d_pro, action='store', type='string', help=h_pro)
     parser.add_option('-q', '--que', default=d_que, action='store', type='string', help=h_que)
     parser.add_option('-t', '--dts', default=d_dts, action='store', type='float',  help=h_dts)
+    parser.add_option('-s', '--srs', default=d_srs, action='store', type='string', help=h_srs)
 
     return parser #, parser.parse_args()
   

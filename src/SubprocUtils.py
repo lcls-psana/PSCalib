@@ -28,15 +28,19 @@ Usage::
     su.call(cmd, shell=False)
     out, err = su.subproc(cmd, env=None, shell=False, do_wait=True)
     out, err, jobid = su.batch_job_submit(cmd='bsub -q psnehq -o log-%%J.txt ls -l', env=None, shell=False)
-    njobs = su.number_of_batch_jobs(usr=None, qname=None)
-    out, err = su.batch_job_kill(jobid, qname='psnehq')
+    status= su.batch_job_status(jobid, user=None, qname=None, addopts='')
+    njobs = su.number_of_batch_jobs(user=None, qname=None, addopts='')
+    out, err = su.batch_job_kill(jobid, user=None, qname='psnehq', addopts='')
+    job_ids = su.batch_job_ids(status=None, user=None, qname='psnehq', addopts='')
 
 Methods 
   * :meth:`call`
   * :meth:`subproc`
   * :meth:`batch_job_submit`
+  * :meth:`batch_job_status`
   * :meth:`number_of_batch_jobs`
   * :meth:`batch_job_kill`
+  * :meth:`batch_job_ids`
   * ...
 
 This software was developed for the SIT project.
@@ -95,7 +99,7 @@ def _str_status(msg) :
 
 #------------------------------
 
-def batch_job_status(jobid, qname='psnehq') :
+def batch_job_status(jobid, user=None, qname=None, addopts='') :
     """ Returns batch job (str) status, e.g. None, 'RUN', 'PEND', 'EXIT', 'DONE', etc 
 
         E.g.: strip responce of the bjobs command like
@@ -105,7 +109,11 @@ def batch_job_status(jobid, qname='psnehq') :
 
         and returns 'DONE'
     """
-    cmd = 'bjobs -q %s %s' % (qname, jobid)
+    cmd = 'bjobs'
+    if qname is not None : cmd += ' -q %s' % qname
+    if user  is not None : cmd += ' -u %s' % user
+    if addopts           : cmd += ' %s' % addopts
+    cmd += ' %s' % jobid
     out, err = subproc(cmd, env=None, shell=False)
     status = _str_status(out)
     return out, err, status
@@ -118,20 +126,53 @@ def _number_of_records(txt) :
 
 #------------------------------
 
-def number_of_batch_jobs(usr=None, qname=None) : # qname='psnehq'
+def number_of_batch_jobs(user=None, qname=None, addopts='') : # qname='psnehq'
     """ Returns number of batch jobs.
     """
-    cmd = 'bjobs -u %s' % (get_login() if usr is None else usr)
+    cmd = 'bjobs'
     if qname is not None : cmd += ' -q %s' % qname
+    if user  is not None : cmd += ' -u %s' % user
+    if addopts           : cmd += ' %s' % addopts
     out, err = subproc(cmd, env=None, shell=False)
     return _number_of_records(out) - 1
 
 #------------------------------
 
-def batch_job_kill(jobid, qname='psnehq') :
-    cmd = 'kill -q %s %s' % (qname, jobid)
+def batch_job_kill(jobid, user=None, qname=None, addopts='') :
+    cmd = 'kill'
+    if qname is not None : cmd += ' -q %s' % qname
+    if user  is not None : cmd += ' -u %s' % user
+    if addopts           : cmd += ' %s' % addopts
+    cmd += ' %s' % jobid
     out, err = subproc(cmd)
     return out, err
+
+#------------------------------
+
+def batch_job_ids(status=None, user=None, qname=None, addopts='') : # qname='psnehq'
+    """ Returns list of batch job ids for specified status (e.g. status='RUN') and other parameters.
+    """
+    cmd = 'bjobs'
+    if qname is not None : cmd += ' -q %s' % qname
+    if user  is not None : cmd += ' -u %s' % user
+    if addopts           : cmd += ' %s' % addopts
+    out, err = subproc(cmd, env=None, shell=False)
+
+    job_ids = []
+
+    lines  = out.split('\n')
+    if len(lines)<2 : return job_ids
+
+    for i, line in enumerate(lines) :
+        if not line : continue # skip empty lines
+        fields = line.split()
+        if i==0 :
+           if fields[0] != 'JOBID' : return job_ids
+           continue
+        #print line
+        jobid, jobst = fields[0], fields[2]
+        if status in (None, jobst) : job_ids.append(jobid)
+    return job_ids
 
 #------------------------------
 #------------------------------
@@ -151,26 +192,37 @@ def test_batch_job_submit(cmd='bsub -q psnehq -o log-%J.txt ls -l', env=None, sh
     print 'Command: "%s"' % cmd
     print 'out:\n"%s"' % out
     print 'err:\n"%s"' % err
-    print 'jobid:"%s"' % jobid
+    print 'jobid: "%s"' % jobid
     print 'check log file log-%s.txt' % jobid
 
 #------------------------------
 
-def test_number_of_batch_jobs(usr=None, qname='psnehq') :
-    njobs = number_of_batch_jobs(usr, qname)
-    print 'usr  : %s' % str(usr)
-    print 'qname: %s' % qname
-    print 'njobs: %d' % njobs
+def test_number_of_batch_jobs(user=None, qname='psnehq', addopts='') :
+    njobs = number_of_batch_jobs(user, qname, addopts)
+    print 'user   : %s' % str(user)
+    print 'qname  : %s' % qname
+    print 'addopts: %s' % addopts
+    print 'njobs  : %d' % njobs
 
 #------------------------------
 
-def test_batch_job_kill(jobid, qname='psnehq') :
-    out, err = batch_job_kill(jobid, qname)
-    print 'qname: %s' % qname
-    print 'jobid:"%s"' % jobid
+def test_batch_job_kill(jobid, qname='psnehq', addopts='') :
+    out, err = batch_job_kill(jobid, qname, addopts)
+    print 'qname  : %s'  % qname
+    print 'jobid  : "%s"' % jobid
+    print 'addopts: %s'% addopts
     print 'out:\n"%s"' % out
     print 'err:\n"%s"' % err
 
+#------------------------------
+
+def test_batch_job_ids(status=None, user=None, qname=None, addopts='') :
+    job_ids = batch_job_ids(status, user, qname, addopts) 
+    print 'status : %s' % status
+    print 'user   : %s' % user
+    print 'qname  : %s' % qname
+    print 'addopts: %s' % addopts
+    print 'job ids: %s' % str(job_ids)
 
 #------------------------------
 #------------------------------
@@ -192,9 +244,10 @@ if __name__ == "__main__" :
 
     if   tname=='1': test_subproc(cmd='ls -ltra')
     elif tname=='2': test_batch_job_submit(cmd='bsub -q psnehq -o log-%J.txt ls -l', env=None, shell=False)
-    elif tname=='3': test_number_of_batch_jobs(usr=None, qname='psnehq')
-    elif tname=='4': test_batch_job_kill(sys.argv[2], qname='psnehq')
-
+    elif tname=='3': test_number_of_batch_jobs(user=None, qname='psnehq')
+    elif tname=='4': test_batch_job_kill(sys.argv[2], user=None, qname='psnehq')
+    elif tname=='5': test_batch_job_ids(status=None, user=None, qname='psnehq')
+    elif tname=='6': test_batch_job_ids(status='SSUSP', user=None, qname=None)
     else : sys.exit ('Not recognized test name: "%s"' % tname)
     print 'Test %s time (sec) = %.3f' % (tname, time()-t0_sec)
 
