@@ -31,8 +31,9 @@ def proc_exp_runs(exp_runs, procname='pixel_status', do_proc=False, qname='psneh
     njobs_in_queue = number_of_batch_jobs(qname=qname)
     print '%d jobs found in queue %s' % (njobs_in_queue, qname)
 
-    for id in batch_job_ids(status='SSUSP', user=None, qname=qname) : 
-        print '  kill SSUSP job %s' % id
+    for kstatus in ('SSUSP','UNKWN') :
+      for id in batch_job_ids(status=kstatus, user=None, qname=qname) : 
+        print '  kill %s job %s' % (kstatus, id)
         batch_job_kill(id, user=None, qname=qname, addopts='-r')
 
     for i,(exp,run) in enumerate(exp_runs) :

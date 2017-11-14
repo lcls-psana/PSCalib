@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-24
+2017-11-14 Mikhail S. Dubrovin
+- app/proc_control - fix order of parameters
+- app/proc_new_datasets - kill UNKWN batch jobs
+
 2017-11-10 Mikhail S. Dubrovin
 - improve run auto processing
   - add SubprocUtils.batch_job_ids, add parameter user to other methods

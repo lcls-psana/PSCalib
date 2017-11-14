@@ -59,7 +59,7 @@ def proc_control(parser) :
     print 'Output work files: %s' % ofprefix
     gu.create_path(ofprefix, depth=8, mode=0774, verb=False)
 
-    cmd = _batch_submit_command(exp, run, procname, qname, logfname, sources, ofprefix)
+    cmd = _batch_submit_command(exp, run, procname, qname, logfname, ofprefix, sources)
     print 'proc_control exp: %s run: %s procname: %s qname: %s logfname %s'%\
           (exp, str(run), procname, qname, logfname)
     if cmd is None : raise IOError('ERROR: batch submission command is None...')
