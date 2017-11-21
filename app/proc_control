@@ -52,21 +52,29 @@ def proc_control(parser) :
     logpref = rpu.log_batch_prefix(exp, run, procname)
     logfname = '%s-%s.txt' % (logpref, tstamp)
 
-    print 'Log file: %s' % logfname
-    gu.create_path(logfname, depth=6, mode=0774, verb=False)
+    for i in range(10) :
+        if gu.create_path(logfname, depth=6, mode=0774, verb=False) : continue
+
+    gu.save_textfile('\nCreated path: %s' % logfname, logfname, mode='a')
+    os.chmod(logfname, 0664)    
 
     ofprefix='%s/nda-#exp-#run-#src-#evts-#type.txt' % rpu.work_dir(exp, procname)
-    print 'Output work files: %s' % ofprefix
-    gu.create_path(ofprefix, depth=8, mode=0774, verb=False)
+    gu.save_textfile('\nOutput work files: %s' % ofprefix, logfname, mode='a')
+
+    for i in range(5) :
+        if gu.create_path(ofprefix, depth=8, mode=0774, verb=False) : continue
+
+    msg = '\nproc_control exp: %s run: %s procname: %s qname: %s logfname %s'%\
+          (exp, str(run), procname, qname, logfname)
+    gu.save_textfile(str(msg), logfname, mode='a')
 
     cmd = _batch_submit_command(exp, run, procname, qname, logfname, ofprefix, sources)
-    print 'proc_control exp: %s run: %s procname: %s qname: %s logfname %s'%\
-          (exp, str(run), procname, qname, logfname)
     if cmd is None : raise IOError('ERROR: batch submission command is None...')
 
     t0_sec = time()
     out, err, jobid = spu.batch_job_submit(cmd, env=None, shell=False)
-    print 'bsub subproc time dt=%7.3f sec' % (time()-t0_sec)
+    msg = 'bsub subproc time dt=%7.3f sec' % (time()-t0_sec)
+    gu.save_textfile(msg, logfname, mode='a')
 
     #if 'submitted without an AFS token' in err : 
     #    print '  Tip: to get rid of error message use commands: kinit; aklog'
@@ -74,10 +82,8 @@ def proc_control(parser) :
     rec   = gu.log_rec_on_start()
     msg = '%s\nSubmitted batch job %s to %s\n  cmd: %s\n  out: %s\n  err: "%s"\n%s\n'%\
           (rec, jobid, qname, cmd, out, err.strip('\n'), 80*'_')
-    print msg
-
+    #print msg
     gu.save_textfile(msg, logfname, mode='a')
-    os.chmod(logfname, 0664)    
 
     # check batch job status in loop
     status = None

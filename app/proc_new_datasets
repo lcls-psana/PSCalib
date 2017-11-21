@@ -50,7 +50,8 @@ def proc_exp_runs(exp_runs, procname='pixel_status', do_proc=False, qname='psneh
             t0_sec = time()
             out, err = subproc(cmd, env=None, shell=False, do_wait=False)
             print '%sSubprocess starting time dt=%7.3f sec' % (gap, time()-t0_sec)
-            #print 'subproc starting response:\n    out: %s\n    err: "%s"' % (out, err.strip('\n'))
+            #print '%sSubprocess starting response:\n       out: %s\n       err: "%s"'%\
+            #      (gap, out, err.strip('\n'))
 
             # mark dataset as processed in any case
             #==============================================
