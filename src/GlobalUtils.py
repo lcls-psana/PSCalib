@@ -29,6 +29,7 @@ Usage::
     usr   = gu.get_login()
     host  = gu.get_hostname()
     cwd   = gu.get_cwd()
+    fmode = gu.file_mode(fname)
     rec   = gu.log_rec_on_start() # e.g. '2017-09-27T10:40:24 user:dubrovin@psanagpu104 cwd:/reg/neh/home4/dubrovin/LCLS/con-jungfrau ...'
     gu.add_rec_to_log(lfname, rec, verbos=False)
 
@@ -71,6 +72,7 @@ Created: 2013-03-08 by Mikhail Dubrovin
 
 import sys
 import os
+from stat import ST_MODE
 import getpass
 import socket
 import numpy as np
@@ -544,6 +546,13 @@ def get_cwd() :
 
 #------------------------------
 
+def file_mode(fname) :
+    """Returns file mode 
+    """
+    return os.stat(fname)[ST_MODE]
+
+#------------------------------
+
 def create_directory(dir, verb=False) : 
     if os.path.exists(dir) :
         pass
@@ -643,7 +652,9 @@ def add_rec_to_log(lfname, rec, verbos=False) :
         cmd = 'echo "%s" >> %s' % (rec, path)
         if verbos : print 'command: %s' % cmd
         os.system(cmd)
-        os.chmod(path, 0666)
+        mode_log = 0666
+        if (file_mode(path) & 0777) == mode_log : return 
+        os.chmod(path, mode_log)
 
 #------------------------------
 

@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-27
+2017-11-27 Mikhail S. Dubrovin
+- GlobalUtils add method file_mode(fname), in add_rec_to_log do not chmod 0666.
+
 Tag: V01-00-26
 2017-11-21 Mikhail S. Dubrovin
 - add app/proc_info
