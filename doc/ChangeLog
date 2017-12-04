@@ -11,6 +11,9 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+2017-12-04 Mikhail S. Dubrovin
+- add ex-geometry-image.py to draw detector relative to IP
+
 Tag: V01-00-27
 2017-11-27 Mikhail S. Dubrovin
 - GlobalUtils add method file_mode(fname), in add_rec_to_log do not chmod 0666.

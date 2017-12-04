@@ -32,7 +32,7 @@ Usage::
     xmin = sg.pixel_coord_min('X')
     ymax = sg.pixel_coord_max('Y')
     xmin, ymin, zmin = sg.pixel_coord_min()
-    xmax, ymax, zmax = sg.pixel_coord_mas()
+    xmax, ymax, zmax = sg.pixel_coord_max()
     ...
 
 See:
