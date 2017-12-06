@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-28
+2017-12-06 Mikhail S. Dubrovin
+- src/GlobalUtils.py - add support for epix10ka
+
 2017-12-04 Mikhail S. Dubrovin
 - add ex-geometry-image.py to draw detector relative to IP
 
