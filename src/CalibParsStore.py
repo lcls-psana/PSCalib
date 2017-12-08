@@ -54,6 +54,7 @@ See:
   -  :py:class:`CalibParsBaseCSPad2x2V1`
   -  :py:class:`CalibParsBaseCSPadV1`
   -  :py:class:`CalibParsBaseEpix100aV1`
+  -  :py:class:`CalibParsBaseEpix10kaV1`
   -  :py:class:`CalibParsBasePnccdV1`
   -  :py:class:`CalibParsBasePrincetonV1`
   -  :py:class:`CalibParsBaseAcqirisV1`
@@ -78,6 +79,7 @@ from PSCalib.CalibParsBaseCameraV1    import CalibParsBaseCameraV1
 from PSCalib.CalibParsBaseCSPad2x2V1  import CalibParsBaseCSPad2x2V1 
 from PSCalib.CalibParsBaseCSPadV1     import CalibParsBaseCSPadV1    
 from PSCalib.CalibParsBaseEpix100aV1  import CalibParsBaseEpix100aV1 
+from PSCalib.CalibParsBaseEpix10kaV1  import CalibParsBaseEpix10kaV1 
 from PSCalib.CalibParsBasePnccdV1     import CalibParsBasePnccdV1    
 from PSCalib.CalibParsBasePrincetonV1 import CalibParsBasePrincetonV1
 from PSCalib.CalibParsBaseAcqirisV1   import CalibParsBaseAcqirisV1
@@ -125,6 +127,7 @@ class CalibParsStore() :
         elif dettype ==  gu.ANDOR3D   : cbase = CalibParsBaseAndor3dV1()    
         elif dettype ==  gu.ANDOR     : cbase = CalibParsBaseAndorV1()    
         elif dettype ==  gu.EPIX100A  : cbase = CalibParsBaseEpix100aV1() 
+        elif dettype ==  gu.EPIX10KA  : cbase = CalibParsBaseEpix10kaV1() 
         elif dettype ==  gu.JUNGFRAU  : cbase = CalibParsBaseJungfrauV1()    
         elif dettype ==  gu.ACQIRIS   : cbase = CalibParsBaseAcqirisV1() 
         elif dettype ==  gu.IMP       : cbase = CalibParsBaseImpV1() 

@@ -11,6 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-29
+2017-12-07 Mikhail S. Dubrovin
+- add support for Epix10ka calibration constants
+	modified:   src/CalibParsStore.py
+	modified:   src/GlobalUtils.py
+        src/CalibParsBaseEpix10kaV1.py
+
 Tag: V01-00-28
 2017-12-06 Mikhail S. Dubrovin
 - src/GlobalUtils.py - add support for epix10ka
