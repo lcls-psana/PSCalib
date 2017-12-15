@@ -79,6 +79,9 @@ import numpy as np
 from time import localtime, strftime
 
 #------------------------------
+
+DIR_INS = '/reg/d/psdm'
+
 #------------------------------
 
 # ATTENTION !!!!! ALL LISTS SHOULD BE IN THE SAME ORDER (FOR DICTIONARIES)
@@ -617,6 +620,14 @@ def load_textfile(path) :
     recs = f.read() # f.readlines()
     f.close() 
     return recs
+
+#------------------------------
+
+def calib_dir_for_exp(exp) :
+    if not isinstance(exp, str) : raise IOError('Experiment name "%s" is expected as str object', str(exp))
+    if len(exp) < 8 : raise IOError('Experiment name "%s" has <8 letters', str(exp))
+    if len(exp) > 9 : raise IOError('Experiment name "%s" has >9 letters', str(exp))
+    return '%s/%s/%s/calib' % (DIR_INS, exp[:3].upper(), exp)
 
 #------------------------------
 

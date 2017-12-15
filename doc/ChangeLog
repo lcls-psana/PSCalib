@@ -10,6 +10,9 @@ Package author: Mikhail S. Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+Tag: V01-00-30
+2017-12-15 Mikhail S. Dubrovin
+- add src/GlobalUtils.calib_dir_for_exp
 
 Tag: V01-00-29
 2017-12-07 Mikhail S. Dubrovin
