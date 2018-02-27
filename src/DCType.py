@@ -178,6 +178,8 @@ class DCType(DCTypeI) :
         msg = '== load data from group %s and fill object %s' % (grp.name, self._name)
         log.debug(msg, self._name)
 
+        #print 'XXX DCType.load group file name: "%s"' % grp.file.name
+
         for k,v in dict(grp).iteritems() :
             #subgrp = v
             #print 'XXX    ', k , v# , "   ", subg.name #, val, subg.len(), type(subg),
@@ -192,21 +194,23 @@ class DCType(DCTypeI) :
                 log.debug('load group "%s"' % k, self._name)
 
                 begin = v.get('begin')
-                if begin is None :
-                    msg = 'corrupted file structure - group "%s" does not contain key "begin", keys: "%s"' % (v.name, v.keys())
+                #if begin is None : 
+                if (begin is None) or (not isinstance(begin[0], float)) :
+                    msg = 'File: "%s"\n       has corrupted structure - group "%s" does not contain key "begin", keys: "%s"'%\
+                          (grp.file.name, v.name, v.keys())
                     log.error(msg, self._name)
                     print 'ERROR:', self._name, msg
                     continue
 
                 end = v.get('end')
-                if end is None :
-                    msg = 'corrupted file structure - group "%s" does not contain key "end", keys: "%s"' % (v.name, v.keys())
+                if (end is None) or (end[0] != 'end') :
+                    msg = 'File: "%s"\n       has structure - group "%s" does not contain key "end", keys: "%s"'%\
+                          (grp.file.name, v.name, v.keys())
                     log.error(msg, self._name)
                     print 'ERROR:', self._name, msg
                     continue
 
                 #print 'ZZZ: name, k, v', v.name, v.keys(), v.values()
-
                 #print "XXX:v['begin'][0], v['end'][0]", v['begin'][0], v['end'][0]
                 o = self.add_range(begin[0], end[0], cmt=False)
                 o.load(v)

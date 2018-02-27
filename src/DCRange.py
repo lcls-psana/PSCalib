@@ -258,7 +258,8 @@ class DCRange(DCRangeI) :
                 log.debug('load group "%s"' % k, self._name)
                 version = v.get('version')
                 if version is None :
-                    msg = 'corrupted file structure - group "%s" does not contain key "version", keys: "%s"' % (v.name, v.keys())
+                    msg = 'File: %s\n       has corrupted structure - group "%s" does not contain key "version", keys: "%s"'%\
+                           (grp.file.filename, v.name, v.keys())
                     log.error(msg, self._name)
                     print 'ERROR:', self._name, msg
                     continue

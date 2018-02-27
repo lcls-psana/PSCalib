@@ -276,7 +276,7 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
     cs = DCStore(fname)
     cs.load()
     if verb :
-        print 50*'_','\nDCStore.print_obj()' 
+        print 50*'_','\nDCMethods.get_constants_from_file calls print_obj()\n File: %s' % fname
         cs.print_obj()
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
@@ -301,7 +301,7 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
 
 #------------------------------
 
-def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False) :
+def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False, use_repo=False) :
     """
     Returns specified array of calibration constants.
 
@@ -329,7 +329,8 @@ def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
     ofn = DCFileName(env, src, calibdir)
     if verb : ofn.print_attrs()
 
-    fname = ofn.calib_file_path()
+    fname = ofn.calib_file_path_repo() if use_repo else\
+            ofn.calib_file_path()
 
     return get_constants_from_file(fname, par, ctype, vers, verb)
 
