@@ -12,6 +12,11 @@ Usage::
     # Methods
     #resp = gu.<method(pars)>
 
+    d = gu.dict_detinfo_alias(env)
+    d = gu.dict_alias_detinfo(env)
+    detname = gu.complete_detname_from_detinfo(detinfo)
+    detname = gu.complete_detname(env, pattern='Jungfrau.0')
+
     dettype = gu.det_type_from_source(source)
     detname = gu.string_from_source(source)
 
@@ -320,7 +325,39 @@ def det_type_from_source(source) :
     else                               : return UNDEFINED
 
 #------------------------------
-##-----------------------------
+
+def dict_detinfo_alias(env) :
+    """Returns dict of pairs {psana.DetInfo : (str)alias}"""
+    return dict([(k.src(), k.alias()) for k in env.configStore().keys() if k.alias()])
+
+#------------------------------
+
+def dict_alias_detinfo(env) :
+    """Returns dict of pairs {(str)alias : psana.DetInfo}"""
+    return dict([(k.alias(), k.src()) for k in env.configStore().keys() if k.alias()])
+
+#------------------------------
+
+def complete_detname_from_detinfo(o) :
+    """Returns complete detector name from psana.DetInfo object, i.e. XcsEndstation.0:Jungfrau.0""" 
+    import psana
+    if not isinstance(o, psana.DetInfo) : return None
+    return '%s.%d:%s.%d' % (o.detName(), o.detId(), o.devName(), o.devId())
+
+#------------------------------
+
+def complete_detname(env, pattern='Jungfrau.0') : # or alias like 'jungfrau1M'
+    """Returns complete detector name like "XcsEndstation.0:Jungfrau.0" using its fraction or alias""" 
+    import psana
+    for k in env.configStore().keys() : 
+        detinfo = k.src()
+        if not isinstance(detinfo, psana.DetInfo) : continue
+        dname = complete_detname_from_detinfo(detinfo)
+        if pattern in dname : return dname
+    # Search detector name for alias
+    detinfo = dict_alias_detinfo(env).get(pattern, None)
+    return complete_detname_from_detinfo(detinfo)
+
 #------------------------------
 
 def string_from_source(source) :

@@ -10,6 +10,10 @@ Package author: Mikhail S. Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+Tag: V01-00-32
+2018-04-19 Mikhail S. Dubrovin
+- add a few methods in GlobalUtils
+
 Tag: V01-00-31
 2018-02-27 Mikhail S. Dubrovin
 - add protection for parameters of DCMethods, DCRange, DCType
