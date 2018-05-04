@@ -832,7 +832,7 @@ def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False) :
     if create_path(path_clb, depth=dep, mode=02770, verb=verbos) : # mode=02770 makes drwxrws---+
 
         cmd = command_deploy_file(ifname, path_clb)
-        print 'cmd: %s' % cmd
+        if verbos : print 'cmd: %s' % cmd
         os.system(cmd)
 
         rec = history_record(ifname, ctypedir, ctype, ofname, comment='')
