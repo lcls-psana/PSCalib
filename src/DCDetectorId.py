@@ -7,7 +7,7 @@ Class :py:class:`DCDetectorId` for the Detector Calibration (DC) project
 Usage::
 
     # Import
-    from PSCalib.DCDetectorId import id_epix, id_cspad
+    from PSCalib.DCDetectorId import id_epix, id_cspad, id_jungfrau
 
     # Parameters
     dsn = 'exp=cxif5315:run=169'
@@ -20,6 +20,7 @@ Usage::
     # Access methods
     ide = id_epix(env, src)
     idc = id_cspad(env, src)
+    idc = id_jungfrau(env, src)
 
 See:
     * :py:class:`DCStore`
@@ -47,9 +48,11 @@ Author: Mikhail Dubrovin
 from PSCalib.DCUtils import detector_full_name, psana_source
 
 from Detector.PyDataAccess import\
-     get_cspad_config_object,\
-     get_cspad2x2_config_object,\
      get_epix_config_object
+     #get_cspad_config_object,\
+     #get_cspad2x2_config_object,\
+
+from Detector.UtilsJungfrau import id_jungfrau as id_jungfrau_det
 
 #------------------------------
 
@@ -79,6 +82,12 @@ def id_cspad(env, src) :
 def id_det_noid(env, src) :
     """Returns detector full name for any src, e.g., XppGon.0:Cspad2x2.0"""
     return detector_full_name(env, src)
+
+#------------------------------
+
+def id_jungfrau(env, src) :
+    """Returns Jungfrau Id for any src, e.g., XcsEndstation.0:Jungfrau.0 or Jungfrau.0"""
+    return id_jungfrau_det(env, src)
 
 #------------------------------
 #------------------------------
@@ -111,12 +120,26 @@ def test_id_cspad() :
 
 #------------------------------
 
+def test_id_jungfrau() :
+    #src, dsn = 'XcsEndstation.0:Jungfrau.0', 'exp=xcsx22015:run=503' # psana.Jungfrau.ConfigV2
+    #src, dsn = 'XcsEndstation.0:Jungfrau.0', 'exp=xcsls3716:run=631' # psana.Jungfrau.ConfigV3
+    src, dsn = 'Jungfrau.', 'exp=xpptut15:run=430' # <=== mfx11116 r664
+    ds = psana.DataSource(dsn)
+    env = ds.env()
+    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
+    print 'dataset     : %s' % dsn
+    print 'source      : %s' % src
+    print 'Detector Id : %s' % id_jungfrau(env, src)
+
+#------------------------------
+
 def do_test() :
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     print 50*'_', '\nTest %s:' % tname
-    if   tname == '0' : test_id_epix(); test_id_cspad()
+    if   tname == '0' : test_id_epix(); test_id_cspad(), test_id_jungfrau() 
     elif tname == '1' : test_id_epix()        
     elif tname == '2' : test_id_cspad()        
+    elif tname == '3' : test_id_jungfrau()        
     else : print 'Not-recognized test: %s' % tname
     sys.exit( 'End of test %s' % tname)
 

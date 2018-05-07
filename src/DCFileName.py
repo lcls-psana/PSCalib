@@ -115,9 +115,10 @@ class DCFileName() :
 
 
     def set_detid(self, env, src) :
-        if self._dettype == 'epix100a': self._detid = did.id_epix(env, src)
-        else                          : self._detid = did.id_det_noid(env, src)
-        if self._detid is None        : self._detid = self.noid
+        if   self._dettype == 'epix100a': self._detid = did.id_epix(env, src)
+        elif self._dettype == 'jungfrau': self._detid = did.id_jungfrau(env, src)
+        else                            : self._detid = did.id_det_noid(env, src)
+        if self._detid is None          : self._detid = self.noid
 
 
     def _set_detname(self, env, src) : 

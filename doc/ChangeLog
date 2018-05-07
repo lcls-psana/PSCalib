@@ -10,6 +10,13 @@ Package author: Mikhail S. Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+
+Tag: V01-00-34
+2018-05-07 Mikhail S. Dubrovin
+- add support for jungfrau Id in access constants from repository hdf5 calib file
+	modified:   src/DCDetectorId.py
+	modified:   src/DCFileName.py
+
 Tag: V01-00-33
 2018-05-04 Mikhail S. Dubrovin
 - GlobalUtils.create_path - hide print under verbos
