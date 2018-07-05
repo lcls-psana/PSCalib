@@ -11,6 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-35
+2018-07-05 Mikhail S. Dubrovin
+- add support for epix10ka in calib directory
+	modified:   src/CalibParsBaseEpix10kaV1.py
+	modified:   src/CalibParsBasePnccdV1.py
+	modified:   src/GlobalUtils.py
+
 Tag: V01-00-34
 2018-05-07 Mikhail S. Dubrovin
 - add support for jungfrau Id in access constants from repository hdf5 calib file

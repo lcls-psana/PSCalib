@@ -35,10 +35,10 @@ class CalibParsBasePnccdV1 :
     cols = 512
     size = segs*rows*cols
     shape = (segs, rows, cols)
-    size_cm = 7 
+    size_cm = 4 
     shape_cm = (size_cm,)
-    cmod = (1,50,50,100,1,size,1)
-        
+    cmod = (3, 350, 350, 128)
+
     def __init__(self) : pass
 
 #------------------------------

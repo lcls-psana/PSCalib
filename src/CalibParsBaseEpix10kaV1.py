@@ -30,11 +30,12 @@ Author: Mikhail Dubrovin
 
 class CalibParsBaseEpix10kaV1 :
 
-    ndim = 1 
-    rows = 352 
-    cols = 384 
-    size = rows*cols
-    shape = (rows, cols)
+    ndim = 4 # (7, 1, 352, 384)
+    segs = 1 
+    rows = 0 # 352->0 variable size array due to variable number of panels
+    cols = 0 # 384 
+    size = segs*rows*cols
+    shape = (segs, rows, cols)
     size_cm = 16 
     shape_cm = (size_cm,)
     cmod = (3, 100, 100, 384, 0,0,0,0, 0,0,0,0, 0,0,0,0)
