@@ -161,6 +161,7 @@ JUNGFRAU    = 26
 ZYLA        = 27
 EPICSCAM    = 28
 EPIX10KA    = 29
+PIXIS       = 30
 
 #XAMPS    # N/A data
 #FEXAMP   # N/A data
@@ -173,13 +174,13 @@ EPIX10KA    = 29
 list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740, \
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000, \
                     ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX,
-                    EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU, ZYLA, EPICSCAM, EPIX10KA)
+                    EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU, ZYLA, EPICSCAM, EPIX10KA, PIXIS)
 """ List of enumetated detector types"""
 
 list_of_det_names = ('UNDEFINED', 'Cspad', 'Cspad2x2', 'Princeton', 'pnCCD', 'Tm6740', \
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
                      'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150', 'Rayonix',\
-                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d', 'Jungfrau', 'Zyla', 'ControlsCamera', 'Epix10ka')
+                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d', 'Jungfrau', 'Zyla', 'ControlsCamera', 'Epix10ka', 'Pixis')
 """ List of enumetated detector names"""
 
 list_of_calib_groups = ('UNDEFINED',
@@ -212,6 +213,7 @@ list_of_calib_groups = ('UNDEFINED',
                         'Camera::CalibV1',
                         'Camera::CalibV1',
                         'Epix10ka::CalibV1',
+                        'Pixis::CalibV1',
                         )
 """ List of enumetated detector calibration groups"""
 
@@ -322,6 +324,7 @@ def det_type_from_source(source) :
     elif ':Zyla.'           in str_src : return ZYLA
     elif ':ControlsCamera.' in str_src : return EPICSCAM
     elif ':Epix10ka.'       in str_src : return EPIX10KA
+    elif ':Pixis.'          in str_src : return PIXIS
     else                               : return UNDEFINED
 
 #------------------------------

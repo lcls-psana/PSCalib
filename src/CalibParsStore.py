@@ -145,7 +145,8 @@ class CalibParsStore() :
                          gu.FLI,\
                          gu.ZYLA,\
                          gu.EPICSCAM,\
-                         gu.PIMAX) : cbase = CalibParsBaseCameraV1()
+                         gu.PIMAX,\
+                         gu.PIXIS) : cbase = CalibParsBaseCameraV1()
 
         else :
             print '%s: calibration is not implemented data source "%s"' % (self.__class__.__name__, source)
