@@ -85,6 +85,7 @@ from PSCalib.CalibParsBasePrincetonV1 import CalibParsBasePrincetonV1
 from PSCalib.CalibParsBaseAcqirisV1   import CalibParsBaseAcqirisV1
 from PSCalib.CalibParsBaseImpV1       import CalibParsBaseImpV1
 from PSCalib.CalibParsBaseJungfrauV1  import CalibParsBaseJungfrauV1
+from PSCalib.CalibParsBaseUxiV1       import CalibParsBaseUxiV1
 
 #------------------------------
 
@@ -131,6 +132,7 @@ class CalibParsStore() :
         elif dettype ==  gu.JUNGFRAU  : cbase = CalibParsBaseJungfrauV1()    
         elif dettype ==  gu.ACQIRIS   : cbase = CalibParsBaseAcqirisV1() 
         elif dettype ==  gu.IMP       : cbase = CalibParsBaseImpV1() 
+        elif dettype ==  gu.UXI       : cbase = CalibParsBaseUxiV1()
         elif dettype in (gu.OPAL1000,\
                          gu.OPAL2000,\
                          gu.OPAL4000,\
@@ -144,6 +146,7 @@ class CalibParsStore() :
                          gu.TIMEPIX,\
                          gu.FLI,\
                          gu.ZYLA,\
+                         gu.PIXIS,\
                          gu.EPICSCAM,\
                          gu.PIMAX,\
                          gu.PIXIS) : cbase = CalibParsBaseCameraV1()
