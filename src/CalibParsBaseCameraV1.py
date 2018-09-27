@@ -36,7 +36,8 @@ class CalibParsBaseCameraV1 :
     shape = (rows, cols)
     size_cm = 16
     shape_cm = (size_cm,)
-    cmod = (1,50,50,100, 1,size,1,0, 0,0,0,0, 0,0,0,0)
+    #cmod = (1,50,50,100, 1,size,1,0, 0,0,0,0, 0,0,0,0)
+    cmod = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0) # cm correction is turned off
         
     def __init__(self) : pass
 

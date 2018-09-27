@@ -11,6 +11,12 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-38
+2018-09-26 Mikhail S. Dubrovin
+- uxi and pixis turn off common mode correction in default parameters
+	modified:   src/CalibParsBaseCameraV1.py
+	modified:   src/CalibParsBaseUxiV1.py
+
 Tag: V01-00-37
 2018-09-25 Mikhail S. Dubrovin
 - add uxi and pixis

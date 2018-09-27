@@ -38,7 +38,7 @@ class CalibParsBaseUxiV1 :
     shape = (segs, rows, cols)
     size_cm = 16
     shape_cm = (size_cm,)
-    cmod = (8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)# cm correction is turned off in python alg #8
+    cmod = (0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0) # cm correction is turned off
     def __init__(self) : pass
 
 #------------------------------
