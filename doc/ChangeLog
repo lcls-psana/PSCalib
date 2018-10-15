@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-39
+2018-10-15 Mikhail S. Dubrovin
+- src/GlobalUtils.py - add EPIX10KA2M
+
 Tag: V01-00-38
 2018-09-26 Mikhail S. Dubrovin
 - uxi and pixis turn off common mode correction in default parameters
