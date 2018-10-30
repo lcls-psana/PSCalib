@@ -11,6 +11,14 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-40
+2018-10-29 Mikhail S. Dubrovin
+- add STREAK and ARCHON
+	modified:   doc/ChangeLog
+	modified:   src/CalibParsBaseEpix10kaV1.py
+	modified:   src/CalibParsStore.py
+	modified:   src/GlobalUtils.py
+
 Tag: V01-00-39
 2018-10-15 Mikhail S. Dubrovin
 - src/GlobalUtils.py - add EPIX10KA2M

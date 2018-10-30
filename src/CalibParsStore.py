@@ -129,6 +129,7 @@ class CalibParsStore() :
         elif dettype ==  gu.ANDOR     : cbase = CalibParsBaseAndorV1()    
         elif dettype ==  gu.EPIX100A  : cbase = CalibParsBaseEpix100aV1() 
         elif dettype ==  gu.EPIX10KA  : cbase = CalibParsBaseEpix10kaV1() 
+        elif dettype ==  gu.EPIX10KA2M: cbase = CalibParsBaseEpix10kaV1() 
         elif dettype ==  gu.JUNGFRAU  : cbase = CalibParsBaseJungfrauV1()    
         elif dettype ==  gu.ACQIRIS   : cbase = CalibParsBaseAcqirisV1() 
         elif dettype ==  gu.IMP       : cbase = CalibParsBaseImpV1() 
@@ -149,7 +150,10 @@ class CalibParsStore() :
                          gu.PIXIS,\
                          gu.EPICSCAM,\
                          gu.PIMAX,\
-                         gu.PIXIS) : cbase = CalibParsBaseCameraV1()
+                         gu.PIXIS,\
+                         gu.STREAK,\
+                         gu.ARCHON\
+                         ) : cbase = CalibParsBaseCameraV1()
 
         else :
             print '%s: calibration is not implemented data source "%s"' % (self.__class__.__name__, source)

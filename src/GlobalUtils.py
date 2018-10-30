@@ -164,6 +164,8 @@ EPIX10KA    = 29
 UXI         = 30
 PIXIS       = 31
 EPIX10KA2M  = 32
+STREAK      = 33
+ARCHON      = 34
 
 #XAMPS    # N/A data
 #FEXAMP   # N/A data
@@ -176,14 +178,15 @@ EPIX10KA2M  = 32
 list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740, \
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000, \
                     ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX,
-                    EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU, ZYLA, EPICSCAM, EPIX10KA, UXI, PIXIS, EPIX10KA2M)
+                    EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU, ZYLA, EPICSCAM, EPIX10KA, UXI, PIXIS, EPIX10KA2M, STREAK, ARCHON)
 
 """ List of enumetated detector types"""
 
 list_of_det_names = ('UNDEFINED', 'Cspad', 'Cspad2x2', 'Princeton', 'pnCCD', 'Tm6740', \
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
                      'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150', 'Rayonix',\
-                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d', 'Jungfrau', 'Zyla', 'ControlsCamera', 'Epix10ka', 'Uxi', 'Pixis', 'Epix10ka2M')
+                     'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d', 'Jungfrau', 'Zyla', 'ControlsCamera', 'Epix10ka',\
+                     'Uxi', 'Pixis', 'Epix10ka2M', 'Streak', 'Archon')
 
 """ List of enumetated detector names"""
 
@@ -220,6 +223,8 @@ list_of_calib_groups = ('UNDEFINED',
                         'Uxi::CalibV1',
                         'Pixis::CalibV1',
                         'Epix10ka2M::CalibV1',
+                        'Camera::CalibV1',
+                        'Camera::CalibV1',
                         )
 """ List of enumetated detector calibration groups"""
 
@@ -294,7 +299,6 @@ bld_names = \
 'XcsAin01',
 'AmoAin01']
 
-
 #------------------------------
 
 def det_type_from_source(source) :
@@ -333,6 +337,8 @@ def det_type_from_source(source) :
     elif ':Uxi.'            in str_src : return UXI
     elif ':Pixis.'          in str_src : return PIXIS
     elif ':Epix10ka2M.'     in str_src : return EPIX10KA2M
+    elif ':StreakC7700.'    in str_src : return STREAK
+    elif ':Archon.'         in str_src : return ARCHON
     else                               : return UNDEFINED
 
 #------------------------------
