@@ -128,8 +128,11 @@ class CalibParsStore() :
         elif dettype ==  gu.ANDOR3D   : cbase = CalibParsBaseAndor3dV1()    
         elif dettype ==  gu.ANDOR     : cbase = CalibParsBaseAndorV1()    
         elif dettype ==  gu.EPIX100A  : cbase = CalibParsBaseEpix100aV1() 
-        elif dettype ==  gu.EPIX10KA  : cbase = CalibParsBaseEpix10kaV1() 
-        elif dettype ==  gu.EPIX10KA2M: cbase = CalibParsBaseEpix10kaV1() 
+        elif dettype in (gu.EPIX10K,\
+                         gu.EPIX10KA,\
+                         gu.EPIX10KA2M,\
+                         gu.EPIX10KAQUAD)\
+                                      : cbase = CalibParsBaseEpix10kaV1() 
         elif dettype ==  gu.JUNGFRAU  : cbase = CalibParsBaseJungfrauV1()    
         elif dettype ==  gu.ACQIRIS   : cbase = CalibParsBaseAcqirisV1() 
         elif dettype ==  gu.IMP       : cbase = CalibParsBaseImpV1() 

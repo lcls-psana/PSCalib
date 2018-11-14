@@ -11,6 +11,15 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-41
+2018-11-14 Mikhail S. Dubrovin
+- Epix10kaQuad and Epix10ka2M - support for calibration constants
+- add geometry of new segment SegGeometryEpix10kaV1
+	modified:   src/CalibParsStore.py
+	modified:   src/GlobalUtils.py
+	new file:   src/SegGeometryEpix10kaV1.py
+	modified:   src/SegGeometryStore.py
+
 Tag: V01-00-40
 2018-10-29 Mikhail S. Dubrovin
 - add STREAK and ARCHON

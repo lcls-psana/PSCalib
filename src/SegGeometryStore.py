@@ -16,6 +16,7 @@ Usage::
     sg3= sgs.Create('PNCCD:V1',   pbits=0377)
     sg4= sgs.Create('ANDOR3D:V1', pbits=0377)
     sg5= sgs.Create('JUNGFRAU:V1',pbits=0377)
+    sg6= sgs.Create('EPIX10KA:V1',pbits=0377)
 
     sg.print_seg_info(pbits=0377)
     size_arr = sg.size()
@@ -40,6 +41,7 @@ See:
  * :py:class:`SegGeometry`, 
  * :py:class:`SegGeometryCspad2x1V1`, 
  * :py:class:`SegGeometryEpix100V1`, 
+ * :py:class:`SegGeometryEpix10kaV1`, 
  * :py:class:`SegGeometryJungfrauV1`, 
  * :py:class:`SegGeometryMatrixV1`, 
  * :py:class:`SegGeometryStore`
@@ -55,6 +57,7 @@ Created: 2013-03-08 by Mikhail Dubrovin
 
 from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one
 from PSCalib.SegGeometryEpix100V1  import epix2x2_one
+from PSCalib.SegGeometryEpix10kaV1 import epix10ka_one
 from PSCalib.SegGeometryMatrixV1   import SegGeometryMatrixV1, segment_one, matrix_pars
 from PSCalib.SegGeometryJungfrauV1 import jungfrau_one
 
@@ -75,6 +78,7 @@ class SegGeometryStore() :
         """        
         if segname=='SENS2X1:V1' : return cspad2x1_one # SegGeometryCspad2x1V1(use_wide_pix_center=False)
         if segname=='EPIX100:V1' : return epix2x2_one  # SegGeometryEpix100V1(use_wide_pix_center=False)
+        if segname=='EPIX10KA:V1': return epix10ka_one # SegGeometryEpix10kaV1(use_wide_pix_center=False)
         if segname=='PNCCD:V1'   : return segment_one  # SegGeometryMatrixV1()
         if segname[:4]=='MTRX'   :
             rows, cols, psize_row, psize_col = matrix_pars(segname)
@@ -123,7 +127,11 @@ def test_seggeom() :
         sg = sgs.Create('JUNGFRAU:V1', pbits=0377)
         sg.print_seg_info(pbits=0377)
 
-    else : print 'Non-expected arguments: sys.argv=', sys.argv, ' use 0,1,2,...'
+    elif(sys.argv[1]=='6') :
+        sg = sgs.Create('EPIX10KA:V1', pbits=0377)
+        sg.print_seg_info(pbits=0377)
+
+    else : print 'Non-expected test name: ', sys.argv[1], ' use 0,1,2,...'
 
 #------------------------------
 
