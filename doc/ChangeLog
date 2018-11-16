@@ -11,6 +11,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-42
+2018-11-15 Mikhail S. Dubrovin
+- fix y axis direction in SegGeometryEpix10kaV1.py
+
 Tag: V01-00-41
 2018-11-14 Mikhail S. Dubrovin
 - Epix10kaQuad and Epix10ka2M - support for calibration constants

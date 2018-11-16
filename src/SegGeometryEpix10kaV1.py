@@ -135,7 +135,7 @@ class SegGeometryEpix10kaV1(SegGeometry) :
 
         y_rhs = np.arange(sp._rowsh)*sp._pixs + sp._pixw - sp._pixsh
         if sp.use_wide_pix_center : y_rhs[0] = sp._pixwh # set y-coordinate of the wide pixel in its geometry center
-        sp.y_arr_um = np.hstack([-y_rhs[::-1], y_rhs])
+        sp.y_arr_um = np.hstack([y_rhs[::-1], -y_rhs]) # reverse sign (+y is opposite to y index)
 
         sp.x_pix_arr_um, sp.y_pix_arr_um  = np.meshgrid(sp.x_arr_um, sp.y_arr_um)
         sp.z_pix_arr_um = np.zeros((sp._rows,sp._cols))
@@ -405,7 +405,7 @@ def test_xyz_maps() :
     #for i,arr2d in enumerate([w.x_pix_arr,w.y_pix_arr]) :
     for i,arr2d in enumerate( w.get_seg_xy_maps_pix() ) :
         amp_range = (arr2d.min(), arr2d.max())
-        gg.plotImageLarge(arr2d, amp_range=amp_range, figsize=(10,5), title=titles[i])
+        gg.plotImageLarge(arr2d, amp_range=amp_range, figsize=(10,8), title=titles[i])
         gg.move(200*i,100*i)
 
     gg.show()
@@ -450,11 +450,11 @@ def test_2x2_img() :
 #------------------------------
 
 def test_2x2_img_easy() :
-    pc2x2 = SegGeometryEpix10kaV1(use_wide_pix_center=False)
-    X,Y = pc2x2.get_seg_xy_maps_pix_with_offset()
+    w = SegGeometryEpix10kaV1(use_wide_pix_center=False)
+    X,Y = w.get_seg_xy_maps_pix_with_offset()
     iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
-    img = gg.getImageFromIndexArrays(iX,iY,iX+iY)
-    gg.plotImageLarge(img, amp_range=(0, 1500), figsize=(10,10))
+    img = gg.getImageFromIndexArrays(iY,iX,iX+iY)
+    gg.plotImageLarge(img, amp_range=(0, 750), figsize=(10,8))
     gg.show()
 
 #------------------------------
