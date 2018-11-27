@@ -708,8 +708,8 @@ def exp_name(env) :
 def log_rec_on_start() :
     """Returns (str) record containing timestamp, login, host, cwd, and command line
     """
-    return '\n%s user:%s@%s cwd:%s\n  command:%s'%\
-           (str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'), get_login(), get_hostname(), get_cwd(), ' '.join(sys.argv))
+    return '%s user:%s@%s cwd:%s rel:%s cmd:%s\n'%\
+           (str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'), get_login(), get_hostname(), get_cwd(), get_enviroment('SIT_RELEASE'), ' '.join(sys.argv))
 
 #------------------------------
 

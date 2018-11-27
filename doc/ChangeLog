@@ -11,6 +11,11 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-43
+2018-11-27 Mikhail S. Dubrovin
+	modified:   src/GlobalUtils.py - minor addition in log_rec_on_start
+	modified:   src/NDArrIO.py - do not reshape input array.
+
 Tag: V01-00-42
 2018-11-15 Mikhail S. Dubrovin
 - fix y axis direction in SegGeometryEpix10kaV1.py

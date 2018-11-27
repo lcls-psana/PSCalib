@@ -82,6 +82,7 @@ def save_txt(fname='nda.txt', arr=None, cmts=(), fmt='%.1f', verbos=False, addme
         for i in range(len(arr.shape)) :
             recs.append('# DIM:%d       %s'   % (i, arr.shape[i]))
 
+    shape0 = arr.shape if isinstance(arr, np.ndarray) else None
     arr2d = gu.reshape_nda_to_2d(arr)
 
     # pretty formatting
@@ -93,6 +94,7 @@ def save_txt(fname='nda.txt', arr=None, cmts=(), fmt='%.1f', verbos=False, addme
 
     np.savetxt(fname, arr, fmt, delimiter=' ', newline=nline, header=hdr, comments='') #, footer='\n') #, comments='# ')
     if verbos : print 'File %s is saved' % fname
+    if isinstance(arr, np.ndarray) : arr.shape = shape0
 
 #------------------------------
 
