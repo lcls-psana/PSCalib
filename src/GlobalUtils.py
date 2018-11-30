@@ -583,7 +583,7 @@ def str_tstamp(fmt='%Y-%m-%dT%H:%M:%S', time_sec=None) :
 def get_enviroment(env='USER') :
     """Returns the value of specified by string name environment variable
     """
-    return os.environ[env]
+    return os.environ.get(env, 'NON-DEFINED-env-%s' % env)
 
 #------------------------------
 
@@ -709,7 +709,7 @@ def log_rec_on_start() :
     """Returns (str) record containing timestamp, login, host, cwd, and command line
     """
     return '%s user:%s@%s cwd:%s rel:%s cmd:%s\n'%\
-           (str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'), get_login(), get_hostname(), get_cwd(), get_enviroment('SIT_RELEASE'), ' '.join(sys.argv))
+           (str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'), get_login(), get_hostname(), get_cwd(), get_enviroment('CONDA_DEFAULT_ENV'), ' '.join(sys.argv))
 
 #------------------------------
 
@@ -965,10 +965,12 @@ def test_mask_edges_3d(mrows=1, mcols=1) :
 
 def do_test() :
 
-    print 'get_enviroment(USER) : %s' % get_enviroment()
-    print 'get_login()          : %s' % get_login()
-    print 'get_hostname()       : %s' % get_hostname()
-    print 'get_cwd()            : %s' % get_cwd()
+    print 'get_enviroment("USER"): %s' % get_enviroment()
+    print 'get_enviroment("XXX") : %s' % get_enviroment('XXX')
+    print 'get_enviroment("CONDA_DEFAULT_ENV")  : %s' % get_enviroment('CONDA_DEFAULT_ENV')
+    print 'get_login()           : %s' % get_login()
+    print 'get_hostname()        : %s' % get_hostname()
+    print 'get_cwd()             : %s' % get_cwd()
     #print ': %s' % 
 
     if len(sys.argv) > 1 :

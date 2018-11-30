@@ -30,6 +30,7 @@ Usage::
     fid    = gu.evt_fiducials(evt)
     t_sec  = gu.evt_time(evt)
     t_sec  = gu.env_time(env)
+    t_sec  = gu.dataset_time(dsname)
 
     # methods for HDF5 
     sg = gu.get_subgroup(grp, subgr_name)
@@ -320,6 +321,14 @@ def env_time(env) :
     ttuple = evid.time()
     #print 'XXX time:',  ttuple
     return float(ttuple[0]) + float(ttuple[1])*1e-9
+
+#------------------------------
+
+def dataset_time(dsname) :
+    """Returns event (double) time for input dsname "exp=xcsx35617:run=6".
+    """
+    ds = psana.DataSource(dsname)
+    return env_time(ds.env())
 
 #------------------------------
 
