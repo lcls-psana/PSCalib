@@ -48,7 +48,7 @@ Usage of interface methods::
     pix_size = pixel_scale_size()
 
     area  = sg.pixel_area_array()
-    mask = sg.pixel_mask_array(mbits=0377)
+    mask = sg.pixel_mask_array(mbits=0377, **kwargs)
     # where mbits = +1-edges, +2-wide pixels, +4-non-bonded pixels, +8-neighbours of non-bonded
 
     sizeX = sg.pixel_size_array('X')
@@ -345,7 +345,7 @@ class SegGeometryMatrixV1(SegGeometry) :
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0377) :
+    def pixel_mask_array(sp, mbits=0377, **kwargs) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits=1 - mask edges,
         +2 - mask two central columns, 

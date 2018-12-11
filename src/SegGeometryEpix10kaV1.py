@@ -48,7 +48,7 @@ Usage::
     pix_size = pixel_scale_size()
 
     area     = sg.pixel_area_array()
-    mask     = sg.pixel_mask_array(mbits=0377)
+    mask     = sg.pixel_mask_array(mbits=0377, width=5, wcentral=5) # **kwargs)
     # where mbits = +1-edges, +2-wide pixels
 
     sizeX = sg.pixel_size_array('X')
@@ -345,32 +345,42 @@ class SegGeometryEpix10kaV1(SegGeometry) :
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0377) :
+    def pixel_mask_array(sp, mbits=0377, **kwargs) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits: +1 - mask edges,
         +2 - mask two central columns 
         """
-        zero_col = np.zeros(sp._rows,dtype=np.uint8)
-        zero_row = np.zeros(sp._cols,dtype=np.uint8)
-        mask     = np.ones((sp._rows,sp._cols),dtype=np.uint8)
+        w = kwargs.get('width', 1)
+        u = kwargs.get('wcentral', 1)
+
+        mask = np.ones((sp._rows,sp._cols),dtype=np.uint8)
 
         if mbits & 1 : 
-        # mask edges
-            mask[0, :] = zero_row # mask top    edge
-            mask[-1,:] = zero_row # mask bottom edge
-            mask[:, 0] = zero_col # mask left   edge
-            mask[:,-1] = zero_col # mask right  edge
+        # mask edges with "width"
+            zero_col = np.zeros((sp._rows,w),dtype=np.uint8)
+            zero_row = np.zeros((w,sp._cols),dtype=np.uint8)
+
+            mask[0:w,:] = zero_row # mask top    edge
+            mask[-w:,:] = zero_row # mask bottom edge
+            mask[:,0:w] = zero_col # mask left   edge
+            mask[:,-w:] = zero_col # mask right  edge
 
         if mbits & 2 : 
-        # mask two central columns
-            mask[:,sp._colsh-1] = zero_col # mask central-left  column
-            mask[:,sp._colsh]   = zero_col # mask central-right column
-            mask[sp._rowsh-1]   = zero_row # mask central-low   row
-            mask[sp._rowsh]     = zero_row # mask central-high  row
+            # mask "wcentral" central columns and rows
 
+            zero_col = np.zeros((sp._rows,u),dtype=np.uint8)
+            zero_row = np.zeros((u,sp._cols),dtype=np.uint8)
+
+            g = sp._colsh
+            mask[:,g-u:g] = zero_col # mask central-left  column
+            mask[:,g:g+u] = zero_col # mask central-right column
+
+            g = sp._rowsh
+            mask[g-u:g,:] = zero_row # mask central-low   row
+            mask[g:g+u,:] = zero_row # mask central-high  row
+  
         return mask
 
-  
 #------------------------------
 #------------------------------
 
@@ -477,7 +487,7 @@ def test_pix_sizes() :
 def test_2x2_mask(mbits=0377) :
     pc2x2 = SegGeometryEpix10kaV1(use_wide_pix_center=False)
     X, Y = pc2x2.get_seg_xy_maps_pix_with_offset()
-    mask = pc2x2.pixel_mask_array(mbits)
+    mask = pc2x2.pixel_mask_array(mbits, width=5, wcentral=5)
     mask[mask==0]=3
     iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
     img = gg.getImageFromIndexArrays(iX,iY,mask)

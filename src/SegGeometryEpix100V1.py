@@ -49,7 +49,7 @@ Usage::
     pix_size = pixel_scale_size()
 
     area     = sg.pixel_area_array()
-    mask     = sg.pixel_mask_array(mbits=0377)
+    mask     = sg.pixel_mask_array(mbits=0377, **kwargs)
     # where mbits = +1-edges, +2-wide pixels
 
     sizeX = sg.pixel_size_array('X')
@@ -345,7 +345,7 @@ class SegGeometryEpix100V1(SegGeometry) :
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0377) :
+    def pixel_mask_array(sp, mbits=0377, **kwargs) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits: +1 - mask edges,
         +2 - mask two central columns 
@@ -362,7 +362,7 @@ class SegGeometryEpix100V1(SegGeometry) :
             mask[:,-1] = zero_col # mask right  edge
 
         if mbits & 2 : 
-        # mask two central columns
+        # mask two central columns and rows
             mask[:,sp._colsh-1] = zero_col # mask central-left  column
             mask[:,sp._colsh]   = zero_col # mask central-right column
             mask[sp._rowsh-1]   = zero_row # mask central-low   row

@@ -331,7 +331,7 @@ class SegGeometryJungfrauV1(SegGeometry) :
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0377, width=1) :
+    def pixel_mask_array(sp, mbits=0377, **kwargs) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
 
         Parameters
@@ -342,7 +342,7 @@ class SegGeometryJungfrauV1(SegGeometry) :
 
         width (uint) - width in pixels of masked edge
         """
-        w = width
+        w = kwargs.get('width', 1)
         zero_col = np.zeros((sp._rows,w),dtype=np.uint8)
         zero_row = np.zeros((w,sp._cols),dtype=np.uint8)
         mask     = np.ones((sp._rows,sp._cols),dtype=np.uint8)

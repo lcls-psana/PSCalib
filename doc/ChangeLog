@@ -11,6 +11,17 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-45
+2018-12-11 Mikhail S. Dubrovin
+- add **kwargs to all SegGeometry*.pixel_mask_array, in GlobalUtils add merge_status, fix mask_neighbors
+	modified:   src/GlobalUtils.py
+	modified:   src/SegGeometry.py
+	modified:   src/SegGeometryCspad2x1V1.py
+	modified:   src/SegGeometryEpix100V1.py
+	modified:   src/SegGeometryEpix10kaV1.py
+	modified:   src/SegGeometryJungfrauV1.py
+	modified:   src/SegGeometryMatrixV1.py
+
 Tag: V01-00-44
 2018-11-30 Mikhail S. Dubrovin
 - add DCUtils.dataset_time, protect GlobalUtils.get_enviroment

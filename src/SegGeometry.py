@@ -130,7 +130,7 @@ class SegGeometry :
         """
         print self.wmsg % 'pixel_coord_max(axis)'
 
-    def pixel_mask_array(self, mbits) :
+    def pixel_mask_array(self, mbits, **kwargs) :
         """ Returns array of masked pixels which content depends on bontrol bitword mbits
         """
         print self.wmsg % 'pixel_mask_array(mask_bits)'

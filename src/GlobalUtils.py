@@ -446,6 +446,23 @@ def merge_masks(mask1=None, mask2=None, dtype=np.uint8) :
 
 #------------------------------
 
+def merge_status(stnda, **kwargs) :
+    """Merges status bits. 
+       Originaly intended for epix10ka2m status array stnda.shape=(7, 16, 352, 384) merging to (16, 352, 384)
+       Also can be used with Jungfrau status array stnda.shape=(7, 16, 352, 384) merging to (16, 352, 384)
+       option "indexes" contains a list of stnda[i,:] indexes to combine status
+    """
+    inds = kwargs.get('indexes', (0,1,2,3,4)) # indexes stand for 'FH','FM','FL','AHL-H','AML-M'
+
+    if stnda.ndim < 2 : return stnda # ignore 1-d arrays
+    st1 = np.copy(stnda[inds[0],:])
+    for i in inds[1:] : # range(1,stnda.shape[0]) :
+        if i<stnda.shape[0] : # boundary check for index
+            st1 = np.bitwise_or(st1, stnda[i,:])
+    return st1
+
+#------------------------------
+
 def mask_neighbors(mask, allnbrs=True, dtype=np.uint8) :
     """Return mask with masked eight neighbor pixels around each 0-bad pixel in input mask.
 
@@ -456,7 +473,7 @@ def mask_neighbors(mask, allnbrs=True, dtype=np.uint8) :
     if len(shape_in) < 2 :
         raise ValueError('Input mask has less then 2-d, shape = %s' % str(shape_in))
 
-    mask_out = np.asarray(mask, dtype)
+    mask_out = np.copy(mask, dtype) # np.asarray(mask, dtype)
 
     if len(shape_in) == 2 :
         # mask nearest neighbors
