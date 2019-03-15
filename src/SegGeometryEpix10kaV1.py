@@ -103,8 +103,8 @@ class SegGeometryEpix10kaV1(SegGeometry) :
     _pixw  = 250     # Wide pixel size in um (micrometer)
     _pixd  = 400.00  # Pixel depth in um (micrometer)
 
-    _colsh = _cols/2
-    _rowsh = _rows/2
+    _colsh = _cols//2
+    _rowsh = _rows//2
     _pixsh = _pixs/2
     _pixwh = _pixw/2
 

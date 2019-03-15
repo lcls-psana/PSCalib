@@ -99,8 +99,8 @@ class SegGeometryCspad2x1V1(SegGeometry) :
     _pixd  = 400.00 # Pixel depth in um (micrometer)
 
     _colsh = _cols//2
-    _pixsh = _pixs//2
-    _pixwh = _pixw//2
+    _pixsh = _pixs/2
+    _pixwh = _pixw/2
 
 #------------------------------
 
