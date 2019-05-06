@@ -35,6 +35,7 @@
 #include "pdscalibdata/AndorBaseV1.h"
 #include "pdscalibdata/Andor3dBaseV1.h"
 #include "pdscalibdata/Epix100aBaseV1.h"
+#include "pdscalibdata/Epix10ka2MBaseV1.h"
 #include "pdscalibdata/VarShapeCameraBaseV1.h"
 //#include "pdscalibdata/Opal1000BaseV1.h"
 //#include "pdscalibdata/Opal4000BaseV1.h"
@@ -487,6 +488,7 @@ template class PSCalib::GenericCalibPars<pdscalibdata::PrincetonBaseV1>;
 template class PSCalib::GenericCalibPars<pdscalibdata::AndorBaseV1>;
 template class PSCalib::GenericCalibPars<pdscalibdata::Andor3dBaseV1>;
 template class PSCalib::GenericCalibPars<pdscalibdata::Epix100aBaseV1>;
+template class PSCalib::GenericCalibPars<pdscalibdata::Epix10ka2MBaseV1>;
 template class PSCalib::GenericCalibPars<pdscalibdata::VarShapeCameraBaseV1>;
 //template class PSCalib::GenericCalibPars<pdscalibdata::Opal1000BaseV1>;
 //template class PSCalib::GenericCalibPars<pdscalibdata::Opal4000BaseV1>;

@@ -11,6 +11,19 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-47
+2019-05-06 Mikhail S. Dubrovin
+- add SegGeometryEpix10kaV1, add CalibPars support for Epix10ka2m
+	modified:   include/CalibParsStore.h
+	new file:   include/SegGeometryEpix10kaV1.h
+	modified:   include/SegGeometryStore.h
+	modified:   src/GenericCalibPars.cpp
+	new file:   src/SegGeometryEpix10kaV1.cpp
+
+Tag: V01-00-46
+2019-03-14 chrisvam
+- use integer numpy indexing for more recent numpy versions
+
 Tag: V01-00-45
 2018-12-11 Mikhail S. Dubrovin
 - add **kwargs to all SegGeometry*.pixel_mask_array, in GlobalUtils add merge_status, fix mask_neighbors

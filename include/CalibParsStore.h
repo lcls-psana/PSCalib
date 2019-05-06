@@ -41,6 +41,7 @@
 #include "pdscalibdata/AndorBaseV1.h"
 #include "pdscalibdata/Andor3dBaseV1.h"
 #include "pdscalibdata/Epix100aBaseV1.h"
+#include "pdscalibdata/Epix10ka2MBaseV1.h"
 #include "pdscalibdata/VarShapeCameraBaseV1.h"
 //#include "pdscalibdata/Opal1000BaseV1.h"
 //#include "pdscalibdata/Opal4000BaseV1.h"
@@ -206,6 +207,12 @@ public:
            if (print_bits & 1) MsgLog("CalibParsStore", info, "Get access to calibration store for Epix100a source: " << str_src);
 	   std::string type_group = (group==std::string()) ? "Epix100a::CalibV1" : group;
 	   return new PSCalib::GenericCalibPars<pdscalibdata::Epix100aBaseV1>(calibdir, type_group, str_src, runnum, prbits);
+	}
+
+        if ( str_src.find(":Epix10ka2M.") != std::string::npos ) {
+           if (print_bits & 1) MsgLog("CalibParsStore", info, "Get access to calibration store for Epix10ka2M source: " << str_src);
+	   std::string type_group = (group==std::string()) ? "Epix10ka2M::CalibV1" : group;
+	   return new PSCalib::GenericCalibPars<pdscalibdata::Epix10ka2MBaseV1>(calibdir, type_group, str_src, runnum, prbits);
 	}
 
 	std::vector<std::string> v_camera_names;
