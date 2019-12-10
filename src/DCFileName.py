@@ -189,7 +189,7 @@ class DCFileName() :
         return '%s/%s' % (self.calib_file_dir_repo(), self.calib_file_name())
 
 
-    def make_path_to_calib_file(self, depth=2, mode=0775) :
+    def make_path_to_calib_file(self, depth=2, mode=0o775) :
         """Creates path beginning from calib directory, e.g.: .../calib/epix100a/
         Returns True if path created and exists.
         """
@@ -252,12 +252,12 @@ def test_make_path_to_calib_file() :
     ofn = DCFileName(ds.env(), 'Epix', calibdir='%s/calib' % gu.get_cwd())
     #ofn = DCFileName(ds.env(), 'Epix', calibdir='./calib')
     ofn.print_attrs()
-    ofn.make_path_to_calib_file(mode=0770)
+    ofn.make_path_to_calib_file(mode=0o770)
 
 #------------------------------
 
 def do_test() :
-    log.setPrintBits(0377)
+    log.setPrintBits(0o377)
 
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     print(50*'_', '\nTest %s:' % tname)

@@ -204,12 +204,12 @@ def append_log_file(exp='xpptut15', procname='pixel_status', runs=[], verb=0) :
     """
     fname_log = log_file(exp, procname)
     if verb : print('Append log file: %s' % fname_log)
-    gu.create_path(fname_log, depth=6, mode=0774, verb=False)
+    gu.create_path(fname_log, depth=6, mode=0o774, verb=False)
     text = msg_to_log(runs)
     if text is None : return
     #print 'Save in file text "%s"' % text
     gu.save_textfile(text, fname_log, mode='a')
-    os.chmod(fname_log, 0664)
+    os.chmod(fname_log, 0o664)
 
 #------------------------------
 
@@ -236,10 +236,10 @@ def move_recs_to_archive(procname, exp, runs) :
     #print '  ==> arc\n%s' % text_arc
 
     gu.save_textfile(text_log, fname_log, mode='w')
-    os.chmod(fname_log, 0664)
+    os.chmod(fname_log, 0o664)
 
     gu.save_textfile(text_arc, fname_arc, mode='a')
-    os.chmod(fname_log, 0664)
+    os.chmod(fname_log, 0o664)
 
 #------------------------------
 

@@ -52,7 +52,7 @@ def init_psana_for_dsname_src(dsname='exp=xcs11116:run=2', source='XcsEndstation
 
     src = psana.Source(source)
     ds  = psana.DataSource(dsname)
-    evt = ds.events().next()
+    evt = next(ds.events())
     env = ds.env()
 
     print('calib_dir: %s' % gu.calib_dir(env))

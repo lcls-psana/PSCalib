@@ -108,29 +108,29 @@ def test_seggeom() :
     if len(sys.argv)==1   : print('For test(s) use command: python', sys.argv[0], '<test-number=1-5>')
 
     elif(sys.argv[1]=='1') :
-        sg = sgs.Create('SENS2X1:V1', pbits=0377)
-        sg.print_seg_info(pbits=0377)
+        sg = sgs.Create('SENS2X1:V1', pbits=0o377)
+        sg.print_seg_info(pbits=0o377)
         
     elif(sys.argv[1]=='2') :
-        sg = sgs.Create('EPIX100:V1', pbits=0377)
-        sg.print_seg_info(pbits=0377)
+        sg = sgs.Create('EPIX100:V1', pbits=0o377)
+        sg.print_seg_info(pbits=0o377)
 
     elif(sys.argv[1]=='3') :
-        sg = sgs.Create('PNCCD:V1', pbits=0377)
-        sg.print_seg_info(pbits=0377)
+        sg = sgs.Create('PNCCD:V1', pbits=0o377)
+        sg.print_seg_info(pbits=0o377)
 
     elif(sys.argv[1]=='4') :
-        sg = sgs.Create('MTRX:512:512:54:54', pbits=0377)
+        sg = sgs.Create('MTRX:512:512:54:54', pbits=0o377)
         print('Consumed time for MTRX:512:512:54:54 (sec) =', time()-t0_sec)
-        sg.print_seg_info(pbits=0377)
+        sg.print_seg_info(pbits=0o377)
   
     elif(sys.argv[1]=='5') :
-        sg = sgs.Create('JUNGFRAU:V1', pbits=0377)
-        sg.print_seg_info(pbits=0377)
+        sg = sgs.Create('JUNGFRAU:V1', pbits=0o377)
+        sg.print_seg_info(pbits=0o377)
 
     elif(sys.argv[1]=='6') :
-        sg = sgs.Create('EPIX10KA:V1', pbits=0377)
-        sg.print_seg_info(pbits=0377)
+        sg = sgs.Create('EPIX10KA:V1', pbits=0o377)
+        sg.print_seg_info(pbits=0o377)
 
     else : print('Non-expected test name: ', sys.argv[1], ' use 0,1,2,...')
 

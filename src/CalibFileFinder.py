@@ -413,7 +413,7 @@ def test01() :
     print('Finding calib file for\n  dir = %s\n  grp = %s\n  src = %s\n  type= %s\n  run = %d' % \
           (cdir, group, src, type, rnum))
 
-    cff = CalibFileFinder(cdir, group, 0377)
+    cff = CalibFileFinder(cdir, group, 0o377)
     fname = cff.findCalibFile(src, type, rnum)
 
     #--------------------------

@@ -243,7 +243,7 @@ class DCS_CLI :
         if dsname is not None :
             ds = psana.DataSource(dsname)
             env=ds.env()
-            evt=ds.events().next()
+            evt=next(ds.events())
         #if self.verbos :
         #print 'time (sec) to get ds, env, evt = %.6f' % (time()-t0_sec)
 

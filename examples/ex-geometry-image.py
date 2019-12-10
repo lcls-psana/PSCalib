@@ -69,7 +69,7 @@ def ex_geometry_image(ntest) :
     print('fname_img: %s' % (fname_img))
 
     t0_sec = time()
-    geo = GeometryAccess(fname_geo, 0377)
+    geo = GeometryAccess(fname_geo, 0o377)
 
     if segname is not None : 
         geo.move_geo(segname, segind, dx, dy, 0) # (hor, vert, z)
@@ -120,7 +120,7 @@ def ex_geometry_image(ntest) :
 
     gr.show(mode=None)
     ofname = 'img-%s.png' % fname_geo.split('.')[0]
-    gg.save_fig(fig, fname=ofname, do_save=True, pbits=0377)
+    gg.save_fig(fig, fname=ofname, do_save=True, pbits=0o377)
 
 #------------------------------
 

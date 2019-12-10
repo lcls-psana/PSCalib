@@ -330,7 +330,7 @@ class GeometryObject :
 
 #------------------------------
 
-    def get_pixel_mask(self, mbits=0377, **kwargs) :
+    def get_pixel_mask(self, mbits=0o377, **kwargs) :
         """ Returns numpy array with pixel mask for self geometry object.
 
         mbits =+1 - mask edges

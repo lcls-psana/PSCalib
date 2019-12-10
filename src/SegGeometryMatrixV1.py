@@ -346,7 +346,7 @@ class SegGeometryMatrixV1(SegGeometry) :
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0377, **kwargs) :
+    def pixel_mask_array(sp, mbits=0o377, **kwargs) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits=1 - mask edges,
         +2 - mask two central columns, 
@@ -417,7 +417,7 @@ def test_img() :
 
     X,Y = w.get_seg_xy_maps_pix()
 
-    w.print_seg_info(0377)
+    w.print_seg_info(0o377)
 
     #print 'X(pix) :\n', X
     print('X.shape =', X.shape)
@@ -468,7 +468,7 @@ def test_pix_sizes() :
 
 #------------------------------
 
-def test_mask(mbits=0377) :
+def test_mask(mbits=0o377) :
     pc2x1 = SegGeometryMatrixV1()
     X, Y = pc2x1.get_seg_xy_maps_pix_with_offset()
     mask = pc2x1.pixel_mask_array(mbits)

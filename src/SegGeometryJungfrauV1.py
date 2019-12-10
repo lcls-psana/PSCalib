@@ -332,7 +332,7 @@ class SegGeometryJungfrauV1(SegGeometry) :
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0377, **kwargs) :
+    def pixel_mask_array(sp, mbits=0o377, **kwargs) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
 
         Parameters
@@ -417,7 +417,7 @@ def test_jungfrau_img() :
 
     X,Y = w.get_seg_xy_maps_pix()
 
-    w.print_seg_info(0377)
+    w.print_seg_info(0o377)
 
     #print 'X(pix) :\n', X
     print('X.shape =', X.shape)
@@ -470,7 +470,7 @@ def test_pix_sizes() :
 
 #------------------------------
 
-def test_jungfrau_mask(mbits=0377, width=1) :
+def test_jungfrau_mask(mbits=0o377, width=1) :
     o = SegGeometryJungfrauV1()
     X, Y = o.get_seg_xy_maps_pix_with_offset()
     mask = o.pixel_mask_array(mbits, width)

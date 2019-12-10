@@ -148,7 +148,7 @@ def create_directory_v0(dir, verb=False) :
 
 #------------------------------
 
-def create_directory(dir, mode=0775) :
+def create_directory(dir, mode=0o775) :
     #print 'create_directory: %s' % dir
     if os.path.exists(dir) :
         log.debug('Directory exists: %s' % dir, __name__) 
@@ -160,7 +160,7 @@ def create_directory(dir, mode=0775) :
 
 #------------------------------
 
-def create_path(path, depth=2, mode=0775) : 
+def create_path(path, depth=2, mode=0o775) : 
     # Creates missing path for /reg/d/psdm/<INS>/<EXP>/calib/<dtype> beginning from calib
     subdirs = path.rstrip('/').rsplit('/', depth)
     log.debug('subdirs: %s' % str(subdirs), __name__)
@@ -408,7 +408,7 @@ def test_detector_full_name() :
 
 def test_evt_time() :
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
-    evt=ds.events().next()
+    evt=next(ds.events())
     print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
     t=evt_time(evt)
     print('evt_time(evt) : %.9f' % t)

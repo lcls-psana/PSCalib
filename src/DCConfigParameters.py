@@ -63,7 +63,7 @@ cp = DCConfigParameters()
 #------------------------------
 
 def test_DCConfigParameters() :
-    log.setPrintBits(0377)
+    log.setPrintBits(0o377)
     cp.readParametersFromFile()
     cp.printParameters()
     cp.log_level.setValue('debug')

@@ -19,7 +19,7 @@ clbkeys = clbs.keys()
 co = cs.get(psana.Epix.Config100aV2, src)
 vn = co.version()
 
-evt = ds.events().next()
+evt = next(ds.events())
 ekeys  = evt.keys()
 runnum = evt.run()
   
@@ -58,7 +58,7 @@ pdssrc=amap.src(str_src) # returns pdssrc for string source like ProcInfo(255.25
 
 strsrc=amap.src('cs140_0') # string source for alias like DetInfo(XppGon.0:Cspad2x2.0)
 
-evt = ds.events().next()
+evt = next(ds.events())
 runnum = evt.run()
 
 #pda = PyDetectorAccess(src, env, pbits=0)
@@ -97,7 +97,7 @@ import psana
 ds  = psana.DataSource('/reg/g/psdm/detector/data_test/types/0014-MfxEndstation.0-Rayonix.0.xtc')
 env = ds.env()
 
-evt = ds.events().next()
+evt = next(ds.events())
 evt.keys()
 evid = evt.get(psana.EventId)
 evid.time()

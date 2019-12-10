@@ -107,7 +107,7 @@ class GenericCalibPars(CalibPars) :
 
         self.reset_dicts()
 
-        self.cff    = None if self.cbase is None else CalibFileFinder(calibdir, group, 0377 if pbits else 0)
+        self.cff    = None if self.cbase is None else CalibFileFinder(calibdir, group, 0o377 if pbits else 0)
         self._ndim  = None if self.cbase is None else cbase.ndim                                            
         self._size  = None if self.cbase is None else cbase.size # it might be 0 for variable size cameras  
         self._shape = None if self.cbase is None else cbase.shape                                           
@@ -124,7 +124,7 @@ class GenericCalibPars(CalibPars) :
 
     def set_print_bits(self, pbits=0) :
         self.pbits  = pbits
-        if self.cff is not None : self.cff.pbits=0377 if pbits else 0
+        if self.cff is not None : self.cff.pbits=0o377 if pbits else 0
 
 #------------------------------
 
