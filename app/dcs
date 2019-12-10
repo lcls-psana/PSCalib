@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 
+from __future__ import print_function
 import os
 import sys
 from time import time
@@ -30,21 +31,21 @@ class DCS_CLI :
 #------------------------------
 
     def print_raw(self) :
-        print 'Command:', ' '.join(sys.argv)
-        print '  opts: ', self.opts
-        print '  defs: ', self.defs
-        print '  args: ', self.args
+        print('Command:', ' '.join(sys.argv))
+        print('  opts: ', self.opts)
+        print('  defs: ', self.defs)
+        print('  args: ', self.args)
 
 #------------------------------
 
     def print_pars(self) :
         """Prints input parameters"""
-        print 'Command:', ' '.join(sys.argv)+\
+        print('Command:', ' '.join(sys.argv)+\
               '\nlaunches %s' % self.__init__.__doc__+\
               '\nwith argument %s and optional parameters:\n' % str(self.args)+\
-              '<key>      <value>          <default>'
+              '<key>      <value>          <default>')
         for k,v in self.opts.items() :
-            print '%s %s %s' % (k.ljust(10), str(v).ljust(16), str(self.defs[k]).ljust(16))
+            print('%s %s %s' % (k.ljust(10), str(v).ljust(16), str(self.defs[k]).ljust(16)))
 
 #------------------------------
 
@@ -104,7 +105,7 @@ class DCS_CLI :
         """
         cfname = self.opts['cfname']
         if not os.path.exists(cfname) :
-            print 'WARNING: file %s does not exist' % cfname
+            print('WARNING: file %s does not exist' % cfname)
             return None
 
         root, ext = os.path.splitext(cfname)
@@ -118,7 +119,7 @@ class DCS_CLI :
         else :
             from PSCalib.NDArrIO import load_txt
             data = load_txt(cfname)
-        if verb : print 'data loaded from file: %s\n' % (cfname), data
+        if verb : print('data loaded from file: %s\n' % (cfname), data)
 
         return data
 
@@ -140,7 +141,7 @@ class DCS_CLI :
             #rms = data.std()
             fmt = '%.1f' # if rms>10 else '%.3f' if rms>0.1 else '%.6f'  
             save_txt(cfname, data, cmts=(), fmt=fmt)
-        if verb : print 'Array of constants for vers=%s is saved in file: %s' % (vers, cfname)
+        if verb : print('Array of constants for vers=%s is saved in file: %s' % (vers, cfname))
 
 #------------------------------
 
@@ -162,7 +163,7 @@ class DCS_CLI :
     def add_constants(self, par, env, src, ctype, cdir, vers, pred, succ, msg, verb) :
         """Add constants from file specified in option -f to the hdf5 file
         """
-        if verb : print 'In %s' % sys._getframe().f_code.co_name
+        if verb : print('In %s' % sys._getframe().f_code.co_name)
         data = self.load_data_file(ctype, verb)
         if data is None : return
         add_constants(data, par, env, src, ctype, cdir, vers, pred, succ, 'CLI %s'%msg, verb)
@@ -173,7 +174,7 @@ class DCS_CLI :
         """Get specified constants from the DCS and save them in npy/txt file.
            par  : psana.Event | float - tsec event time
         """
-        if verb : print 'In %s' % sys._getframe().f_code.co_name
+        if verb : print('In %s' % sys._getframe().f_code.co_name)
         data = get_constants(par, env, src, ctype, cdir, vers, verb)
         cfname = self.fname_nda(env, src, cdir)
         self.save_data_file(cfname, data, ctype, vers, verb)
@@ -184,7 +185,7 @@ class DCS_CLI :
         """Add constants from file specified in option -f to the hdf5 file fname
            par  : psana.Event | float - tsec event time
         """
-        if verb : print 'In %s' % sys._getframe().f_code.co_name
+        if verb : print('In %s' % sys._getframe().f_code.co_name)
         data = self.load_data_file(ctype, verb)
         if data is None : return
         env = None # is used to comment experiment name
@@ -196,7 +197,7 @@ class DCS_CLI :
         """Get specified constants from the DCS and save them in npy/txt file.
            par  : psana.Event | float - tsec event time
         """
-        if verb : print 'In %s' % sys._getframe().f_code.co_name
+        if verb : print('In %s' % sys._getframe().f_code.co_name)
         data = get_constants_from_file(fname, par, ctype, vers, verb)
         cfname = self.fname_nda_from_fnameh5(fname)
         self.save_data_file(cfname, data, ctype, vers, verb)
@@ -204,19 +205,19 @@ class DCS_CLI :
 #------------------------------
 
     def delete_version_from_file(self, fname, par, ctype, vers, msg, verb) :
-        if verb : print 'In %s' % sys._getframe().f_code.co_name
+        if verb : print('In %s' % sys._getframe().f_code.co_name)
         delete_version_from_file(fname, par, ctype, vers, msg, verb)
 
 #------------------------------
 
     def delete_range_from_file(self, fname, ctype, rng, msg, verb) :
-        if verb : print 'In %s' % sys._getframe().f_code.co_name
+        if verb : print('In %s' % sys._getframe().f_code.co_name)
         delete_range_from_file(fname, ctype, rng, msg, verb)
 
 #------------------------------
 
     def delete_ctype_from_file(self, fname, ctype, msg, verb) :
-        if verb : print 'In %s' % sys._getframe().f_code.co_name
+        if verb : print('In %s' % sys._getframe().f_code.co_name)
         delete_ctype_from_file(fname, ctype, msg, verb)
 
 #------------------------------
@@ -227,7 +228,7 @@ class DCS_CLI :
         nargs =len(self.args) 
         if not nargs :
             self.parser.print_usage()
-            print 'WARNING: command argument is missing. See command usage above.'
+            print('WARNING: command argument is missing. See command usage above.')
             return
 
         import psana
@@ -273,7 +274,7 @@ class DCS_CLI :
             elif 'delc' in mode : self.delete_ctype_from_file  (fname, ctype, msg, verb)
             else :
                 self.parser.print_usage()
-                print 'WARNING: unrecognized command argument "%s". See command usage above.' % self.args[0]
+                print('WARNING: unrecognized command argument "%s". See command usage above.' % self.args[0])
                 return
 
         else :
@@ -285,7 +286,7 @@ class DCS_CLI :
             elif 'delc' in mode : self.delete_ctype  (evt, env, src, ctype, cdir, msg, verb)
             else :
                 self.parser.print_usage()
-                print 'WARNING: unrecognized command argument "%s". See command usage above.' % self.args[0]
+                print('WARNING: unrecognized command argument "%s". See command usage above.' % self.args[0])
                 return
 
 #------------------------------

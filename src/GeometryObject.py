@@ -66,6 +66,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import os
@@ -161,10 +162,10 @@ class GeometryObject :
     def print_geo(self) :
         """ Print info about self geometry object
         """
-        print 'parent:%10s %2d   geo: %10s %2d' % (self.pname, self.pindex, self.oname, self.oindex) + \
+        print('parent:%10s %2d   geo: %10s %2d' % (self.pname, self.pindex, self.oname, self.oindex) + \
               '  x0:%8.0f  y0:%8.0f  z0:%8.0f' % (self.x0, self.y0, self.z0) + \
               '  rot_z:%8.3f  rot_y:%8.3f  rot_x:%8.3f' % (self.rot_z, self.rot_y, self.rot_x) + \
-              '  tilt_z:%8.5f  tilt_y:%8.5f  tilt_x:%8.5f' % (self.tilt_z, self.tilt_y, self.tilt_x)
+              '  tilt_z:%8.5f  tilt_y:%8.5f  tilt_x:%8.5f' % (self.tilt_z, self.tilt_y, self.tilt_x))
 
 #------------------------------
 
@@ -188,7 +189,7 @@ class GeometryObject :
               (self.pname, self.pindex, self.oname, self.oindex, len(self.list_of_children))
         for geo in self.list_of_children :
             msg += ' %s:%d' % (geo.oname, geo.oindex)
-        print msg
+        print(msg)
 
 #------------------------------
 
@@ -277,8 +278,8 @@ class GeometryObject :
         xac, yac, zac = None, None, None
         for ind, child in enumerate(self.list_of_children) :
             if child.oindex != ind :
-                print 'WARNING! Geometry object %s:%d has non-consequtive index in calibration file, reconst index:%d' % \
-                      (child.oname, child.oindex, ind)
+                print('WARNING! Geometry object %s:%d has non-consequtive index in calibration file, reconst index:%d' % \
+                      (child.oname, child.oindex, ind))
 
             xch, ych, zch = child.get_pixel_coords(do_tilt)
 
@@ -313,8 +314,8 @@ class GeometryObject :
         aar = None
         for ind, child in enumerate(self.list_of_children) :
             if child.oindex != ind :
-                print 'WARNING! Geometry object %s:%d has non-consequtive index in calibration file, reconst index:%d' % \
-                      (child.oname, child.oindex, ind)
+                print('WARNING! Geometry object %s:%d has non-consequtive index in calibration file, reconst index:%d' % \
+                      (child.oname, child.oindex, ind))
 
             ach = child.get_pixel_areas()
             aar = ach if ind==0 else np.vstack((aar, ach))
@@ -345,8 +346,8 @@ class GeometryObject :
         oar = None
         for ind, child in enumerate(self.list_of_children) :
             if child.oindex != ind :
-                print 'WARNING! Geometry object %s:%d has non-consequtive index in calibration file, reconst index:%d' % \
-                      (child.oname, child.oindex, ind)
+                print('WARNING! Geometry object %s:%d has non-consequtive index in calibration file, reconst index:%d' % \
+                      (child.oname, child.oindex, ind))
 
             car = child.get_pixel_mask(mbits, **kwargs)
             oar = car if ind==0 else np.vstack((oar, car))
@@ -487,7 +488,7 @@ def two2x1ToData2x2(arrTwo2x1) :
 #------------------------------
 
 if __name__ == "__main__" :
-    print 78*'='+'\n==  Tests for this module are available in pyimgalgos/src/GeometryAccess.py ==\n'+78*'='
+    print(78*'='+'\n==  Tests for this module are available in pyimgalgos/src/GeometryAccess.py ==\n'+78*'=')
     sys.exit ('End of %s' % sys.argv[0])
 
 #------------------------------

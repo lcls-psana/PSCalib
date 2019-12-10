@@ -49,6 +49,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016 by Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import os
@@ -199,7 +200,7 @@ class DCType(DCTypeI) :
                     msg = 'File: "%s"\n       has corrupted structure - group "%s" does not contain key "begin", keys: "%s"'%\
                           (grp.file.name, v.name, v.keys())
                     log.error(msg, self._name)
-                    print 'ERROR:', self._name, msg
+                    print('ERROR:', self._name, msg)
                     continue
 
                 end = v.get('end')
@@ -207,7 +208,7 @@ class DCType(DCTypeI) :
                     msg = 'File: "%s"\n       has structure - group "%s" does not contain key "end", keys: "%s"'%\
                           (grp.file.name, v.name, v.keys())
                     log.error(msg, self._name)
-                    print 'ERROR:', self._name, msg
+                    print('ERROR:', self._name, msg)
                     continue
 
                 #print 'ZZZ: name, k, v', v.name, v.keys(), v.values()
@@ -219,9 +220,9 @@ class DCType(DCTypeI) :
     def print_obj(self) :
         offset = 2 * self._offspace
         self.print_base(offset)
-        print '%s ctype    %s' % (offset, self.ctype())
-        print '%s N ranges %s' % (offset, len(self.ranges()))
-        print '%s ranges   %s' % (offset, str(self.ranges().keys()))
+        print('%s ctype    %s' % (offset, self.ctype()))
+        print('%s N ranges %s' % (offset, len(self.ranges())))
+        print('%s ranges   %s' % (offset, str(self.ranges().keys())))
 
         for k,v in self.ranges().iteritems() :
             v.print_obj()
@@ -251,9 +252,9 @@ def test_DCType() :
 
 def test() :
     log.setPrintBits(0377) 
-    if   len(sys.argv)==1  : print 'For test(s) use command: python %s <test-number=1-4>' % sys.argv[0]
+    if   len(sys.argv)==1  : print('For test(s) use command: python %s <test-number=1-4>' % sys.argv[0])
     elif(sys.argv[1]=='1') : test_DCType()        
-    else : print 'Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv
+    else : print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
 
 #------------------------------
 

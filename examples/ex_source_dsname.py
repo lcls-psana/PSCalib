@@ -2,6 +2,7 @@
 
 #------------------------------
 
+from __future__ import print_function
 def ex_source_dsname(ntest) : 
     """returns source and dataset name/file"""
 
@@ -80,10 +81,10 @@ if __name__ == "__main__" :
     import sys
 
     ntest = int(sys.argv[1]) if len(sys.argv)>1 else 1
-    print '%s\nExample # %d' % (80*'_', ntest)
+    print('%s\nExample # %d' % (80*'_', ntest))
 
     src, dsn = ex_source_dsname(ntest)
-    print 'src=%s, dsname=%s' % (src, dsn)
+    print('src=%s, dsname=%s' % (src, dsn))
 
     sys.exit(0)
 

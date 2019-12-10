@@ -1,3 +1,4 @@
+from __future__ import print_function
 #!@PYTHON@
 ####!/usr/bin/env python
 
@@ -64,8 +65,8 @@ def ex_geometry_image(ntest) :
       shape = (2,512,1024)
       #segname, segind, dx, dy = 'JFCAMERA:V1', 0, -90*1000, -3*1000
 
-    print 'fname_geo: %s' % (fname_geo)
-    print 'fname_img: %s' % (fname_img)
+    print('fname_geo: %s' % (fname_geo))
+    print('fname_img: %s' % (fname_img))
 
     t0_sec = time()
     geo = GeometryAccess(fname_geo, 0377)
@@ -74,12 +75,12 @@ def ex_geometry_image(ntest) :
         geo.move_geo(segname, segind, dx, dy, 0) # (hor, vert, z)
 
     X, Y, Z = geo.get_pixel_coords() # oname=None, oindex=0, do_tilt=True)
-    print 'GeometryAccess time = %.6f sec' % (time()-t0_sec)
+    print('GeometryAccess time = %.6f sec' % (time()-t0_sec))
     xmin = X.min()
     xmax = X.max()
     ymin = Y.min()
     ymax = Y.max()
-    print 'Image xmin=%.1f xmax=%.1f ymin=%.1f ymax=%.1f'% (xmin, xmax, ymin, ymax)
+    print('Image xmin=%.1f xmax=%.1f ymin=%.1f ymax=%.1f'% (xmin, xmax, ymin, ymax))
 
     print_ndarr(X, 'X')
     print_ndarr(Y, 'Y')
@@ -102,8 +103,8 @@ def ex_geometry_image(ntest) :
     min, max = img.min(), img.max()
     amin, amax = ave-0.5*rms, ave+2.5*rms
     #amin, amax = 600, 1300
-    print 'Image ave=%.1f rms=%.1f min=%.1f max=%.1f amin=%.1f amax=%.1f'%\
-          (ave, rms, min, max, amin, amax)
+    print('Image ave=%.1f rms=%.1f min=%.1f max=%.1f amin=%.1f amax=%.1f'%\
+          (ave, rms, min, max, amin, amax))
 
     fig, axim, axcb = gg.fig_axes(figsize=(13,12), title=fname_geo)
     imsh, cbar = gr.imshow_cbar(fig, axim, axcb, img, amin=amin, amax=amax, extent=(xmin,xmax,ymin,ymax),\
@@ -125,10 +126,10 @@ def ex_geometry_image(ntest) :
 
 if __name__ == "__main__" :
     tname = sys.argv[1] if len(sys.argv) > 1 else '1'
-    print 50*'_', '\nTest %s:' % tname
+    print(50*'_', '\nTest %s:' % tname)
     if   tname == '1' : ex_geometry_image(tname);
     elif tname == '2' : ex_geometry_image(tname)
-    else : print 'Not-recognized test name: %s' % tname
+    else : print('Not-recognized test name: %s' % tname)
     sys.exit('End of test %s' % tname)
  
 #------------------------------

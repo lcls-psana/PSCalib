@@ -56,6 +56,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016 by Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import os
@@ -274,17 +275,17 @@ class DCStore(DCStoreI) :
         offset = 1 * self._offspace
         self.print_base(offset)
         tsec = self.tscfile()
-        print '%s dettype     %s' % (offset, self.dettype())
-        print '%s detid       %s' % (offset, self.detid())
-        print '%s detname     %s' % (offset, self.detname())
-        print '%s tscfile     %s' % (offset, ('%.9f: %s' % (tsec, self.tsec_to_tstr(tsec)))\
-                                     if tsec is not None else str(tsec))
-        print '%s predecessor %s' % (offset, self.predecessor())
-        print '%s successor   %s' % (offset, self.successor())
-        print '%s ctypes'         % (offset)
+        print('%s dettype     %s' % (offset, self.dettype()))
+        print('%s detid       %s' % (offset, self.detid()))
+        print('%s detname     %s' % (offset, self.detname()))
+        print('%s tscfile     %s' % (offset, ('%.9f: %s' % (tsec, self.tsec_to_tstr(tsec)))\
+                                     if tsec is not None else str(tsec)))
+        print('%s predecessor %s' % (offset, self.predecessor()))
+        print('%s successor   %s' % (offset, self.successor()))
+        print('%s ctypes'         % (offset))
 
-        print '%s N types     %s' % (offset, len(self.ctypes()))
-        print '%s types       %s' % (offset, str(self.ctypes().keys()))
+        print('%s N types     %s' % (offset, len(self.ctypes())))
+        print('%s types       %s' % (offset, str(self.ctypes().keys())))
 
         for k,v in self.ctypes().iteritems() :
         #    #msg='Add type %s as object %s' % (k, v.ctype())
@@ -393,7 +394,7 @@ def test_DCStore_load() :
     o = DCStore('cspad-654321.h5')
     o.load()
 
-    print 50*'_','\ntest o.print()' 
+    print(50*'_','\ntest o.print()') 
     o.print_obj()
 
 #------------------------------
@@ -405,22 +406,22 @@ def test_DCStore_load_and_save() :
     o = DCStore('cspad-654321.h5')
     o.load()
 
-    print 50*'_','\ntest o.print()' 
+    print(50*'_','\ntest o.print()') 
     o.print_obj()
 
-    print 50*'_','\n test o.save(fname)' 
+    print(50*'_','\n test o.save(fname)') 
     o.save('cspad-re-loaded.h5')
 
 #------------------------------
 
 def test() :
     log.setPrintBits(0377) 
-    if len(sys.argv)==1    : print 'For test(s) use command: python %s <test-number=1-4>' % sys.argv[0]
+    if len(sys.argv)==1    : print('For test(s) use command: python %s <test-number=1-4>' % sys.argv[0])
     elif(sys.argv[1]=='1') : test_DCStore()        
     elif(sys.argv[1]=='2') : test_DCStore_save()        
     elif(sys.argv[1]=='3') : test_DCStore_load()        
     elif(sys.argv[1]=='4') : test_DCStore_load_and_save()        
-    else : print 'Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv
+    else : print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
 
 #------------------------------
 

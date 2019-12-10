@@ -80,6 +80,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016-09-23 by Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import sys
@@ -113,15 +114,15 @@ def is_good_fname(fname, verb=False) :
     metname = sys._getframe().f_code.co_name
 
     if fname is None :
-        if verb : print '%s WARNING: file name is None' % metname
+        if verb : print('%s WARNING: file name is None' % metname)
         return False
 
     if not isinstance(fname, str) :
-        if verb : print '%s WARNING: parameter fname is not str' % metname
+        if verb : print('%s WARNING: parameter fname is not str' % metname)
         return False
 
     if not os.path.exists(fname) :
-        if verb : print '%s WARNING: file %s does not exist' % (metname, fname)
+        if verb : print('%s WARNING: file %s does not exist' % (metname, fname))
         return False
 
     return True
@@ -158,11 +159,11 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
 
-    if verb : print '  %s.add_constants_to_file  ctype: %s  vers: %s'%\
-                    (metname, str_ctype, vers)
+    if verb : print('  %s.add_constants_to_file  ctype: %s  vers: %s'%\
+                    (metname, str_ctype, vers))
 
     if fname is None :
-        if verb : print 'WARNING: file name is not defined - return None'
+        if verb : print('WARNING: file name is not defined - return None')
         return
 
     tsec_ev = dcu.par_to_tsec(par)
@@ -205,7 +206,7 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
     #cr.add_history_record(rec)
 
     if verb : 
-        print 50*'_','\nIn %s:' % metname
+        print(50*'_','\nIn %s:' % metname)
         cs.print_obj()
     
     if verb : log.setPrintBits(02) # 0377
@@ -242,8 +243,8 @@ def add_constants(data, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
 
-    if verb : print '  %s.add_constants  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
-                    (metname, src, str_ctype, vers, calibdir)
+    if verb : print('  %s.add_constants  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
+                    (metname, src, str_ctype, vers, calibdir))
 
     ofn = DCFileName(env, src, calibdir)
     if verb : ofn.print_attrs()
@@ -276,7 +277,7 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
     cs = DCStore(fname)
     cs.load()
     if verb :
-        print 50*'_','\nDCMethods.get_constants_from_file calls print_obj()\n File: %s' % fname
+        print(50*'_','\nDCMethods.get_constants_from_file calls print_obj()\n File: %s' % fname)
         cs.print_obj()
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
@@ -323,8 +324,8 @@ def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.get_constants  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
-                    (metname, src, str_ctype, vers, calibdir)
+    if verb : print('  %s.get_constants  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
+                    (metname, src, str_ctype, vers, calibdir))
 
     ofn = DCFileName(env, src, calibdir)
     if verb : ofn.print_attrs()
@@ -354,8 +355,8 @@ def delete_version_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, cmt=Non
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.delete_version_from_file:  ctype: %s  vers: %s'%\
-                    (metname, str_ctype, vers)
+    if verb : print('  %s.delete_version_from_file:  ctype: %s  vers: %s'%\
+                    (metname, str_ctype, vers))
 
     if not is_good_fname(fname, verb) : return None
 
@@ -379,7 +380,7 @@ def delete_version_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, cmt=Non
     cs.save()
 
     if verb :
-        print 50*'_','\nDCStore.print_obj() after delete version %s' % str(vdel)
+        print(50*'_','\nDCStore.print_obj() after delete version %s' % str(vdel))
         cs.print_obj()
     
     return vdel
@@ -405,8 +406,8 @@ def delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.delete_version:\n  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
-                    (metname, src, str_ctype, vers, calibdir)
+    if verb : print('  %s.delete_version:\n  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
+                    (metname, src, str_ctype, vers, calibdir))
 
     ofn = DCFileName(env, src, calibdir)
     if verb : ofn.print_attrs()
@@ -433,8 +434,8 @@ def delete_range_from_file(fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, ver
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.delete_range_from_file  ctype: %s  range: %s'%\
-                    (metname, str_ctype, range)
+    if verb : print('  %s.delete_range_from_file  ctype: %s  range: %s'%\
+                    (metname, str_ctype, range))
 
     if not is_good_fname(fname, verb) : return None
 
@@ -453,7 +454,7 @@ def delete_range_from_file(fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, ver
     cs.save()
 
     if verb :
-        print 50*'_','\nDCStore.print_obj() after delete range %s' % rdel
+        print(50*'_','\nDCStore.print_obj() after delete range %s' % rdel)
         cs.print_obj()
     
     return rdel
@@ -479,8 +480,8 @@ def delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.delete_range  src: %s\n  ctype: %s\n  range: %s\n  calibdir:%s'%\
-                    (metname, src, str_ctype, range, calibdir)
+    if verb : print('  %s.delete_range  src: %s\n  ctype: %s\n  range: %s\n  calibdir:%s'%\
+                    (metname, src, str_ctype, range, calibdir))
 
     ofn = DCFileName(env, src, calibdir)
     if verb : ofn.print_attrs()
@@ -506,8 +507,8 @@ def delete_ctype_from_file(fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False) :
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.delete_ctype  ctype: %s  range: %s'%\
-                    (metname, str_ctype, range)
+    if verb : print('  %s.delete_ctype  ctype: %s  range: %s'%\
+                    (metname, str_ctype, range))
 
     if not is_good_fname(fname, verb) : return None
 
@@ -523,7 +524,7 @@ def delete_ctype_from_file(fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False) :
     cs.save()
 
     if verb :
-        print 50*'_','\nDCStore.print_obj() after delete ctype %s' % tdel
+        print(50*'_','\nDCStore.print_obj() after delete ctype %s' % tdel)
         cs.print_obj()
     
     return tdel
@@ -548,8 +549,8 @@ def delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, 
     metname = sys._getframe().f_code.co_name
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
-    if verb : print '  %s.delete_ctype  src: %s\n  ctype: %s\n  range: %s\n  calibdir:%s'%\
-                    (metname, src, str_ctype, range, calibdir)
+    if verb : print('  %s.delete_ctype  src: %s\n  ctype: %s\n  range: %s\n  calibdir:%s'%\
+                    (metname, src, str_ctype, range, calibdir))
 
     ofn = DCFileName(env, src, calibdir)
     if verb : ofn.print_attrs()
@@ -577,9 +578,9 @@ def print_content_from_file(fname) :
 
     t0_sec = time()
     cs.load()
-    print 'File content loading time (sec) = %.6f' % (time()-t0_sec)
+    print('File content loading time (sec) = %.6f' % (time()-t0_sec))
     
-    print 50*'_','\nDCStore.print_obj()' 
+    print(50*'_','\nDCStore.print_obj()') 
     cs.print_obj()
 
 #------------------------------
@@ -615,7 +616,7 @@ def get_constants_v0(*par, **opt) :
 
 def test_add_constants() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     import numpy as np
 
@@ -627,13 +628,13 @@ def test_add_constants() :
     cmt  = 'my comment: %s' % metname
     
     add_constants(nda, gevt, genv, gsrc, gctype, gcalibdir, vers, pred, succ, cmt, gverb)
-    print '%s: constants added nda.shape=%s' % (metname, nda.shape)
+    print('%s: constants added nda.shape=%s' % (metname, nda.shape))
 
 #------------------------------
 
 def test_add_constants_to_file() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     import numpy as np
 
@@ -647,13 +648,13 @@ def test_add_constants_to_file() :
 
     add_constants_to_file(data, gfname, par, genv, gctype, vers, pred, succ, cmt, gverb)
 
-    print '%s: constants added data.shape=%s' % (metname, data.shape)
+    print('%s: constants added data.shape=%s' % (metname, data.shape))
 
 #------------------------------
 
 def test_add_text() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     import numpy as np
 
@@ -665,13 +666,13 @@ def test_add_text() :
     cmt  = 'my comment: %s' % metname
     
     add_constants(data, gevt, genv, gsrc, ctype, gcalibdir, vers, pred, succ, cmt, gverb)
-    print '%s: text is added to the file' % (metname)
+    print('%s: text is added to the file' % (metname))
 
 #------------------------------
 
 def test_add_text_to_file() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     import numpy as np
 
@@ -685,13 +686,13 @@ def test_add_text_to_file() :
     
     add_constants_to_file(data, gfname, par, genv, gctype, vers, pred, succ, cmt, gverb)
     
-    print '%s: text is added to the file\n  %s' % (metname, gfname)
+    print('%s: text is added to the file\n  %s' % (metname, gfname))
 
 #------------------------------
 
 def test_add_constants_two() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     import numpy as np
 
@@ -708,129 +709,129 @@ def test_add_constants_two() :
     
     add_constants(nda1, gevt, genv, gsrc, ctype1, gcalibdir, vers, pred, succ, cmt1, gverb)
     add_constants(nda2, gevt, genv, gsrc, ctype2, gcalibdir, vers, pred, succ, cmt2, gverb)
-    print '%s: constants added ctype1=%s nda1.shape=%s' % (metname, str(ctype1), nda1.shape)
-    print '%s: constants added ctype2=%s nda2.shape=%s' % (metname, str(ctype2), nda2.shape)
+    print('%s: constants added ctype1=%s nda1.shape=%s' % (metname, str(ctype1), nda1.shape))
+    print('%s: constants added ctype2=%s nda2.shape=%s' % (metname, str(ctype2), nda2.shape))
 
 #------------------------------
 
 def test_get_constants() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     vers = None
     data = get_constants(gevt, genv, gsrc, gctype, gcalibdir, vers, gverb)
 
-    print '%s: retrieved constants for vers %s' % (metname, str(vers))
-    print 'data:\n', data
-    if isinstance(data, np.ndarray) : print 'data.shape=%s' % (str(data.shape))
+    print('%s: retrieved constants for vers %s' % (metname, str(vers)))
+    print('data:\n', data)
+    if isinstance(data, np.ndarray) : print('data.shape=%s' % (str(data.shape)))
 
 #------------------------------
 
 def test_get_constants_from_file() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     vers = None
     data = get_constants_from_file(gfname, gevt, gctype, vers, gverb)
 
-    print '%s: retrieved constants for vers %s' % (metname, str(vers))
-    print 'data:\n', data
-    if isinstance(data, np.ndarray) : print 'data.shape=%s' % (str(data.shape))
+    print('%s: retrieved constants for vers %s' % (metname, str(vers)))
+    print('data:\n', data)
+    if isinstance(data, np.ndarray) : print('data.shape=%s' % (str(data.shape)))
 
 #------------------------------
 
 def test_delete_version() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     vers = None # for default - last version
     cmt  = 'my comment: %s' % metname
     vdel = delete_version(gevt, genv, gsrc, gctype, gcalibdir, vers, cmt, gverb)
-    print '%s: deleted version %s' % (metname, str(vdel))
+    print('%s: deleted version %s' % (metname, str(vdel)))
 
 #------------------------------
 
 def test_delete_version_from_file() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     vers = None # for default - last version
     cmt  = 'my comment: %s' % metname
     vdel = delete_version_from_file(gfname, gevt, gctype, vers, cmt, gverb)
 
-    print '%s: deleted version %s' % (metname, str(vdel))
+    print('%s: deleted version %s' % (metname, str(vdel)))
 
 #------------------------------
 
 def test_delete_range() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     range = '1474587520-end'
     cmt  = 'my comment: %s' % metname
     rdel = delete_range(gevt, genv, gsrc, gctype, gcalibdir, range, cmt, gverb)
-    print '%s: deleted range %s' % (metname, str(rdel))
+    print('%s: deleted range %s' % (metname, str(rdel)))
 
 #------------------------------
 
 def test_delete_range_from_file() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     range = '1474587520-end'
     cmt  = 'my comment: %s' % metname
     rdel = delete_range_from_file(gfname, gctype, range, cmt, gverb)    
-    print '%s: deleted range %s' % (metname, str(rdel))
+    print('%s: deleted range %s' % (metname, str(rdel)))
 
 #------------------------------
 
 def test_delete_ctype() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     cmt  = 'my comment: %s' % metname
     tdel = delete_ctype(gevt, genv, gsrc, gctype, gcalibdir, cmt, gverb)
-    print '%s: deleted ctype %s' % (metname, str(tdel))
+    print('%s: deleted ctype %s' % (metname, str(tdel)))
 
 #------------------------------
 
 def test_delete_ctype_from_file() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
 
     cmt  = 'my comment: %s' % metname
     tdel = delete_ctype_from_file(gfname, gctype, cmt, gverb)
     
-    print '%s: deleted ctype %s' % (metname, str(tdel))
+    print('%s: deleted ctype %s' % (metname, str(tdel)))
 
 #------------------------------
 
 def test_print_content() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
     print_content(genv, gsrc, gcalibdir)
-    print '%s is completed' % (metname)
+    print('%s is completed' % (metname))
 
 #------------------------------
 
 def test_print_content_from_file() :
     metname = sys._getframe().f_code.co_name
-    print 20*'_', '\n%s' % metname
+    print(20*'_', '\n%s' % metname)
     print_content_from_file(gfname)
-    print '%s is completed' % (metname)
+    print('%s is completed' % (metname))
 
 #------------------------------
 
 def test_misc() :
-    print 20*'_', '\n%s' % sys._getframe().f_code.co_name
+    print(20*'_', '\n%s' % sys._getframe().f_code.co_name)
 
     import PSCalib.DCUtils as dcu
 
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    print 'get_enviroment(USER) : %s' % dcu.get_enviroment()
-    print 'get_login()          : %s' % dcu.get_login()
-    print 'get_hostname()       : %s' % dcu.get_hostname()
-    print 'get_cwd()            : %s' % dcu.get_cwd()
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
+    print('get_enviroment(USER) : %s' % dcu.get_enviroment())
+    print('get_login()          : %s' % dcu.get_login())
+    print('get_hostname()       : %s' % dcu.get_hostname())
+    print('get_cwd()            : %s' % dcu.get_cwd())
 
 #------------------------------
 
@@ -870,7 +871,7 @@ def do_test() :
     #log.setPrintBits(0377)
 
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
-    print 50*'_', '\nTest %s:' % tname
+    print(50*'_', '\nTest %s:' % tname)
     t0_sec = time()
     if   tname == '0' : test_misc(); 
 
@@ -892,7 +893,7 @@ def do_test() :
     elif tname == '17': test_delete_range_from_file()
     elif tname == '18': test_delete_ctype_from_file()
 
-    else : print 'Not-recognized test name: %s' % tname
+    else : print('Not-recognized test name: %s' % tname)
     msg = 'End of test %s, consumed time (sec) = %.6f' % (tname, time()-t0_sec)
     sys.exit(msg)
  

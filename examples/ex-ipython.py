@@ -1,3 +1,4 @@
+from __future__ import print_function
 import psana
 
 ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0019-XppGon.0-Epix100a.0.xtc')
@@ -35,7 +36,7 @@ import psana
 src = psana.Source('XppGon.0:Epix100a.0')
 ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0019-XppGon.0-Epix100a.0.xtc')
 co = ds.env().configStore().get(psana.Epix.Config100aV2, src)
-print 'Epix detector Id: %d' % co.version()
+print('Epix detector Id: %d' % co.version())
 
 #------------------------------
 
@@ -109,9 +110,9 @@ src=psana.Source(':Evr.')
 for i, evt in enumerate(ds.events()):
         o = evt.get(psana.EvrData.DataV4, src)
         if   o is None : o = evt.get(psana.EvrData.DataV3, src)
-        elif o is None : print 'EvrData.DataV4,3 is not found in event %d' % i
+        elif o is None : print('EvrData.DataV4,3 is not found in event %d' % i)
         lst_ts  = [(eco.timestampHigh(), eco.timestampLow()) for eco in o.fifoEvents()]
-        print 'Event %3d timestampHigh(), eco.timestampLow():' % i, lst_ts
+        print('Event %3d timestampHigh(), eco.timestampLow():' % i, lst_ts)
         if i>10 : break
 
 #------------------------------

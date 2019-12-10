@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 
+from __future__ import print_function
 import os
 import sys
 from time import time
@@ -181,48 +182,48 @@ def batch_job_ids(status=None, user=None, qname=None, addopts='') : # qname='psn
 
 def test_subproc(cmd='ls -ltra', env=None, shell=False, do_wait=True) :
     out, err = subproc(cmd, env, shell, do_wait)
-    print 'Command: "%s"' % cmd
-    print 'out:\n"%s"' % out
-    print 'err:\n"%s"' % err
+    print('Command: "%s"' % cmd)
+    print('out:\n"%s"' % out)
+    print('err:\n"%s"' % err)
  
 #------------------------------
 
 def test_batch_job_submit(cmd='bsub -q psnehq -o log-%J.txt ls -l', env=None, shell=False) :
     out, err, jobid = batch_job_submit(cmd, env, shell)
-    print 'Command: "%s"' % cmd
-    print 'out:\n"%s"' % out
-    print 'err:\n"%s"' % err
-    print 'jobid: "%s"' % jobid
-    print 'check log file log-%s.txt' % jobid
+    print('Command: "%s"' % cmd)
+    print('out:\n"%s"' % out)
+    print('err:\n"%s"' % err)
+    print('jobid: "%s"' % jobid)
+    print('check log file log-%s.txt' % jobid)
 
 #------------------------------
 
 def test_number_of_batch_jobs(user=None, qname='psnehq', addopts='') :
     njobs = number_of_batch_jobs(user, qname, addopts)
-    print 'user   : %s' % str(user)
-    print 'qname  : %s' % qname
-    print 'addopts: %s' % addopts
-    print 'njobs  : %d' % njobs
+    print('user   : %s' % str(user))
+    print('qname  : %s' % qname)
+    print('addopts: %s' % addopts)
+    print('njobs  : %d' % njobs)
 
 #------------------------------
 
 def test_batch_job_kill(jobid, qname='psnehq', addopts='') :
     out, err = batch_job_kill(jobid, qname, addopts)
-    print 'qname  : %s'  % qname
-    print 'jobid  : "%s"' % jobid
-    print 'addopts: %s'% addopts
-    print 'out:\n"%s"' % out
-    print 'err:\n"%s"' % err
+    print('qname  : %s'  % qname)
+    print('jobid  : "%s"' % jobid)
+    print('addopts: %s'% addopts)
+    print('out:\n"%s"' % out)
+    print('err:\n"%s"' % err)
 
 #------------------------------
 
 def test_batch_job_ids(status=None, user=None, qname=None, addopts='') :
     job_ids = batch_job_ids(status, user, qname, addopts) 
-    print 'status : %s' % status
-    print 'user   : %s' % user
-    print 'qname  : %s' % qname
-    print 'addopts: %s' % addopts
-    print 'job ids: %s' % str(job_ids)
+    print('status : %s' % status)
+    print('user   : %s' % user)
+    print('qname  : %s' % qname)
+    print('addopts: %s' % addopts)
+    print('job ids: %s' % str(job_ids))
 
 #------------------------------
 #------------------------------
@@ -238,7 +239,7 @@ def usage() :
 #------------------------------
 
 if __name__ == "__main__" :
-    print 80*'_'
+    print(80*'_')
     tname = sys.argv[1] if len(sys.argv)>1 else '1'
     t0_sec = time()
 
@@ -249,9 +250,9 @@ if __name__ == "__main__" :
     elif tname=='5': test_batch_job_ids(status=None, user=None, qname='psnehq')
     elif tname=='6': test_batch_job_ids(status='SSUSP', user=None, qname=None)
     else : sys.exit ('Not recognized test name: "%s"' % tname)
-    print 'Test %s time (sec) = %.3f' % (tname, time()-t0_sec)
+    print('Test %s time (sec) = %.3f' % (tname, time()-t0_sec))
 
-    if len(sys.argv)<2 : print usage()
+    if len(sys.argv)<2 : print(usage())
 
     sys.exit ('End of %s' % sys.argv[0])
 

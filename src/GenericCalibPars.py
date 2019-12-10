@@ -56,6 +56,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import sys
@@ -140,7 +141,7 @@ class GenericCalibPars(CalibPars) :
             + '\n  fnrepo     : %s' % self.fnrepo   \
             + '\n  tsec       : %s' % self.tsec     \
             + '\n  pbits      : %s' % self.pbits    
-        print inf
+        print(inf)
 
 #------------------------------
 
@@ -174,16 +175,16 @@ class GenericCalibPars(CalibPars) :
         if self.cbase is None : return None
 
         tname = gu.dic_calib_type_to_name[ctype]
-        if self.pbits : print 'INFO %s: load default constants of type %s' % (self.msgh(3), tname)
+        if self.pbits : print('INFO %s: load default constants of type %s' % (self.msgh(3), tname))
 
         if ctype == gu.COMMON_MODE :
             self.dic_status[ctype] = gu.DEFAULT
             return np.array(self.cbase.cmod, dtype = gu.dic_calib_type_to_dtype[ctype])
 
         if self.cbase.size == 0 :
-            if self.pbits : print 'WARNING %s: default constants of type %s' % (self.msgh(3), tname) \
+            if self.pbits : print('WARNING %s: default constants of type %s' % (self.msgh(3), tname) \
                                   + ' are not available for variable size cameras.'\
-                                  + '\n  Check if the file with calibration constanrs is available in calib directory.'
+                                  + '\n  Check if the file with calibration constanrs is available in calib directory.')
             return None
 
         self.dic_status[ctype] = gu.DEFAULT
@@ -220,25 +221,25 @@ class GenericCalibPars(CalibPars) :
             return self.dic_constants[ctype]
 
         tname = gu.dic_calib_type_to_name[ctype]
-        if self.pbits : print 'INFO %s: load constants of type %s' % (self.msgh(3), tname)
+        if self.pbits : print('INFO %s: load constants of type %s' % (self.msgh(3), tname))
 
         fname = self.cff.findCalibFile(str(self.source), tname, self.runnum)
 
         if fname == '' :
-            if self.pbits : print 'WARNING %s: calibration file for type %s is not found.' % (self.msgh(3), tname)
+            if self.pbits : print('WARNING %s: calibration file for type %s is not found.' % (self.msgh(3), tname))
             self.dic_status[ctype] = gu.NONFOUND
             nda = self.dic_constants[ctype] = self.constants_default(ctype)
             return nda
 
-        if self.pbits : print self.msgw() % tname
-        if self.pbits : print 'fname_name: %s' % fname
+        if self.pbits : print(self.msgw() % tname)
+        if self.pbits : print('fname_name: %s' % fname)
 
         nda = None 
         try :
             #nda = np.loadtxt(fname, dtype=gu.dic_calib_type_to_dtype[ctype])
             nda = np.array(load_txt(fname), dtype=gu.dic_calib_type_to_dtype[ctype])
         except :
-            if self.pbits : print 'WARNING %s: calibration file for type %s is unreadable.' % (self.msgh(3), tname)
+            if self.pbits : print('WARNING %s: calibration file for type %s is unreadable.' % (self.msgh(3), tname))
             self.dic_status[ctype] = gu.UNREADABLE
             nda = self.dic_constants[ctype] = self.constants_default(ctype)
             return nda
@@ -285,8 +286,8 @@ class GenericCalibPars(CalibPars) :
         verb = self.pbits & 128
         if self.pbits :
             self.print_attrs()
-            print '%s.constants_dcs  tsec: %s  ctype: %s  vers: %s  verb: %s\n  fname: %s' %\
-                  (self.name, str(self.tsec), str(ctype), str(vers), str(verb), self.fnexpc)
+            print('%s.constants_dcs  tsec: %s  ctype: %s  vers: %s  verb: %s\n  fname: %s' %\
+                  (self.name, str(self.tsec), str(ctype), str(vers), str(verb), self.fnexpc))
 
         return get_constants_from_file(self.fnrepo, self.tsec, ctype, vers, verb)
 
@@ -320,7 +321,7 @@ class GenericCalibPars(CalibPars) :
             i_status = self.dic_status[ctype]
             s_status = gu.dic_calib_status_value_to_name[i_status]
             s_ctype  = gu.dic_calib_type_to_name[ctype]
-            print '%s.constants  ctype:%s  status:%s' % (self.name, s_ctype, s_status)
+            print('%s.constants  ctype:%s  status:%s' % (self.name, s_ctype, s_status))
             print_ndarr(arr, name='    arr', first=0, last=5)
 
         return arr
@@ -408,7 +409,7 @@ class GenericCalibPars(CalibPars) :
     def ndim(self, ctype=gu.PEDESTALS) :
         """Returns ndim
         """
-        if self.pbits & 128 : print self.msgw() % 'ndim  (%s)' % gu.dic_calib_type_to_name[ctype]
+        if self.pbits & 128 : print(self.msgw() % 'ndim  (%s)' % gu.dic_calib_type_to_name[ctype])
         if ctype == gu.COMMON_MODE : return 1
         else :
             self.retrieve_shape()
@@ -419,7 +420,7 @@ class GenericCalibPars(CalibPars) :
     def shape(self, ctype=gu.PEDESTALS) :
         """Returns shape
         """
-        if self.pbits & 128 : print self.msgw() % 'shape (%s)' % gu.dic_calib_type_to_name[ctype]
+        if self.pbits & 128 : print(self.msgw() % 'shape (%s)' % gu.dic_calib_type_to_name[ctype])
         if ctype == gu.COMMON_MODE : return self.cbase.shape_cm
         else :
             self.retrieve_shape()
@@ -430,7 +431,7 @@ class GenericCalibPars(CalibPars) :
     def size(self, ctype=gu.PEDESTALS) :
         """Returns size
         """
-        if self.pbits & 128 : print self.msgw() % 'size  (%s)' % gu.dic_calib_type_to_name[ctype]
+        if self.pbits & 128 : print(self.msgw() % 'size  (%s)' % gu.dic_calib_type_to_name[ctype])
         if ctype == gu.COMMON_MODE : return self.cbase.size_cm
         else :
             self.retrieve_shape()
@@ -441,7 +442,7 @@ class GenericCalibPars(CalibPars) :
     def status(self, ctype=gu.PEDESTALS) :
         """Returns status
         """
-        if self.pbits & 128 : print self.msgw() % 'status(%s)' % gu.dic_calib_type_to_name[ctype]
+        if self.pbits & 128 : print(self.msgw() % 'status(%s)' % gu.dic_calib_type_to_name[ctype])
         return self.dic_status[ctype]
 
 #------------------------------

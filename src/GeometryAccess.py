@@ -103,6 +103,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import os
@@ -140,7 +141,7 @@ class GeometryAccess :
         self.valid = False
 
         if path is None or not os.path.exists(path) :
-            if pbits : print '%s: geometry file "%s" does not exist' % (self.__class__.__name__, path)
+            if pbits : print('%s: geometry file "%s" does not exist' % (self.__class__.__name__, path))
             return
 
         self.load_pars_from_file()
@@ -185,12 +186,12 @@ class GeometryAccess :
         self.dict_of_comments = {}
         self.list_of_geos = []
 
-        if self.pbits & 32 : print 'Load file: %s' % self.path
+        if self.pbits & 32 : print('Load file: %s' % self.path)
 
         f=open(self.path,'r')
         for linef in f :
             line = linef.strip('\n')
-            if self.pbits & 128 : print line
+            if self.pbits & 128 : print(line)
             if not line : continue   # discard empty strings
             if line[0] == '#' :      # process line of comments
                 self._add_comment_to_dict(line)
@@ -210,18 +211,18 @@ class GeometryAccess :
         """        
         self.valid = False
         if not isinstance(s, str) :
-            if pbits : print '%s.load_pars_from_str input parameter is not a str, s: %s' % (self.__class__.__name__, str(s))
+            if pbits : print('%s.load_pars_from_str input parameter is not a str, s: %s' % (self.__class__.__name__, str(s)))
             return
             
         self.reset_cash()
         self.dict_of_comments = {}
         self.list_of_geos = []
 
-        if self.pbits & 32 : print 'Load text: %s' % s
+        if self.pbits & 32 : print('Load text: %s' % s)
 
         for linef in s.split('\n') :
             line = linef.strip('\n')
-            if self.pbits & 128 : print line
+            if self.pbits & 128 : print(line)
             if not line : continue   # discard empty strings
             if line[0] == '#' :      # process line of comments
                 self._add_comment_to_dict(line)
@@ -239,7 +240,7 @@ class GeometryAccess :
         """        
         if not self.valid : return
 
-        if self.pbits & 32 : print 'Save file: %s' % path
+        if self.pbits & 32 : print('Save file: %s' % path)
 
         txt = ''
         # save comments
@@ -258,7 +259,7 @@ class GeometryAccess :
         f.write(txt)
         f.close()
 
-        if self.pbits & 64 : print txt
+        if self.pbits & 64 : print(txt)
     
     #------------------------------
     
@@ -290,7 +291,7 @@ class GeometryAccess :
         keys = ['pname','pindex','oname','oindex','x0','y0','z0','rot_z','rot_y','rot_x','tilt_z','tilt_y','tilt_x']
         f = line.split()
         if len(f) != len(keys) :
-            print 'The list length for fields from file: %d is not equal to expected: %d' % (len(f), len(keys))
+            print('The list length for fields from file: %d is not equal to expected: %d' % (len(f), len(keys)))
             return
     
         vals = [str  (f[0]),
@@ -350,7 +351,7 @@ class GeometryAccess :
             geo.set_parent(parent)
             parent.add_child(geo)
 
-            if self.pbits & 16 : print 'geo:%s:%d has parent:%s:%d' % (geo.oname, geo.oindex, parent.oname, parent.oindex)
+            if self.pbits & 16 : print('geo:%s:%d has parent:%s:%d' % (geo.oname, geo.oindex, parent.oname, parent.oindex))
 
     #------------------------------
 
@@ -392,7 +393,7 @@ class GeometryAccess :
 
         geo = self.get_top_geo() if oname is None else self.get_geo(oname, oindex)
         if self.pbits & 8 :
-            print 'get_pixel_coords(...) for geo:',
+            print('get_pixel_coords(...) for geo:', end=' ')
             geo.print_geo_children();
         
         self.X_old, self.Y_old, self.Z_old = geo.get_pixel_coords(do_tilt) 
@@ -491,7 +492,7 @@ class GeometryAccess :
     
     def print_list_of_geos(self) :
         ss = '\nprint_list_of_geos():'
-        if len(self.list_of_geos) == 0 : print '%s List_of_geos is empty...' % ss
+        if len(self.list_of_geos) == 0 : print('%s List_of_geos is empty...' % ss)
         if not self.valid : return
         for geo in self.list_of_geos : geo.print_geo()
 
@@ -499,18 +500,18 @@ class GeometryAccess :
     
     def print_list_of_geos_children(self) :
         ss = '\nprint_list_of_geos_children():'
-        if len(self.list_of_geos) == 0 : print '%s List_of_geos is empty...' % ss
+        if len(self.list_of_geos) == 0 : print('%s List_of_geos is empty...' % ss)
         if not self.valid : return
         for geo in self.list_of_geos : geo.print_geo_children()
 
     #------------------------------
     
     def print_comments_from_dict(self) :
-        print '\nprint_comments_from_dict():'
+        print('\nprint_comments_from_dict():')
         if not self.valid : return
         #for k,v in self.dict_of_comments.iteritems():
         for k in sorted(self.dict_of_comments):
-            print 'key: %3d  val: %s' % (k, self.dict_of_comments[k])
+            print('key: %3d  val: %s' % (k, self.dict_of_comments[k]))
 
     #------------------------------
 
@@ -520,10 +521,10 @@ class GeometryAccess :
         if not self.valid : return
         X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt=True)
 
-        print 'size=', X.size
-        print 'X: %s...'% ', '.join(['%10.1f'%v for v in X.flatten()[0:9]])
-        print 'Y: %s...'% ', '.join(['%10.1f'%v for v in Y.flatten()[0:9]])
-        print 'Z: %s...'% ', '.join(['%10.1f'%v for v in Z.flatten()[0:9]])
+        print('size=', X.size)
+        print('X: %s...'% ', '.join(['%10.1f'%v for v in X.flatten()[0:9]]))
+        print('Y: %s...'% ', '.join(['%10.1f'%v for v in Y.flatten()[0:9]]))
+        print('Z: %s...'% ', '.join(['%10.1f'%v for v in Z.flatten()[0:9]]))
 
     #------------------------------
 
@@ -682,10 +683,10 @@ class GeometryAccess :
         """
         if not self.valid : return None
         psf = np.array(self.get_psf())
-        print 'print_psf(): psf.shape: %s \npsf vectors:' % (str(psf.shape)) 
+        print('print_psf(): psf.shape: %s \npsf vectors:' % (str(psf.shape))) 
         for (px,py,pz), (sx,xy,xz), (fx,fy,fz) in psf:
-            print '    p=(%12.2f, %12.2f, %12.2f),    s=(%8.2f, %8.2f, %8.2f)   f=(%8.2f, %8.2f, %8.2f)' \
-                  % (px,py,pz,  sx,xy,xz,  fx,fy,fz)
+            print('    p=(%12.2f, %12.2f, %12.2f),    s=(%8.2f, %8.2f, %8.2f)   f=(%8.2f, %8.2f, %8.2f)' \
+                  % (px,py,pz,  sx,xy,xz,  fx,fy,fz))
 
 #------------------------------
 #------ Global Method(s) ------
@@ -707,7 +708,7 @@ def img_from_pixel_arrays(iX, iY, W=None, dtype=np.float32, vbase=0) :
     or (W is not None and iX.size !=  W.size) :
         msg = 'img_from_pixel_arrays(): WARNING input array sizes are different;' \
             + ' iX.size=%d, iY.size=%d, W.size=%d' % (iX.size, iY.size, W.size)
-        print msg
+        print(msg)
         return img_default()
 
     iXfl = iX.flatten()
@@ -742,11 +743,11 @@ def test_access(geometry) :
     geometry.print_list_of_geos()
     geometry.print_list_of_geos_children()
 
-    print '\nTOP GEO:'
+    print('\nTOP GEO:')
     top_geo = geometry.get_top_geo()
     top_geo.print_geo_children()
 
-    print '\nINTERMEDIATE GEO (QUAD):'
+    print('\nINTERMEDIATE GEO (QUAD):')
     geo = geometry.get_geo('QUAD:V1', 0) 
     #geo = geometry.get_top_geo() 
     geo.print_geo_children()
@@ -754,37 +755,37 @@ def test_access(geometry) :
     t0_sec = time()
     X,Y,Z = geo.get_pixel_coords(do_tilt=True)
     #X,Y = geo.get_2d_pixel_coords()
-    print 'X:\n', X
-    print 'Consumed time to get 3d pixel coordinates = %7.3f sec' % (time()-t0_sec)
-    print 'Geometry object: %s:%d X.shape:%s' % (geo.oname, geo.oindex, str(X.shape))
+    print('X:\n', X)
+    print('Consumed time to get 3d pixel coordinates = %7.3f sec' % (time()-t0_sec))
+    print('Geometry object: %s:%d X.shape:%s' % (geo.oname, geo.oindex, str(X.shape)))
 
-    print '\nTest of print_pixel_coords() for quad:'
+    print('\nTest of print_pixel_coords() for quad:')
     geometry.print_pixel_coords('QUAD:V1', 1)
-    print '\nTest of print_pixel_coords() for CSPAD:'
+    print('\nTest of print_pixel_coords() for CSPAD:')
     geometry.print_pixel_coords()
 
-    print '\nTest of get_pixel_areas() for QUAD:'
+    print('\nTest of get_pixel_areas() for QUAD:')
     A = geo.get_pixel_areas()
-    print 'Geometry object: %s:%d A.shape:%s' % (geo.oname, geo.oindex, str(A.shape))
-    print 'A[0,0:5,190:198]:\n', A[0,0:5,190:198]
+    print('Geometry object: %s:%d A.shape:%s' % (geo.oname, geo.oindex, str(A.shape)))
+    print('A[0,0:5,190:198]:\n', A[0,0:5,190:198])
  
-    print '\nTest of get_pixel_areas() for CSPAD:'
+    print('\nTest of get_pixel_areas() for CSPAD:')
     A = top_geo.get_pixel_areas()
-    print 'Geometry object: %s:%d A.shape:%s' % (geo.oname, geo.oindex, str(A.shape))
-    print 'A[0,0,0:5,190:198]:\n', A[0,0,0:5,190:198]
+    print('Geometry object: %s:%d A.shape:%s' % (geo.oname, geo.oindex, str(A.shape)))
+    print('A[0,0,0:5,190:198]:\n', A[0,0,0:5,190:198])
 
-    print '\nTest of get_size_geo_array()'
-    print 'for QUAD : %d' % geo.get_size_geo_array()
-    print 'for CSPAD: %d' % top_geo.get_size_geo_array()
+    print('\nTest of get_size_geo_array()')
+    print('for QUAD : %d' % geo.get_size_geo_array())
+    print('for CSPAD: %d' % top_geo.get_size_geo_array())
 
-    print '\nTest of get_pixel_scale_size()'
-    print 'for QUAD    : %8.2f' % geo.get_pixel_scale_size()
-    print 'for CSPAD   : %8.2f' % top_geo.get_pixel_scale_size()
-    print 'for geometry: %8.2f' % geometry.get_pixel_scale_size()
+    print('\nTest of get_pixel_scale_size()')
+    print('for QUAD    : %8.2f' % geo.get_pixel_scale_size())
+    print('for CSPAD   : %8.2f' % top_geo.get_pixel_scale_size())
+    print('for geometry: %8.2f' % geometry.get_pixel_scale_size())
 
-    print '\nTest of get_dict_of_comments():'
+    print('\nTest of get_dict_of_comments():')
     d = geometry.get_dict_of_comments()
-    print "d[0] = %s" % d[0]
+    print("d[0] = %s" % d[0])
 
 #------------------------------
 
@@ -799,7 +800,7 @@ def test_plot_quad(geometry) :
     arr.shape = (8,185,388)
     amp_range = (0,185+388)
  
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
+    print('iX, iY, W shape:', iX.shape, iY.shape, arr.shape) 
     img = img_from_pixel_arrays(iX,iY,W=arr)
 
     gg.plotImageLarge(img,amp_range=amp_range)
@@ -819,7 +820,7 @@ def test_mask_quad(geometry, mbits) :
     arr.shape = (8,185,388)
     amp_range = (-1,2)
  
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
+    print('iX, iY, W shape:', iX.shape, iY.shape, arr.shape) 
     img = img_from_pixel_arrays(iX, iY, W=arr, vbase=0.5)
 
     gg.plotImageLarge(img,amp_range=amp_range)
@@ -844,13 +845,13 @@ def test_plot_cspad(geometry, fname_data, amp_range=(0,0.5)) :
     iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc, do_tilt=True)
 
     ixo, iyo = geometry.point_coord_indexes(xy0_off_pix=xyc, do_tilt=True)
-    print 'Detector origin indexes ixo, iyo:', ixo, iyo
+    print('Detector origin indexes ixo, iyo:', ixo, iyo)
 
     root, ext = os.path.splitext(fname_data)
     arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float) 
     arr.shape= (4,8,185,388)
 
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape
+    print('iX, iY, W shape:', iX.shape, iY.shape, arr.shape)
 
     arr.shape = iX.shape
     img = img_from_pixel_arrays(iX, iY, W=arr)
@@ -921,7 +922,7 @@ def test_cspad2x2() :
     arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float) 
     arr.shape= (185,388,2)
 
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
+    print('iX, iY, W shape:', iX.shape, iY.shape, arr.shape) 
     img = img_from_pixel_arrays(iX,iY,W=arr)
 
     axim = gg.plotImageLarge(img,amp_range=amp_range)
@@ -949,7 +950,7 @@ def test_epix100a() :
     root, ext = os.path.splitext(fname_data)
     arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float) 
 
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
+    print('iX, iY, W shape:', iX.shape, iY.shape, arr.shape) 
     img = img_from_pixel_arrays(iX,iY,W=arr)
 
     axim = gg.plotImageLarge(img,amp_range=amp_range)
@@ -984,9 +985,9 @@ def test_cspad_xy_at_z() :
     #ave, rms = arr.mean(), arr.std()
     #amp_range = (ave-rms, ave+3*rms)
     amp_range = (0, 1000)
-    print 'amp_range', amp_range
+    print('amp_range', amp_range)
 
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
+    print('iX, iY, W shape:', iX.shape, iY.shape, arr.shape) 
     img = img_from_pixel_arrays(iX,iY,W=arr)
 
     axim = gg.plotImageLarge(img,amp_range=amp_range)
@@ -1032,19 +1033,19 @@ if __name__ == "__main__" :
     #fname_data     = basedir + 'cspad-arr-cxid2714-r0023-lysozyme-rings.npy'
     #amp_range = (0,500)
 
-    print '%s\nfname_geometry: %s\nfname_data: %s' %(120*'_', fname_geometry, fname_geometry)
+    print('%s\nfname_geometry: %s\nfname_data: %s' %(120*'_', fname_geometry, fname_geometry))
 
     geometry = GeometryAccess(fname_geometry, 0)
 
     msg = 'Use command: sys.argv[0] <num>, wher num=1,2,3,...,10'
 
-    if len(sys.argv)==1   : print 'App needs in input parameter.' + msg
+    if len(sys.argv)==1   : print('App needs in input parameter.' + msg)
     elif sys.argv[1]=='1' : test_access(geometry)
     elif sys.argv[1]=='2' : test_plot_quad(geometry)
     elif sys.argv[1]=='3' : test_plot_cspad(geometry, fname_data, amp_range)
     elif sys.argv[1]=='4' : test_img_default()
     elif sys.argv[1]=='5' :
-        print 'Init GeometryAccess is silent? (see below)'
+        print('Init GeometryAccess is silent? (see below)')
         ga0 = GeometryAccess(fname_geometry, 0)
     elif sys.argv[1]=='6' : ga0377 = GeometryAccess(fname_geometry, 0377)
     elif sys.argv[1]=='7' : test_save_pars_in_file(geometry)
@@ -1055,7 +1056,7 @@ if __name__ == "__main__" :
     elif sys.argv[1]=='12': test_epix100a()
     elif sys.argv[1]=='13': geometry.print_comments_from_dict()
     elif sys.argv[1]=='14': test_cspad_xy_at_z()
-    else : print 'Wrong input parameter.' + msg
+    else : print('Wrong input parameter.' + msg)
 
     sys.exit ('End of %s' % sys.argv[0])
 

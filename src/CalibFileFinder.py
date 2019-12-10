@@ -48,6 +48,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import os
@@ -112,7 +113,7 @@ class CalibFile :
         return self.end
 
     def set_invalid(self, msg) :
-        if self.pbits : print msg
+        if self.pbits : print(msg)
         self.valid = False
 
     def __cmp__(self, other) :        
@@ -157,7 +158,7 @@ def deploy_calib_array(cdir, src, type, run_start, run_end=None, arr=None, dcmts
         fname_bkp = '%s-%s'%(fname, gu.str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'))
         os.system('cp %s %s'%(fname, fname_bkp))
         if pbits & 1 :
-            print 'Existing file %s\nis backed-up  %s' % (fname, fname_bkp)
+            print('Existing file %s\nis backed-up  %s' % (fname, fname_bkp))
 
     # extend dictionary for other parameters
     d = dict(dcmts)
@@ -171,21 +172,21 @@ def deploy_calib_array(cdir, src, type, run_start, run_end=None, arr=None, dcmts
     
     # save n-dimensional numpy array in the tmp text file
     fntmp = tempfile.NamedTemporaryFile(mode='r+b',suffix='.data')
-    if pbits & 2 : print 'Save constants in tmp file: %s' % fntmp.name
+    if pbits & 2 : print('Save constants in tmp file: %s' % fntmp.name)
     save_txt(fntmp.name, arr, cmts, fmt='%.1f')
 
-    if pbits & 1 : print 'Deploy constants in file: %s' % fname
+    if pbits & 1 : print('Deploy constants in file: %s' % fname)
     # USE cat in stead of cp and move in order to create output file with correct ACL permissions
     cmd_cat = 'cat %s > %s' % (fntmp.name, fname)    
     #os.system(cmd_cat)
     stream = os.popen(cmd_cat)
     resp = stream.read()
     msg = 'Command: %s\n - resp: %s' % (cmd_cat, resp)
-    if pbits & 2 : print msg
+    if pbits & 2 : print(msg)
 
     # add record to the HISTORY file
     hrec = _history_record(d)
-    if pbits & 1 : print 'Add record: %sto the file: %s' % (hrec, path_history)
+    if pbits & 1 : print('Add record: %sto the file: %s' % (hrec, path_history))
     gu.save_textfile(hrec, path_history, mode='a')
 
 #------------------------------
@@ -206,7 +207,7 @@ def deploy_calib_file(cdir, src, type, run_start, run_end=None, ifname='', dcmts
         fname_bkp = '%s-%s'%(fname, gu.str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'))
         os.system('cp %s %s'%(fname, fname_bkp))
         if pbits & 1 :
-            print 'Existing file %s\nis backed-up  %s' % (fname, fname_bkp)
+            print('Existing file %s\nis backed-up  %s' % (fname, fname_bkp))
 
     # extend dictionary for other parameters
     d = dict(dcmts)
@@ -216,18 +217,18 @@ def deploy_calib_file(cdir, src, type, run_start, run_end=None, ifname='', dcmts
     d['src']   = src
     d['ctype'] = type
 
-    if pbits & 1 : print 'Deploy constants in file: %s' % fname
+    if pbits & 1 : print('Deploy constants in file: %s' % fname)
     # USE cat in stead of cp and move in order to create output file with correct ACL permissions
     cmd_cat = 'cat %s > %s' % (ifname, fname)    
     #os.system(cmd_cat)
     stream = os.popen(cmd_cat)
     resp = stream.read()
     msg = 'Command: %s\n - resp: %s' % (cmd_cat, resp)
-    if pbits & 2 : print msg
+    if pbits & 2 : print(msg)
 
     # add record to the HISTORY file
     hrec = _history_record(d)
-    if pbits & 1 : print 'Add record: %sto the file: %s' % (hrec, path_history)
+    if pbits & 1 : print('Add record: %sto the file: %s' % (hrec, path_history))
     gu.save_textfile(hrec, path_history, mode='a')
 
 #------------------------------
@@ -273,7 +274,7 @@ class CalibFileFinder :
             dettype = gu.det_type_from_source(src)
             self.group = gu.dic_det_type_to_calib_group.get(dettype)
             if self.group is None :
-                if self.pbits & 1 : print 'WARNING! CALIBRATION GROUP IS NOT FOUND FOR SOURCE %s' % src
+                if self.pbits & 1 : print('WARNING! CALIBRATION GROUP IS NOT FOUND FOR SOURCE %s' % src)
                 return False
         return True
 
@@ -282,7 +283,7 @@ class CalibFileFinder :
         """Returns calibration file name.
         """
         if os.path.basename(self.cdir.rstrip('/')) != 'calib' :
-            if self.pbits & 1  : print 'WARNING! NOT calib DIRECTORY: %s' % self.cdir
+            if self.pbits & 1  : print('WARNING! NOT calib DIRECTORY: %s' % self.cdir)
             return None
 
         # there have been problems with calib-dir mounts on the mon nodes.
@@ -290,18 +291,18 @@ class CalibFileFinder :
         #assert os.path.isdir(self.cdir), 'psana calib-dir must exist: '+self.cdir
 
         if not os.path.isdir(self.cdir) :
-            print 'WARNING! psana calib-dir is not found: %s' % self.cdir
+            print('WARNING! psana calib-dir is not found: %s' % self.cdir)
             return None
 
         if not self._setGroup(src) :
             return None
 
         if run_start < 0 :
-            if self.pbits & 1  : print 'WARNING! START RUN NUMBER IS NEGATIVE: %d' % run_start
+            if self.pbits & 1  : print('WARNING! START RUN NUMBER IS NEGATIVE: %d' % run_start)
             return None
 
         if run_start > 9999 :
-            if self.pbits & 1  : print 'WARNING! START RUN NUMBER EXCEEDS 4-DIGITS: %d' % run_start
+            if self.pbits & 1  : print('WARNING! START RUN NUMBER EXCEEDS 4-DIGITS: %d' % run_start)
             return None
 
         if run_end is None :
@@ -310,15 +311,15 @@ class CalibFileFinder :
         else :
 
           if run_end < 0 :
-            if self.pbits & 1  : print 'WARNING! END RUN NUMBER IS NEGATIVE: %d' % run_end
+            if self.pbits & 1  : print('WARNING! END RUN NUMBER IS NEGATIVE: %d' % run_end)
             return None
 
           if run_end > 9999 :
-            if self.pbits & 1  : print 'WARNING! END RUN NUMBER IS TOO BIG: %d' % run_end
+            if self.pbits & 1  : print('WARNING! END RUN NUMBER IS TOO BIG: %d' % run_end)
             return None
 
           if run_end < run_start :
-            if self.pbits & 1  : print 'WARNING! END RUN:%d < START RUN:%d' % (run_end, run_start)
+            if self.pbits & 1  : print('WARNING! END RUN:%d < START RUN:%d' % (run_end, run_start))
             return None
 
           self.cfname = '%d-%d.data' % (run_start, run_end) 
@@ -340,14 +341,14 @@ class CalibFileFinder :
         # raise an exception here to try to detect this problem
         #assert os.path.isdir(self.cdir), 'psana calib-dir must exist: '+self.cdir
         if not os.path.isdir(self.cdir) :
-            print 'WARNING! psana calib-dir is not found: %s' % self.cdir
+            print('WARNING! psana calib-dir is not found: %s' % self.cdir)
             return None
 
         if not self._setGroup(src) : return ''
 
         dir_name = os.path.join(self.cdir, self.group, src, type)
         if not os.path.exists(dir_name) :
-            if self.pbits & 1  : print 'WARNING! NON-EXISTENT DIR: %s' % dir_name
+            if self.pbits & 1  : print('WARNING! NON-EXISTENT DIR: %s' % dir_name)
             return ''
 
         fnames = os.listdir(dir_name)
@@ -358,7 +359,7 @@ class CalibFileFinder :
     def selectCalibFile(self, files, rnum) :
         """Selects calibration file from a list of file names
         """
-        if self.pbits & 1024 : print '\nUnsorted list of *.data files in the calib directory:'
+        if self.pbits & 1024 : print('\nUnsorted list of *.data files in the calib directory:')
         list_cf = []
         for path in files : 
            fname = os.path.basename(path)
@@ -368,7 +369,7 @@ class CalibFileFinder :
 
            cf = CalibFile(path)
            if cf.valid :
-               if self.pbits & 1024 : print cf.str_attrs()
+               if self.pbits & 1024 : print(cf.str_attrs())
                list_cf.append(cf)
            
         # sotr list
@@ -376,15 +377,15 @@ class CalibFileFinder :
         
         # print entire sorted list
         if self.pbits & 4 :
-            print '\nSorted list of *.data files in the calib directory:'
+            print('\nSorted list of *.data files in the calib directory:')
             for cf in list_cf_ord[::-1] :
-                if self.pbits & 4 : print cf.str_attrs()
+                if self.pbits & 4 : print(cf.str_attrs())
 
         # search for the calibration file
         for cf in list_cf_ord[::-1] :
             if cf.get_begin() <= rnum and rnum <= cf.get_end() :
                 if self.pbits & 8 :
-                    print 'Select calib file: %s' % cf.get_path()
+                    print('Select calib file: %s' % cf.get_path())
                 return cf.get_path()
 
         # if no matching found
@@ -408,30 +409,30 @@ def test01() :
 
     #--------------------------
 
-    print 80*'_', '\nTest 1'
-    print 'Finding calib file for\n  dir = %s\n  grp = %s\n  src = %s\n  type= %s\n  run = %d' % \
-          (cdir, group, src, type, rnum)
+    print(80*'_', '\nTest 1')
+    print('Finding calib file for\n  dir = %s\n  grp = %s\n  src = %s\n  type= %s\n  run = %d' % \
+          (cdir, group, src, type, rnum))
 
     cff = CalibFileFinder(cdir, group, 0377)
     fname = cff.findCalibFile(src, type, rnum)
 
     #--------------------------
 
-    print 80*'_', '\nTest 2'
-    print 'Test methods find_calib_file and make_calib_file_name'
+    print(80*'_', '\nTest 2')
+    print('Test methods find_calib_file and make_calib_file_name')
     fname_existing = find_calib_file(cdir, src, type, rnum, pbits=1)
-    print '  fname_existing : %s' % fname_existing
+    print('  fname_existing : %s' % fname_existing)
 
     cdir = './calib'
     run_start = 134
     gu.create_directory(cdir, True)
     fname_new      = make_calib_file_name(cdir, src, type, run_start, run_end=None, pbits=0)
-    print '  fname_new      : %s' % fname_new
+    print('  fname_new      : %s' % fname_new)
 
 #--------------------------
 
 def test_deploy_calib_array() :
-    print 80*'_', '\nTest deploy_calib_array'
+    print(80*'_', '\nTest deploy_calib_array')
 
     cdir  = './calib'
     if not os.path.exists(cdir) : gu.create_directory(cdir, verb=True)
@@ -448,7 +449,7 @@ def test_deploy_calib_array() :
 #--------------------------
 
 def test_deploy_calib_file() :
-    print 80*'_', '\nTest deploy_calib_file'
+    print(80*'_', '\nTest deploy_calib_file')
     cdir  = './calib'
     if not os.path.exists(cdir) : gu.create_directory(cdir, verb=True)
     #cdir  = '/reg/d/psdm/CXI/cxi83714/calib'
@@ -470,7 +471,7 @@ if __name__ == "__main__" :
     elif sys.argv[1]=='2' : test01() 
     elif sys.argv[1]=='3' : test_deploy_calib_array() 
     elif sys.argv[1]=='4' : test_deploy_calib_file() 
-    else : print 'Non-expected arguments: sys.argv=', sys.argv
+    else : print('Non-expected arguments: sys.argv=', sys.argv)
 
     sys.exit('End of %s' % sys.argv[0])
 

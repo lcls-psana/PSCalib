@@ -1,3 +1,4 @@
+from __future__ import print_function
 #!@PYTHON@
 #####!/usr/bin/env python
 #------------------------------
@@ -29,27 +30,27 @@ def proc_exp_runs(exp_runs, procname='pixel_status', do_proc=False, qname='psneh
                        dt_sec=60, sources='cspad,opal,epix100,pnccd,princeton,andor') :
 
     njobs_in_queue = number_of_batch_jobs(qname=qname)
-    print '%d jobs found in queue %s' % (njobs_in_queue, qname)
+    print('%d jobs found in queue %s' % (njobs_in_queue, qname))
 
     for kstatus in ('SSUSP','UNKWN') :
       for id in batch_job_ids(status=kstatus, user=None, qname=qname) : 
-        print '  kill %s job %s' % (kstatus, id)
+        print('  kill %s job %s' % (kstatus, id))
         batch_job_kill(id, user=None, qname=qname, addopts='-r')
 
     for i,(exp,run) in enumerate(exp_runs) :
         dsname = 'exp=%s:run=%s'%(exp, run.lstrip('0'))
         logname = rpu.log_file(exp, procname)
-        print '%4d %s %4s %s %s'%(i+1, exp.ljust(10), run, dsname.ljust(22), logname)
+        print('%4d %s %4s %s %s'%(i+1, exp.ljust(10), run, dsname.ljust(22), logname))
         #--------------
         gap = 5*' '
         if do_proc and i<njobs and njobs_in_queue<njobs: 
             cmd = subprocess_command(exp, run, procname, qname, dt_sec, sources)
             if cmd is None : raise IOError('ERROR: batch submission command is None...')
 
-            print '%sStart subprocess: %s' % (gap, cmd)
+            print('%sStart subprocess: %s' % (gap, cmd))
             t0_sec = time()
             out, err = subproc(cmd, env=None, shell=False, do_wait=False)
-            print '%sSubprocess starting time dt=%7.3f sec' % (gap, time()-t0_sec)
+            print('%sSubprocess starting time dt=%7.3f sec' % (gap, time()-t0_sec))
             #print '%sSubprocess starting response:\n       out: %s\n       err: "%s"'%\
             #      (gap, out, err.strip('\n'))
 
@@ -58,7 +59,7 @@ def proc_exp_runs(exp_runs, procname='pixel_status', do_proc=False, qname='psneh
             rpu.append_log_file(exp, procname, [str(run),])
             #==============================================
         #--------------
-    print '%d new runs found' % (len(exp_runs))
+    print('%d new runs found' % (len(exp_runs)))
 
 #------------------------------
 #------------------------------
@@ -139,7 +140,7 @@ if __name__ == "__main__" :
     if len(sys.argv) == 1 : 
         parser.print_help()
         #sys.exit('WARNING: using ALL default parameters...')
-        print 'WARNING: using ALL default parameters...'
+        print('WARNING: using ALL default parameters...')
 
     proc_new_datasets(parser)
     sys.exit(0)

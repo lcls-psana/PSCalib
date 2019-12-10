@@ -53,6 +53,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016-09-23 at Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import os
@@ -261,7 +262,7 @@ class DCRange(DCRangeI) :
                     msg = 'File: %s\n       has corrupted structure - group "%s" does not contain key "version", keys: "%s"'%\
                            (grp.file.filename, v.name, v.keys())
                     log.error(msg, self._name)
-                    print 'ERROR:', self._name, msg
+                    print('ERROR:', self._name, msg)
                     continue
                 o = self.add_version(version[0], cmt=False)
                 o.load(v)
@@ -270,14 +271,14 @@ class DCRange(DCRangeI) :
     def print_obj(self) :
         offset = 3 * self._offspace
         self.print_base(offset)
-        print '%s begin     %s' % (offset, self.begin()),
-        print ': %s'            % self.tsec_to_tstr(self.begin())
-        print '%s end       %s' % (offset, self.end()),
-        print ' %s'             % ('' if (self.end() in (None,'end')) else self.tsec_to_tstr(self.end()))
-        print '%s range     %s' % (offset, self.range())
-        print '%s versdef   %s' % (offset, self.vnum_def())
-        print '%s N vers    %s' % (offset, len(self.versions()))
-        print '%s versions  %s' % (offset, str(self.versions().keys()))
+        print('%s begin     %s' % (offset, self.begin()), end=' ')
+        print(': %s'            % self.tsec_to_tstr(self.begin()))
+        print('%s end       %s' % (offset, self.end()), end=' ')
+        print(' %s'             % ('' if (self.end() in (None,'end')) else self.tsec_to_tstr(self.end())))
+        print('%s range     %s' % (offset, self.range()))
+        print('%s versdef   %s' % (offset, self.vnum_def()))
+        print('%s N vers    %s' % (offset, len(self.versions())))
+        print('%s versions  %s' % (offset, str(self.versions().keys())))
 
         for k,v in self.versions().iteritems() :
             v.print_obj()
@@ -310,9 +311,9 @@ def test_DCRange() :
 def test() :
     log.setPrintBits(0377) 
 
-    if len(sys.argv)==1 : print 'For test(s) use command: python %s <test-number=1-4>' % sys.argv[0]
+    if len(sys.argv)==1 : print('For test(s) use command: python %s <test-number=1-4>' % sys.argv[0])
     elif(sys.argv[1]=='1') : test_DCRange()        
-    else : print 'Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv
+    else : print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
 
 #------------------------------
 

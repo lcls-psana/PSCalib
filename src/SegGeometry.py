@@ -47,6 +47,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import sys
@@ -78,62 +79,62 @@ class SegGeometry :
     def print_seg_info(self, pbits=0) :
         """ Prints segment info for selected bits
         """
-        print self.wmsg % 'print_seg_info(pbits=0)'
+        print(self.wmsg % 'print_seg_info(pbits=0)')
 
     def size(self) :
         """ Returns segment size - total number of pixels in segment
         """
-        print self.wmsg % 'size()'
+        print(self.wmsg % 'size()')
 
     def rows(self) :
         """ Returns number of rows in segment
         """
-        print self.wmsg % 'rows()'
+        print(self.wmsg % 'rows()')
 
     def cols(self) :
         """ Returns number of cols in segment
         """
-        print self.wmsg % 'cols()'
+        print(self.wmsg % 'cols()')
 
     def shape(self) :
         """ Returns shape of the segment [rows, cols]
         """
-        print self.wmsg % 'shape()'
+        print(self.wmsg % 'shape()')
 
     def pixel_scale_size(self) :
         """ Returns pixel size in um for indexing
         """
-        print self.wmsg % 'pixel_scale_size()'
+        print(self.wmsg % 'pixel_scale_size()')
 
     def pixel_area_array(self) :
         """ Returns array of pixel relative areas of shape=[rows, cols]
         """
-        print self.wmsg % 'pixel_area_array()'
+        print(self.wmsg % 'pixel_area_array()')
 
     def pixel_size_array(self, axis) :
         """ Returns array of pixel size in um for AXIS
         """
-        print self.wmsg % 'pixel_size_array(axis)'
+        print(self.wmsg % 'pixel_size_array(axis)')
 
     def pixel_coord_array(self, axis) :
         """ Returns array of segment pixel coordinates in um for AXIS
         """
-        print self.wmsg % 'pixel_coord_array(axis)'
+        print(self.wmsg % 'pixel_coord_array(axis)')
 
     def pixel_coord_min(self, axis) :
         """ Returns minimal value in the array of segment pixel coordinates in um for AXIS
         """
-        print self.wmsg % 'pixel_coord_min(axis)'
+        print(self.wmsg % 'pixel_coord_min(axis)')
 
     def pixel_coord_max(self, axis) :
         """ Returns maximal value in the array of segment pixel coordinates in um for AXIS
         """
-        print self.wmsg % 'pixel_coord_max(axis)'
+        print(self.wmsg % 'pixel_coord_max(axis)')
 
     def pixel_mask_array(self, mbits, **kwargs) :
         """ Returns array of masked pixels which content depends on bontrol bitword mbits
         """
-        print self.wmsg % 'pixel_mask_array(mask_bits)'
+        print(self.wmsg % 'pixel_mask_array(mask_bits)')
 
     def return_switch(sp, meth, axis=None) :
         """ Returns three x,y,z arrays if axis=None, or single array for specified axis 
@@ -154,7 +155,7 @@ class SegGeometry :
 #------------------------------
 
 if __name__ == "__main__" :
-    print 'Module %s describes interface methods for segment pixel geometry' % sys.argv[0]
+    print('Module %s describes interface methods for segment pixel geometry' % sys.argv[0])
 
     sg = SegGeometry()
     sg.print_seg_info()

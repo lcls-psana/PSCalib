@@ -46,6 +46,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016 by Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import os
@@ -143,18 +144,18 @@ class DCVersion(DCVersionI) :
     def print_obj(self) :
         offset = 4 * self._offspace
         self.print_base(offset)
-        print '%s version    %s' % (offset, self.vnum())
+        print('%s version    %s' % (offset, self.vnum()))
 
         tsec = self.tsprod()
         msg = '%d: %s' % (floor(tsec), self.tsec_to_tstr(tsec)) if tsec is not None else 'None'
-        print '%s tsprod     %s' % (offset, msg)
+        print('%s tsprod     %s' % (offset, msg))
 
         data = self.data()
         if isinstance(data, np.ndarray) :
-           print '%s data.shape %s  dtype %s' % (offset, str(data.shape), str(data.dtype))
+           print('%s data.shape %s  dtype %s' % (offset, str(data.shape), str(data.dtype)))
         else :
-           print '%s data' % (offset)
-           for s in data.split('\n') : print '%s     %s' % (offset, s)
+           print('%s data' % (offset))
+           for s in data.split('\n') : print('%s     %s' % (offset, s))
 
         #for k,v in self.versions().iteritems() :
         #    v.print_obj()
@@ -192,10 +193,10 @@ def test() :
     log.setPrintBits(0377) 
 
     if len(sys.argv)==1 :
-        print 'For test(s) use command: python %s <test-number=1-4>' % sys.argv[0]
+        print('For test(s) use command: python %s <test-number=1-4>' % sys.argv[0])
         test_DCVersion()
     elif(sys.argv[1]=='1') : test_DCVersion()        
-    else : print 'Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv
+    else : print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
 
 #------------------------------
 

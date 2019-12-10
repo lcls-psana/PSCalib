@@ -73,6 +73,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2013-03-08 by Mikhail Dubrovin
 """
+from __future__ import print_function
 #--------------------------------
 
 import sys
@@ -583,8 +584,8 @@ def evaluate_limits(arr, nneg=5, npos=5, lim_lo=1, lim_hi=1000, verbos=1, cmt=''
     lo, hi = max(lo, lim_lo), min(hi, lim_hi)
 
     if verbos & 1 :
-        print '  %s: %s ave, std = %.3f, %.3f  low, high limits = %.3f, %.3f'%\
-              (sys._getframe().f_code.co_name, cmt, ave, std, lo, hi)
+        print('  %s: %s ave, std = %.3f, %.3f  low, high limits = %.3f, %.3f'%\
+              (sys._getframe().f_code.co_name, cmt, ave, std, lo, hi))
 
     return lo, hi
 
@@ -640,7 +641,7 @@ def create_directory(dir, verb=False) :
         #if verb : print 'Directory exists: %s' % dir
     else :
         os.makedirs(dir)
-        if verb : print 'Directory created: %s' % dir
+        if verb : print('Directory created: %s' % dir)
 
 #------------------------------
 
@@ -648,12 +649,12 @@ def create_directory_with_mode(dir, mode=0777, verb=False) :
     """Creates directory and sets its mode"""
 
     if os.path.exists(dir) :
-        if verb : print 'Directory exists: %s' % dir
+        if verb : print('Directory exists: %s' % dir)
         pass
     else :
         os.makedirs(dir)
         os.chmod(dir, mode)
-        if verb : print 'Directory created: %s, mode(oct)=%s' % (dir, oct(mode))
+        if verb : print('Directory created: %s, mode(oct)=%s' % (dir, oct(mode)))
 
 #------------------------------
 
@@ -664,7 +665,7 @@ def create_path(path, depth=6, mode=0777, verb=False) :
 
        Returns True if path to file exists, False othervise
     """
-    if verb : print 'create_path: %s' % path
+    if verb : print('create_path: %s' % path)
 
     #subdirs = path.strip('/').split('/')
     subdirs = path.split('/')
@@ -739,7 +740,7 @@ def add_rec_to_log(lfname, rec, verbos=False) :
 
     if create_path(path, depth=6, mode=0777, verb=verbos) :
         cmd = 'echo "%s" >> %s' % (rec, path)
-        if verbos : print 'command: %s' % cmd
+        if verbos : print('command: %s' % cmd)
         os.system(cmd)
         mode_log = 0666
         if (file_mode(path) & 0777) == mode_log : return 
@@ -752,7 +753,7 @@ def alias_for_src_name(env) :
     srcs  = [k.src()   for k in ckeys]
     alias = [k.alias() for k in ckeys]
     d = dict(zip(srcs, alias))
-    for s,a in d.items() : print 'src: %40s   alias: %s' % (s, a)
+    for s,a in d.items() : print('src: %40s   alias: %s' % (s, a))
     #print keysalias
 
 #------------------------------
@@ -870,12 +871,12 @@ def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False) :
     if create_path(path_clb, depth=dep, mode=02770, verb=verbos) : # mode=02770 makes drwxrws---+
 
         cmd = command_deploy_file(ifname, path_clb)
-        if verbos : print 'cmd: %s' % cmd
+        if verbos : print('cmd: %s' % cmd)
         os.system(cmd)
 
         rec = history_record(ifname, ctypedir, ctype, ofname, comment='')
         cmd = command_add_record_to_file(rec, path_his)
-        if verbos : print 'cmd: %s' % cmd
+        if verbos : print('cmd: %s' % cmd)
         os.system(cmd)
         if lfname is not None : add_rec_to_log(lfname, '  %s' % rec, verbos)
 
@@ -982,12 +983,12 @@ def test_mask_edges_3d(mrows=1, mcols=1) :
 
 def do_test() :
 
-    print 'get_enviroment("USER"): %s' % get_enviroment()
-    print 'get_enviroment("XXX") : %s' % get_enviroment('XXX')
-    print 'get_enviroment("CONDA_DEFAULT_ENV")  : %s' % get_enviroment('CONDA_DEFAULT_ENV')
-    print 'get_login()           : %s' % get_login()
-    print 'get_hostname()        : %s' % get_hostname()
-    print 'get_cwd()             : %s' % get_cwd()
+    print('get_enviroment("USER"): %s' % get_enviroment())
+    print('get_enviroment("XXX") : %s' % get_enviroment('XXX'))
+    print('get_enviroment("CONDA_DEFAULT_ENV")  : %s' % get_enviroment('CONDA_DEFAULT_ENV'))
+    print('get_login()           : %s' % get_login())
+    print('get_hostname()        : %s' % get_hostname())
+    print('get_cwd()             : %s' % get_cwd())
     #print ': %s' % 
 
     if len(sys.argv) > 1 :

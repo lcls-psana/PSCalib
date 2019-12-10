@@ -57,6 +57,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016 by Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 import sys
@@ -143,7 +144,7 @@ def create_directory_v0(dir, verb=False) :
         #if verb : print 'Directory exists: %s' % dir
     else :
         os.makedirs(dir)
-        if verb : print 'Directory created: %s' % dir
+        if verb : print('Directory created: %s' % dir)
 
 #------------------------------
 
@@ -365,11 +366,11 @@ def par_to_tsec(par) :
 def test_source_full_name() :
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     env=ds.env()    
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    print 'src="Epix"    :', source_full_name(env, 'Epix')
-    print 'src="Cspad."  :', source_full_name(env, 'Cspad.')
-    print 'src="Cspad"   :', source_full_name(env, 'Cspad')
-    print 'src="cs140_0" :', source_full_name(env, 'cs140_0')
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
+    print('src="Epix"    :', source_full_name(env, 'Epix'))
+    print('src="Cspad."  :', source_full_name(env, 'Cspad.'))
+    print('src="Cspad"   :', source_full_name(env, 'Cspad'))
+    print('src="cs140_0" :', source_full_name(env, 'cs140_0'))
 
 #------------------------------
 
@@ -377,65 +378,65 @@ def test_string_from_source() :
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     env=ds.env()    
     source = psana_source(env, 'cs140_0')
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    print 'source', source
-    print 'string_from_source', string_from_source(source)
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
+    print('source', source)
+    print('string_from_source', string_from_source(source))
 
 #------------------------------
 
 def test_psana_source() :
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     env=ds.env()    
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    print 'psana_source(env, "Epix")    :', psana_source(env, 'Epix')
-    print 'psana_source(env, "Cspad.")  :', psana_source(env, 'Cspad.')
-    print 'psana_source(env, "Cspad")   :', psana_source(env, 'Cspad')
-    print 'psana_source(env, "cs140_0") :', psana_source(env, 'cs140_0')
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
+    print('psana_source(env, "Epix")    :', psana_source(env, 'Epix'))
+    print('psana_source(env, "Cspad.")  :', psana_source(env, 'Cspad.'))
+    print('psana_source(env, "Cspad")   :', psana_source(env, 'Cspad'))
+    print('psana_source(env, "cs140_0") :', psana_source(env, 'cs140_0'))
 
 #------------------------------
 
 def test_detector_full_name() :
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     env=ds.env()
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    print 'src="Epix"                            :', detector_full_name(env, "Epix")
-    print 'src=psana.Source("Epix"))             :', detector_full_name(env, psana.Source('Epix'))
-    print 'src="DetInfo(NoDetector.0:Epix100a.0)":', detector_full_name(env, 'DetInfo(NoDetector.0:Epix100a.0)')
-    print 'for alias src="cs140_0"               :', detector_full_name(env, 'cs140_0')
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
+    print('src="Epix"                            :', detector_full_name(env, "Epix"))
+    print('src=psana.Source("Epix"))             :', detector_full_name(env, psana.Source('Epix')))
+    print('src="DetInfo(NoDetector.0:Epix100a.0)":', detector_full_name(env, 'DetInfo(NoDetector.0:Epix100a.0)'))
+    print('for alias src="cs140_0"               :', detector_full_name(env, 'cs140_0'))
 
 #------------------------------
 
 def test_evt_time() :
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     evt=ds.events().next()
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
     t=evt_time(evt)
-    print 'evt_time(evt) : %.9f' % t
+    print('evt_time(evt) : %.9f' % t)
 
 #------------------------------
 
 def test_env_time() :
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
     env=ds.env()
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
     t=env_time(env)
-    print 'env_time(evt) : %.9f' % t
+    print('env_time(evt) : %.9f' % t)
 
 #------------------------------
 
 def test_misc() :
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    print 'get_enviroment(USER) : %s' % get_enviroment()
-    print 'get_login()          : %s' % get_login()
-    print 'get_hostname()       : %s' % get_hostname()
-    print 'get_cwd()            : %s' % get_cwd()
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
+    print('get_enviroment(USER) : %s' % get_enviroment())
+    print('get_login()          : %s' % get_login())
+    print('get_hostname()       : %s' % get_hostname())
+    print('get_cwd()            : %s' % get_cwd())
 
 #------------------------------
 
 def do_test() :
     import sys; global sys
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
-    print 50*'_', '\nTest %s:' % tname
+    print(50*'_', '\nTest %s:' % tname)
     if   tname == '0' : test_misc(); test_source_full_name(); test_string_from_source();\
                         test_psana_source(); test_detector_full_name()
     elif tname == '1' : test_source_full_name()
@@ -444,7 +445,7 @@ def do_test() :
     elif tname == '4' : test_detector_full_name()
     elif tname == '5' : test_evt_time()
     elif tname == '6' : test_env_time()
-    else : print 'Not-recognized test name: %s' % tname
+    else : print('Not-recognized test name: %s' % tname)
     sys.exit('End of test %s' % tname)
  
 #------------------------------

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #------------------------------
 
+from __future__ import print_function
 import psana
 import PSCalib.GlobalUtils as gu
 
@@ -54,9 +55,9 @@ def init_psana_for_dsname_src(dsname='exp=xcs11116:run=2', source='XcsEndstation
     evt = ds.events().next()
     env = ds.env()
 
-    print 'calib_dir: %s' % gu.calib_dir(env)
-    print 'exp_name : %s' % gu.exp_name(env)
-    print 'alias_for_src_name : %s' % gu.alias_for_src_name(env)
+    print('calib_dir: %s' % gu.calib_dir(env))
+    print('exp_name : %s' % gu.exp_name(env))
+    print('alias_for_src_name : %s' % gu.alias_for_src_name(env))
 
     #print 'src_name_from_alias:\n'
     #gu.src_name_from_alias(env)
@@ -69,13 +70,13 @@ def init_psana_for_dsname_src(dsname='exp=xcs11116:run=2', source='XcsEndstation
     #        break
     #runnum = evt.run()
 
-    print 80*'_', '\nenv.configStore().keys():\n'
-    for k in env.configStore().keys() : print k
+    print(80*'_', '\nenv.configStore().keys():\n')
+    for k in env.configStore().keys() : print(k)
 
-    print 80*'_', '\nevt.keys():\n'
-    for k in evt.keys() : print k
+    print(80*'_', '\nevt.keys():\n')
+    for k in evt.keys() : print(k)
 
-    print 80*'_'
+    print(80*'_')
 
     return ds, src, evt, env
 
@@ -102,24 +103,24 @@ def print_epix100_id(tname) :
     o = get_epix_config_object(env, src)
     
     if o is None :
-        print 'get_epix_config_object returns None'
+        print('get_epix_config_object returns None')
         return
 
-    print 'version         :', o.version()   
-    print 'Version         :', o.Version
-    print 'numberOfColumns :', o.numberOfColumns()
-    print 'numberOfRows    :', o.numberOfRows()
-    print 'TypeId          :', o.TypeId
-    print 'carrierId0/1    :', o.carrierId0(), '/', o.carrierId1()
-    print 'digitalCardId0/1:', o.digitalCardId0(), '/', o.digitalCardId1()
-    print 'analogCardId0/1 :', o.analogCardId0(), '/', o.analogCardId1()
+    print('version         :', o.version())   
+    print('Version         :', o.Version)
+    print('numberOfColumns :', o.numberOfColumns())
+    print('numberOfRows    :', o.numberOfRows())
+    print('TypeId          :', o.TypeId)
+    print('carrierId0/1    :', o.carrierId0(), '/', o.carrierId1())
+    print('digitalCardId0/1:', o.digitalCardId0(), '/', o.digitalCardId1())
+    print('analogCardId0/1 :', o.analogCardId0(), '/', o.analogCardId1())
 
-    print 'exp=%s:run=%d %s' % (env.experiment(), evt.run(), gu.string_from_source(src))
-    print 'epix100a-%010d-%010d-%010d-%010d-%010d-%010d-%010d' % (\
+    print('exp=%s:run=%d %s' % (env.experiment(), evt.run(), gu.string_from_source(src)))
+    print('epix100a-%010d-%010d-%010d-%010d-%010d-%010d-%010d' % (\
            o.version(),\
            o.carrierId0(), o.carrierId1(),\
            o.digitalCardId0(), o.digitalCardId1(),\
-           o.analogCardId0(), o.analogCardId1())
+           o.analogCardId0(), o.analogCardId1()))
 
 #------------------------------
 
@@ -130,15 +131,15 @@ def print_epix100_id_for_dsname_src(dsname='exp=xcs11116:run=2', source='XcsEnds
     o = get_epix_config_object(env, src)
     
     if o is None :
-        print 'get_epix_config_object returns None'
+        print('get_epix_config_object returns None')
         return
 
-    print 'exp=%s:run=%d %s' % (env.experiment(), evt.run(), gu.string_from_source(src))
-    print 'epix100a-%010d-%010d-%010d-%010d-%010d-%010d-%010d' % (\
+    print('exp=%s:run=%d %s' % (env.experiment(), evt.run(), gu.string_from_source(src)))
+    print('epix100a-%010d-%010d-%010d-%010d-%010d-%010d-%010d' % (\
            o.version(),\
            o.carrierId0(), o.carrierId1(),\
            o.digitalCardId0(), o.digitalCardId1(),\
-           o.analogCardId0(), o.analogCardId1())
+           o.analogCardId0(), o.analogCardId1()))
 
 #------------------------------
 
@@ -156,7 +157,7 @@ if __name__ == "__main__" :
     tname = '1' if len(sys.argv) < 2 else sys.argv[1]
     if tname in ('1', '2', '3', '4', '5', '6', '7', '8') : 
          print_epix100_id(tname)
-         print 'Usage:\n%s'% usage()
+         print('Usage:\n%s'% usage())
     elif len(sys.argv)>2 : print_epix100_id_for_dsname_src(sys.argv[1], sys.argv[2])
     else : sys.exit ('Not recognized test name: "%s"' % tname)
 

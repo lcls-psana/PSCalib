@@ -24,6 +24,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2016-05-17 by Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 from CalibManager.Logger import logger as log
@@ -45,8 +46,8 @@ def test_log() :
     log.critical('This is a test message 5', __name__)
     log.critical('This is a test message 6')
 
-    print 'getLogContent():\n',      log.getLogContent()
-    print 'getLogContentTotal():\n', log.getLogContentTotal()
+    print('getLogContent():\n',      log.getLogContent())
+    print('getLogContentTotal():\n', log.getLogContentTotal())
 
     #log.saveLogInFile()
     #log.saveLogTotalInFile()

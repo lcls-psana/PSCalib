@@ -48,6 +48,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
+from __future__ import print_function
 
 import os
 from   PSCalib.DCLogger import log
@@ -97,7 +98,7 @@ class DCFileName() :
 
 
     def print_attrs(self) :
-        print self.str_attrs()
+        print(self.str_attrs())
 
 
     def log_attrs(self) :
@@ -225,7 +226,7 @@ class DCFileName() :
 #------------------------------
 
 def test_DCFileName() :
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
 
     import psana
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
@@ -243,7 +244,7 @@ def test_DCFileName() :
 #------------------------------
 
 def test_make_path_to_calib_file() :
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
 
     import psana
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
@@ -259,11 +260,11 @@ def do_test() :
     log.setPrintBits(0377)
 
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
-    print 50*'_', '\nTest %s:' % tname
+    print(50*'_', '\nTest %s:' % tname)
     if   tname == '0' : test_DCFileName() # ; test_DCFileName()
     elif tname == '1' : test_DCFileName()
     elif tname == '2' : test_make_path_to_calib_file()
-    else : print 'Not-recognized test: %s' % tname
+    else : print('Not-recognized test: %s' % tname)
     sys.exit('End of test %s' % tname)
 
 #------------------------------

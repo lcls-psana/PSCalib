@@ -42,6 +42,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
+from __future__ import print_function
 
 #------------------------------
 
@@ -101,10 +102,10 @@ def test_id_epix() :
     src = 'XppGon.0:Epix100a.0'  
     ds = psana.DataSource(dsn)
     env = ds.env()
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    print 'dataset     : %s' % dsn
-    print 'source      : %s' % src
-    print 'Detector Id : %s' % id_epix(env, src)
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
+    print('dataset     : %s' % dsn)
+    print('source      : %s' % src)
+    print('Detector Id : %s' % id_epix(env, src))
 
 #------------------------------
 
@@ -113,10 +114,10 @@ def test_id_cspad() :
     src = ':Cspad.0' # 'CxiDs2.0:Cspad.0'
     ds = psana.DataSource(dsn)
     env = ds.env()
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    print 'dataset     : %s' % dsn
-    print 'source      : %s' % src
-    print 'Detector Id : %s' % id_cspad(env, src)
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
+    print('dataset     : %s' % dsn)
+    print('source      : %s' % src)
+    print('Detector Id : %s' % id_cspad(env, src))
 
 #------------------------------
 
@@ -126,21 +127,21 @@ def test_id_jungfrau() :
     src, dsn = 'Jungfrau.', 'exp=xpptut15:run=430' # <=== mfx11116 r664
     ds = psana.DataSource(dsn)
     env = ds.env()
-    print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    print 'dataset     : %s' % dsn
-    print 'source      : %s' % src
-    print 'Detector Id : %s' % id_jungfrau(env, src)
+    print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
+    print('dataset     : %s' % dsn)
+    print('source      : %s' % src)
+    print('Detector Id : %s' % id_jungfrau(env, src))
 
 #------------------------------
 
 def do_test() :
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
-    print 50*'_', '\nTest %s:' % tname
+    print(50*'_', '\nTest %s:' % tname)
     if   tname == '0' : test_id_epix(); test_id_cspad(), test_id_jungfrau() 
     elif tname == '1' : test_id_epix()        
     elif tname == '2' : test_id_cspad()        
     elif tname == '3' : test_id_jungfrau()        
-    else : print 'Not-recognized test: %s' % tname
+    else : print('Not-recognized test: %s' % tname)
     sys.exit( 'End of test %s' % tname)
 
 #------------------------------

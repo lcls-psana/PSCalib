@@ -1,3 +1,4 @@
+from __future__ import print_function
 import h5py
 import numpy
 import logging
@@ -97,4 +98,4 @@ if __name__ == "__main__":
             }
     save('ConstTest.h5',ct)
     data = load('ConstTest.h5')
-    print '***',data
+    print('***',data)

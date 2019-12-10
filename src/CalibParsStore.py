@@ -65,6 +65,7 @@ part of it, please give an appropriate acknowledgment.
 
 Created: 2013-03-08 by Mikhail Dubrovin
 """
+from __future__ import print_function
 
 import sys
 
@@ -118,7 +119,7 @@ class CalibParsStore() :
         dettype = gu.det_type_from_source(source)
         grp = group if group is not None else gu.dic_det_type_to_calib_group[dettype]
 
-        if pbits : print '%s: Detector type = %d: %s' % (self.name, dettype, gu.dic_det_type_to_name[dettype])
+        if pbits : print('%s: Detector type = %d: %s' % (self.name, dettype, gu.dic_det_type_to_name[dettype]))
 
         cbase = None
         if   dettype ==  gu.CSPAD     : cbase = CalibParsBaseCSPadV1()
@@ -159,7 +160,7 @@ class CalibParsStore() :
                          ) : cbase = CalibParsBaseCameraV1()
 
         else :
-            print '%s: calibration is not implemented data source "%s"' % (self.__class__.__name__, source)
+            print('%s: calibration is not implemented data source "%s"' % (self.__class__.__name__, source))
             #raise IOError('Calibration parameters for source: %s are not implemented in class %s' % (source, self.__class__.__name__))
         return GenericCalibPars(cbase, calibdir, grp, source, runnum, pbits, fnexpc, fnrepo, tsec)
 
@@ -197,9 +198,9 @@ class CalibParsStore() :
 
         #if True :
         if pbits :
-            print '%s.CreateForEvtEnv: for tsec: %s' % (self.name, str(tsec))
-            print '  expected hdf5 file name repo : "%s"' % (fnrepo)
-            print '  expected hdf5 file name local: "%s"' % (fnexpc)
+            print('%s.CreateForEvtEnv: for tsec: %s' % (self.name, str(tsec)))
+            print('  expected hdf5 file name repo : "%s"' % (fnrepo))
+            print('  expected hdf5 file name local: "%s"' % (fnexpc))
 
         return self.Create(calibdir, group, source, runnum, pbits, fnexpc, fnrepo, tsec)
 
@@ -218,8 +219,8 @@ import numpy as np
 def print_nda(nda, cmt='') :
     arr = nda if isinstance(nda, np.ndarray) else np.array(nda) 
     str_arr = str(arr) if arr.size<5 else str(arr.flatten()[0:5])
-    print '%s %s: shape=%s, size=%d, dtype=%s, data=%s' % \
-          (cmt, type(nda), str(arr.shape), arr.size, str(arr.dtype), str_arr)
+    print('%s %s: shape=%s, size=%d, dtype=%s, data=%s' % \
+          (cmt, type(nda), str(arr.shape), arr.size, str(arr.dtype), str_arr))
 
 #------------------------------
 
@@ -244,16 +245,16 @@ def test_Create(tname='0') :
         print_nda(o.pixel_bkgd(),   'pixel_bkgd') 
         print_nda(o.shape(),        'shape')
  
-        print 'size=%d' % o.size()
-        print 'ndim=%d' % o.ndim()
+        print('size=%d' % o.size())
+        print('ndim=%d' % o.ndim())
 
         statval = o.status(gu.PEDESTALS)
-        print 'status(PEDESTALS)=%d: %s' % (statval, gu.dic_calib_status_value_to_name[statval])
+        print('status(PEDESTALS)=%d: %s' % (statval, gu.dic_calib_status_value_to_name[statval]))
 
         statval = o.status(gu.PIXEL_GAIN)
-        print 'status(PIXEL_GAIN)=%d: %s' % (statval, gu.dic_calib_status_value_to_name[statval])
+        print('status(PIXEL_GAIN)=%d: %s' % (statval, gu.dic_calib_status_value_to_name[statval]))
  
-    else : print 'Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv
+    else : print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
 
 #------------------------------
 
@@ -285,10 +286,10 @@ def test_CreateForEvtEnv(tname='0') :
 
 if __name__ == "__main__" :
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
-    print 50*'_', '\nTest %s:' % tname
+    print(50*'_', '\nTest %s:' % tname)
     if   tname == '0' : test_Create(tname)
     elif tname in ('1','2') : test_CreateForEvtEnv(tname)
-    else : print 'Non-implemented test: %s' % tname
+    else : print('Non-implemented test: %s' % tname)
     sys.exit( 'End of %s test.' % sys.argv[0])
 
 #------------------------------

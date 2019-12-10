@@ -69,6 +69,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 from time import time, sleep, localtime, gmtime, strftime, strptime, mktime
@@ -293,16 +294,16 @@ class DCBase(object) :
 
     def print_base(self, offset='  ') :
         """Print content of dictionaries of parameters and history"""
-        print '%s %s'             % (offset, self._name)
+        print('%s %s'             % (offset, self._name))
 
-        if len(self._dicpars) : print '%s Parameters:' % offset
+        if len(self._dicpars) : print('%s Parameters:' % offset)
         for k,v in self._dicpars.items() :
-            print '  %s par: %20s  value: %s' % (offset, k, str(v))
+            print('  %s par: %20s  value: %s' % (offset, k, str(v)))
 
-        if len(self._dichist) : print '%s History:' % offset
+        if len(self._dichist) : print('%s History:' % offset)
         for k,v in sorted(self._dichist.items()) :
             #print '%s t[sec]: %d: %s rec: %s' % (offset, floor(k), self.tsec_to_tstr(k), str(v))
-            print '  %s %s %s' % (offset, self.tsec_to_tstr(k, addfsec=False), str(v))
+            print('  %s %s %s' % (offset, self.tsec_to_tstr(k, addfsec=False), str(v)))
 
 #------------------------------
 
@@ -324,10 +325,10 @@ def test_pars() :
     o = DCBase()
     d = {1:'10', 2:'20', 3:'30'}
     o.set_pars_dict(d)
-    print '\nTest pars: %s' % o.pars_text()
+    print('\nTest pars: %s' % o.pars_text())
     o.del_par(2)
-    print '\nAfter del_par(2): %s' % o.pars_text()
-    print '\npar(3): %s' % o.par(3)
+    print('\nAfter del_par(2): %s' % o.pars_text())
+    print('\npar(3): %s' % o.par(3))
 
 #------------------------------
 
@@ -339,12 +340,12 @@ def test_history() :
     o.add_history_record('rec 04')
     o.add_history_record('rec 05')
     o.add_history_record('rec 06')
-    print '\nTest history records:\n%s' % o.history_text()
+    print('\nTest history records:\n%s' % o.history_text())
     o.save_history_file('history-test.txt', verb=True)
     o.add_history_record('rec 07')
 
     o.load_history_file('history-test.txt', verb=True)
-    print '\nTest history records:\n%s' % o.history_text()
+    print('\nTest history records:\n%s' % o.history_text())
 
 #------------------------------
 
@@ -353,16 +354,16 @@ def test_time_converters() :
     t_sec  = time()
     t_str  = o.tsec_to_tstr(t_sec, tsfmt=None) 
     t_sec2 = o.tstr_to_tsec(t_str, tsfmt=None)
-    print 'convert time     %.6f to time stamp: %s' % (t_sec,  t_str)
-    print 'and back to time %.6f' % (t_sec2)
+    print('convert time     %.6f to time stamp: %s' % (t_sec,  t_str))
+    print('and back to time %.6f' % (t_sec2))
 
 #------------------------------
 
 def test_make_record() :
     o = DCBase()
-    print o.make_record(action='test make_record for cmt=False', key='keyword', cmt=False)
-    print o.make_record(action='test make_record for cmt=None', key='keyword', cmt=None)
-    print o.make_record(action='test make_record for cmt="my comment"', key='keyword', cmt="my comment")
+    print(o.make_record(action='test make_record for cmt=False', key='keyword', cmt=False))
+    print(o.make_record(action='test make_record for cmt=None', key='keyword', cmt=None))
+    print(o.make_record(action='test make_record for cmt="my comment"', key='keyword', cmt="my comment"))
 
 #------------------------------
 

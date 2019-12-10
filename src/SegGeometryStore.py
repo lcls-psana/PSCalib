@@ -53,6 +53,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2013-03-08 by Mikhail Dubrovin
 """
+from __future__ import print_function
 #------------------------------
 
 from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one
@@ -104,7 +105,7 @@ def test_seggeom() :
     from time import time
     t0_sec = time()
 
-    if len(sys.argv)==1   : print 'For test(s) use command: python', sys.argv[0], '<test-number=1-5>'
+    if len(sys.argv)==1   : print('For test(s) use command: python', sys.argv[0], '<test-number=1-5>')
 
     elif(sys.argv[1]=='1') :
         sg = sgs.Create('SENS2X1:V1', pbits=0377)
@@ -120,7 +121,7 @@ def test_seggeom() :
 
     elif(sys.argv[1]=='4') :
         sg = sgs.Create('MTRX:512:512:54:54', pbits=0377)
-        print 'Consumed time for MTRX:512:512:54:54 (sec) =', time()-t0_sec
+        print('Consumed time for MTRX:512:512:54:54 (sec) =', time()-t0_sec)
         sg.print_seg_info(pbits=0377)
   
     elif(sys.argv[1]=='5') :
@@ -131,12 +132,12 @@ def test_seggeom() :
         sg = sgs.Create('EPIX10KA:V1', pbits=0377)
         sg.print_seg_info(pbits=0377)
 
-    else : print 'Non-expected test name: ', sys.argv[1], ' use 0,1,2,...'
+    else : print('Non-expected test name: ', sys.argv[1], ' use 0,1,2,...')
 
 #------------------------------
 
 if __name__ == "__main__" :
     test_seggeom()
-    print 'End of test.'
+    print('End of test.')
 
 #------------------------------
