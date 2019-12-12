@@ -354,7 +354,7 @@ private:
                                    const bool do_tilt=true
                                   );
 
-  const static double DEG_TO_RAD = 3.141592653589793238463 / 180; 
+  constexpr static double DEG_TO_RAD = 3.141592653589793238463 / 180; 
 
   static void rotation(const double* X, const double* Y, const unsigned size,
                        const double C, const double S, 

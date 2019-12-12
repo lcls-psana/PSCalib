@@ -153,16 +153,16 @@ public:
   static const size_t  NCORNERS = 4;
 
   /// Pixel scale size [um] for indexing  
-  static const pixel_coord_t PIX_SCALE_SIZE_DEF = 12345;
+  static constexpr pixel_coord_t PIX_SCALE_SIZE_DEF = 12345;
 
   /// Pixel size [um] in column direction
-  static const pixel_coord_t PIX_SIZE_COLS_DEF = 75; // for pnccd
+  static constexpr pixel_coord_t PIX_SIZE_COLS_DEF = 75; // for pnccd
 
   /// Pixel size [um] in row direction
-  static const pixel_coord_t PIX_SIZE_ROWS_DEF = 75; // for pnccd
+  static constexpr pixel_coord_t PIX_SIZE_ROWS_DEF = 75; // for pnccd
 
   /// Pixel size [um] in depth
-  static const pixel_coord_t PIX_SIZE_DEPTH_DEF = 400; // for pnccd
+  static constexpr pixel_coord_t PIX_SIZE_DEPTH_DEF = 400; // for pnccd
 
   /// Conversion factor between um and pix 
   //static const double UM_TO_PIX;             // = 1./75;

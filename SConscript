@@ -27,4 +27,4 @@ Import('*')
 #
 #
 #standardSConscript(UTESTS=['TestCalibFileFinder'], DOCGEN="doxy-all psana-modules-doxy")
-standardSConscript(UTESTS=['TestCalibFileFinder'], DOCGEN="doxy-all psana-modules-doxy pyana-ref")
+standardSConscript(UTESTS=['TestCalibFileFinder'], DOCGEN="doxy-all psana-modules-doxy pyana-ref", CCFLAGS="-std=gnu++11")
