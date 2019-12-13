@@ -1,4 +1,5 @@
 from __future__ import print_function
+from __future__ import division
 #!@PYTHON@
 ####!/usr/bin/env python
 

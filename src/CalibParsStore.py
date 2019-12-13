@@ -90,7 +90,7 @@ from PSCalib.CalibParsBaseUxiV1       import CalibParsBaseUxiV1
 
 #------------------------------
 
-class CalibParsStore() :
+class CalibParsStore(object) :
     """Factory class for CalibPars object of different detectors"""
 
 #------------------------------

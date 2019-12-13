@@ -79,7 +79,7 @@ import PSCalib.GlobalUtils as gu
 
 #------------------------------
 
-class CalibPars :
+class CalibPars(object) :
 
 #------------------------------
 

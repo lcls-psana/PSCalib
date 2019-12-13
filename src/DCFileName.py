@@ -58,7 +58,7 @@ from PSCalib.DCConfigParameters import cp
 
 #------------------------------
 
-class DCFileName() :
+class DCFileName(object) :
     """File name generator object for Detector Calibration Store (DCS) project. 
 
     Parameters

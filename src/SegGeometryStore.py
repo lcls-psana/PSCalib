@@ -64,7 +64,7 @@ from PSCalib.SegGeometryJungfrauV1 import jungfrau_one
 
 #------------------------------
 
-class SegGeometryStore() :
+class SegGeometryStore(object) :
     """Factory class for SegGeometry-base objects of different detectors"""
 
 #------------------------------

@@ -27,7 +27,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseJungfrauV1 :
+class CalibParsBaseJungfrauV1(object) :
 
     ndim = 3 
     segs = 1 # (1, 512, 1024)

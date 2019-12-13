@@ -116,7 +116,7 @@ class DCRange(DCRangeI) :
         return self._vnum_def 
 
     def vnum_last(self) :
-        keys = self._dicvers.keys()
+        keys = list(self._dicvers.keys())
         return keys[-1] if len(keys) else 0
 
     def version(self, vnum=None)   :
@@ -132,7 +132,7 @@ class DCRange(DCRangeI) :
 
     def add_version(self, vnum=None, tsec_prod=None, nda=None, cmt=False) :
         vn = self.vnum_last() + 1 if vnum is None else vnum
-        if vn in self._dicvers.keys() :
+        if vn in list(self._dicvers.keys()) :
             return self._dicvers[vn]
         o = self._dicvers[vn] = DCVersion(vn, tsec_prod, nda)
 
@@ -145,7 +145,7 @@ class DCRange(DCRangeI) :
     def set_vnum_def(self, vnum=None) :
         if vnum is None or vnum == 0 :
             self._vnum_def = 0 # will use last
-        elif vnum in self._dicvers.keys() :
+        elif vnum in list(self._dicvers.keys()) :
             self._vnum_def = vnum
             self.add_history_record('WARNING: set_vnum_defdef sets default version %d' % vnum)
         else :
@@ -157,7 +157,7 @@ class DCRange(DCRangeI) :
         """Marks child object for deletion in save()"""
         vers = self.vnum_last() if vnum is None else vnum
 
-        if vers in self._dicvers.keys() :
+        if vers in list(self._dicvers.keys()) :
             self._lst_del_keys.append(vers)
 
             rec = self.make_record('del version', str(vers), cmt) 
@@ -225,7 +225,7 @@ class DCRange(DCRangeI) :
         #print 'ZZZ: self.versions()', self.versions() 
 
         # save/delete objects in/from hdf5 file
-        for k,v in self._dicvers.iteritems() :
+        for k,v in self._dicvers.items() :
             if k in self._lst_del_keys : delete_object(grp, version_int_to_str(k))
             else : v.save(grp)
 
@@ -243,7 +243,7 @@ class DCRange(DCRangeI) :
         log.debug(msg, self._name)
 
         #print  'XXX load grp, keys:', grp, grp.keys()
-        for k,v in dict(grp).iteritems() :
+        for k,v in dict(grp).items() :
             #subgrp = v
             if isinstance(v, sp.dataset_t) :                    
                 log.debug('load dataset "%s"' % k, self._name)
@@ -260,7 +260,7 @@ class DCRange(DCRangeI) :
                 version = v.get('version')
                 if version is None :
                     msg = 'File: %s\n       has corrupted structure - group "%s" does not contain key "version", keys: "%s"'%\
-                           (grp.file.filename, v.name, v.keys())
+                           (grp.file.filename, v.name, list(v.keys()))
                     log.error(msg, self._name)
                     print('ERROR:', self._name, msg)
                     continue
@@ -278,9 +278,9 @@ class DCRange(DCRangeI) :
         print('%s range     %s' % (offset, self.range()))
         print('%s versdef   %s' % (offset, self.vnum_def()))
         print('%s N vers    %s' % (offset, len(self.versions())))
-        print('%s versions  %s' % (offset, str(self.versions().keys())))
+        print('%s versions  %s' % (offset, str(list(self.versions().keys()))))
 
-        for k,v in self.versions().iteritems() :
+        for k,v in self.versions().items() :
             v.print_obj()
 
 #------------------------------

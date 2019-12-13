@@ -27,7 +27,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseCSPadV1 :
+class CalibParsBaseCSPadV1(object) :
 
     ndim = 3 
     quads= 4 

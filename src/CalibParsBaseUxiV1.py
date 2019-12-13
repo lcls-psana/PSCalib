@@ -28,7 +28,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseUxiV1 :
+class CalibParsBaseUxiV1(object) :
 
     ndim = 3
     segs = 0 # 1-8 variable size

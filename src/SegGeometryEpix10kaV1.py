@@ -84,6 +84,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Created from SegGeometryEpix100V1.py on 2018-11-14 by Mikhail Dubrovin
 """
 from __future__ import print_function
+from __future__ import division
 #------------------------------
 
 import sys

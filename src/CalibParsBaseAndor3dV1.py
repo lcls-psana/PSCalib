@@ -27,7 +27,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseAndor3dV1 :
+class CalibParsBaseAndor3dV1(object) :
 
     ndim = 3 
     segs = 2

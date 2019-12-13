@@ -97,7 +97,7 @@ def rotation(X, Y, angle_deg) :
 
 #------------------------------
 
-class GeometryObject :
+class GeometryObject(object) :
 
     def __init__(self, pname=None, pindex=None, \
                  oname=None, oindex=None, \

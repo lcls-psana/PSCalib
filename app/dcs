@@ -12,7 +12,7 @@ import PSCalib.DCUtils as dcu
 
 #------------------------------
 
-class DCS_CLI :
+class DCS_CLI(object) :
     def __init__(self, parser) :
         """Detector Calibration Store Command Line Interface"""
 

@@ -27,7 +27,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseAcqirisV1 :
+class CalibParsBaseAcqirisV1(object) :
 
     ndim = 2 
     rows = 0 # VARIABLE SHAPE DATA PARAMETERS WILL BE TAKEN FROM FILE METADATA

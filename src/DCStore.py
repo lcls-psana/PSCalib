@@ -162,7 +162,7 @@ class DCStore(DCStoreI) :
             log.error(msg, self.__class__.__name__)
             return None
             
-        if ctype in self._dicctypes.keys() :
+        if ctype in list(self._dicctypes.keys()) :
             return self._dicctypes[ctype]
         o = self._dicctypes[ctype] = DCType(ctype)
 
@@ -174,7 +174,7 @@ class DCStore(DCStoreI) :
 
     def mark_ctype(self, ctype, cmt=False) :
         """Marks child object for deletion in save()"""
-        if ctype in self._dicctypes.keys() :
+        if ctype in list(self._dicctypes.keys()) :
             self._lst_del_keys.append(ctype)
 
             rec = self.make_record('del ctype', ctype, cmt) 
@@ -225,7 +225,7 @@ class DCStore(DCStoreI) :
             ds6 = save_object_as_dset(grp, 'successor',   data=self.successor())   # 'str'
 
             # save/delete objects in/from hdf5 file
-            for k,v in self._dicctypes.iteritems() :
+            for k,v in self._dicctypes.items() :
                 if k in self._lst_del_keys : delete_object(grp, k)
                 else : v.save(grp)
                        #self._dicctypes[k].save(grp)
@@ -250,7 +250,7 @@ class DCStore(DCStoreI) :
             #log.info(msg, self._name)
             log.info('Load data from file %s' % self._fpath, self._name)
 
-            for k,v in dict(grp).iteritems() :
+            for k,v in dict(grp).items() :
                 #subgrp = v
                 #print '    ', k # , "   ", subg.name #, val, subg.len(), type(subg),
 
@@ -285,9 +285,9 @@ class DCStore(DCStoreI) :
         print('%s ctypes'         % (offset))
 
         print('%s N types     %s' % (offset, len(self.ctypes())))
-        print('%s types       %s' % (offset, str(self.ctypes().keys())))
+        print('%s types       %s' % (offset, str(list(self.ctypes().keys()))))
 
-        for k,v in self.ctypes().iteritems() :
+        for k,v in self.ctypes().items() :
         #    #msg='Add type %s as object %s' % (k, v.ctype())
         #    #log.info(msg, self._name)
             v.print_obj()

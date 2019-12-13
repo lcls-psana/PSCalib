@@ -104,6 +104,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Author: Mikhail Dubrovin
 """
 from __future__ import print_function
+from __future__ import division
 #------------------------------
 
 import os
@@ -124,7 +125,7 @@ def divide_protected(num, den, vsub_zero=0) :
 
 #------------------------------
 
-class GeometryAccess :
+class GeometryAccess(object) :
     """ :py:class:`GeometryAccess`
     """
 

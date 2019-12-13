@@ -432,7 +432,7 @@ def print_experiments_count_runs() : # ins='CXI'
         d_ins_nexps[ins] = len(exps)
 
     print('\nSummary on %s\n%s'%(gu.str_tstamp('%Y-%m-%dT%H:%M:%S', time()), 40*'_'))
-    for ins,nruns in d_ins_nruns.iteritems() :
+    for ins,nruns in d_ins_nruns.items() :
         print('%6d runs in %4d experiments of %s' % (nruns, d_ins_nexps[ins], ins))
 
     dname = '%s/<all-ins>/<all-exp>/'%DIR_INS
@@ -500,7 +500,7 @@ def print_datasets_new_under_control(procname='pixel_status', add_to_log=False) 
 
 def print_exp_runs_old(dic_exp_runs, procname='pixel_status', move_to_archive=False) :
     nruns = 0
-    for exp,runs in dic_exp_runs.iteritems() :
+    for exp,runs in dic_exp_runs.items() :
         #dsname = 'exp=%s:run=%s'%(exp, run.lstrip('0'))
         logname = log_file(exp, procname)
         print('%s%s\n  '%(exp.ljust(10), logname), end=' ')

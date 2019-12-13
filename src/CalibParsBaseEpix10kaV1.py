@@ -28,7 +28,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseEpix10kaV1 :
+class CalibParsBaseEpix10kaV1(object) :
 
     ndim = 4 # constants_shape = (7, 1, 352, 384) # data_shape = (16, 352, 384)
     segs = 1

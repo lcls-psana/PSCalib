@@ -27,7 +27,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseEpix100aV1 :
+class CalibParsBaseEpix100aV1(object) :
 
     ndim = 2 
     rows = 704 

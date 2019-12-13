@@ -27,7 +27,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseCameraV1 :
+class CalibParsBaseCameraV1(object) :
 
     ndim = 2 
     rows = 0 

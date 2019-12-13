@@ -27,7 +27,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseImpV1 :
+class CalibParsBaseImpV1(object) :
 
     ndim = 2 
     rows = 4

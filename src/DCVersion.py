@@ -114,7 +114,7 @@ class DCVersion(DCVersionI) :
         msg = '==== load data from group %s and fill object %s' % (grp.name, self._name)
         log.debug(msg, self._name)
 
-        for k,v in dict(grp).iteritems() :
+        for k,v in dict(grp).items() :
             #subgrp = v
             #print '    ', k , v
 

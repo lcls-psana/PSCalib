@@ -13,14 +13,14 @@ cdir    = env.calibDir()
 exp     = env.experiment()
 ins     = env.instrument()
 
-cfgkeys = cs.keys()
-clbkeys = clbs.keys()
+cfgkeys = list(cs.keys())
+clbkeys = list(clbs.keys())
 
 co = cs.get(psana.Epix.Config100aV2, src)
 vn = co.version()
 
 evt = next(ds.events())
-ekeys  = evt.keys()
+ekeys  = list(evt.keys())
 runnum = evt.run()
   
 eo = evt.get(psana.Epix.ElementV3, src)
@@ -64,7 +64,7 @@ runnum = evt.run()
 #pda = PyDetectorAccess(src, env, pbits=0)
 
 cs = env.configStore()
-cs.keys()
+list(cs.keys())
 
 co = cs.get(psana.Epix.Config100aV1, src)     # (704, 768)
 
@@ -98,7 +98,7 @@ ds  = psana.DataSource('/reg/g/psdm/detector/data_test/types/0014-MfxEndstation.
 env = ds.env()
 
 evt = next(ds.events())
-evt.keys()
+list(evt.keys())
 evid = evt.get(psana.EventId)
 evid.time()
 

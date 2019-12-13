@@ -85,6 +85,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Created: 2017-10-12 by Mikhail Dubrovin
 """
 from __future__ import print_function
+from __future__ import division
 #------------------------------
 
 import sys

@@ -59,7 +59,7 @@ import tempfile
 
 #------------------------------
 
-class CalibFile :
+class CalibFile(object) :
 
     rnum_max = 9999
 
@@ -168,7 +168,7 @@ def deploy_calib_array(cdir, src, type, run_start, run_end=None, arr=None, dcmts
     d['ctype'] = type
 
     # make list of comments
-    cmts=['%s %s'%(k.upper().ljust(11),v) for k,v in d.iteritems()]
+    cmts=['%s %s'%(k.upper().ljust(11),v) for k,v in d.items()]
     
     # save n-dimensional numpy array in the tmp text file
     fntmp = tempfile.NamedTemporaryFile(mode='r+b',suffix='.data')
@@ -259,7 +259,7 @@ def _history_record(dcmts) :
    
 #------------------------------
 
-class CalibFileFinder :
+class CalibFileFinder(object) :
 
     def __init__(self, cdir='', group='', pbits=1) :
         self.cdir  = cdir

@@ -74,6 +74,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Created: 2013-03-08 by Mikhail Dubrovin
 """
 from __future__ import print_function
+from __future__ import division
 #--------------------------------
 
 import sys
@@ -396,7 +397,7 @@ def shape_nda_to_2d(arr) :
     """
     sh = arr.shape
     if len(sh)<3 : return sh
-    return (arr.size/sh[-1], sh[-1])
+    return (arr.size//sh[-1], sh[-1])
 
 ##-----------------------------
 
@@ -405,7 +406,7 @@ def shape_nda_to_3d(arr) :
     """
     sh = arr.shape
     if len(sh)<4 : return sh
-    return (arr.size/sh[-1]/sh[-2], sh[-2], sh[-1])
+    return (arr.size//sh[-1]//sh[-2], sh[-2], sh[-1])
 
 ##-----------------------------
 
@@ -414,7 +415,7 @@ def reshape_nda_to_2d(arr) :
     """
     sh = arr.shape
     if len(sh)<3 : return arr
-    arr.shape = (arr.size/sh[-1], sh[-1])
+    arr.shape = (arr.size//sh[-1], sh[-1])
     return arr
 
 ##-----------------------------
@@ -424,7 +425,7 @@ def reshape_nda_to_3d(arr) :
     """
     sh = arr.shape
     if len(sh)<4 : return arr
-    arr.shape = (arr.size/sh[-1]/sh[-2], sh[-2], sh[-1])
+    arr.shape = (arr.size//sh[-1]//sh[-2], sh[-2], sh[-1])
     return arr
 
 #------------------------------
@@ -749,10 +750,10 @@ def add_rec_to_log(lfname, rec, verbos=False) :
 #------------------------------
 
 def alias_for_src_name(env) :
-    ckeys = env.configStore().keys()
+    ckeys = list(env.configStore().keys())
     srcs  = [k.src()   for k in ckeys]
     alias = [k.alias() for k in ckeys]
-    d = dict(zip(srcs, alias))
+    d = dict(list(zip(srcs, alias)))
     for s,a in d.items() : print('src: %40s   alias: %s' % (s, a))
     #print keysalias
 

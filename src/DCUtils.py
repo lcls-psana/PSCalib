@@ -72,7 +72,7 @@ import PSCalib.GlobalUtils as gu
 
 #------------------------------
 
-class h5py_proxy :
+class h5py_proxy(object) :
     def __init__(self) :
         self.h5py = None
         self.Dataset = None
@@ -89,7 +89,7 @@ class h5py_proxy :
 import h5py
 #------------------------------
 
-class Storage :
+class Storage(object) :
     def __init__(self) :
         self.dataset_t = h5py.Dataset
         self.group_t   = h5py.Group
@@ -283,7 +283,7 @@ def save_object_as_dset(grp, name, shape=None, dtype=None, data=0) :
     #print 'XXX: save_object_as_dset '
     #print 'XXX grp.keys():',  grp.keys()
     #print 'XXX %s in grp.keys(): ' % name, name in grp.keys()
-    if name in grp.keys() : return
+    if name in list(grp.keys()) : return
 
     if isinstance(data, np.ndarray) :
         return grp.create_dataset(name, data=data)

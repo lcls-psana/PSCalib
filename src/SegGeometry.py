@@ -66,7 +66,7 @@ def rotation(X, Y, C, S) :
 
 #------------------------------
 
-class SegGeometry :
+class SegGeometry(object) :
     AXIS = ['X', 'Y', 'Z']
     DIC_AXIS = {'X':0, 'Y':1, 'Z':2}
     wmsg = 'WARNING! %s - interface method from the base class \nneeds to be re-implemented in the derived class'

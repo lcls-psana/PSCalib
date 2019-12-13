@@ -12,7 +12,7 @@ from RegDB import experiment_info as expinfo
 def print_experiment_runs(ins, exp) :
     for r in expinfo.experiment_runs(ins, exp) :
         print(30*'_', '\n', r)
-        for k,v in r.iteritems() :
+        for k,v in r.items() :
             print('    ', k,v)
 
 
@@ -32,7 +32,7 @@ def print_detectors(ins, exp, run) :
 
 
 def print_calibration_runs(ins, exp) :
-    for k,v in expinfo.calibration_runs(ins, exp).iteritems() :
+    for k,v in expinfo.calibration_runs(ins, exp).items() :
         print(k,v)
 
 #------------------------------

@@ -27,7 +27,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseCSPad2x2V1 :
+class CalibParsBaseCSPad2x2V1(object) :
 
     ndim = 3 
     segs = 2 

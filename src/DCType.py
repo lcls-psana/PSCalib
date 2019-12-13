@@ -90,7 +90,7 @@ class DCType(DCTypeI) :
 
     def add_range(self, begin, end=None, cmt=False) :
         keyrng = key(begin, end)
-        if keyrng in self._dicranges.keys() :
+        if keyrng in list(self._dicranges.keys()) :
             return self._dicranges[keyrng]
         o = self._dicranges[keyrng] = DCRange(begin, end)
 
@@ -102,7 +102,7 @@ class DCType(DCTypeI) :
 
     def mark_range_for_key(self, keyrng, cmt=False) :
         """Marks child object for deletion in save()"""
-        if keyrng in self._dicranges.keys() :
+        if keyrng in list(self._dicranges.keys()) :
             #o = self._dicranges[keyrng]
             #o.mark_versions()
             self._lst_del_keys.append(keyrng)
@@ -124,7 +124,7 @@ class DCType(DCTypeI) :
 
     def mark_ranges(self) :
         """Marks all child objects for deletion in save()"""
-        if keyrng in self._dicranges.keys() :
+        if keyrng in list(self._dicranges.keys()) :
             self.mark_range_for_key(keyrng)
             #self._lst_del_keys.append(keyrng)
 
@@ -162,7 +162,7 @@ class DCType(DCTypeI) :
         log.debug(msg, self._name)
 
         # save/delete objects in/from hdf5 file
-        for k,v in self._dicranges.iteritems() :
+        for k,v in self._dicranges.items() :
             if k in self._lst_del_keys : delete_object(grp, k)
             else : v.save(grp)
 
@@ -181,7 +181,7 @@ class DCType(DCTypeI) :
 
         #print 'XXX DCType.load group file name: "%s"' % grp.file.name
 
-        for k,v in dict(grp).iteritems() :
+        for k,v in dict(grp).items() :
             #subgrp = v
             #print 'XXX    ', k , v# , "   ", subg.name #, val, subg.len(), type(subg),
 
@@ -198,7 +198,7 @@ class DCType(DCTypeI) :
                 #if begin is None : 
                 if (begin is None) or (not isinstance(begin[0], float)) :
                     msg = 'File: "%s"\n       has corrupted structure - group "%s" does not contain key "begin", keys: "%s"'%\
-                          (grp.file.name, v.name, v.keys())
+                          (grp.file.name, v.name, list(v.keys()))
                     log.error(msg, self._name)
                     print('ERROR:', self._name, msg)
                     continue
@@ -206,7 +206,7 @@ class DCType(DCTypeI) :
                 end = v.get('end')
                 if (end is None) or (end[0] != 'end') :
                     msg = 'File: "%s"\n       has structure - group "%s" does not contain key "end", keys: "%s"'%\
-                          (grp.file.name, v.name, v.keys())
+                          (grp.file.name, v.name, list(v.keys()))
                     log.error(msg, self._name)
                     print('ERROR:', self._name, msg)
                     continue
@@ -222,9 +222,9 @@ class DCType(DCTypeI) :
         self.print_base(offset)
         print('%s ctype    %s' % (offset, self.ctype()))
         print('%s N ranges %s' % (offset, len(self.ranges())))
-        print('%s ranges   %s' % (offset, str(self.ranges().keys())))
+        print('%s ranges   %s' % (offset, str(list(self.ranges().keys()))))
 
-        for k,v in self.ranges().iteritems() :
+        for k,v in self.ranges().items() :
             v.print_obj()
 
 #------------------------------

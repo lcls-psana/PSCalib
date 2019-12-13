@@ -120,7 +120,7 @@ class DCBase(object) :
 
 
     def del_par(self, k) :
-        if k in self._dicpars.keys() : del self._dicpars[k]
+        if k in list(self._dicpars.keys()) : del self._dicpars[k]
         
 
     def clear_pars(self) :
@@ -160,7 +160,7 @@ class DCBase(object) :
 
 
     def del_history_record(self, k) :
-        if k in self._dichist.keys() : del self._dichist[k]
+        if k in list(self._dichist.keys()) : del self._dichist[k]
         
 
     def clear_history(self) :
@@ -257,7 +257,7 @@ class DCBase(object) :
     def _load_pars_dict(self, grp) :
         log.debug('_load_pars_dict for group %s' % grp.name, self._name)
         self.clear_pars()
-        for k,v in dict(grp).iteritems() :
+        for k,v in dict(grp).items() :
             log.debug('par: %s = %s' % (k, str(v[0])), self._name)
             self.add_par(k, v[0])
 

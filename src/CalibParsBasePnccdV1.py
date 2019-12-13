@@ -27,7 +27,7 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBasePnccdV1 :
+class CalibParsBasePnccdV1(object) :
 
     ndim = 3 
     segs = 4
