@@ -127,6 +127,24 @@ class CalibFile(object) :
             elif self.end < other.end : return  1
             else : return 0
 
+    def __eq__(self, other):
+        return self.__cmp__(other) == 0
+
+    def __ne__(self, other):
+        return self.__cmp__(other) != 0
+
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+
+    def __le__(self, other):
+        return self.__cmp__(other) <= 0
+
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
+
+    def __ge__(self, other):
+        return self.__cmp__(other) >= 0
+
     def str_attrs(self) : 
         return 'begin: %4d  end: %4d  path: %s' % (self.begin, self.end, self.path)
 
