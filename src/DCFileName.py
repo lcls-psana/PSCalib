@@ -206,7 +206,7 @@ class DCFileName(object) :
             #fname, ext = os.path.splitext(fnamext)
 
         if pathf is None\
-        or pathf is '' : raise IOError('%s: File name "%s" is not allowed'%(self._name, pathf))
+        or pathf == '' : raise IOError('%s: File name "%s" is not allowed'%(self._name, pathf))
 
         self.path = pathf 
 
