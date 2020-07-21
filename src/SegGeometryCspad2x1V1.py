@@ -92,6 +92,8 @@ from PSCalib.SegGeometry import *
 class SegGeometryCspad2x1V1(SegGeometry) :
     """Self-sufficient class for generation of CSPad 2x1 sensor pixel coordinate array"""
 
+    _name = 'SegGeometryCspad2x1V1'
+
     _rows  = 185    # Number of rows in 2x1 at rotation 0
     _cols  = 388    # Number of cols in 2x1 at rotation 0
     _pixs  = 109.92 # Pixel size in um (micrometer)
@@ -102,15 +104,21 @@ class SegGeometryCspad2x1V1(SegGeometry) :
     _pixsh = _pixs/2
     _pixwh = _pixw/2
 
+    _arows = _rows
+    _acols = _colsh
+
+    _nasics_in_rows = 1 # Number of ASICs in row direction
+    _nasics_in_cols = 2 # Number of ASICs in column direction
+
+    _asic0indices = ((0, 0), (0, _colsh))
+
 #------------------------------
 
-    def __init__(sp, use_wide_pix_center=True) :
-        #print 'SegGeometryCspad2x1V1.__init__()'
+    def __init__(sp, **kwa) :
+        #print('SegGeometryCspad2x1V1.__init__()')
 
         SegGeometry.__init__(sp)
-        #super(SegGeometry, self).__init__()
-
-        sp.use_wide_pix_center = use_wide_pix_center
+        sp.use_wide_pix_center = kwa.get('use_wide_pix_center', True)
 
         sp.x_pix_arr_um_offset  = None
         sp.pix_area_arr = None
@@ -397,17 +405,37 @@ class SegGeometryCspad2x1V1(SegGeometry) :
 
         return mask
 
+#----------
+# 2020-07 added for converter
+
+    def asic0indices(sp):
+        """ Returns list of ASIC (0,0)-corner indices in panel daq array. 
+        """
+        return sp._asic0indices
+
+    def asic_rows_cols(sp):
+        """ Returns ASIC number of rows, columns.
+        """
+        return sp._arows, sp._acols
+
+    def number_of_asics_in_rows_cols(sp):
+        """ Returns ASIC number of ASICS in the panal in direction fo rows, columns.
+        """
+        return sp._nasics_in_rows, sp._nasics_in_cols
+
+    def name(sp):
+        """ Returns segment name.
+        """
+        return sp._name
   
-#------------------------------
 #------------------------------
 
 cspad2x1_one = SegGeometryCspad2x1V1(use_wide_pix_center=False)
+cspad2x1_wpc = SegGeometryCspad2x1V1(use_wide_pix_center=True)
 
 #------------------------------
 #------------------------------
-#------------------------------
 #----------- TEST -------------
-#------------------------------
 #------------------------------
 #------------------------------
 
