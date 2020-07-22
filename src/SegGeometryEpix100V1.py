@@ -40,7 +40,7 @@ Usage::
 
     from SegGeometryEpix100V1 import epix2x2_one as sg
 
-    sg.print_seg_info(0377)
+    sg.print_seg_info(0o377)
 
     size_arr = sg.size()
     rows     = sg.rows()
@@ -49,7 +49,7 @@ Usage::
     pix_size = pixel_scale_size()
 
     area     = sg.pixel_area_array()
-    mask     = sg.pixel_mask_array(mbits=0377, **kwargs)
+    mask     = sg.pixel_mask_array(mbits=0o377, **kwargs)
     # where mbits = +1-edges, +2-wide pixels
 
     sizeX = sg.pixel_size_array('X')
@@ -57,7 +57,7 @@ Usage::
 
     X     = sg.pixel_coord_array('X')
     X,Y,Z = sg.pixel_coord_array()
-    print 'X.shape =', X.shape
+    print('X.shape =', X.shape)
 
     xmin, ymin, zmin = sg.pixel_coord_min()
     xmax, ymax, zmax = sg.pixel_coord_max()
@@ -96,7 +96,7 @@ from PSCalib.SegGeometry import *
 
 #------------------------------
 
-class SegGeometryEpix100V1(SegGeometry) :
+class SegGeometryEpix100V1(SegGeometry):
     """Self-sufficient class for generation of Epix100 2x2 sensor pixel coordinate array"""
 
     _rows  = 704     # Number of rows in 2x2
@@ -112,13 +112,12 @@ class SegGeometryEpix100V1(SegGeometry) :
 
 #------------------------------
 
-    def __init__(sp, use_wide_pix_center=True) :
-        #print 'SegGeometryEpix100V1.__init__()'
+    def __init__(sp, **kwa):
+        #print('SegGeometryEpix100V1.__init__()')
 
         SegGeometry.__init__(sp)
         #super(SegGeometry, self).__init__()
-
-        sp.use_wide_pix_center = use_wide_pix_center
+        sp.use_wide_pix_center = kwa.get('use_wide_pix_center', True)
 
         sp.x_pix_arr_um_offset  = None
         sp.pix_area_arr = None
@@ -127,16 +126,16 @@ class SegGeometryEpix100V1(SegGeometry) :
 
 #------------------------------
 
-    def make_pixel_coord_arrs(sp) :
+    def make_pixel_coord_arrs(sp):
         """Makes [704,768] maps of x, y, and z 2x2 pixel coordinates
         with origin in the center of 2x2
         """        
         x_rhs = np.arange(sp._colsh)*sp._pixs + sp._pixw - sp._pixsh
-        if sp.use_wide_pix_center : x_rhs[0] = sp._pixwh # set x-coordinate of the wide pixel in its geometry center
+        if sp.use_wide_pix_center: x_rhs[0] = sp._pixwh # set x-coordinate of the wide pixel in its geometry center
         sp.x_arr_um = np.hstack([-x_rhs[::-1], x_rhs])
 
         y_rhs = np.arange(sp._rowsh)*sp._pixs + sp._pixw - sp._pixsh
-        if sp.use_wide_pix_center : y_rhs[0] = sp._pixwh # set y-coordinate of the wide pixel in its geometry center
+        if sp.use_wide_pix_center: y_rhs[0] = sp._pixwh # set y-coordinate of the wide pixel in its geometry center
         sp.y_arr_um = np.hstack([-y_rhs[::-1], y_rhs])
 
         sp.x_pix_arr_um, sp.y_pix_arr_um  = np.meshgrid(sp.x_arr_um, sp.y_arr_um)
@@ -144,10 +143,10 @@ class SegGeometryEpix100V1(SegGeometry) :
         
 #------------------------------
 
-    def make_pixel_size_arrs(sp) :
+    def make_pixel_size_arrs(sp):
         """Makes [704,768] maps of x, y, and z 2x2 pixel size 
         """        
-        if sp.pix_area_arr is not None : return
+        if sp.pix_area_arr is not None: return
 
         x_rhs_size_um = np.ones(sp._colsh)*sp._pixs
         x_rhs_size_um[0] = sp._pixw
@@ -165,12 +164,12 @@ class SegGeometryEpix100V1(SegGeometry) :
 
 #------------------------------
 
-    def print_member_data(sp) :
+    def print_member_data(sp):
         print('SegGeometryEpix100V1.print_member_data()')
         print('    _rows : %d'     % sp._rows)
         print('    _cols : %d'     % sp._cols)
-        print('    _pixs  : %7.2f' % sp._pixs) 
-        print('    _pixw  : %7.2f' % sp._pixw) 
+        print('    _pixs  : %7.2f' % sp._pixs)
+        print('    _pixw  : %7.2f' % sp._pixw)
         print('    _pixd  : %7.2f' % sp._pixd) 
         print('    _colsh : %d'    % sp._colsh)
         print('    _pixsh : %7.2f' % sp._pixsh)
@@ -178,7 +177,7 @@ class SegGeometryEpix100V1(SegGeometry) :
 
 #------------------------------
 
-    def print_pixel_size_arrs(sp) :
+    def print_pixel_size_arrs(sp):
         print('SegGeometryEpix100V1.print_pixel_size_arrs()')
         sp.make_pixel_size_arrs()
         print('sp.x_pix_size_um[348:358,378:388]:\n', sp.x_pix_size_um[348:358,378:388])
@@ -192,7 +191,7 @@ class SegGeometryEpix100V1(SegGeometry) :
 
 #------------------------------
 
-    def print_maps_seg_um(sp) :
+    def print_maps_seg_um(sp):
         print('SegGeometryEpix100V1.print_maps_seg_um()')
         print('x_pix_arr_um =\n',      sp.x_pix_arr_um)
         print('x_pix_arr_um.shape = ', sp.x_pix_arr_um.shape)
@@ -203,8 +202,8 @@ class SegGeometryEpix100V1(SegGeometry) :
 
 #------------------------------
 
-    def print_xy_1darr_um(sp) :
-        print('SegGeometryEpix100V1.print_xy_1darr_um()')
+    def print_xy_1darr_um(sp):
+        print('SegGeometryEpix100V1.print_xy_1darr_um())')
         print('x_arr_um:\n',       sp.x_arr_um)
         print('x_arr_um.shape = ', sp.x_arr_um.shape)
         print('y_arr_um:\n',       sp.y_arr_um)
@@ -212,7 +211,7 @@ class SegGeometryEpix100V1(SegGeometry) :
 
 #------------------------------
 
-    def print_xyz_min_max_um(sp) :
+    def print_xyz_min_max_um(sp):
         print('SegGeometryEpix100V1.print_xyz_min_max_um()')
         xmin, ymin, zmin = sp.get_xyz_min_um()
         xmax, ymax, zmax = sp.get_xyz_max_um()
@@ -221,50 +220,50 @@ class SegGeometryEpix100V1(SegGeometry) :
 
 #------------------------------
 
-    def get_xyz_min_um(sp) : 
+    def get_xyz_min_um(sp):
         return sp.x_arr_um[0], sp.y_arr_um[-1], 0
 
-    def get_xyz_max_um(sp) : 
+    def get_xyz_max_um(sp):
         return sp.x_arr_um[-1], sp.y_arr_um[0], 0
 
-    def get_seg_xy_maps_um(sp) : 
+    def get_seg_xy_maps_um(sp):
         return sp.x_pix_arr_um, sp.y_pix_arr_um
 
-    def get_seg_xyz_maps_um(sp) : 
+    def get_seg_xyz_maps_um(sp):
         return sp.x_pix_arr_um, sp.y_pix_arr_um, sp.z_pix_arr_um
 
-    def get_seg_xy_maps_um_with_offset(sp) : 
-        if  sp.x_pix_arr_um_offset is None :
+    def get_seg_xy_maps_um_with_offset(sp):
+        if  sp.x_pix_arr_um_offset is None:
             x_min_um, y_min_um, z_min_um = sp.get_xyz_min_um()
             sp.x_pix_arr_um_offset = sp.x_pix_arr_um - x_min_um
             sp.y_pix_arr_um_offset = sp.y_pix_arr_um - y_min_um
         return sp.x_pix_arr_um_offset, sp.y_pix_arr_um_offset
 
-    def get_seg_xyz_maps_um_with_offset(sp) : 
-        if  sp.x_pix_arr_um_offset is None :
+    def get_seg_xyz_maps_um_with_offset(sp):
+        if  sp.x_pix_arr_um_offset is None:
             x_min_um, y_min_um, z_min_um = sp.get_xyz_min_um()
             sp.x_pix_arr_um_offset = sp.x_pix_arr_um - x_min_um
             sp.y_pix_arr_um_offset = sp.y_pix_arr_um - y_min_um
             sp.z_pix_arr_um_offset = sp.z_pix_arr_um - z_min_um
         return sp.x_pix_arr_um_offset, sp.y_pix_arr_um_offset, sp.z_pix_arr_um_offset
 
-    def get_pix_size_um(sp) : 
+    def get_pix_size_um(sp):
         return sp._pixs
 
-    def get_pixel_size_arrs_um(sp) :
+    def get_pixel_size_arrs_um(sp):
         sp.make_pixel_size_arrs()
         return sp.x_pix_size_um, sp.y_pix_size_um, sp.z_pix_size_um
 
-    def get_pixel_area_arr(sp) :
+    def get_pixel_area_arr(sp):
         sp.make_pixel_size_arrs()
         return sp.pix_area_arr
 
-    def get_seg_xy_maps_pix(sp) :
+    def get_seg_xy_maps_pix(sp):
         sp.x_pix_arr_pix = sp.x_pix_arr_um/sp._pixs
         sp.y_pix_arr_pix = sp.y_pix_arr_um/sp._pixs
         return sp.x_pix_arr_pix, sp.y_pix_arr_pix
 
-    def get_seg_xy_maps_pix_with_offset(sp) :
+    def get_seg_xy_maps_pix_with_offset(sp):
         X, Y = sp.get_seg_xy_maps_pix()
         xmin, ymin = X.min(), Y.min()
         return X-xmin, Y-ymin
@@ -273,7 +272,7 @@ class SegGeometryEpix100V1(SegGeometry) :
 # INTERFACE METHODS
 #------------------------------
 
-    def print_seg_info(sp, pbits=0) :
+    def print_seg_info(sp, pbits=0):
         """ Prints segment info for selected bits
         pbits = 0 - nothing,
         +1 - member data,
@@ -281,73 +280,73 @@ class SegGeometryEpix100V1(SegGeometry) :
         +4 - min, max coordinates in um,
         +8 - x, y 1-d pixel coordinate arrays in um.
         """
-        if pbits & 1 : sp.print_member_data()
-        if pbits & 2 : sp.print_maps_seg_um()
-        if pbits & 4 : sp.print_xyz_min_max_um()
-        if pbits & 8 : sp.print_xy_1darr_um()
+        if pbits & 1: sp.print_member_data()
+        if pbits & 2: sp.print_maps_seg_um()
+        if pbits & 4: sp.print_xyz_min_max_um()
+        if pbits & 8: sp.print_xy_1darr_um()
 
 
-    def size(sp) :
+    def size(sp):
         """ Returns number of pixels in segment
         """
         return sp._rows*sp._cols
 
 
-    def rows(sp) :
+    def rows(sp):
         """ Returns number of rows in segment
         """
         return sp._rows
 
 
-    def cols(sp) :
+    def cols(sp):
         """ Returns number of cols in segment
         """
         return sp._cols
 
 
-    def shape(sp) :
+    def shape(sp):
         """ Returns shape of the segment (rows, cols)
         """
         return (sp._rows, sp._cols)
 
 
-    def pixel_scale_size(sp) :
+    def pixel_scale_size(sp):
         """ Returns pixel size in um for indexing
         """
         return sp._pixs
 
 
-    def pixel_area_array(sp) :
+    def pixel_area_array(sp):
         """ Returns pixel area array of shape=(rows, cols)
         """
         return sp.get_pixel_area_arr()
 
 
-    def pixel_size_array(sp, axis=None) :
+    def pixel_size_array(sp, axis=None):
         """ Returns numpy array of pixel sizes in um for AXIS
         """
         return sp.return_switch(sp.get_pixel_size_arrs_um, axis)
 
 
-    def pixel_coord_array(sp, axis=None) :
+    def pixel_coord_array(sp, axis=None):
         """ Returns numpy array of segment pixel coordinates in um for AXIS
         """
         return sp.return_switch(sp.get_seg_xyz_maps_um, axis)
 
 
-    def pixel_coord_min(sp, axis=None) :
+    def pixel_coord_min(sp, axis=None):
         """ Returns minimal value in the array of segment pixel coordinates in um for AXIS
         """
         return sp.return_switch(sp.get_xyz_min_um, axis)
 
 
-    def pixel_coord_max(sp, axis=None) :
+    def pixel_coord_max(sp, axis=None):
         """ Returns maximal value in the array of segment pixel coordinates in um for AXIS
         """
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0o377, **kwargs) :
+    def pixel_mask_array(sp, mbits=0o377, **kwargs):
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits: +1 - mask edges,
         +2 - mask two central columns 
@@ -356,14 +355,14 @@ class SegGeometryEpix100V1(SegGeometry) :
         zero_row = np.zeros(sp._cols,dtype=np.uint8)
         mask     = np.ones((sp._rows,sp._cols),dtype=np.uint8)
 
-        if mbits & 1 : 
+        if mbits & 1:
         # mask edges
             mask[0, :] = zero_row # mask top    edge
             mask[-1,:] = zero_row # mask bottom edge
             mask[:, 0] = zero_col # mask left   edge
             mask[:,-1] = zero_col # mask right  edge
 
-        if mbits & 2 : 
+        if mbits & 2:
         # mask two central columns and rows
             mask[:,sp._colsh-1] = zero_col # mask central-left  column
             mask[:,sp._colsh]   = zero_col # mask central-right column
@@ -374,23 +373,21 @@ class SegGeometryEpix100V1(SegGeometry) :
 
   
 #------------------------------
-#------------------------------
 
 epix2x2_one = SegGeometryEpix100V1(use_wide_pix_center=False)
+epix2x2_wpc = SegGeometryEpix100V1(use_wide_pix_center=True)
 
-#------------------------------
 #------------------------------
 #------------------------------
 #----------- TEST -------------
 #------------------------------
 #------------------------------
-#------------------------------
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     import pyimgalgos.GlobalGraphics as gg # For test purpose in main only
 
 
-def test_xyz_min_max() :
+def test_xyz_min_max():
     w = SegGeometryEpix100V1()
     w.print_xyz_min_max_um() 
     print('Ymin = ', w.pixel_coord_min('Y'))
@@ -398,14 +395,14 @@ def test_xyz_min_max() :
 
 #------------------------------
 
-def test_xyz_maps() :
+def test_xyz_maps():
 
     w = SegGeometryEpix100V1()
     w.print_maps_seg_um()
 
     titles = ['X map','Y map']
-    #for i,arr2d in enumerate([w.x_pix_arr,w.y_pix_arr]) :
-    for i,arr2d in enumerate( w.get_seg_xy_maps_pix() ) :
+    #for i,arr2d in enumerate([w.x_pix_arr,w.y_pix_arr]):
+    for i,arr2d in enumerate( w.get_seg_xy_maps_pix() ):
         amp_range = (arr2d.min(), arr2d.max())
         gg.plotImageLarge(arr2d, amp_range=amp_range, figsize=(10,5), title=titles[i])
         gg.move(200*i,100*i)
@@ -414,7 +411,7 @@ def test_xyz_maps() :
 
 #------------------------------
 
-def test_2x2_img() :
+def test_2x2_img():
 
     t0_sec = time()
     w = SegGeometryEpix100V1(use_wide_pix_center=False)
@@ -425,7 +422,6 @@ def test_2x2_img() :
 
     w.print_seg_info(0o377)
 
-    #print 'X(pix) :\n', X
     print('X.shape =', X.shape)
 
     xmin, ymin, zmin = w.get_xyz_min_um()
@@ -442,16 +438,16 @@ def test_2x2_img() :
 
 #    H, Xedges, Yedges = np.histogram2d(X.flatten(), Y.flatten(), bins=[xsize,ysize], range=[[xmin, xmax], [ymin, ymax]], normed=False, weights=X.flatten()+Y.flatten()) 
 
-#    print 'Xedges:', Xedges
-#    print 'Yedges:', Yedges
-#    print 'H.shape:', H.shape
+#    print('Xedges:', Xedges)
+#    print('Yedges:', Yedges)
+#    print('H.shape:', H.shape)
 
 #    gg.plotImageLarge(H, amp_range=(-800, 800), figsize=(8,10)) # range=(-1, 2), 
 #    gg.show()
 
 #------------------------------
 
-def test_2x2_img_easy() :
+def test_2x2_img_easy():
     pc2x2 = SegGeometryEpix100V1(use_wide_pix_center=False)
     X,Y = pc2x2.get_seg_xy_maps_pix_with_offset()
     iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
@@ -461,22 +457,22 @@ def test_2x2_img_easy() :
 
 #------------------------------
 
-def test_pix_sizes() :
+def test_pix_sizes():
     w = SegGeometryEpix100V1()
     w.print_pixel_size_arrs()
     size_arrX = w.pixel_size_array('X')
     size_arrY = w.pixel_size_array('Y')
     area_arr  = w.pixel_area_array()
     print('area_arr[348:358,378:388]:\n',   area_arr[348:358,378:388])
-    print('area_arr.shape :',               area_arr.shape)
+    print('area_arr.shape:',               area_arr.shape)
     print('size_arrX[348:358,378:388]:\n',  size_arrX[348:358,378:388])
-    print('size_arrX.shape :',              size_arrX.shape)
+    print('size_arrX.shape:',              size_arrX.shape)
     print('size_arrY[348:358,378:388]:\n',  size_arrY[348:358,378:388])
-    print('size_arrY.shape :',              size_arrY.shape)
+    print('size_arrY.shape:',              size_arrY.shape)
 
 #------------------------------
 
-def test_2x2_mask(mbits=0o377) :
+def test_2x2_mask(mbits=0o377):
     pc2x2 = SegGeometryEpix100V1(use_wide_pix_center=False)
     X, Y = pc2x2.get_seg_xy_maps_pix_with_offset()
     mask = pc2x2.pixel_mask_array(mbits)
@@ -488,17 +484,17 @@ def test_2x2_mask(mbits=0o377) :
 
 #------------------------------
  
-if __name__ == "__main__" :
+if __name__ == "__main__":
 
-    if len(sys.argv)==1   : print('For test(s) use command: python', sys.argv[0], '<test-number=0-5>')
-    elif sys.argv[1]=='0' : test_xyz_min_max()
-    elif sys.argv[1]=='1' : test_xyz_maps()
-    elif sys.argv[1]=='2' : test_2x2_img()
-    elif sys.argv[1]=='3' : test_2x2_img_easy()
-    elif sys.argv[1]=='4' : test_pix_sizes()
-    elif sys.argv[1]=='5' : test_2x2_mask(mbits=1+2)
-    else : print('Non-expected arguments: sys.argv=', sys.argv)
+    if len(sys.argv)==1  : print('For test(s) use command: python', sys.argv[0], '<test-number=0-5>')
+    elif sys.argv[1]=='0': test_xyz_min_max()
+    elif sys.argv[1]=='1': test_xyz_maps()
+    elif sys.argv[1]=='2': test_2x2_img()
+    elif sys.argv[1]=='3': test_2x2_img_easy()
+    elif sys.argv[1]=='4': test_pix_sizes()
+    elif sys.argv[1]=='5': test_2x2_mask(mbits=1+2)
+    else: print('Non-expected arguments: sys.argv=', sys.argv)
 
-    sys.exit( 'End of test.' )
+    sys.exit('End of test.')
 
 #------------------------------

@@ -11,6 +11,22 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-48
+2019-078-21 Mikhail S. Dubrovin
+- add UtilsConvert.py to convert psana geometry to crystfel
+  and adjust SegGeometry*
+- py2->py3 compatability
+- minor style update for mult. modules:
+	modified:   GeometryAccess.py
+	modified:   GeometryObject.py
+	modified:   SegGeometry.py
+	modified:   SegGeometryCspad2x1V1.py
+	modified:   SegGeometryEpix100V1.py
+	modified:   SegGeometryEpix10kaV1.py
+	modified:   SegGeometryJungfrauV1.py
+	modified:   SegGeometryStore.py
+	new file:   UtilsConvert.py
+
 Tag: V01-00-47
 2019-05-06 Mikhail S. Dubrovin
 - add SegGeometryEpix10kaV1, add CalibPars support for Epix10ka2m

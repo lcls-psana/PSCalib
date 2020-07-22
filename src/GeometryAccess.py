@@ -129,7 +129,7 @@ class GeometryAccess(object) :
     """ :py:class:`GeometryAccess`
     """
 
-    def __init__(self, path=None, pbits=0) : 
+    def __init__(self, path=None, pbits=0, use_wide_pix_center=False) : 
         """Constructor of the class :py:class:`GeometryAccess`      
 
         Parameters
@@ -140,6 +140,7 @@ class GeometryAccess(object) :
         self.path  = path
         self.pbits = pbits
         self.valid = False
+        self.use_wide_pix_center = use_wide_pix_center
 
         if path is None or not os.path.exists(path) :
             if pbits : print('%s: geometry file "%s" does not exist' % (self.__class__.__name__, path))
@@ -314,6 +315,7 @@ class GeometryAccess(object) :
         #print 'vals: ', vals
     
         d = dict(zip(keys, vals))
+        d['use_wide_pix_center'] = self.use_wide_pix_center
         #print 'd=', d
         #return d
         return GeometryObject(**d)
@@ -332,7 +334,8 @@ class GeometryAccess(object) :
         # The name of parent object is not found among geo names in the self.list_of_geos
         # add top parent object to the list
         if geobj.pname is not None :
-            top_parent = GeometryObject(pname=None, pindex=0, oname=geobj.pname, oindex=geobj.pindex)
+            top_parent = GeometryObject(pname=None, pindex=0, oname=geobj.pname, oindex=geobj.pindex,\
+                                        use_wide_pix_center=self.use_wide_pix_center)
             self.list_of_geos.append(top_parent)
             return top_parent
                    
@@ -900,17 +903,12 @@ def test_load_pars_from_file(geometry) :
 def test_cspad2x2() :
     """ Test cspad2x2 geometry table
     """
-    ## MecTargetChamber.0:Cspad2x2.1
-    basedir = '/reg/neh/home1/dubrovin/LCLS/CSPad2x2Alignment/calib-cspad2x2-01-2013-02-13/'    
+    basedir = '/reg/g/psdm/detector/alignment/cspad2x2/calib-cspad2x2-01-2013-02-13/'   
     fname_geometry = basedir + 'calib/CsPad2x2::CalibV1/MecTargetChamber.0:Cspad2x2.1/geometry/0-end.data'
     fname_data     = basedir + 'cspad2x2.1-ndarr-ave-meca6113-r0028.dat'    
 
-    ## MecTargetChamber.0:Cspad2x2.2 
-    #basedir = '/reg/neh/home1/dubrovin/LCLS/CSPad2x2Alignment/calib-cspad2x2-02-2013-02-13/'    
-    #fname_geometry = basedir + 'calib/CsPad2x2::CalibV1/MecTargetChamber.0:Cspad2x2.2/geometry/0-end.data'
-    #fname_data     = basedir + 'cspad2x2.2-ndarr-ave-meca6113-r0028.dat'    
+    geometry = GeometryAccess(fname_geometry, 0o377, use_wide_pix_center=False)
 
-    geometry = GeometryAccess(fname_geometry, 0o377)
     amp_range = (0,15000)
 
     # get pixel coordinate index arrays:
