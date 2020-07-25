@@ -84,7 +84,7 @@ class SegGeometryStore(object):
         if segname=='SENS2X1:V1' : return cspad2x1_wpc if wpc else cspad2x1_one # SegGeometryCspad2x1V1(use_wide_pix_center=False)
         if segname=='EPIX100:V1' : return epix2x2_wpc  if wpc else epix2x2_one  # SegGeometryEpix100V1 (use_wide_pix_center=False)
         if segname=='EPIX10KA:V1': return epix10ka_wpc if wpc else epix10ka_one # SegGeometryEpix10kaV1(use_wide_pix_center=False)
-        if segname=='PNCCD:V1'   : segment_one  # SegGeometryMatrixV1()
+        if segname=='PNCCD:V1'   : return segment_one  # SegGeometryMatrixV1()
         if segname[:4]=='MTRX'   :
             rows, cols, psize_row, psize_col = matrix_pars(segname)
             return SegGeometryMatrixV1(rows, cols, psize_row, psize_col,\
