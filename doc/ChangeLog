@@ -11,8 +11,14 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-49
+2020-07-24 Mikhail S. Dubrovin
+- add missing return
+	modified:   src/GeometryObject.py
+	modified:   src/SegGeometryStore.py
+
 Tag: V01-00-48
-2019-078-21 Mikhail S. Dubrovin
+2020-07-21 Mikhail S. Dubrovin
 - add UtilsConvert.py to convert psana geometry to crystfel
   and adjust SegGeometry*
 - py2->py3 compatability

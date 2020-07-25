@@ -293,7 +293,7 @@ class GeometryObject:
                 zac = np.vstack((zac, zch))
 
         # define shape for output x,y,z arrays
-        shape_child = xch.shape
+        #shape_child = xch.shape
         len_child = len(self.list_of_children)
         geo_shape = np.hstack(([len_child], xch.shape))
         #print('geo_shape = ', geo_shape)
