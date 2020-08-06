@@ -11,6 +11,12 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-50
+2020-08-06 Mikhail S. Dubrovin
+- add app/geometry_image
+	new file:   app/geometry_image
+	modified:   src/DCUtils.py
+
 Tag: V01-00-49
 2020-07-24 Mikhail S. Dubrovin
 - add missing return

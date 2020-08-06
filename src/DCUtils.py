@@ -205,7 +205,8 @@ def dettype_from_str_source(src) :
     str_src = str(src)
     str_split = str_src.rsplit(':',1) 
     detname = str_split[1].split('.',1) if len(str_split)>1 else None
-    return detname[0] if len(detname)>1 else None
+    #return detname[0] if len(detname)>1 else None
+    return None if detname is None else detname[0] if len(detname)>1 else None
 
 #------------------------------
 
