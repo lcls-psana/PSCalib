@@ -11,6 +11,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-51
+2020-08-07 Mikhail S. Dubrovin
+- add app/geometry_convert
+	new file:   app/geometry_convert
+	modified:   doc/ChangeLog
+	modified:   src/UtilsConvert.py
+
 Tag: V01-00-50
 2020-08-06 Mikhail S. Dubrovin
 - add app/geometry_image

@@ -1,0 +1,53 @@
+#!/usr/bin/env python
+
+import sys
+import logging
+DICT_NAME_TO_LEVEL = logging._levelNames # logging._nameToLevel # {'INFO': 20, 'WARNING': 30, 'WARN': 30,...
+LEVEL_NAMES = [v for v in logging._levelNames.values() if isinstance(v,str)] #_levelToName
+STR_LEVEL_NAMES = ', '.join(LEVEL_NAMES)
+
+import argparse
+
+from PSCalib.UtilsConvert import convert_detector_any
+
+#----------
+
+if __name__ == "__main__":
+
+    scrname = sys.argv[0].rsplit('/')[-1]
+
+    fname_jungfrau_8     = '/reg/g/psdm/detector/data2_test/geometry/geo-jungfrau-8-segment.data'
+    fname_epix10ka2m_16  = '/reg/g/psdm/detector/data2_test/geometry/geo-epix10ka2m-16-segment.data'
+    fname_epix10ka2m_def = '/reg/g/psdm/detector/data2_test/geometry/geo-epix10ka2m-default.data'
+    fname_cspad_cxi      = '/reg/g/psdm/detector/data2_test/geometry/geo-cspad-cxi.data'
+
+    d_dettype = 'epix10ka'
+    d_fname   = fname_epix10ka2m_16
+    d_ofname  = 'geo-crystfel.txt'
+    d_loglev  ='INFO'
+    usage = '\nE.g.: %s' % scrname\
+      + '\n  or: %s -d epix10ka -f %s -o geo_crystfel.txt -l DEBUG' % (scrname, d_fname)
+
+    parser = argparse.ArgumentParser(usage=usage)
+    parser.add_argument('-t', '--tname',   default='0',       type=str, help='test number: 1/2/3/4 = epix10ka/jungfrau/cspad/epix10ka-default')
+    parser.add_argument('-d', '--dettype', default=d_dettype, type=str, help='detector type, i.e. epix10ka, jungfrau, cspad, def=%s' % d_dettype)
+    parser.add_argument('-f', '--fname',   default=d_fname,   type=str, help='input geometry file name, def=%s' % d_fname)
+    parser.add_argument('-o', '--ofname',  default=d_ofname,  type=str, help='output file name, def=%s' % d_ofname)
+    parser.add_argument('-l', '--loglev',  default=d_loglev,  type=str, help='logging level name, one of %s, def=%s' % (STR_LEVEL_NAMES, d_loglev))
+    #parser.add_argument('exp', type=str, help='experiment name (e.g. amox23616)')
+    #parser.add_argument('run', type=int, help='run number') # 104
+
+    args = parser.parse_args()
+    print('Arguments:') #%s\n' % str(args))
+    for k,v in vars(args).items(): print('  %12s : %s' % (k, str(v)))
+
+    logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d : %(message)s', datefmt='%Y-%m-%dT%H:%M:%S', level=DICT_NAME_TO_LEVEL[args.loglev])
+    logging.debug('Logger is initialized for level %s' % args.loglev)
+
+    tname = args.tname
+
+    convert_detector_any(args)
+
+    sys.exit('END OF %s' % scrname)
+
+#----------
