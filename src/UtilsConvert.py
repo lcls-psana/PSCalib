@@ -84,7 +84,7 @@ def panel_constants_to_crystfel(seg, n, x, y, z):
         pref = '\np%da%d'%(n,a)
 
         txt +='%s/fs = %+.6fx %+.6fy %+.6fz' % (pref, nfs[0], nfs[1], nfs[2])\
-            + '%s/ss = %+.6fx %+.6fy %+.6fz' % (pref, nfs[0], nfs[1], nfs[2])\
+            + '%s/ss = %+.6fx %+.6fy %+.6fz' % (pref, nss[0], nss[1], nss[2])\
             + '%s/res = %.3f' % (pref, 1e6/pix_size)\
             + '%s/corner_x = %.6f' % (pref, x[r0,c0]/pix_size)\
             + '%s/corner_y = %.6f' % (pref, y[r0,c0]/pix_size)\
@@ -147,7 +147,10 @@ def geometry_to_crystfel(seg, valid_nsegs, fname, ofname=None):
 
 #----------
 
-def convert_detector_any(dettype, fname, ofname):
+def convert_detector_any(args):
+
+    dettype, fname, ofname = args.dettype, args.fname, args.ofname
+
     if   'epix10ka' in dettype.lower(): geometry_to_crystfel(sgs.Create(segname='EPIX10KA:V1',pbits=0), (1,4,16), fname, ofname)
     elif 'jungfrau' in dettype.lower(): geometry_to_crystfel(sgs.Create(segname='JUNGFRAU:V1',pbits=0), (1,2,8),  fname, ofname)
     elif 'cspad'    in dettype.lower(): geometry_to_crystfel(sgs.Create(segname='SENS2X1:V1', pbits=0), (1,8,32), fname, ofname)
@@ -213,7 +216,7 @@ if __name__ == "__main__":
 
     tname = args.tname
 
-    if   tname=='0': convert_detector_any(args.dettype, args.fname, args.ofname)
+    if   tname=='0': convert_detector_any(args)
     elif tname=='1': test_epix10ka_any(fname_epix10ka2m_16)
     elif tname=='2': test_jungfrau_any(fname_jungfrau_8)
     elif tname=='3': test_cspad_any(fname_cspad_cxi)
