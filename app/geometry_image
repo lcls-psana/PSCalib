@@ -28,6 +28,7 @@ def argument_parser():
     d_segzero  = None
     d_imgwidth = 9.6
     d_imgheight= 8.9 # defined by macbook-pro 13" - soo small.
+    d_nrings = 100
 
     usage = 'E.g.: %s -h # brief info about content' % SCRNAME
           #+ '\n  or: %s %s -i -e -p -S 5 # skip 5 calib-cycles and plot graphics' % (SCRNAME, d_dsname)\
@@ -45,6 +46,7 @@ def argument_parser():
     parser.add_argument('-W', '--imgwidth', type=float, default=d_imgwidth, help='image width on screen [inch], default: %s'%d_imgwidth)
     parser.add_argument('-H', '--imgheight',type=float, default=d_imgheight,help='image height on screen [inch], default: %s'%d_imgheight)
     #parser.add_argument('-e', '--procev', default=d_procev, help='process events in loop, default: %s'%d_procev, action='store_true')
+    parser.add_argument('-R', '--nrings',  type=int,   default=d_nrings,  help='number of rings, default: %d'%d_nrings)
     
     args = parser.parse_args()
     print('Arguments: %s\n' % str(args))
@@ -93,6 +95,7 @@ def geometry_image():
     segzero   = args.segzero
     imgheight = args.imgheight
     imgwidth  = args.imgwidth
+    nrings    = args.nrings
     #sys.exit('TEST EXIT')
 
     #shape     = None
@@ -151,6 +154,9 @@ def geometry_image():
 
     nda = np.loadtxt(fname_nda)
     iX, iY = geo.get_pixel_coord_indexes(do_tilt=True)
+    #iX, iY = geo.get_pixel_coord_indexes(xy0_off_pix=(500,500), do_tilt=True)
+    #iX, iY = geo.get_pixel_xy_inds_at_z(zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)
+
     print_ndarr(iX, 'iX')
     print_ndarr(iY, 'iY')
     print_ndarr(nda, 'nda')
@@ -205,7 +211,7 @@ def geometry_image():
     #axim.set_ylim((-rmax,rma))
     gg.drawCenter(axim, xy0, s=xmax/20, linewidth=1, color='w')
 
-    for radius in np.linspace(0, 2.5*xmax, 50, endpoint=True):
+    for radius in np.linspace(0, 2.5*xmax, nrings, endpoint=True):
         gg.drawCircle(axim, xy0, radius, linewidth=1, color='w', fill=False)
 
     gr.show(mode=None)
