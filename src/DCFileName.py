@@ -256,7 +256,7 @@ def test_make_path_to_calib_file() :
 #------------------------------
 
 def do_test() :
-    log.setPrintBits(0377)
+    log.setPrintBits(0o377)
 
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     print 50*'_', '\nTest %s:' % tname

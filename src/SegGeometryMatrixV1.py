@@ -39,7 +39,7 @@ Usage of interface methods::
 
     from SegGeometryMatrixV1 import cspad2x1_one as sg
 
-    sg.print_seg_info(0377)
+    sg.print_seg_info(0o377)
 
     size_arr = sg.size()
     rows     = sg.rows()
@@ -48,7 +48,8 @@ Usage of interface methods::
     pix_size = pixel_scale_size()
 
     area  = sg.pixel_area_array()
-    mask = sg.pixel_mask_array(mbits=0377, **kwargs)
+    mbits=0o377
+    mask = sg.pixel_mask_array(mbits)
     # where mbits = +1-edges, +2-wide pixels, +4-non-bonded pixels, +8-neighbours of non-bonded
 
     sizeX = sg.pixel_size_array('X')
@@ -345,23 +346,24 @@ class SegGeometryMatrixV1(SegGeometry) :
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0377, **kwargs) :
+    def pixel_mask_array(sp, mbits=0o377, width=1) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits=1 - mask edges,
         +2 - mask two central columns, 
         +4 - mask non-bonded pixels,
         +8 - mask nearest neighbours of nonbonded pixels.
         """
+        w = width
         zero_col = np.zeros(sp._rows,dtype=np.uint8)
         zero_row = np.zeros(sp._cols,dtype=np.uint8)
         mask     = np.ones((sp._rows,sp._cols),dtype=np.uint8)
 
         if mbits & 1 : 
         # mask edges
-            mask[0, :] = zero_row # mask top    edge
-            mask[-1,:] = zero_row # mask bottom edge
-            mask[:, 0] = zero_col # mask left   edge
-            mask[:,-1] = zero_col # mask right  edge
+            mask[0:w,:] = zero_row # mask top    edge
+            mask[-w:,:] = zero_row # mask bottom edge
+            mask[:,0:w] = zero_col # mask left   edge
+            mask[:,-w:] = zero_col # mask right  edge
 
         return mask
 
@@ -385,7 +387,7 @@ if __name__ == "__main__" :
 
 
 def test_xyz_min_max() :
-    w = SegGeometryMatrixV1()
+    w = segment_one
     w.print_xyz_min_max_um() 
     print 'Ymin = ', w.pixel_coord_min('Y')
     print 'Ymax = ', w.pixel_coord_max('Y')
@@ -394,7 +396,7 @@ def test_xyz_min_max() :
 
 def test_xyz_maps() :
 
-    w = SegGeometryMatrixV1()
+    w = segment_one
     w.print_maps_seg_um()
 
     titles = ['X map','Y map']
@@ -411,12 +413,12 @@ def test_xyz_maps() :
 def test_img() :
 
     t0_sec = time()
-    w = SegGeometryMatrixV1()
+    w = segment_one
     print 'Consumed time for coordinate arrays (sec) =', time()-t0_sec
 
     X,Y = w.get_seg_xy_maps_pix()
 
-    w.print_seg_info(0377)
+    w.print_seg_info(0o377)
 
     #print 'X(pix) :\n', X
     print 'X.shape =', X.shape
@@ -445,18 +447,19 @@ def test_img() :
 #------------------------------
 
 def test_img_easy() :
-    pc2x1 = SegGeometryMatrixV1()
-    #X,Y = pc2x1.get_seg_xy_maps_pix()
-    X,Y = pc2x1.get_seg_xy_maps_pix_with_offset()
-    iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
-    img = gg.getImageFromIndexArrays(iX,iY,iX+iY)
-    gg.plotImageLarge(img, amp_range=(0, 1100), figsize=(8,10))
+    o = segment_one
+    X, Y = o.get_seg_xy_maps_pix()
+    xmin, xmax, ymin, ymax  = X.min(), X.max(), Y.min(), Y.max()
+    Xoff, Yoff = X-xmin, Y-ymin
+    iX, iY = (Xoff+0.25).astype(int), (Yoff+0.25).astype(int)
+    img = gg.getImageFromIndexArrays(iY,iX,X+2*Y)
+    gg.plotImageLarge(img, amp_range=(xmin+2*ymin, xmax+2*ymax), figsize=(8,10))
     gg.show()
 
 #------------------------------
 
 def test_pix_sizes() :
-    w = SegGeometryMatrixV1()
+    w = segment_one
     w.print_pixel_size_arrs()
     size_arr = w.pixel_size_array('X')
     area_arr = w.pixel_area_array()
@@ -467,10 +470,10 @@ def test_pix_sizes() :
 
 #------------------------------
 
-def test_mask(mbits=0377) :
-    pc2x1 = SegGeometryMatrixV1()
-    X, Y = pc2x1.get_seg_xy_maps_pix_with_offset()
-    mask = pc2x1.pixel_mask_array(mbits)
+def test_mask(mbits=0o377, width=5) :
+    o = segment_one
+    X, Y = o.get_seg_xy_maps_pix_with_offset()
+    mask = o.pixel_mask_array(mbits,width)
     iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
     img = gg.getImageFromIndexArrays(iX,iY,mask)
     gg.plotImageLarge(img, amp_range=(-1, 2), figsize=(8,10))
@@ -486,7 +489,7 @@ if __name__ == "__main__" :
     elif sys.argv[1]=='2' : test_img()
     elif sys.argv[1]=='3' : test_img_easy()
     elif sys.argv[1]=='4' : test_pix_sizes()
-    elif sys.argv[1]=='5' : test_mask(mbits=1+2+4+8)
+    elif sys.argv[1]=='5' : test_mask(mbits=1+2+4+8, width=5)
     else : print 'Non-expected arguments: sys.argv=', sys.argv
 
     sys.exit( 'End of test.' )

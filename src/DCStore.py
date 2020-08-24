@@ -414,7 +414,7 @@ def test_DCStore_load_and_save() :
 #------------------------------
 
 def test() :
-    log.setPrintBits(0377) 
+    log.setPrintBits(0o377)
     if len(sys.argv)==1    : print 'For test(s) use command: python %s <test-number=1-4>' % sys.argv[0]
     elif(sys.argv[1]=='1') : test_DCStore()        
     elif(sys.argv[1]=='2') : test_DCStore_save()        

@@ -55,11 +55,15 @@ Created: 2013-03-08 by Mikhail Dubrovin
 """
 #------------------------------
 
+import logging
+logger = logging.getLogger(__name__)
+
 from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one, cspad2x1_wpc
 from PSCalib.SegGeometryEpix100V1  import epix2x2_one, epix2x2_wpc
 from PSCalib.SegGeometryEpix10kaV1 import epix10ka_one, epix10ka_wpc
 from PSCalib.SegGeometryMatrixV1   import SegGeometryMatrixV1, segment_one, matrix_pars
 from PSCalib.SegGeometryJungfrauV1 import jungfrau_one
+from PSCalib.SegGeometryJungfrauV2 import jungfrau_front
 
 #------------------------------
 
@@ -89,7 +93,8 @@ class SegGeometryStore():
             return SegGeometryMatrixV1(rows, cols, psize_row, psize_col,\
                                        pix_size_depth=100,\
                                        pix_scale_size=min(psize_row, psize_col))
-        if segname=='JUNGFRAU:V1': return jungfrau_one  # SegGeometryJungfrauV1()
+        if segname=='JUNGFRAU:V1': return jungfrau_one    # SegGeometryJungfrauV1()
+        if segname=='JUNGFRAU:V2': return jungfrau_front  # SegGeometryJungfrauV2()
         #if segname=='ANDOR3D:V1': return seg_andor3d  # SegGeometryMatrixV1()
         return None
 
@@ -108,7 +113,7 @@ def test_seggeom():
     from time import time
     t0_sec = time()
 
-    if len(sys.argv)==1: print('For test(s) use command: python', sys.argv[0], '<test-number=1-5>')
+    if len(sys.argv)==1: print('For test(s) use command: python', sys.argv[0], '<test-number=1-7>')
 
     elif(sys.argv[1]=='1'):
         sg = sgs.Create(segname='SENS2X1:V1', pbits=0o377)
@@ -132,6 +137,10 @@ def test_seggeom():
         sg.print_seg_info(pbits=0o377)
 
     elif(sys.argv[1]=='6'):
+        sg = sgs.Create(segname='JUNGFRAU:V2', pbits=0o377)
+        sg.print_seg_info(pbits=0o377)
+
+    elif(sys.argv[1]=='7'):
         sg = sgs.Create(segname='EPIX10KA:V1', pbits=0o377)
         sg.print_seg_info(pbits=0o377)
 
@@ -140,6 +149,7 @@ def test_seggeom():
 #------------------------------
 
 if __name__ == "__main__":
+    logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.DEBUG)
     test_seggeom()
     print('End of test.')
 

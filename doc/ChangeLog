@@ -11,6 +11,33 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-53
+2020-08-24 Mikhail S. Dubrovin
+- add SegGeometryJungfrauV2
+- in SegGeometry*.pixel_mask_array roll back **kwargs
+- a lot of cosmetic changes
+	modified:   CalibFileFinder.py
+	modified:   DCConfigParameters.py
+	modified:   DCEmail.py
+	modified:   DCFileName.py
+	modified:   DCLogger.py
+	modified:   DCMethods.py
+	modified:   DCRange.py
+	modified:   DCStore.py
+	modified:   DCType.py
+	modified:   DCUtils.py
+	modified:   DCVersion.py
+	modified:   GenericCalibPars.py
+	modified:   GeometryAccess.py
+	modified:   GlobalUtils.py
+	modified:   SegGeometryCspad2x1V1.py
+	modified:   SegGeometryEpix100V1.py
+	modified:   SegGeometryEpix10kaV1.py
+	modified:   SegGeometryJungfrauV1.py
+	new file:   SegGeometryJungfrauV2.py
+	modified:   SegGeometryMatrixV1.py
+	modified:   SegGeometryStore.py
+
 Tag: V01-00-52
 2020-08-15 Mikhail S. Dubrovin
 - update app/geometry_image

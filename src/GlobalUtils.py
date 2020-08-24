@@ -43,8 +43,8 @@ Usage::
     #### tsec, tnsec, fiducial, tsdate, tstime = gu.time_pars(evt) # needs in psana...
 
     gu.create_directory(dir, verb=False)
-    gu.create_directory_with_mode(dir, mode=0777, verb=False)
-    exists = gu.create_path(path, depth=6, mode=0777, verb=True)
+    gu.create_directory_with_mode(dir, mode=0o777, verb=False)
+    exists = gu.create_path(path, depth=6, mode=0o777, verb=True)
 
     arr  = gu.load_textfile(path)
     gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append 
@@ -644,7 +644,7 @@ def create_directory(dir, verb=False) :
 
 #------------------------------
 
-def create_directory_with_mode(dir, mode=0777, verb=False) :
+def create_directory_with_mode(dir, mode=0o777, verb=False) :
     """Creates directory and sets its mode"""
 
     if os.path.exists(dir) :
@@ -657,7 +657,7 @@ def create_directory_with_mode(dir, mode=0777, verb=False) :
 
 #------------------------------
 
-def create_path(path, depth=6, mode=0777, verb=False) : 
+def create_path(path, depth=6, mode=0o777, verb=False) : 
     """Creates missing path of specified depth from the beginning
        e.g. for '/reg/g/psdm/logs/calibman/2016/07/log-file-name.txt'
        or '/reg/d/psdm/cxi/cxi11216/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data'
@@ -737,12 +737,12 @@ def add_rec_to_log(lfname, rec, verbos=False) :
 
     #print 'XXX:add_rec_to_log, path=%s' % path
 
-    if create_path(path, depth=6, mode=0777, verb=verbos) :
+    if create_path(path, depth=6, mode=0o777, verb=verbos) :
         cmd = 'echo "%s" >> %s' % (rec, path)
         if verbos : print 'command: %s' % cmd
         os.system(cmd)
-        mode_log = 0666
-        if (file_mode(path) & 0777) == mode_log : return 
+        mode_log = 0o666
+        if (file_mode(path) & 0o777) == mode_log : return 
         os.chmod(path, mode_log)
 
 #------------------------------
@@ -867,7 +867,7 @@ def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False) :
 
     dep = 6 if '/reg/d/psdm/' in path_clb else 0
 
-    if create_path(path_clb, depth=dep, mode=02770, verb=verbos) : # mode=02770 makes drwxrws---+
+    if create_path(path_clb, depth=dep, mode=0o2770, verb=verbos) : # mode=0o2770 makes drwxrws---+
 
         cmd = command_deploy_file(ifname, path_clb)
         if verbos : print 'cmd: %s' % cmd

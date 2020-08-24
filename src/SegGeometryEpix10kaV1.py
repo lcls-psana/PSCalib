@@ -48,7 +48,7 @@ Usage::
     pix_size = pixel_scale_size()
 
     area     = sg.pixel_area_array()
-    mask     = sg.pixel_mask_array(mbits=0o377, width=5, wcentral=5) # **kwargs)
+    mask     = sg.pixel_mask_array(mbits=0o377, width=5, wcentral=5)
     # where mbits = +1-edges, +2-wide pixels
 
     sizeX = sg.pixel_size_array('X')
@@ -359,13 +359,13 @@ class SegGeometryEpix10kaV1(SegGeometry):
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0o377, **kwargs):
+    def pixel_mask_array(sp, mbits=0o377, width=1, wcentral=1):
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits: +1 - mask edges,
         +2 - mask two central columns 
         """
-        w = kwargs.get('width', 1)
-        u = kwargs.get('wcentral', 1)
+        w = width    # kwargs.get('width', 1)
+        u = wcentral # kwargs.get('wcentral', 1)
 
         mask = np.ones((sp._rows,sp._cols),dtype=np.uint8)
 

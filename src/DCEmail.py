@@ -71,7 +71,7 @@ def send_text_email(msg=None, subject=None, email_from=None, email_to=None) :
 
 def test_send_text_email() :
     print 20*'_', '\n%s:' % sys._getframe().f_code.co_name
-    log.setPrintBits(0377) 
+    log.setPrintBits(0o377)
     send_text_email(msg='Test message',\
                subject='Test subject',\
                email_from='no-reply@slac.stanford.edu',\

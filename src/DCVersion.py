@@ -189,7 +189,7 @@ def test_DCVersion() :
 #------------------------------
 
 def test() :
-    log.setPrintBits(0377) 
+    log.setPrintBits(0o377) 
 
     if len(sys.argv)==1 :
         print 'For test(s) use command: python %s <test-number=1-4>' % sys.argv[0]

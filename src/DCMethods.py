@@ -169,7 +169,7 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
 
     cs = DCStore(fname)
 
-    if verb : log.setPrintBits(0377) # 0377
+    if verb : log.setPrintBits(0o377) # 0o377
 
     if os.path.exists(fname) : cs.load()
 
@@ -208,7 +208,7 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
         print 50*'_','\nIn %s:' % metname
         cs.print_obj()
     
-    if verb : log.setPrintBits(02) # 0377
+    if verb : log.setPrintBits(02) # 0o377
 
     cs.save()
 
@@ -247,7 +247,7 @@ def add_constants(data, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir
 
     ofn = DCFileName(env, src, calibdir)
     if verb : ofn.print_attrs()
-    ofn.make_path_to_calib_file() # depth=2, mode=0775)
+    ofn.make_path_to_calib_file() # depth=2, mode=0o775)
 
     fname = ofn.calib_file_path()
 
@@ -374,7 +374,7 @@ def delete_version_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, cmt=Non
 
     vdel = cr.mark_version(vnum=vers, cmt=cmt)
 
-    if verb : log.setPrintBits(02) # 0377
+    if verb : log.setPrintBits(02) # 0o377
 
     cs.save()
 
@@ -448,7 +448,7 @@ def delete_range_from_file(fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, ver
     rdel = ct.mark_range_for_key(range, cmt=cmt)
     if rdel is None : return None
 
-    if verb : log.setPrintBits(02) # 0377
+    if verb : log.setPrintBits(02) # 0o377
 
     cs.save()
 
@@ -518,7 +518,7 @@ def delete_ctype_from_file(fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False) :
     tdel = cs.mark_ctype(str_ctype, cmt=cmt)
     if tdel is None : return None 
 
-    if verb : log.setPrintBits(02) # 0377
+    if verb : log.setPrintBits(02) # 0o377
 
     cs.save()
 
@@ -867,7 +867,7 @@ def do_test() :
 
     set_parameters()
 
-    #log.setPrintBits(0377)
+    #log.setPrintBits(0o377)
 
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     print 50*'_', '\nTest %s:' % tname

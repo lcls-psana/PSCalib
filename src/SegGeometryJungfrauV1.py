@@ -348,7 +348,7 @@ class SegGeometryJungfrauV1(SegGeometry):
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, **kwargs):
+    def pixel_mask_array(sp, mbits=0o377, width=1):
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
 
         Parameters
@@ -359,8 +359,8 @@ class SegGeometryJungfrauV1(SegGeometry):
 
         width (uint) - width in pixels of masked edge
         """
-        w     = kwargs.get('width', 1)
-        mbits = kwargs.get('mbits', 0o377)
+        w = width
+        #mbits = kwargs.get('mbits', 0o377)
         zero_col = np.zeros((sp._rows,w),dtype=np.uint8)
         zero_row = np.zeros((w,sp._cols),dtype=np.uint8)
         mask     = np.ones((sp._rows,sp._cols),dtype=np.uint8)
@@ -426,7 +426,7 @@ if __name__ == "__main__":
 
 
   def test_xyz_min_max():
-    w = SegGeometryJungfrauV1()
+    w = jungfrau_one
     w.print_xyz_min_max_um() 
     logger.info('\nYmin = ' + str(w.pixel_coord_min('Y'))\
               + '\nYmax = ' + str(w.pixel_coord_max('Y')))
@@ -435,7 +435,7 @@ if __name__ == "__main__":
 
   def test_xyz_maps():
 
-    w = SegGeometryJungfrauV1()
+    w = jungfrau_one
     w.print_maps_seg_um()
 
     titles = ['X map','Y map']
@@ -452,7 +452,7 @@ if __name__ == "__main__":
   def test_jungfrau_img():
 
     t0_sec = time()
-    w = SegGeometryJungfrauV1()
+    w = jungfrau_one
     logger.info('Consumed time for coordinate arrays (sec) = %.3f' % (time()-t0_sec))
 
     X,Y = w.get_seg_xy_maps_pix()
@@ -476,17 +476,25 @@ if __name__ == "__main__":
 #------------------------------
 
   def test_jungfrau_img_easy():
-    o = SegGeometryJungfrauV1()
-    X,Y = o.get_seg_xy_maps_pix_with_offset()
-    iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
-    img = gg.getImageFromIndexArrays(iY,iX,iX+2*iY)
-    gg.plotImageLarge(img, amp_range=(0, 1500), figsize=(14,6))
+    o = jungfrau_one
+    #X,Y = o.get_seg_xy_maps_pix_with_offset()
+    #iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
+    #img = gg.getImageFromIndexArrays(iY,iX,iX+2*iY)
+    #gg.plotImageLarge(img, amp_range=(0, 1500), figsize=(14,6))
+
+    X, Y = o.get_seg_xy_maps_pix()
+    xmin, xmax, ymin, ymax  = X.min(), X.max(), Y.min(), Y.max()
+    Xoff, Yoff = X-xmin, Y-ymin
+    iX, iY = (Xoff+0.25).astype(int), (Yoff+0.25).astype(int)
+    img = gg.getImageFromIndexArrays(iY,iX,X+3*Y)
+    gg.plotImageLarge(img, amp_range=(xmin+3*ymin, xmax+3*ymax), figsize=(14,6))
+
     gg.show()
 
 #------------------------------
 
   def test_pix_sizes():
-    w = SegGeometryJungfrauV1()
+    w = jungfrau_one
     w.print_pixel_size_arrs()
     size_arrX = w.pixel_size_array('X')
     size_arrY = w.pixel_size_array('Y')
@@ -503,7 +511,7 @@ if __name__ == "__main__":
 #------------------------------
 
   def test_jungfrau_mask(mbits=0o377, width=1):
-    o = SegGeometryJungfrauV1()
+    o = jungfrau_one
     X, Y = o.get_seg_xy_maps_pix_with_offset()
     mask = o.pixel_mask_array(mbits=mbits, width=width)
     mask[mask==0]=4

@@ -9,7 +9,7 @@ Usage::
     from PSCalib.GeometryAccess import GeometryAccess, img_from_pixel_arrays
 
     fname_geometry = '/reg/d/psdm/CXI/cxitut13/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
-    geometry = GeometryAccess(fname_geometry, 0377)
+    geometry = GeometryAccess(fname_geometry, 0o377)
 
     # load constants from geometry file
     geometry.load_pars_from_file(path=None)
@@ -49,7 +49,7 @@ Usage::
 
     # get pixel mask array;
     # mbits = +1-mask edges, +2-wide pixels, +4-non-bonded pixels, +8/+16 - four/eight neighbours of non-bonded
-    mask = geometry.get_pixel_mask(oname=None, oindex=0, mbits=0377)
+    mask = geometry.get_pixel_mask(oname=None, oindex=0, mbits=0o377)
 
     # get index arrays for entire detector
     iX, iY = geometry.get_pixel_coord_indexes(do_tilt=True)
@@ -433,7 +433,7 @@ class GeometryAccess :
 
     #------------------------------
 
-    def get_pixel_mask(self, oname=None, oindex=0, mbits=0377, **kwargs) :
+    def get_pixel_mask(self, oname=None, oindex=0, mbits=0o377, **kwargs) :
         """Returns pixel mask array for top or specified geometry object.
 
         mbits =+1 - mask edges
@@ -905,7 +905,7 @@ def test_cspad2x2() :
     fname_geometry = basedir + 'calib/CsPad2x2::CalibV1/MecTargetChamber.0:Cspad2x2.1/geometry/0-end.data'
     fname_data     = basedir + 'cspad2x2.1-ndarr-ave-meca6113-r0028.dat'    
 
-    geometry = GeometryAccess(fname_geometry, 0377, use_wide_pix_center=False)
+    geometry = GeometryAccess(fname_geometry, 0o377, use_wide_pix_center=False)
     amp_range = (0,15000)
 
     # get pixel coordinate index arrays:
@@ -938,7 +938,7 @@ def test_epix100a() :
     #fname_geometry = basedir + 'calib/Epix100a::CalibV1/NoDetector.0:Epix100a.0/geometry/0-end.data'
     #fname_data     = basedir + 'epix100a-ndarr-ave-clb-xppi0614-r0073.dat'    
 
-    geometry = GeometryAccess(fname_geometry, 0177777)
+    geometry = GeometryAccess(fname_geometry, 0o177777)
     amp_range = (-4,10)
 
     iX, iY = geometry.get_pixel_coord_indexes()
@@ -963,7 +963,7 @@ def test_cspad_xy_at_z() :
     fname_geometry = basedir + '2016-06-03-geometry-cxi06216-r25-camera1-z175mm.txt'
     fname_data     = basedir + '2016-06-03-chun-cxi06216-0025-DscCsPad-max.txt'    
 
-    geometry = GeometryAccess(fname_geometry, 0377)
+    geometry = GeometryAccess(fname_geometry, 0o377)
 
     # get pixel coordinate index arrays:
     xyc = xc, yc = 1000, 1000
@@ -1043,7 +1043,7 @@ if __name__ == "__main__" :
     elif sys.argv[1]=='5' :
         print 'Init GeometryAccess is silent? (see below)'
         ga0 = GeometryAccess(fname_geometry, 0)
-    elif sys.argv[1]=='6' : ga0377 = GeometryAccess(fname_geometry, 0377)
+    elif sys.argv[1]=='6' : ga0377 = GeometryAccess(fname_geometry, 0o377)
     elif sys.argv[1]=='7' : test_save_pars_in_file(geometry)
     elif sys.argv[1]=='8' : test_load_pars_from_file(geometry)
     elif sys.argv[1]=='9' : test_mask_quad(geometry, 1+2+8) #+16
