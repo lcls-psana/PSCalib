@@ -11,6 +11,19 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-54
+2020-08-28 Mikhail S. Dubrovin
+- fix issue with pixel_mask_array, add parameter cframe to coords_xyz
+	modified:   src/GeometryAccess.py
+	modified:   src/GeometryObject.py
+	modified:   src/GlobalUtils.py
+	modified:   src/SegGeometry.py
+	modified:   src/SegGeometryCspad2x1V1.py
+	modified:   src/SegGeometryEpix100V1.py
+	modified:   src/SegGeometryEpix10kaV1.py
+	modified:   src/SegGeometryJungfrauV1.py
+	modified:   src/SegGeometryMatrixV1.py
+
 Tag: V01-00-53
 2020-08-24 Mikhail S. Dubrovin
 - add SegGeometryJungfrauV2

@@ -89,6 +89,11 @@ DIR_INS = '/reg/d/psdm'
 
 #------------------------------
 
+CFRAME_PSANA   = 0 # default psana frame for image-matrix from open panel side x-rows, y-columns, z-along the beam
+CFRAME_LAB     = 1 # LAB frame - Y-top (-g - opposite to gravity) Z-along the beam, X=[YxZ]
+
+#------------------------------
+
 # ATTENTION !!!!! ALL LISTS SHOULD BE IN THE SAME ORDER (FOR DICTIONARIES)
 
 # Enumerated and named parameters

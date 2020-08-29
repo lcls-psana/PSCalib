@@ -32,8 +32,8 @@ Usage::
     oindex = geo.get_geo_index()
     pname  = geo.get_parent_name()
     pindex = geo.get_parent_index()
-    X,Y,Z  = geo.get_pixel_coords(do_tilt=true)
-    X,Y    = geo.get_2d_pixel_coords(do_tilt=true)
+    X,Y,Z  = geo.get_pixel_coords(do_tilt=True)
+    X,Y    = geo.get_2d_pixel_coords(do_tilt=True)
     area   = geo.get_pixel_area()
     #mbits = +1-edges, +2-wide pixels, +4-non-bonded pixels, +8/+16 - four/eight neighbours of non-bonded
     mask   = geo.get_pixel_mask(mbits=0o377)
@@ -341,7 +341,7 @@ class GeometryObject:
         """
 
         if self.algo is not None:
-            return self.algo.pixel_mask_array(mbits, **kwargs)
+            return self.algo.pixel_mask_array(mbits=mbits, **kwargs)
 
         oar = None
         for ind, child in enumerate(self.list_of_children):
@@ -349,7 +349,7 @@ class GeometryObject:
                 print('WARNING! Geometry object %s:%d has non-consequtive index in calibration file, reconst index:%d' % \
                       (child.oname, child.oindex, ind))
 
-            car = child.get_pixel_mask(mbits, **kwargs)
+            car = child.get_pixel_mask(mbits=mbits, **kwargs)
             oar = car if ind==0 else np.vstack((oar, car))
 
         # define shape for output x,y,z arrays

@@ -359,7 +359,7 @@ class SegGeometryEpix10kaV1(SegGeometry):
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0o377, width=1, wcentral=1):
+    def pixel_mask_array(sp, mbits=0o377, width=1, wcentral=1, **kwa):
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits: +1 - mask edges,
         +2 - mask two central columns 

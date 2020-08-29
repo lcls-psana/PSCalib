@@ -137,7 +137,7 @@ class SegGeometry:
         """
         self.print_warning('pixel_coord_max(axis)')
 
-    def pixel_mask_array(self, mbits, **kwargs):
+    def pixel_mask_array(self, mbits=0o377, **kwa):
         """ Returns array of masked pixels which content depends on bontrol bitword mbits
         """
         self.print_warning('pixel_mask_array(mask_bits)')

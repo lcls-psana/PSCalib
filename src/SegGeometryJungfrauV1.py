@@ -348,7 +348,7 @@ class SegGeometryJungfrauV1(SegGeometry):
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0o377, width=1):
+    def pixel_mask_array(sp, mbits=0o377, width=1, **kwa):
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
 
         Parameters

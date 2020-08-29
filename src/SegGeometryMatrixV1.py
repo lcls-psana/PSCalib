@@ -346,7 +346,7 @@ class SegGeometryMatrixV1(SegGeometry) :
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0o377, width=1) :
+    def pixel_mask_array(sp, mbits=0o377, width=1, **kwa) :
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits=1 - mask edges,
         +2 - mask two central columns, 
@@ -354,8 +354,8 @@ class SegGeometryMatrixV1(SegGeometry) :
         +8 - mask nearest neighbours of nonbonded pixels.
         """
         w = width
-        zero_col = np.zeros(sp._rows,dtype=np.uint8)
-        zero_row = np.zeros(sp._cols,dtype=np.uint8)
+        zero_col = np.zeros((sp._rows,w),dtype=np.uint8)
+        zero_row = np.zeros((w,sp._cols),dtype=np.uint8)
         mask     = np.ones((sp._rows,sp._cols),dtype=np.uint8)
 
         if mbits & 1 : 
@@ -367,7 +367,6 @@ class SegGeometryMatrixV1(SegGeometry) :
 
         return mask
 
-  
 #------------------------------
 #------------------------------
 
