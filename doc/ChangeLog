@@ -13,7 +13,7 @@ reverse time order.
 
 Tag: V01-00-55
 2020-09-02 Mikhail S. Dubrovin
-- fix sign of Z in records for IP, extend convertor for pnccd, add -C option to geometry_image, refactor pixel indexing for images
+- extend convertor for pnccd, add -C option to geometry_image, refactor pixel indexing for images, fix sign of Z in records for IP
 	modified:   GeometryAccess.py
 	modified:   UtilsConvert.py
 	modified:   SegGeometryMatrixV1.py
