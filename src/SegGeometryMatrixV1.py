@@ -108,12 +108,19 @@ def matrix_pars(segname) :
 #------------------------------
 
 class SegGeometryMatrixV1(SegGeometry) :
-    """Self-sufficient class for generation of CSPad 2x1 sensor pixel coordinate array"""
+    """Self-sufficient class for generation of sensor pixel coordinate array"""
 
-    #_rows  = 512    # Number of rows in 2x1 at rotation 0
-    #_cols  = 512    # Number of cols in 2x1 at rotation 0
+    _name = 'SegGeometryMatrixV1'
+
+    #_rows  = 512    # Number of rows in panel at rotation 0
+    #_cols  = 512    # Number of cols in panel at rotation 0
     #_pixs  = 75.00  # Pixel size in um (micrometer)
     #_pixd  = 400.00 # Pixel depth in um (micrometer)
+
+    _asic0indices = ((0, 0),)
+    _nasics_in_rows = 1
+    _nasics_in_cols = 1
+
 
 #------------------------------
 
@@ -367,6 +374,30 @@ class SegGeometryMatrixV1(SegGeometry) :
 
         return mask
 
+#----------
+# 2020-08 added for converter
+
+    def asic0indices(sp):
+        """ Returns list of ASIC (0,0)-corner indices in panel daq array. 
+        """
+        return sp._asic0indices
+
+    def asic_rows_cols(sp):
+        """ Returns ASIC number of rows, columns.
+        """
+        return sp._rows, sp._cols
+
+    def number_of_asics_in_rows_cols(sp):
+        """ Returns ASIC number of ASICS in the panal in direction fo rows, columns.
+        """
+        return sp._nasics_in_rows, sp._nasics_in_cols
+
+    def name(sp):
+        """ Returns segment name.
+        """
+        return sp._name
+  
+#------------------------------
 #------------------------------
 #------------------------------
 

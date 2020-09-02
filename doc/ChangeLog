@@ -11,6 +11,15 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-55
+2020-09-02 Mikhail S. Dubrovin
+- fix sign of Z in records for IP, extend convertor for pnccd, add -C option to geometry_image, refactor pixel indexing for images
+	modified:   GeometryAccess.py
+	modified:   UtilsConvert.py
+	modified:   SegGeometryMatrixV1.py
+	modified:   app/geometry_convert
+	modified:   app/geometry_image
+
 Tag: V01-00-54
 2020-08-28 Mikhail S. Dubrovin
 - fix issue with pixel_mask_array, add parameter cframe to coords_xyz
@@ -61,7 +70,6 @@ Tag: V01-00-51
 2020-08-07 Mikhail S. Dubrovin
 - add app/geometry_convert
 	new file:   app/geometry_convert
-	modified:   doc/ChangeLog
 	modified:   src/UtilsConvert.py
 
 Tag: V01-00-50

@@ -51,22 +51,22 @@ Usage::
     # mbits = +1-mask edges, +2-wide pixels, +4-non-bonded pixels, +8/+16 - four/eight neighbours of non-bonded
     mask = geometry.get_pixel_mask(oname=None, oindex=0, mbits=0o377)
 
-    # get index arrays for entire detector
-    iX, iY = geometry.get_pixel_coord_indexes(do_tilt=True)
+    # get image martix index arrays for entire detector
+    rows, cols = geometry.get_pixel_coord_indexes(do_tilt=True, cframe=0)
 
-    # get index arrays for specified quad with offset
-    iX, iY = geometry.get_pixel_coord_indexes('QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=(1000,1000), do_tilt=True)
+    # get image martix index arrays for specified quad with offset
+    rows, cols = geometry.get_pixel_coord_indexes('QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=(1000,1000), do_tilt=True, cframe=0)
 
-    # get index arrays for pixel coordinates projected toward origin on specified zplane
-    iX, iY = geometry.get_pixel_xy_inds_at_z(zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)
+    # get image martix index arrays for pixel coordinates projected toward origin on specified zplane
+    rows, cols = geometry.get_pixel_xy_inds_at_z(zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True, cframe=0)
 
-    # get ix and iy indexes for specified point in [um]. By default p_um=(0,0) - detector origin coordinates (center).
-    ix, iy = geometry.point_coord_indexes(p_um=(0,0))
+    # get image martix irow and icol indexes for specified point in [um]. By default p_um=(0,0) - detector origin coordinates (center).
+    irow, icol = geometry.point_coord_indexes(p_um=(0,0))
     # all other parameters should be the same as in get_pixel_coord_indexes method
-    ix, iy = geometry.point_coord_indexes(p_um=(0,0), 'QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=(1000,1000), do_tilt=True)
+    irow, icol = geometry.point_coord_indexes(p_um=(0,0), 'QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=(1000,1000), do_tilt=True, cframe=0)
 
     # get 2-d image from index arrays
-    img = img_from_pixel_arrays(iX,iY,W=arr)
+    img = img_from_pixel_arrays(rows,cols,W=arr)
 
     # Get specified object of the class GeometryObject, all objects are kept in the list self.list_of_geos
     geo = geometry.get_geo('QUAD:V1', 1) 
@@ -141,7 +141,7 @@ class GeometryAccess:
         self.use_wide_pix_center = use_wide_pix_center
 
         if path is None or not os.path.exists(path):
-            if pbits: print '%s: geometry file "%s" does not exist' % (self.__class__.__name__, path)
+            if pbits: print('%s: geometry file "%s" does not exist' % (self.__class__.__name__, path))
             return
 
         self.load_pars_from_file()
@@ -161,10 +161,10 @@ class GeometryAccess:
         self.X_old      = None
         self.Y_old      = None
         self.Z_old      = None
-        self.iX_old     = None
-        self.iY_old     = None
-        self.ipx_old    = None
-        self.ipy_old    = None
+        self.rows_old   = None
+        self.cols_old   = None
+        self.irow_old   = None
+        self.icol_old   = None
         self.p_um_old   = None
         self.cframe_old = None
 
@@ -193,7 +193,7 @@ class GeometryAccess:
         for linef in f:
             line = linef.strip('\n')
             if self.pbits & 128: print line
-            if not line: continue   # discard empty strings
+            if not line.strip(): continue   # discard empty strings
             if line[0] == '#':      # process line of comments
                 self._add_comment_to_dict(line)
                 continue
@@ -310,13 +310,11 @@ class GeometryAccess:
                 float(f[12])
                ]
 
-        #print 'keys: ', keys
-        #print 'vals: ', vals
+        # catch positive Z for IP - in the image-matrix psana frame (z opposite to beam) detector Z relative to IP should always be negative. 
+        if vals[0][:2]=='IP' and vals[6]>0: vals[6]=-vals[6]
     
         d = dict(zip(keys, vals))
         d['use_wide_pix_center'] = self.use_wide_pix_center
-        #print 'd=', d
-        #return d
         return GeometryObject(**d)
     
     #------------------------------
@@ -384,14 +382,20 @@ class GeometryAccess:
     
     #------------------------------
 
-    def switch_coordinate_frame(self, x, y, z, cframe=0):
-        """ returns x,y,z pixel arrays in requested coordinate frame.
-            cframe [int] = 0 - default psana frame for image-matrix from open panel side x-rows, y-columns, z-along the beam
+    def coords_psana_to_lab_frame(self, x, y, z):
+        """ Switches arrays of pixel coordinates between psana <-(symmetric transformation)-> lab frame 
+            returns x,y,z pixel arrays in the lab coordinate frame.
+            cframe [int] = 0 - default psana frame for image-matrix from open panel side X-rows, Y-columns, Z-opposite the beam
                          = 1 - LAB frame - Y-top (-g - opposite to gravity) Z-along the beam, X=[YxZ]
         """ 
-        if cframe>0: return np.array(-y), np.array(-x), np.array(z)
-        return x,y,z
+        return np.array(-y), np.array(-x), np.array(-z)
 
+    #------------------------------
+
+    def coords_lab_to_psana_frame(self, x, y, z):
+        """Forth-back-symmetric transformation"""
+        return np.array(-y), np.array(-x), np.array(-z)
+ 
     #------------------------------
 
     def get_pixel_coords(self, oname=None, oindex=0, do_tilt=True, cframe=0):
@@ -411,7 +415,7 @@ class GeometryAccess:
             geo.print_geo_children();
         
         x,y,z = geo.get_pixel_coords(do_tilt) 
-        self.X_old, self.Y_old, self.Z_old = self.switch_coordinate_frame(x,y,z,cframe) if cframe>0 else (x,y,z)
+        self.X_old, self.Y_old, self.Z_old = self.coords_psana_to_lab_frame(x,y,z) if cframe>0 else (x,y,z)
         self.tilt_old = do_tilt
         self.cframe_old = cframe
         return self.X_old, self.Y_old, self.Z_old
@@ -530,11 +534,11 @@ class GeometryAccess:
 
     #------------------------------
 
-    def print_pixel_coords(self, oname=None, oindex=0):
+    def print_pixel_coords(self, oname=None, oindex=0, cframe=0):
         """Partial print of pixel coordinate X,Y,Z arrays for selected or top(by default) geo
         """
         if not self.valid: return
-        X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt=True)
+        X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt=True, cframe=cframe)
 
         print 'size=', X.size
         print 'X: %s...'% ', '.join(['%10.1f'%v for v in X.flatten()[0:9]])
@@ -542,79 +546,92 @@ class GeometryAccess:
         print 'Z: %s...'% ', '.join(['%10.1f'%v for v in Z.flatten()[0:9]])
 
     #------------------------------
+        
+    def xy_to_rc_point(self, X, Y, p_um=(0,0), pix_scale_size_um=None, xy0_off_pix=None, cframe=0):
+        if None in (X,Y): return None, None
 
-    def get_pixel_coord_indexes(self, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True):
-        """Returns two pixel X,Y coordinate index arrays for top or specified geometry object 
+        x_um, y_um = self.p_um_old = p_um
+        pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
+
+        if cframe==1: #LAB frame z-along the beam, y-nodir, x=[y,z]
+            xmin, ymax = X.min(), Y.max()
+            if xy0_off_pix is not None:
+                # Offset in pix -> um
+                if xy0_off_pix[0]>0: xmin -= xy0_off_pix[0] * pix_size
+                if xy0_off_pix[1]>0: ymax += xy0_off_pix[1] * pix_size
+            xmin, ymax = xmin-pix_size/2, ymax+pix_size/2
+            return int(floor((ymax-y_um)/pix_size)), int(floor((x_um-xmin)/pix_size))
+
+        else: # PSANA image-matrix frame - x-along gravity(rows), y-right(columns), z=[x,y]-opposite to the beam
+            xmin, ymin = X.min(), Y.min()
+            if xy0_off_pix is not None:
+                # Offset in pix -> um
+                if xy0_off_pix[0]>0: xmin -= xy0_off_pix[0] * pix_size
+                if xy0_off_pix[1]>0: ymin -= xy0_off_pix[1] * pix_size
+            xmin, ymin = xmin-pix_size/2, ymin-pix_size/2
+            return int(floor((x_um-xmin)/pix_size)), int(floor((y_um-ymin)/pix_size))
+
+    #------------------------------
+
+    def xy_to_rc_arrays(self, X, Y, pix_scale_size_um=None, xy0_off_pix=None, cframe=0):
+        """Returns image martix rows and columns arrays evaluated from X,Y coordinate arrays.
+        """
+        if None in (X,Y): return None, None
+
+        pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
+
+        if cframe>0: #LAB frame z-along the beam, y-nodir, x=[y,z]
+            xmin, ymax = X.min(), Y.max()
+            if xy0_off_pix is not None:
+                # Offset in pix -> um
+                if xy0_off_pix[0]>0: xmin -= xy0_off_pix[0] * pix_size
+                if xy0_off_pix[1]>0: ymax += xy0_off_pix[1] * pix_size
+            xmin, ymax = xmin-pix_size/2, ymax+pix_size/2
+            return np.array((ymax-Y)/pix_size, dtype=np.uint), np.array((X-xmin)/pix_size, dtype=np.uint)
+
+        else: # PSANA image-matrix frame - x-along gravity(rows), y-right(columns), z=[x,y]-opposite to the beam
+            xmin, ymin = X.min(), Y.min()
+            if xy0_off_pix is not None:
+                # Offset in pix -> um
+                if xy0_off_pix[0]>0: xmin -= xy0_off_pix[0] * pix_size
+                if xy0_off_pix[1]>0: ymin -= xy0_off_pix[1] * pix_size
+            xmin, ymin = xmin-pix_size/2, ymin-pix_size/2
+            return np.array((X-xmin)/pix_size, dtype=np.uint), np.array((Y-ymin)/pix_size, dtype=np.uint)
+
+    #------------------------------
+
+    def get_pixel_coord_indexes(self, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True, cframe=0):
+        """Returns image martix rows and columns arrays evaluated from X,Y coordinate arrays for top or specified geometry object.
         """
         if not self.valid: return None, None
 
         if  oindex  == self.oindex_old\
         and oname   == self.oname_old\
         and do_tilt == self.tilt_old\
+        and cframe  == self.cframe_old\
         and pix_scale_size_um is None\
         and xy0_off_pix is None\
-        and self.iX_old is not None:
-            return self.iX_old, self.iY_old
+        and self.rows_old is not None:
+            return self.rows_old, self.cols_old
 
-        X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt)
-
-        pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
-        pix_half = 0.5*pix_size
-
-        xmin, ymin = X.min()-pix_half, Y.min()-pix_half 
-
-        if xy0_off_pix is not None:
-            # Offset in pix -> um
-            x_off_um = xy0_off_pix[0] * pix_size
-            y_off_um = xy0_off_pix[1] * pix_size
-            # Protection against wrong offset bringing negative indexes
-            xmin += x_off_um
-            ymin += y_off_um
-            x_off_um = x_off_um + pix_half if xmin>0 else x_off_um - xmin
-            y_off_um = y_off_um + pix_half if ymin>0 else y_off_um - ymin
-            self.iX_old, self.iY_old = np.array((X+x_off_um)/pix_size, dtype=np.uint), np.array((Y+y_off_um)/pix_size, dtype=np.uint)
-
-        else:
-            self.iX_old, self.iY_old = np.array((X-xmin)/pix_size, dtype=np.uint), np.array((Y-ymin)/pix_size, dtype=np.uint)
-
-        return self.iX_old, self.iY_old
+        X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt, cframe)
+        self.rows_old, self.cols_old = self.xy_to_rc_arrays(X, Y, pix_scale_size_um, xy0_off_pix, cframe)
+        return self.rows_old, self.cols_old
 
     #------------------------------
 
-    def get_pixel_xy_inds_at_z(self, zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True):
-        """Returns pixel coordinate index arrays iX, iY of size for specified zplane and geometry object  
+    def get_pixel_xy_inds_at_z(self, zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True, cframe=0):
+        """Returns pixel coordinate index arrays rows, cols of size for specified zplane and geometry object  
         """
         if not self.valid: return None, None
-
-        X, Y = self.get_pixel_xy_at_z(zplane, oname, oindex, do_tilt)
-
-        if X is None: return None, None
-
-        pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
-        pix_half = 0.5*pix_size
-
-        xmin, ymin = X.min()-pix_half, Y.min()-pix_half 
-
-        if xy0_off_pix is not None:
-            # Offset in pix -> um
-            x_off_um = xy0_off_pix[0] * pix_size
-            y_off_um = xy0_off_pix[1] * pix_size
-            # Protection against wrong offset bringing negative indexes
-            xmin += x_off_um
-            ymin += y_off_um
-            x_off_um = x_off_um + pix_half if xmin>0 else x_off_um - xmin
-            y_off_um = y_off_um + pix_half if ymin>0 else y_off_um - ymin
-            self.iX_old, self.iY_old = np.array((X+x_off_um)/pix_size, dtype=np.uint), np.array((Y+y_off_um)/pix_size, dtype=np.uint)
-
-        else:
-            self.iX_old, self.iY_old = np.array((X-xmin)/pix_size, dtype=np.uint), np.array((Y-ymin)/pix_size, dtype=np.uint)
-
-        return self.iX_old, self.iY_old
+        X, Y = self.get_pixel_xy_at_z(zplane, oname, oindex, do_tilt, cframe)
+        self.rows_old, self.cols_old = self.xy_to_rc_arrays(X, Y, pix_scale_size_um, xy0_off_pix, cframe)
+        return self.rows_old, self.cols_old
 
     #------------------------------
 
-    def point_coord_indexes(self, p_um=(0,0), oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True):
-        """Converts point (x_um, y_um) corrdinates [um] to pixel (ix, iy) indexes.
+    def point_coord_indexes(self, p_um=(0,0), oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True, cframe=0):
+        """Converts point (x_um, y_um) corrdinates [um] to pixel (row, col) indexes.
            All other parameters are the same as in get_pixel_coord_indexes.
            WARNING: indexes are not required to be inside the image. They are integer, may be negative or exceed pixel maximal index.
         """
@@ -626,33 +643,12 @@ class GeometryAccess:
         and p_um    == self.p_um_old\
         and pix_scale_size_um is None\
         and xy0_off_pix is None\
-        and self.ipx_old is not None:
-            return self.ipx_old, self.ipy_old
+        and self.irow_old is not None:
+            return self.irow_old, self.icol_old
 
-        X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt)
-
-        pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
-        pix_half = 0.5*pix_size
-
-        xmin, ymin = X.min()-pix_half, Y.min()-pix_half 
-        x_um, y_um = self.p_um_old = p_um
-
-        if xy0_off_pix is not None:
-            # Offset in pix -> um
-            x_off_um = xy0_off_pix[0] * pix_size
-            y_off_um = xy0_off_pix[1] * pix_size
-            # Protection against wrong offset bringing negative indexes
-            xmin += x_off_um
-            ymin += y_off_um
-            x_off_um = x_off_um + pix_half if xmin>0 else x_off_um - xmin
-            y_off_um = y_off_um + pix_half if ymin>0 else y_off_um - ymin
-
-            self.ipx_old, self.ipy_old = int(floor((x_um+x_off_um)/pix_size)), int(floor((y_um+y_off_um)/pix_size))
-
-        else: 
-            self.ipx_old, self.ipy_old = int(floor((x_um-xmin)/pix_size)), int(floor((y_um-ymin)/pix_size))
-
-        return self.ipx_old, self.ipy_old
+        X, Y, Z = self.get_pixel_coords(oname, oindex, do_tilt, cframe)
+        self.irow_old, self.icol_old = self.xy_to_rc_point(X, Y, p_um, pix_scale_size_um, xy0_off_pix, cframe)
+        return self.irow_old, self.icol_old
 
     #------------------------------
 
@@ -664,7 +660,7 @@ class GeometryAccess:
     #------------------------------
 
     def get_psf(self):
-        """Returns array of vectors in TJ format (psf stands for position-slow-fast vectors)
+        """Returns array of vectors in CrystFEL format (psf stands for position-slow-fast vectors)
         """
         if not self.valid: return None
         X, Y, Z = self.get_pixel_coords() # pixel positions for top level object
@@ -689,7 +685,6 @@ class GeometryAccess:
             psf.append((vp,vs,vf))
 
         return psf
-
 
     #------------------------------
 
@@ -716,25 +711,26 @@ def img_default(shape=(10,10), dtype = np.float32):
 
 #------------------------------
 
-def img_from_pixel_arrays(iX, iY, W=None, dtype=np.float32, vbase=0):
-    """Returns image from iX, iY coordinate index arrays and associated weights W.
+def img_from_pixel_arrays(rows, cols, W=None, dtype=np.float32, vbase=0):
+    """Returns image from rows, cols index arrays and associated weights W.
+       Methods like matplotlib imshow(img) plot 2-d image array oriented as matrix(rows,cols).
     """
-    if iX.size != iY.size \
-    or (W is not None and iX.size !=  W.size):
+    if rows.size != cols.size \
+    or (W is not None and rows.size !=  W.size):
         msg = 'img_from_pixel_arrays(): WARNING input array sizes are different;' \
-            + ' iX.size=%d, iY.size=%d, W.size=%d' % (iX.size, iY.size, W.size)
+            + ' rows.size=%d, cols.size=%d, W.size=%d' % (rows.size, cols.size, W.size)
         print msg
         return img_default()
 
-    iXfl = iX.flatten()
-    iYfl = iY.flatten()
+    rowsfl = rows.flatten()
+    colsfl = cols.flatten()
 
-    xsize = int(iXfl.max())+1 
-    ysize = int(iYfl.max())+1
+    rsize = int(rowsfl.max())+1 
+    csize = int(colsfl.max())+1
 
-    weight = W.flatten() if W is not None else np.ones_like(iXfl)
-    img = vbase*np.ones((xsize,ysize), dtype=dtype)
-    img[iXfl,iYfl] = weight # Fill image array with data 
+    weight = W.flatten() if W is not None else np.ones_like(rowsfl)
+    img = vbase*np.ones((rsize,csize), dtype=dtype)
+    img[rowsfl,colsfl] = weight # Fill image array with data 
     return img
 
 #------------------------------
@@ -768,7 +764,7 @@ def test_access(geometry):
     geo.print_geo_children()
 
     t0_sec = time()
-    X,Y,Z = geo.get_pixel_coords(do_tilt=True)
+    X,Y,Z = geo.get_pixel_coords(do_tilt=True, cframe=0)
     #X,Y = geo.get_2d_pixel_coords()
     print 'X:\n', X
     print 'Consumed time to get 3d pixel coordinates = %7.3f sec' % (time()-t0_sec)
@@ -808,15 +804,15 @@ def test_plot_quad(geometry):
     """ Tests geometry acess methods of the class GeometryAccess object for CSPAD quad
     """
     ## get index arrays
-    iX, iY = geometry.get_pixel_coord_indexes('QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)
+    rows, cols = geometry.get_pixel_coord_indexes('QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)
 
     # get intensity array
-    arr = tig.cspad_nparr(n2x1=iX.shape[0])
+    arr = tig.cspad_nparr(n2x1=rows.shape[0])
     arr.shape = (8,185,388)
     amp_range = (0,185+388)
  
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
-    img = img_from_pixel_arrays(iX,iY,W=arr)
+    print 'rows, cols, W shape:', rows.shape, cols.shape, arr.shape 
+    img = img_from_pixel_arrays(rows,cols,W=arr)
 
     gg.plotImageLarge(img,amp_range=amp_range)
     gg.move(500,10)
@@ -828,15 +824,15 @@ def test_mask_quad(geometry, mbits):
     """ Tests geometry acess methods of the class GeometryAccess object for CSPAD quad
     """
     ## get index arrays
-    iX, iY = geometry.get_pixel_coord_indexes('QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)
+    rows, cols = geometry.get_pixel_coord_indexes('QUAD:V1', 1, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)
 
     # get intensity array
     arr = geometry.get_pixel_mask('QUAD:V1', 1, mbits)
     arr.shape = (8,185,388)
     amp_range = (-1,2)
  
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
-    img = img_from_pixel_arrays(iX, iY, W=arr, vbase=0.5)
+    print 'rows, cols, W shape:', rows.shape, cols.shape, arr.shape 
+    img = img_from_pixel_arrays(rows, cols, W=arr, vbase=0.5)
 
     gg.plotImageLarge(img,amp_range=amp_range)
     gg.move(500,10)
@@ -856,8 +852,8 @@ def test_plot_cspad(geometry, fname_data, amp_range=(0,0.5)):
     xc, yc = 1000, 1000
     xyc = xc, yc # None 
 
-    #iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=None)
-    iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc, do_tilt=True)
+    #rows, cols = geometry.get_pixel_coord_indexes(xy0_off_pix=None)
+    rows, cols = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc, do_tilt=True)
 
     ixo, iyo = geometry.point_coord_indexes(xy0_off_pix=xyc, do_tilt=True)
     print 'Detector origin indexes ixo, iyo:', ixo, iyo
@@ -866,10 +862,10 @@ def test_plot_cspad(geometry, fname_data, amp_range=(0,0.5)):
     arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float) 
     arr.shape= (4,8,185,388)
 
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape
+    print 'rows, cols, W shape:', rows.shape, cols.shape, arr.shape
 
-    arr.shape = iX.shape
-    img = img_from_pixel_arrays(iX, iY, W=arr)
+    arr.shape = rows.shape
+    img = img_from_pixel_arrays(rows, cols, W=arr)
 
     xyc_ring = (yc, xc)
     axim = gg.plotImageLarge(img,amp_range=amp_range)
@@ -884,7 +880,7 @@ def test_plot_cspad(geometry, fname_data, amp_range=(0,0.5)):
 def test_img_default():
     """ Test default image
     """
-    axim = gg.plotImageLarge( img_default() )
+    axim = gg.plotImageLarge(img_default())
     gg.move(500,10)
     gg.show()
 
@@ -923,16 +919,16 @@ def test_cspad2x2():
 
     # get pixel coordinate index arrays:
     #xyc = xc, yc = 1000, 1000
-    #iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc)
+    #rows, cols = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc)
 
-    iX, iY = geometry.get_pixel_coord_indexes(do_tilt=True)
+    rows, cols = geometry.get_pixel_coord_indexes(do_tilt=True)
 
     root, ext = os.path.splitext(fname_data)
     arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float) 
     arr.shape= (185,388,2)
 
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
-    img = img_from_pixel_arrays(iX,iY,W=arr)
+    print 'rows, cols, W shape:', rows.shape, cols.shape, arr.shape 
+    img = img_from_pixel_arrays(rows,cols,W=arr)
 
     axim = gg.plotImageLarge(img,amp_range=amp_range)
     gg.move(500,10)
@@ -954,13 +950,13 @@ def test_epix100a():
     geometry = GeometryAccess(fname_geometry, 0o177777)
     amp_range = (-4,10)
 
-    iX, iY = geometry.get_pixel_coord_indexes()
+    rows, cols = geometry.get_pixel_coord_indexes()
 
     root, ext = os.path.splitext(fname_data)
     arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float) 
 
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
-    img = img_from_pixel_arrays(iX,iY,W=arr)
+    print 'rows, cols, W shape:', rows.shape, cols.shape, arr.shape 
+    img = img_from_pixel_arrays(rows,cols,W=arr)
 
     axim = gg.plotImageLarge(img,amp_range=amp_range)
     gg.move(500,10)
@@ -980,10 +976,10 @@ def test_cspad_xy_at_z():
 
     # get pixel coordinate index arrays:
     xyc = xc, yc = 1000, 1000
-    #iX, iY = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc)
-    #iX, iY = geometry.get_pixel_coord_indexes(do_tilt=True)
-    #iX, iY = geometry.get_pixel_xy_inds_at_z(zplane=None, xy0_off_pix=xyc)
-    iX, iY = geometry.get_pixel_xy_inds_at_z(zplane=150000)
+    #rows, cols = geometry.get_pixel_coord_indexes(xy0_off_pix=xyc)
+    #rows, cols = geometry.get_pixel_coord_indexes(do_tilt=True)
+    #rows, cols = geometry.get_pixel_xy_inds_at_z(zplane=None, xy0_off_pix=xyc)
+    rows, cols = geometry.get_pixel_xy_inds_at_z(zplane=150000)
 
     root, ext = os.path.splitext(fname_data)
     arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float) 
@@ -996,8 +992,8 @@ def test_cspad_xy_at_z():
     amp_range = (0, 1000)
     print 'amp_range', amp_range
 
-    print 'iX, iY, W shape:', iX.shape, iY.shape, arr.shape 
-    img = img_from_pixel_arrays(iX,iY,W=arr)
+    print 'rows, cols, W shape:', rows.shape, cols.shape, arr.shape 
+    img = img_from_pixel_arrays(rows,cols,W=arr)
 
     axim = gg.plotImageLarge(img,amp_range=amp_range)
     gg.move(500,10)

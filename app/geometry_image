@@ -28,7 +28,8 @@ def argument_parser():
     d_segzero  = None
     d_imgwidth = 9.6
     d_imgheight= 8.9 # defined by macbook-pro 13" - soo small.
-    d_nrings = 100
+    d_nrings   = 100
+    d_cframe   = 0
 
     usage = 'E.g.: %s -h # brief info about content' % SCRNAME
           #+ '\n  or: %s %s -i -e -p -S 5 # skip 5 calib-cycles and plot graphics' % (SCRNAME, d_dsname)\
@@ -45,8 +46,9 @@ def argument_parser():
     parser.add_argument('-i', '--segzero',  type=int,   default=d_segzero,  help='segment index to redefine intensity, default: %s'%d_segzero)
     parser.add_argument('-W', '--imgwidth', type=float, default=d_imgwidth, help='image width on screen [inch], default: %s'%d_imgwidth)
     parser.add_argument('-H', '--imgheight',type=float, default=d_imgheight,help='image height on screen [inch], default: %s'%d_imgheight)
-    #parser.add_argument('-e', '--procev', default=d_procev, help='process events in loop, default: %s'%d_procev, action='store_true')
     parser.add_argument('-R', '--nrings',  type=int,   default=d_nrings,  help='number of rings, default: %d'%d_nrings)
+    parser.add_argument('-C', '--cframe',  type=int,   default=d_cframe,  help='coordinate frame 0-psana, 1-LAB, default: %d'%d_cframe)
+    #parser.add_argument('-e', '--procev', default=d_procev, help='process events in loop, default: %s'%d_procev, action='store_true')
     
     args = parser.parse_args()
     print('Arguments: %s\n' % str(args))
@@ -96,6 +98,7 @@ def geometry_image():
     imgheight = args.imgheight
     imgwidth  = args.imgwidth
     nrings    = args.nrings
+    cframe    = args.cframe
     #sys.exit('TEST EXIT')
 
     #shape     = None
@@ -141,7 +144,7 @@ def geometry_image():
     if segname is not None: 
         geo.move_geo(segname, segind, dx, dy, 0) # (hor, vert, z)
 
-    X, Y, Z = geo.get_pixel_coords() # oname=None, oindex=0, do_tilt=True)
+    X, Y, Z = geo.get_pixel_coords(cframe=cframe) # oname=None, oindex=0, do_tilt=True)
     print('GeometryAccess time = %.6f sec' % (time()-t0_sec))
     xmin = X.min()
     xmax = X.max()
@@ -153,21 +156,21 @@ def geometry_image():
     print_ndarr(Y, 'Y')
 
     nda = np.loadtxt(fname_nda)
-    iX, iY = geo.get_pixel_coord_indexes(do_tilt=True)
-    #iX, iY = geo.get_pixel_coord_indexes(xy0_off_pix=(500,500), do_tilt=True)
-    #iX, iY = geo.get_pixel_xy_inds_at_z(zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True)
+    rows, cols = geo.get_pixel_coord_indexes(do_tilt=True, cframe=cframe)
+    #rows, cols = geo.get_pixel_coord_indexes(xy0_off_pix=(500,500), do_tilt=True, cframe=cframe))
+    #rows, cols = geo.get_pixel_xy_inds_at_z(zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True, cframe=cframe))
 
-    print_ndarr(iX, 'iX')
-    print_ndarr(iY, 'iY')
+    print_ndarr(rows, 'rows')
+    print_ndarr(cols, 'cols')
     print_ndarr(nda, 'nda')
 
-    shape = shape_as_3d(iX.shape)
+    shape = shape_as_3d(rows.shape)
     if nda.size == 2162688: shape = (16,352,384) # epix10ka2m
     if nda.size == 4194304: shape = (8,512,1024) # jungfrau4m
     print('shape:', shape)
 
-    iX.shape = shape
-    iY.shape = shape
+    rows.shape = shape
+    cols.shape = shape
     nda.shape = shape
 
     #ave, rms = nda.mean(), nda.std()
@@ -194,7 +197,7 @@ def geometry_image():
        #print_ndarr(grid[1],'XXX grid[1]')
        nda[segzero,:] = 0.3*grid[0] + 0.7*grid[1] + amin # cols change color faster
 
-    img = img_from_pixel_arrays(iX,iY,W=nda)
+    img = img_from_pixel_arrays(rows,cols,W=nda)
     print_ndarr(img, 'img')
 
     #plot_image(img)
