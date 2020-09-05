@@ -50,13 +50,14 @@ For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/dis
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-Author: Mikhail Dubrovin
+Created: 2013-03-08 by Mikhail Dubrovin
+2020-09-04 - converted to py3
 """
 #------------------------------
 
-import sys
 import logging
 logger = logging.getLogger(__name__)
+import numpy as np
 
 #------------------------------
 
@@ -160,8 +161,9 @@ class SegGeometry:
 
 if __name__ == "__main__":
 
-    logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.DEBUG)
+    import sys
 
+    logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.DEBUG)
     logger.debug('Module %s describes interface methods for segment pixel geometry' % sys.argv[0])
 
     sg = SegGeometry()

@@ -11,6 +11,20 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-??
+2020-09-04 Mikhail S. Dubrovin
+- in progress converter from crystfel to psana, SegGeometry* to py3
+	modified:   SegGeometry.py
+	modified:   SegGeometryCspad2x1V1.py
+	modified:   SegGeometryEpix100V1.py
+	modified:   SegGeometryEpix10kaV1.py
+	modified:   SegGeometryJungfrauV1.py
+	modified:   SegGeometryJungfrauV2.py
+	modified:   SegGeometryMatrixV1.py
+	modified:   SegGeometryStore.py
+	modified:   UtilsConvert.py
+	new file:   UtilsConvertCrystFEL.py
+
 Tag: V01-00-55
 2020-09-02 Mikhail S. Dubrovin
 - extend convertor for pnccd, add -C option to geometry_image, refactor pixel indexing for images, fix sign of Z in records for IP

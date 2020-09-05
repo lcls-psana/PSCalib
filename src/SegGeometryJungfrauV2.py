@@ -83,15 +83,11 @@ This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2017-10-12 by Mikhail Dubrovin
+2020-09-04 - converted to py3
 """
 #------------------------------
 
-import sys
-import math
-import numpy as np
-from time import time
-
-from PSCalib.SegGeometryJungfrauV1 import SegGeometryJungfrauV1, logging
+from PSCalib.SegGeometryJungfrauV1 import * # SegGeometryJungfrauV1, logging, np
 logger = logging.getLogger(__name__)
 
 #------------------------------
@@ -137,16 +133,15 @@ class SegGeometryJungfrauV2(SegGeometryJungfrauV1):
 jungfrau_front = SegGeometryJungfrauV2()
 
 #------------------------------
-#------------------------------
-#------------------------------
 #----------- TEST -------------
-#------------------------------
-#------------------------------
 #------------------------------
 
 if __name__ == "__main__":
+  import sys
+  from time import time
   import pyimgalgos.GlobalGraphics as gg # For test purpose in main only
 
+  logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.DEBUG)
 
   def test_xyz_min_max():
     w = jungfrau_front
@@ -239,7 +234,7 @@ if __name__ == "__main__":
 
 #------------------------------
 
-  def usage(tname):
+  def usage(tname='0'):
     s = ''
     if tname in ('0',): s+='\n==== Usage: python %s <test-number>' % sys.argv[0]
     if tname in ('0','1'): s+='\n 1 - test_xyz_min_max()'
@@ -255,11 +250,8 @@ if __name__ == "__main__":
  
 if __name__ == "__main__":
 
-    logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.DEBUG)
-
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
-    logger.info('%s' % usage(tname))
-
+    if len(sys.argv)==1: logger.info(usage())
     if   tname in ('1',): test_xyz_min_max()                     
     elif tname in ('2',): test_xyz_maps()                        
     elif tname in ('3',): test_jungfrau_img()                    
@@ -267,8 +259,8 @@ if __name__ == "__main__":
     elif tname in ('5',): test_pix_sizes()                       
     elif tname in ('6',): test_jungfrau_mask(mbits=1+2)          
     elif tname in ('7',): test_jungfrau_mask(mbits=1+2, width=10)
-    else: sys.exit('Non-implemented test %s' % tname)
-    logger.info('%s' % usage('0'))
-    sys.exit('End of test %s' % tname)
+    else: logger.warning('NON-EXPECTED TEST NAME: %s\n\n%s' % (tname, usage()))
+    if len(sys.argv)>1: logger.info(usage(tname))
+    sys.exit('END OF TEST')
 
 #------------------------------
