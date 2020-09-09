@@ -1,7 +1,4 @@
 #--------------------------------------------------------------------------
-# File and Version Information:
-#  $Id:$
-#
 # Description:
 #  ChangeLog file for package PSCalib
 #------------------------------------------------------------------------
@@ -10,6 +7,20 @@ Package author: Mikhail S. Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+
+Tag: V01-00-57
+2020-09-09 Mikhail S. Dubrovin
+- convert to py3
+	modified:   src/GeometryAccess.py
+	modified:   src/GeometryObject.py
+- cosmetic update
+	modified:   SegGeometryCspad2x1V1.py
+	modified:   SegGeometryEpix100V1.py
+	modified:   SegGeometryEpix10kaV1.py
+	modified:   SegGeometryJungfrauV1.py
+	modified:   SegGeometryJungfrauV2.py
+	modified:   SegGeometryMatrixV1.py
+	modified:   SegGeometryStore.py
 
 Tag: V01-00-56
 2020-09-08 Mikhail S. Dubrovin
