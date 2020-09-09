@@ -84,7 +84,6 @@ class SegGeometryStore():
         """
         segname = kwa.get('segname', 'SENS2X1:V1')
         wpc     = kwa.get('use_wide_pix_center', False)
-        #pbits   = kwa.get('pbits', 0)
 
         if segname=='SENS2X1:V1' : return cspad2x1_wpc if wpc else cspad2x1_one # SegGeometryCspad2x1V1(use_wide_pix_center=False)
         if segname=='EPIX100:V1' : return epix2x2_wpc  if wpc else epix2x2_one  # SegGeometryEpix100V1 (use_wide_pix_center=False)
@@ -140,26 +139,22 @@ if __name__ == "__main__":
 
 #----------
 
-  def test_seggeom():
+if __name__ == "__main__":
 
+    tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     if len(sys.argv)==1: logger.info(usage())
-    elif(sys.argv[1]=='1'): sg = test_segname('SENS2X1:V1')
-    elif(sys.argv[1]=='2'): sg = test_segname('EPIX100:V1')
-    elif(sys.argv[1]=='3'): sg = test_segname('PNCCD:V1')
-    elif(sys.argv[1]=='4'): sg = test_segname('EPIX10KA:V1')
-    elif(sys.argv[1]=='5'): sg = test_segname('JUNGFRAU:V1')
-    elif(sys.argv[1]=='6'): sg = test_segname('JUNGFRAU:V2')
-    elif(sys.argv[1]=='7'): sg = test_segname('MTRX:512:512:54:54')
-    elif(sys.argv[1]=='8'):
+    elif(tname=='1'): sg = test_segname('SENS2X1:V1')
+    elif(tname=='2'): sg = test_segname('EPIX100:V1')
+    elif(tname=='3'): sg = test_segname('PNCCD:V1')
+    elif(tname=='4'): sg = test_segname('EPIX10KA:V1')
+    elif(tname=='5'): sg = test_segname('JUNGFRAU:V1')
+    elif(tname=='6'): sg = test_segname('JUNGFRAU:V2')
+    elif(tname=='7'): sg = test_segname('MTRX:512:512:54:54')
+    elif(tname=='8'):
         sg = sgs.Create(segname='ABRACADABRA:V1')
         logger.info('Return for non-existent segment name: %s' % sg)
-    else: logger.warning('NON-EXPECTED TEST NAME: %s\n\n%s' % (sys.argv[1], usage()))
-    if len(sys.argv)>1: logger.info(usage(sys.argv[1]))
-
-#------------------------------
-
-if __name__ == "__main__":
-    test_seggeom()
+    else: logger.warning('NON-EXPECTED TEST NAME: %s\n\n%s' % (tname, usage()))
+    if len(sys.argv)>1: logger.info(usage(tname))
     sys.exit('END OF TEST')
 
 #------------------------------

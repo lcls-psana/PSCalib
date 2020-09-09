@@ -525,12 +525,12 @@ if __name__ == "__main__":
 
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     if len(sys.argv)==1: logger.info(usage())
-    if   tname in ('1',): test_xyz_min_max()                     
-    elif tname in ('2',): test_xyz_maps()                        
-    elif tname in ('3',): test_jungfrau_img()                    
-    elif tname in ('4',): test_jungfrau_img_easy()               
-    elif tname in ('5',): test_pix_sizes()                       
-    elif tname in ('6',): test_jungfrau_mask(mbits=1+2)          
+    elif tname in ('1',): test_xyz_min_max()
+    elif tname in ('2',): test_xyz_maps()
+    elif tname in ('3',): test_jungfrau_img()
+    elif tname in ('4',): test_jungfrau_img_easy()
+    elif tname in ('5',): test_pix_sizes()
+    elif tname in ('6',): test_jungfrau_mask(mbits=1+2)
     elif tname in ('7',): test_jungfrau_mask(mbits=1+2, width=10)
     else: logger.warning('NON-EXPECTED TEST NAME: %s\n\n%s' % (tname, usage()))
     if len(sys.argv)>1: logger.info(usage(tname))

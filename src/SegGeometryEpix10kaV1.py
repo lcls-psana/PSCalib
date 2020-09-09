@@ -536,7 +536,7 @@ if __name__ == "__main__":
 
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     if len(sys.argv)==1: logger.info(usage())
-    if   tname in ('1',): test_xyz_min_max()
+    elif tname in ('1',): test_xyz_min_max()
     elif tname in ('2',): test_xyz_maps()
     elif tname in ('3',): test_2x2_img()
     elif tname in ('4',): test_2x2_img_easy()

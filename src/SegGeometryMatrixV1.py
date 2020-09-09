@@ -528,15 +528,16 @@ if __name__ == "__main__":
  
   if __name__ == "__main__":
 
+    tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     if len(sys.argv)==1: logger.info(usage())
-    elif sys.argv[1]=='1': test_xyz_min_max()
-    elif sys.argv[1]=='2': test_xyz_maps()
-    elif sys.argv[1]=='3': test_img()
-    elif sys.argv[1]=='4': test_img_easy()
-    elif sys.argv[1]=='5': test_pix_sizes()
-    elif sys.argv[1]=='6': test_mask(mbits=1+2+4+8, width=5)
-    else: logger.warning('NON-EXPECTED TEST NAME: %s\n\n%s' % (sys.argv[1], usage()))
-    if len(sys.argv)>1: logger.info(usage(sys.argv[1]))
+    elif tname=='1': test_xyz_min_max()
+    elif tname=='2': test_xyz_maps()
+    elif tname=='3': test_img()
+    elif tname=='4': test_img_easy()
+    elif tname=='5': test_pix_sizes()
+    elif tname=='6': test_mask(mbits=1+2+4+8, width=5)
+    else: logger.warning('NON-EXPECTED TEST NAME: %s\n\n%s' % (tname, usage()))
+    if len(sys.argv)>1: logger.info(usage(tname))
     sys.exit('END OF TEST')
 
 #------------------------------
