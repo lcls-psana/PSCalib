@@ -557,7 +557,7 @@ class GeometryAccess:
     #------------------------------
         
     def xy_to_rc_point(self, X, Y, p_um=(0,0), pix_scale_size_um=None, xy0_off_pix=None, cframe=0):
-        if None in (X,Y): return None, None
+        if X is None or Y is None: return None, None
 
         x_um, y_um = self.p_um_old = p_um
         pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
@@ -585,7 +585,7 @@ class GeometryAccess:
     def xy_to_rc_arrays(self, X, Y, pix_scale_size_um=None, xy0_off_pix=None, cframe=0):
         """Returns image martix rows and columns arrays evaluated from X,Y coordinate arrays.
         """
-        if None in (X,Y): return None, None
+        if X is None or Y is None: return None, None
 
         pix_size = self.get_pixel_scale_size() if pix_scale_size_um is None else pix_scale_size_um
 

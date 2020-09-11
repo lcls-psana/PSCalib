@@ -470,7 +470,8 @@ def two2x1ToData2x2(arrTwo2x1):
         raise ValueError('Expected n-d array shape=(2,185,388), input shape=%s' % str(arrTwo2x1.shape))
 
     arrTwo2x1.shape = (2,185,388)
-    arr2x2 = np.array(zip(arrTwo2x1[0].flatten(), arrTwo2x1[1].flatten()))
+    #arr2x2 = np.array(zip(arrTwo2x1[0].flatten(), arrTwo2x1[1].flatten()))
+    arr2x2 = np.array(list(zip(arrTwo2x1[0].flatten(), arrTwo2x1[1].flatten())))
     arr2x2.shape = (185,388,2)
     return arr2x2
 

@@ -8,6 +8,12 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-58
+2020-09-11 Mikhail S. Dubrovin
+- fix for py3 compatability
+	modified:   src/GeometryAccess.py
+	modified:   src/GeometryObject.py
+
 Tag: V01-00-57
 2020-09-09 Mikhail S. Dubrovin
 - convert to py3
