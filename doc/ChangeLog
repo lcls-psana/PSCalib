@@ -8,6 +8,12 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-59
+2020-09-18 Mikhail S. Dubrovin
+- update geometry_image gix GeometryAccess
+	modified:   app/geometry_image
+	modified:   src/GeometryAccess.py
+
 Tag: V01-00-58
 2020-09-11 Mikhail S. Dubrovin
 - fix for py3 compatability

@@ -5,7 +5,12 @@ import sys
 from time import time
 import numpy as np
 
-from pyimgalgos.GlobalUtils import print_ndarr, shape_as_3d
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.INFO)
+
+from Detector.GlobalUtils import print_ndarr, info_ndarr
+from pyimgalgos.GlobalUtils import shape_as_3d
 from PSCalib.GeometryAccess import GeometryAccess, img_from_pixel_arrays
 
 import pyimgalgos.Graphics as gr
@@ -87,7 +92,7 @@ def geometry_image():
 
     #tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     tname = args.tname
-    print(50*'_', '\nTest %s:' % tname)
+    logger.info('%s\nTest %s:' % (50*'_',tname))
 
     fname_geo = args.geofname
     fname_nda = args.ndafname
@@ -135,8 +140,8 @@ def geometry_image():
       msg = 'Not-recognized test name: %s' % tname
       sys.exit('End of test %s' % tname)
 
-    print('fname_geo: %s' % fname_geo)
-    print('fname_nda: %s' % fname_nda)
+    logger.info('fname_geo: %s' % fname_geo)
+    logger.info('fname_nda: %s' % fname_nda)
 
     t0_sec = time()
     geo = GeometryAccess(fname_geo, 0o377)
@@ -145,29 +150,29 @@ def geometry_image():
         geo.move_geo(segname, segind, dx, dy, 0) # (hor, vert, z)
 
     X, Y, Z = geo.get_pixel_coords(cframe=cframe) # oname=None, oindex=0, do_tilt=True)
-    print('GeometryAccess time = %.6f sec' % (time()-t0_sec))
+    logger.info('GeometryAccess time = %.6f sec' % (time()-t0_sec))
     xmin = X.min()
     xmax = X.max()
     ymin = Y.min()
     ymax = Y.max()
-    print('Image xmin=%.1f xmax=%.1f ymin=%.1f ymax=%.1f'% (xmin, xmax, ymin, ymax))
+    logger.info('Image xmin=%.1f xmax=%.1f ymin=%.1f ymax=%.1f'% (xmin, xmax, ymin, ymax))
 
-    print_ndarr(X, 'X')
-    print_ndarr(Y, 'Y')
+    logger.info(info_ndarr(X, 'X'))
+    logger.info(info_ndarr(Y, 'Y'))
 
     nda = np.loadtxt(fname_nda)
     rows, cols = geo.get_pixel_coord_indexes(do_tilt=True, cframe=cframe)
     #rows, cols = geo.get_pixel_coord_indexes(xy0_off_pix=(500,500), do_tilt=True, cframe=cframe))
     #rows, cols = geo.get_pixel_xy_inds_at_z(zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True, cframe=cframe))
 
-    print_ndarr(rows, 'rows')
-    print_ndarr(cols, 'cols')
-    print_ndarr(nda, 'nda')
+    logger.info(info_ndarr(rows, 'rows'))
+    logger.info(info_ndarr(cols, 'cols'))
+    logger.info(info_ndarr(nda, 'nda'))
 
     shape = shape_as_3d(rows.shape)
     if nda.size == 2162688: shape = (16,352,384) # epix10ka2m
     if nda.size == 4194304: shape = (8,512,1024) # jungfrau4m
-    print('shape:', shape)
+    logger.info('shape: %s' % str(shape))
 
     rows.shape = shape
     cols.shape = shape
@@ -177,28 +182,28 @@ def geometry_image():
     vmin, vmax = nda.min(), nda.max()
     med = np.median(nda)
     spr = np.median(np.abs(nda-med))
-    print('median, spread:', med, spr)
+    logger.info('median: %.3f spread: %.3f' % (med, spr))
  
     amin, amax = med-nrmsneg*spr, med+nrmspos*spr
-    print('Image med=%.1f spr=%.1f min=%.1f max=%.1f amin=%.1f amax=%.1f'%\
+    logger.info('Image med=%.1f spr=%.1f min=%.1f max=%.1f amin=%.1f amax=%.1f'%\
           (med, spr, vmin, vmax, amin, amax))
 
     # replace one segment in data
     if segzero is not None:
        #segsize = nda[segzero,:].size
        segsh = nda[segzero,:].shape
-       #print('XXX segsh', segsh)
-       print_ndarr(segsh,'XXX segsh')
+       #logger.info('XXX segsh', segsh)
+       logger.info(info_ndarr(segsh,'XXX segsh'))
        norm = (amax-amin)/max(segsh[0],segsh[1])
        arows = np.arange(segsh[0], dtype=nda.dtype) * norm
        acols = np.arange(segsh[1], dtype=nda.dtype) * norm
        grid = np.meshgrid(acols,arows)
-       #print_ndarr(grid[0],'XXX grid[0]')
-       #print_ndarr(grid[1],'XXX grid[1]')
+       #logger.info(info_ndarr(grid[0],'XXX grid[0]'))
+       #logger.info(info_ndarr(grid[1],'XXX grid[1]'))
        nda[segzero,:] = 0.3*grid[0] + 0.7*grid[1] + amin # cols change color faster
 
     img = img_from_pixel_arrays(rows,cols,W=nda)
-    print_ndarr(img, 'img')
+    logger.info(info_ndarr(img, 'img'))
 
     #plot_image(img)
     fig, axim, axcb = gg.fig_axes(figsize=(imgwidth,imgheight),\

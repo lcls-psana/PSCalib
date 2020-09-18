@@ -137,14 +137,14 @@ class GeometryAccess:
 
         - path : str - path to the geometry file
         - pbits : int - verbosity bitword
-        """        
+        """
         self.path  = args[0] if len(args)>0 else kwargs.get('path', None)   # positional or optional argument
         self.pbits = args[1] if len(args)>1 else kwargs.get('pbits', 0)     # deprecated, but backward compatable
         self.use_wide_pix_center = kwargs.get('use_wide_pix_center', False) # optional only
         self.valid = False
 
         if self.path is None or not os.path.exists(self.path):
-            logger.warning('%s: geometry file "%s" does not exist' % (self.__class__.__name__, path))
+            logger.warning('%s: geometry file "%s" does not exist' % (self.__class__.__name__, self.path))
             return
 
         self.load_pars_from_file()
