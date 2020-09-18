@@ -10,7 +10,7 @@ reverse time order.
 
 Tag: V01-00-59
 2020-09-18 Mikhail S. Dubrovin
-- update geometry_image gix GeometryAccess
+- update geometry_image fix GeometryAccess
 	modified:   app/geometry_image
 	modified:   src/GeometryAccess.py
 
