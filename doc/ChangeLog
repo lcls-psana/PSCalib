@@ -8,6 +8,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-60
+2020-09-22 Mikhail S. Dubrovin
+- for Chuck add parameter fract to point_coor?d_indexes in GeometryAccess
+
 Tag: V01-00-59
 2020-09-18 Mikhail S. Dubrovin
 - update geometry_image fix GeometryAccess
