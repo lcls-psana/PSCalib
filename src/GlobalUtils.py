@@ -43,8 +43,8 @@ Usage::
     #### tsec, tnsec, fiducial, tsdate, tstime = gu.time_pars(evt) # needs in psana...
 
     gu.create_directory(dir, verb=False)
-    gu.create_directory_with_mode(dir, mode=0777, verb=False)
-    exists = gu.create_path(path, depth=6, mode=0777, verb=True)
+    gu.create_directory_with_mode(dir, mode=0o777, verb=False)
+    exists = gu.create_path(path, depth=6, mode=0o777, verb=True)
 
     arr  = gu.load_textfile(path)
     gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append 
@@ -88,6 +88,11 @@ from time import localtime, strftime
 #------------------------------
 
 DIR_INS = '/reg/d/psdm'
+
+#------------------------------
+
+CFRAME_PSANA   = 0 # default psana frame for image-matrix from open panel side x-rows, y-columns, z-along the beam
+CFRAME_LAB     = 1 # LAB frame - Y-top (-g - opposite to gravity) Z-along the beam, X=[YxZ]
 
 #------------------------------
 
@@ -869,7 +874,7 @@ def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False) :
 
     dep = 6 if '/reg/d/psdm/' in path_clb else 0
 
-    if create_path(path_clb, depth=dep, mode=0o2770, verb=verbos) : # mode=02770 makes drwxrws---+
+    if create_path(path_clb, depth=dep, mode=0o2770, verb=verbos): # mode=0o2770 makes drwxrws---+
 
         cmd = command_deploy_file(ifname, path_clb)
         if verbos : print('cmd: %s' % cmd)

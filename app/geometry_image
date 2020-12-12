@@ -5,11 +5,18 @@ import sys
 from time import time
 import numpy as np
 
-from pyimgalgos.GlobalUtils import print_ndarr, shape_as_3d
+import logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.INFO)
+
+from Detector.GlobalUtils import print_ndarr, info_ndarr
+from pyimgalgos.GlobalUtils import shape_as_3d
 from PSCalib.GeometryAccess import GeometryAccess, img_from_pixel_arrays
 
 import pyimgalgos.Graphics as gr
 import pyimgalgos.GlobalGraphics as gg
+
+SCRNAME = sys.argv[0].rsplit('/')[-1]
 
 #----------
 
@@ -24,21 +31,28 @@ def argument_parser():
     d_nrmspos  = 2.5
     d_nrmsneg  = 0.5
     d_segzero  = None
+    d_imgwidth = 9.6
+    d_imgheight= 8.9 # defined by macbook-pro 13" - soo small.
+    d_nrings   = 100
+    d_cframe   = 0
 
-    scrname = sys.argv[0].rsplit('/')[-1]
-    usage = 'E.g.: %s -h # brief info about content' % scrname
-          #+ '\n  or: %s %s -i -e -p -S 5 # skip 5 calib-cycles and plot graphics' % (scrname, d_dsname)\
-          #+ '\n  or: %s %s -e -p -s --detname %s -f %s' % (scrname, d_dsname, d_detname, d_prefix)
+    usage = 'E.g.: %s -h # brief info about content' % SCRNAME
+          #+ '\n  or: %s %s -i -e -p -S 5 # skip 5 calib-cycles and plot graphics' % (SCRNAME, d_dsname)\
+          #+ '\n  or: %s %s -e -p -s --detname %s -f %s' % (SCRNAME, d_dsname, d_detname, d_prefix)
     print(usage)
     
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', '--tname',    type=str,   default=d_tname,    help='test name: 1,2,3,..., default: %s'%d_tname)
-    parser.add_argument('-g', '--geofname', type=str,   default=d_geofname, help='geometry constants file name, default: %s'%d_geofname)
+    parser.add_argument('-g', '--geofname',   type=str,   default=d_geofname, help='geometry constants file name, default: %s'%d_geofname)
     parser.add_argument('-a', '--ndafname', type=str,   default=d_ndafname, help='text ndarray file name, default: %s'%d_ndafname)
     parser.add_argument('-o', '--ofname',   type=str,   default=d_ofname,   help='file name for output image, default: %s'%d_ofname)
     parser.add_argument('-p', '--nrmspos',  type=float, default=d_nrmspos,  help='number of rms positive for intensity range, default: %s'%d_nrmspos)
     parser.add_argument('-n', '--nrmsneg',  type=float, default=d_nrmsneg,  help='number of rms negative for intensity range, default: %s'%d_nrmsneg)
     parser.add_argument('-i', '--segzero',  type=int,   default=d_segzero,  help='segment index to redefine intensity, default: %s'%d_segzero)
+    parser.add_argument('-W', '--imgwidth', type=float, default=d_imgwidth, help='image width on screen [inch], default: %s'%d_imgwidth)
+    parser.add_argument('-H', '--imgheight',type=float, default=d_imgheight,help='image height on screen [inch], default: %s'%d_imgheight)
+    parser.add_argument('-R', '--nrings',  type=int,   default=d_nrings,  help='number of rings, default: %d'%d_nrings)
+    parser.add_argument('-C', '--cframe',  type=int,   default=d_cframe,  help='coordinate frame 0-psana, 1-LAB, default: %d'%d_cframe)
     #parser.add_argument('-e', '--procev', default=d_procev, help='process events in loop, default: %s'%d_procev, action='store_true')
     
     args = parser.parse_args()
@@ -78,7 +92,7 @@ def geometry_image():
 
     #tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     tname = args.tname
-    print(50*'_', '\nTest %s:' % tname)
+    logger.info('%s\nTest %s:' % (50*'_',tname))
 
     fname_geo = args.geofname
     fname_nda = args.ndafname
@@ -86,6 +100,10 @@ def geometry_image():
     nrmspos   = args.nrmspos
     nrmsneg   = args.nrmsneg
     segzero   = args.segzero
+    imgheight = args.imgheight
+    imgwidth  = args.imgwidth
+    nrings    = args.nrings
+    cframe    = args.cframe
     #sys.exit('TEST EXIT')
 
     #shape     = None
@@ -122,8 +140,8 @@ def geometry_image():
       msg = 'Not-recognized test name: %s' % tname
       sys.exit('End of test %s' % tname)
 
-    print('fname_geo: %s' % fname_geo)
-    print('fname_nda: %s' % fname_nda)
+    logger.info('fname_geo: %s' % fname_geo)
+    logger.info('fname_nda: %s' % fname_nda)
 
     t0_sec = time()
     geo = GeometryAccess(fname_geo, 0o377)
@@ -131,67 +149,77 @@ def geometry_image():
     if segname is not None: 
         geo.move_geo(segname, segind, dx, dy, 0) # (hor, vert, z)
 
-    X, Y, Z = geo.get_pixel_coords() # oname=None, oindex=0, do_tilt=True)
-    print('GeometryAccess time = %.6f sec' % (time()-t0_sec))
+    X, Y, Z = geo.get_pixel_coords(cframe=cframe) # oname=None, oindex=0, do_tilt=True)
+    logger.info('GeometryAccess time = %.6f sec' % (time()-t0_sec))
     xmin = X.min()
     xmax = X.max()
     ymin = Y.min()
     ymax = Y.max()
-    print('Image xmin=%.1f xmax=%.1f ymin=%.1f ymax=%.1f'% (xmin, xmax, ymin, ymax))
+    logger.info('Image xmin=%.1f xmax=%.1f ymin=%.1f ymax=%.1f'% (xmin, xmax, ymin, ymax))
 
-    print_ndarr(X, 'X')
-    print_ndarr(Y, 'Y')
+    logger.info(info_ndarr(X, 'X'))
+    logger.info(info_ndarr(Y, 'Y'))
 
     nda = np.loadtxt(fname_nda)
-    iX, iY = geo.get_pixel_coord_indexes(do_tilt=True)
-    print_ndarr(iX, 'iX')
-    print_ndarr(iY, 'iY')
-    print_ndarr(nda, 'nda')
+    rows, cols = geo.get_pixel_coord_indexes(do_tilt=True, cframe=cframe)
+    #rows, cols = geo.get_pixel_coord_indexes(xy0_off_pix=(500,500), do_tilt=True, cframe=cframe))
+    #rows, cols = geo.get_pixel_xy_inds_at_z(zplane=None, oname=None, oindex=0, pix_scale_size_um=None, xy0_off_pix=None, do_tilt=True, cframe=cframe))
 
-    shape = shape_as_3d(nda.shape)
-    if nda.size == 2162688: shape = (16,352,384)
-    print('shape:', shape)
+    logger.info(info_ndarr(rows, 'rows'))
+    logger.info(info_ndarr(cols, 'cols'))
+    logger.info(info_ndarr(nda, 'nda'))
 
-    iX.shape = shape
-    iY.shape = shape
+    shape = shape_as_3d(rows.shape)
+    if nda.size == 2162688: shape = (16,352,384) # epix10ka2m
+    if nda.size == 4194304: shape = (8,512,1024) # jungfrau4m
+    logger.info('shape: %s' % str(shape))
+
+    rows.shape = shape
+    cols.shape = shape
     nda.shape = shape
 
     #ave, rms = nda.mean(), nda.std()
     vmin, vmax = nda.min(), nda.max()
     med = np.median(nda)
     spr = np.median(np.abs(nda-med))
-    print('median, spread:', med, spr)
+    logger.info('median: %.3f spread: %.3f' % (med, spr))
  
     amin, amax = med-nrmsneg*spr, med+nrmspos*spr
-    print('Image med=%.1f spr=%.1f min=%.1f max=%.1f amin=%.1f amax=%.1f'%\
+    logger.info('Image med=%.1f spr=%.1f min=%.1f max=%.1f amin=%.1f amax=%.1f'%\
           (med, spr, vmin, vmax, amin, amax))
 
-
+    # replace one segment in data
     if segzero is not None:
        #segsize = nda[segzero,:].size
        segsh = nda[segzero,:].shape
-       norm = spr/max(segsh[0],segsh[1])
+       #logger.info('XXX segsh', segsh)
+       logger.info(info_ndarr(segsh,'XXX segsh'))
+       norm = (amax-amin)/max(segsh[0],segsh[1])
        arows = np.arange(segsh[0], dtype=nda.dtype) * norm
        acols = np.arange(segsh[1], dtype=nda.dtype) * norm
        grid = np.meshgrid(acols,arows)
-       #print_ndarr(grid[0],'XXX grid[0]')
-       #print_ndarr(grid[1],'XXX grid[1]')
-       nda[segzero,:] = 2*grid[0] + 4*grid[1] # cols change color faster
+       #logger.info(info_ndarr(grid[0],'XXX grid[0]'))
+       #logger.info(info_ndarr(grid[1],'XXX grid[1]'))
+       nda[segzero,:] = 0.3*grid[0] + 0.7*grid[1] + amin # cols change color faster
 
-
-    img = img_from_pixel_arrays(iX,iY,W=nda)
-    print_ndarr(img, 'img')
+    img = img_from_pixel_arrays(rows,cols,W=nda)
+    logger.info(info_ndarr(img, 'img'))
 
     #plot_image(img)
-    fig, axim, axcb = gg.fig_axes(figsize=(13,12), title=fname_geo)
+    fig, axim, axcb = gg.fig_axes(figsize=(imgwidth,imgheight),\
+         win_axim=(0.06, 0.03, 0.87, 0.93),\
+         win_axcb=(0.923,0.03, 0.02, 0.93), dpi=80, title=fname_geo)
     imsh, cbar = gr.imshow_cbar(fig, axim, axcb, img, amin=amin, amax=amax, extent=(xmin,xmax,ymin,ymax),\
                                 interpolation='nearest', aspect='auto', origin='upper',\
                                 orientation='vertical', cmap='inferno') # 'inferno''Greys_r'
     xy0 = (0,0)
 
+    #rmax = 100000
+    #axim.set_xlim((-rmax,rmax))
+    #axim.set_ylim((-rmax,rma))
     gg.drawCenter(axim, xy0, s=xmax/20, linewidth=1, color='w')
 
-    for radius in np.linspace(0, 2.5*xmax, 50, endpoint=True):
+    for radius in np.linspace(0, 2.5*xmax, nrings, endpoint=True):
         gg.drawCircle(axim, xy0, radius, linewidth=1, color='w', fill=False)
 
     gr.show(mode=None)
@@ -200,7 +228,8 @@ def geometry_image():
 #----------
 
 if __name__ == "__main__":
+    if len(sys.argv)<2: sys.exit('Try command> %s -h' % SCRNAME)
     geometry_image()
-    sys.exit('End of %s' % sys.argv[0].rsplit('/')[-1])
+    sys.exit('End of %s' % SCRNAME)
  
 #----------

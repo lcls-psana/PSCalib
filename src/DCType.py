@@ -233,7 +233,7 @@ class DCType(DCTypeI) :
 #------------------------------
 #------------------------------
 
-def test_DCType() :
+def test_DCType():
 
     o = DCType('pedestals')
 
@@ -250,15 +250,15 @@ def test_DCType() :
 
 #------------------------------
 
-def test() :
+def test():
     log.setPrintBits(0o377) 
-    if   len(sys.argv)==1  : print('For test(s) use command: python %s <test-number=1-4>' % sys.argv[0])
-    elif(sys.argv[1]=='1') : test_DCType()        
+    if   len(sys.argv)==1: print('For test(s) use command: python %s <test-number=1-4>' % sys.argv[0])
+    elif(sys.argv[1]=='1'): test_DCType()        
     else : print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
 
 #------------------------------
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     test()
     sys.exit( 'End of %s test.' % sys.argv[0])
 

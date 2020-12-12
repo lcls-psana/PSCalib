@@ -50,14 +50,15 @@ For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/dis
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-Author: Mikhail Dubrovin
+Created: 2013-03-08 by Mikhail Dubrovin
+2020-09-04 - converted to py3
 """
 from __future__ import print_function
 #------------------------------
 
-import sys
 import logging
 logger = logging.getLogger(__name__)
+import numpy as np
 
 #------------------------------
 
@@ -139,7 +140,7 @@ class SegGeometry(object):
         """
         self.print_warning('pixel_coord_max(axis)')
 
-    def pixel_mask_array(self, mbits, **kwargs):
+    def pixel_mask_array(self, mbits=0o377, **kwa):
         """ Returns array of masked pixels which content depends on bontrol bitword mbits
         """
         self.print_warning('pixel_mask_array(mask_bits)')
@@ -162,6 +163,7 @@ class SegGeometry(object):
 
 if __name__ == "__main__":
 
+    import sys
     logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.DEBUG)
     logger.debug('Module %s describes interface methods for segment pixel geometry' % sys.argv[0])
 

@@ -14,7 +14,7 @@ Usage::
     type  = 'pedestals'
     rnum  = 137
 
-    cff = CalibFileFinder(cdir, group, pbits=0377)
+    cff = CalibFileFinder(cdir, group, pbits=0o377)
     #OR
     cff = CalibFileFinder(cdir)
     fname = cff.findCalibFile(src, type, rnum)

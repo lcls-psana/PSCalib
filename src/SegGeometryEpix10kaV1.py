@@ -48,7 +48,7 @@ Usage::
     pix_size = pixel_scale_size()
 
     area     = sg.pixel_area_array()
-    mask     = sg.pixel_mask_array(mbits=0o377, width=5, wcentral=5) # **kwargs)
+    mask     = sg.pixel_mask_array(mbits=0o377, width=5, wcentral=5)
     # where mbits = +1-edges, +2-wide pixels
 
     sizeX = sg.pixel_size_array('X')
@@ -81,16 +81,12 @@ For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/dis
 This software was developed for the SIT project.
 If you use all or part of it, please give an appropriate acknowledgment.
 
-Created from SegGeometryEpix100V1.py on 2018-11-14 by Mikhail Dubrovin
+Created on 2018-11-14 by Mikhail Dubrovin
+2020-09-04 - converted to py3
 """
 from __future__ import print_function
 from __future__ import division
 #------------------------------
-
-import sys
-import math
-import numpy as np
-from time import time
 
 from PSCalib.SegGeometry import *
 logger = logging.getLogger(__name__)
@@ -124,7 +120,7 @@ class SegGeometryEpix10kaV1(SegGeometry):
 #------------------------------
 
     def __init__(sp, **kwa):
-        logger.debug('SegGeometryEpix10kaV1.__init__()')
+        logger.debug('%s.__init__()'%sp._name)
         sp.use_wide_pix_center = kwa.get('use_wide_pix_center', True)
 
         SegGeometry.__init__(sp)
@@ -361,13 +357,12 @@ class SegGeometryEpix10kaV1(SegGeometry):
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0o377, **kwargs):
+    def pixel_mask_array(sp, mbits=0o377, width=1, wcentral=1, **kwa):
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
-        mbits: +1 - mask edges,
-        +2 - mask two central columns 
+        mbits: +1 - mask edges, +2 - mask two central columns 
         """
-        w = kwargs.get('width', 1)
-        u = kwargs.get('wcentral', 1)
+        w = width    # kwargs.get('width', 1)
+        u = wcentral # kwargs.get('wcentral', 1)
 
         mask = np.ones((sp._rows,sp._cols),dtype=np.uint8)
 
@@ -426,16 +421,16 @@ epix10ka_one = SegGeometryEpix10kaV1(use_wide_pix_center=False)
 epix10ka_wpc = SegGeometryEpix10kaV1(use_wide_pix_center=True)
 
 #------------------------------
-#------------------------------
-#------------------------------
 #----------- TEST -------------
-#------------------------------
-#------------------------------
 #------------------------------
 
 if __name__ == "__main__":
+
+  import sys
+  from time import time
   import pyimgalgos.GlobalGraphics as gg # For test purpose in main only
 
+  logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.DEBUG)
 
   def test_xyz_min_max():
     w = SegGeometryEpix10kaV1()
@@ -528,7 +523,7 @@ if __name__ == "__main__":
 
 #----------
 
-  def usage(tname):
+  def usage(tname='0'):
     s = ''
     if tname in ('0',): s+='\n==== Usage: python %s <test-number>' % sys.argv[0]
     if tname in ('0','1'): s+='\n 1 - test_xyz_min_max()'
@@ -543,19 +538,16 @@ if __name__ == "__main__":
 
 if __name__ == "__main__":
 
-    logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', level=logging.DEBUG)
-
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
-    logger.info('%s' % usage(tname))
-
-    if   tname in ('1',): test_xyz_min_max()
+    if len(sys.argv)==1: logger.info(usage())
+    elif tname in ('1',): test_xyz_min_max()
     elif tname in ('2',): test_xyz_maps()
     elif tname in ('3',): test_2x2_img()
     elif tname in ('4',): test_2x2_img_easy()
     elif tname in ('5',): test_pix_sizes()
     elif tname in ('6',): test_2x2_mask(mbits=1+2)
-    else: sys.exit('Non-implemented test %s' % tname)
-    logger.info('%s' % usage('0'))
-    sys.exit('End of test %s' % tname)
+    else: logger.warning('NON-EXPECTED TEST NAME: %s\n\n%s' % (tname, usage()))
+    if len(sys.argv)>1: logger.info(usage(tname))
+    sys.exit('END OF TEST')
 
 #------------------------------

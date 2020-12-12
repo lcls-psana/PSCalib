@@ -1,7 +1,4 @@
 #--------------------------------------------------------------------------
-# File and Version Information:
-#  $Id:$
-#
 # Description:
 #  ChangeLog file for package PSCalib
 #------------------------------------------------------------------------
@@ -11,11 +8,111 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V01-00-60
+2020-09-22 Mikhail S. Dubrovin
+- for Chuck add parameter fract to point_coor?d_indexes in GeometryAccess
+
+Tag: V01-00-59
+2020-09-18 Mikhail S. Dubrovin
+- update geometry_image fix GeometryAccess
+	modified:   app/geometry_image
+	modified:   src/GeometryAccess.py
+
+Tag: V01-00-58
+2020-09-11 Mikhail S. Dubrovin
+- fix for py3 compatability
+	modified:   src/GeometryAccess.py
+	modified:   src/GeometryObject.py
+
+Tag: V01-00-57
+2020-09-09 Mikhail S. Dubrovin
+- convert to py3
+	modified:   src/GeometryAccess.py
+	modified:   src/GeometryObject.py
+- cosmetic update
+	modified:   SegGeometryCspad2x1V1.py
+	modified:   SegGeometryEpix100V1.py
+	modified:   SegGeometryEpix10kaV1.py
+	modified:   SegGeometryJungfrauV1.py
+	modified:   SegGeometryJungfrauV2.py
+	modified:   SegGeometryMatrixV1.py
+	modified:   SegGeometryStore.py
+
+Tag: V01-00-56
+2020-09-08 Mikhail S. Dubrovin
+
+2020-09-04 Mikhail S. Dubrovin
+- in progress converter from crystfel to psana, SegGeometry* to py3
+	modified:   SegGeometry.py
+	modified:   SegGeometryCspad2x1V1.py
+	modified:   SegGeometryEpix100V1.py
+	modified:   SegGeometryEpix10kaV1.py
+	modified:   SegGeometryJungfrauV1.py
+	modified:   SegGeometryJungfrauV2.py
+	modified:   SegGeometryMatrixV1.py
+	modified:   SegGeometryStore.py
+	modified:   UtilsConvert.py
+	new file:   UtilsConvertCrystFEL.py
+
+Tag: V01-00-55
+2020-09-02 Mikhail S. Dubrovin
+- extend convertor for pnccd, add -C option to geometry_image, refactor pixel indexing for images, fix sign of Z in records for IP
+	modified:   GeometryAccess.py
+	modified:   UtilsConvert.py
+	modified:   SegGeometryMatrixV1.py
+	modified:   app/geometry_convert
+	modified:   app/geometry_image
+
+Tag: V01-00-54
+2020-08-28 Mikhail S. Dubrovin
+- fix issue with pixel_mask_array, add parameter cframe to coords_xyz
+	modified:   src/GeometryAccess.py
+	modified:   src/GeometryObject.py
+	modified:   src/GlobalUtils.py
+	modified:   src/SegGeometry.py
+	modified:   src/SegGeometryCspad2x1V1.py
+	modified:   src/SegGeometryEpix100V1.py
+	modified:   src/SegGeometryEpix10kaV1.py
+	modified:   src/SegGeometryJungfrauV1.py
+	modified:   src/SegGeometryMatrixV1.py
+
+Tag: V01-00-53
+2020-08-24 Mikhail S. Dubrovin
+- add SegGeometryJungfrauV2
+- in SegGeometry*.pixel_mask_array roll back **kwargs
+- a lot of cosmetic changes
+	modified:   CalibFileFinder.py
+	modified:   DCConfigParameters.py
+	modified:   DCEmail.py
+	modified:   DCFileName.py
+	modified:   DCLogger.py
+	modified:   DCMethods.py
+	modified:   DCRange.py
+	modified:   DCStore.py
+	modified:   DCType.py
+	modified:   DCUtils.py
+	modified:   DCVersion.py
+	modified:   GenericCalibPars.py
+	modified:   GeometryAccess.py
+	modified:   GlobalUtils.py
+	modified:   SegGeometryCspad2x1V1.py
+	modified:   SegGeometryEpix100V1.py
+	modified:   SegGeometryEpix10kaV1.py
+	modified:   SegGeometryJungfrauV1.py
+	new file:   SegGeometryJungfrauV2.py
+	modified:   SegGeometryMatrixV1.py
+	modified:   SegGeometryStore.py
+
+Tag: V01-00-52
+2020-08-15 Mikhail S. Dubrovin
+- update app/geometry_image
+	modified:   app/geometry_image
+	modified:   src/UtilsConvert.py
+
 Tag: V01-00-51
 2020-08-07 Mikhail S. Dubrovin
 - add app/geometry_convert
 	new file:   app/geometry_convert
-	modified:   doc/ChangeLog
 	modified:   src/UtilsConvert.py
 
 Tag: V01-00-50
