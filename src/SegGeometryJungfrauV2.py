@@ -57,7 +57,7 @@ Usage::
 
     X     = sg.pixel_coord_array('X')
     X,Y,Z = sg.pixel_coord_array()
-    print 'X.shape =', X.shape
+    print('X.shape =', X.shape)
 
     xmin, ymin, zmin = sg.pixel_coord_min()
     xmax, ymax, zmax = sg.pixel_coord_max()

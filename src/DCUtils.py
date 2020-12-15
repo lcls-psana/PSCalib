@@ -437,7 +437,7 @@ def test_misc():
 def do_test():
     import sys; global sys
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
-    print 50*'_', '\nTest %s:' % tname
+    print(50*'_', '\nTest %s:' % tname)
     if   tname == '0': test_misc(); test_source_full_name(); test_string_from_source();\
                         test_psana_source(); test_detector_full_name()
     elif tname == '1': test_source_full_name()
@@ -446,7 +446,7 @@ def do_test():
     elif tname == '4': test_detector_full_name()
     elif tname == '5': test_evt_time()
     elif tname == '6': test_env_time()
-    else: print 'Not-recognized test name: %s' % tname
+    else: print('Not-recognized test name: %s' % tname)
     sys.exit('End of test %s' % tname)
  
 #------------------------------
