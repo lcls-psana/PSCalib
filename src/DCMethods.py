@@ -449,11 +449,7 @@ def delete_range_from_file(fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, ver
     rdel = ct.mark_range_for_key(range, cmt=cmt)
     if rdel is None : return None
 
-<<<<<<< HEAD
     if verb : log.setPrintBits(0o2) # 0377
-=======
-    if verb : log.setPrintBits(02) # 0o377
->>>>>>> master
 
     cs.save()
 
@@ -523,11 +519,7 @@ def delete_ctype_from_file(fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False) :
     tdel = cs.mark_ctype(str_ctype, cmt=cmt)
     if tdel is None : return None 
 
-<<<<<<< HEAD
     if verb : log.setPrintBits(0o2) # 0377
-=======
-    if verb : log.setPrintBits(02) # 0o377
->>>>>>> master
 
     cs.save()
 
