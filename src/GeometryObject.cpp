@@ -100,11 +100,11 @@ GeometryObject::~GeometryObject ()
 //-------------------
 void GeometryObject::deallocate_memory()
 {
-  if (p_xarr) delete [] p_xarr; p_xarr=0;
-  if (p_yarr) delete [] p_yarr;	p_yarr=0;
-  if (p_zarr) delete [] p_zarr;	p_zarr=0;
-  if (p_aarr) delete [] p_aarr;	p_aarr=0;
-  if (p_marr) delete [] p_marr;	p_marr=0;
+  if (p_xarr){delete [] p_xarr; p_xarr=0;}
+  if (p_yarr){delete [] p_yarr; p_yarr=0;}
+  if (p_zarr){delete [] p_zarr; p_zarr=0;}
+  if (p_aarr){delete [] p_aarr; p_aarr=0;}
+  if (p_marr){delete [] p_marr; p_marr=0;}
 }
 
 //-------------------

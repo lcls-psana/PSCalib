@@ -8,6 +8,14 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-01
+2021-01-08 Mikhail Dubrovin
+- src/GeometryObject.cpp - cosmetic to eliminate new compiler warnings
+
+Tag: V02-00-00 Valerio?
+
+Tag: V01-01-00 Valerio?
+
 Tag: V01-00-60
 2020-09-22 Mikhail S. Dubrovin
 - for Chuck add parameter fract to point_coor?d_indexes in GeometryAccess
