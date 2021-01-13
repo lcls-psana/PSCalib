@@ -8,6 +8,10 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-02
+2021-01-12 Mikhail Dubrovin
+modified:   src/CalibParsBaseEpix10kaV1.py - change default cmod
+
 Tag: V02-00-01
 2021-01-08 Mikhail Dubrovin
 - src/GeometryObject.cpp - cosmetic to eliminate new compiler warnings

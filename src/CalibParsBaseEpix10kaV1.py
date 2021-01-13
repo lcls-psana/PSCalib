@@ -28,9 +28,9 @@ Author: Mikhail Dubrovin
 """
 #------------------------------
 
-class CalibParsBaseEpix10kaV1(object) :
+class CalibParsBaseEpix10kaV1():
 
-    ndim = 4 # constants_shape = (7, 1, 352, 384) # data_shape = (16, 352, 384)
+    ndim = 4 # constants_shape = (7, 16, 352, 384) # data_shape = (16, 352, 384)
     segs = 1
     rows = 0 # 352->0 variable size array due to variable number of panels
     cols = 0 # 384 
@@ -38,8 +38,8 @@ class CalibParsBaseEpix10kaV1(object) :
     shape = (segs, rows, cols)
     size_cm = 16 
     shape_cm = (size_cm,)
-    cmod = (3, 100, 100, 384, 0,0,0,0, 0,0,0,0, 0,0,0,0)
-    # 3-median, 100-max threshold, 100-max correction, 384-pix group size
+    cmod = (7,2,10,10, 0,0,0,0, 0,0,0,0, 0,0,0,0)
+    # cmod[0/1/2/3] = 7:median for epix10ka/ 0,+1,+2,+4:off,rows,cols,banks/ 10-max correction / 10- min number of pix for correction
          
     def __init__(self) : pass
 
