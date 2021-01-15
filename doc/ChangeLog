@@ -8,6 +8,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-03
+2021-01-13 Mikhail Dubrovin
+- fix conversion to py3 and associated libs issues - 'end' vs b'end', __del__
+	modified:   DCRange.py
+	modified:   DCStore.py
+	modified:   DCType.py
+
 Tag: V02-00-02
 2021-01-12 Mikhail Dubrovin
 modified:   src/CalibParsBaseEpix10kaV1.py - change default cmod

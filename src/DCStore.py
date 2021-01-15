@@ -194,9 +194,11 @@ class DCStore(DCStoreI) :
             #self._lst_del_keys.append(ctype)
 
 
-    def __del__(self) :
-        for ctype in self._dicctypes.keys() :
-            del self._dicctypes[ctype] 
+    def __del__(self):
+        del self._dicctypes
+        #self._dicctypes = {}
+        #for ctype in self._dicctypes.keys():
+        #    del self._dicctypes[ctype] 
 
 
     def clear_ctypes(self) :

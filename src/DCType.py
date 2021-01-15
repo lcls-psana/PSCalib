@@ -57,7 +57,7 @@ import sys
 from PSCalib.DCInterface import DCTypeI
 from PSCalib.DCLogger import log
 from PSCalib.DCRange import DCRange, key
-from PSCalib.DCUtils import sp, evt_time, get_subgroup, save_object_as_dset, delete_object
+from PSCalib.DCUtils import sp, np, evt_time, get_subgroup, save_object_as_dset, delete_object
 
 #------------------------------
 
@@ -129,9 +129,10 @@ class DCType(DCTypeI) :
             #self._lst_del_keys.append(keyrng)
 
  
-    def __del__(self) :
-        for keyrng in self._dicranges.keys() :
-            del self._dicranges[keyrng] 
+    def __del__(self):
+        del self._dicranges
+        #for keyrng in self._dicranges.keys():
+        #    del self._dicranges[keyrng]
 
 
     def clear_ranges(self) :
@@ -204,7 +205,9 @@ class DCType(DCTypeI) :
                     continue
 
                 end = v.get('end')
-                if (end is None) or (end[0] != 'end') :
+
+                str_end = end[0].decode('utf-8') if isinstance(end[0], np.bytes_) else str(end[0])
+                if end is None or str_end!='end':
                     msg = 'File: "%s"\n       has structure - group "%s" does not contain key "end", keys: "%s"'%\
                           (grp.file.name, v.name, list(v.keys()))
                     log.error(msg, self._name)

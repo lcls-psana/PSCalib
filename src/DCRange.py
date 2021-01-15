@@ -75,7 +75,7 @@ def key(begin, end=None) :
     ex.: 1471285222-1471285555 or 1471285222-end from double time like 1471285222.123456
     """
     str_begin = ('%d' % floor(begin)) if begin is not None else 0
-    str_end = 'end' if (end is None or end=='end') else ('%d' % ceil(end))
+    str_end = 'end' if end in (None, 'end', b'end') else ('%d' % ceil(end))
     return '%s-%s' % (str_begin, str_end)
 
 #------------------------------
@@ -178,8 +178,9 @@ class DCRange(DCRangeI) :
 
 
     def __del__(self) :
-        for vers in self._dicvers.keys() :
-            del self._dicvers[vers]
+        del self._dicvers
+        #for vers in self._dicvers.keys() :
+        #    del self._dicvers[vers]
 
 
     def clear_versions(self) :
@@ -187,9 +188,9 @@ class DCRange(DCRangeI) :
 
 
     def tsec_in_range(self, tsec) :
-        if tsec < self.begin() : return False 
-        if self.end() == 'end' : return True 
-        if tsec > self.end()   : return False 
+        if tsec < self.begin(): return False
+        if self.end() in ('end',b'end'): return True
+        if tsec > self.end(): return False
         return True
 
 
