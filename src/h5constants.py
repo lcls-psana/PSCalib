@@ -66,7 +66,7 @@ class ConstantsLoad(object):
                
             self.setval(remainder,obj[dictname])
         else:
-            obj[name]=self.f[self.fullname].value
+            obj[name]=self.f[self.fullname][()] # .value - deprecated
 
     def loadCallBack(self,name,obj):
         '''called back by h5py routine visititems for each

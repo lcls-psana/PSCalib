@@ -124,7 +124,7 @@ class DCVersion(DCVersionI) :
                 if   k == 'version': self.set_vnum(v[0])
                 elif k == 'tsprod' : self.set_tsprod(v[0])
                 elif k == 'data'   :
-                    d = v.value
+                    d = v[()] #v.value - depricated
                     if str(d.dtype)[:2] == '|S' :
                         d=d.tostring() # .split('\n')
                         #print 'XXX: d, type(d): %s'%d, type(d)
