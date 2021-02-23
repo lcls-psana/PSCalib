@@ -146,7 +146,7 @@ class GeometryAccess:
         self.valid = False
 
         if self.path is None or not os.path.exists(self.path):
-            logger.warning('%s: geometry file "%s" does not exist' % (self.__class__.__name__, self.path))
+            logger.debug('%s: geometry file "%s" does not exist' % (self.__class__.__name__, self.path))
             return
 
         self.load_pars_from_file()
