@@ -8,6 +8,18 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-05
+2021-03-01 Mikhail Dubrovin
+- define and use str_pro to check and convert bytes to str object
+modified:
+  DCBase.py
+  DCMethods.py - use str_pro in get_constants_from_file
+  DCRange.py
+  DCUtils.py - add method str_pro returning str for bytes
+  DCVersion.py
+
+Tag: V02-00-04 - ???
+
 Tag: V02-00-03
 2021-01-13 Mikhail Dubrovin
 - fix conversion to py3 and associated libs issues - 'end' vs b'end', __del__
