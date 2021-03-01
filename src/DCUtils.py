@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#------------------------------
+
 """
 Class :py:class:`DCUtils` contains a set of utilities
 =====================================================
@@ -37,6 +37,8 @@ Usage::
     gu.delete_object(grp, oname)
     gu.save_object_as_dset(grp, name, shape=None, dtype=None, data=0)
 
+    str_obj = str_pro(s)
+
 See:
     * :class:`DCStore`
     * :class:`DCType`
@@ -58,7 +60,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Created: 2016 by Mikhail Dubrovin
 """
 from __future__ import print_function
-#------------------------------
+
 
 import sys
 import os
@@ -70,7 +72,7 @@ import psana
 from PSCalib.DCLogger import log
 import PSCalib.GlobalUtils as gu
 
-#------------------------------
+
 
 class h5py_proxy:
     def __init__(self):
@@ -84,10 +86,10 @@ class h5py_proxy:
             import h5py
             self.h5py = h5py
 
-#------------------------------
+
 #h5py = h5py_proxy()
 import h5py
-#------------------------------
+
 
 class Storage:
     def __init__(self):
@@ -95,25 +97,25 @@ class Storage:
         self.group_t   = h5py.Group
         self.File      = h5py.File
 
-#------------------------------
+
 
 sp = Storage()
 
-#------------------------------
+
 
 def str_tstamp(fmt='%Y-%m-%dT%H:%M:%S', time_sec=None):
     """Returns string timestamp for specified format and time in sec or current time by default
     """
     return strftime(fmt, localtime(time_sec))
 
-#------------------------------
+
 
 def get_enviroment(env='USER'):
     """Returns the value of specified by string name environment variable
     """
     return os.environ[env]
 
-#------------------------------
+
 
 def get_login():
     """Returns login name
@@ -121,7 +123,7 @@ def get_login():
     #return os.getlogin()
     return getpass.getuser()
 
-#------------------------------
+
 
 def get_hostname():
     """Returns login name
@@ -129,14 +131,14 @@ def get_hostname():
     #return os.uname()[1]
     return socket.gethostname()
 
-#------------------------------
+
 
 def get_cwd():
     """Returns current working directory
     """
     return os.getcwd()
 
-#------------------------------
+
 
 def create_directory_v0(dir, verb=False):
     if os.path.exists(dir):
@@ -146,7 +148,7 @@ def create_directory_v0(dir, verb=False):
         os.makedirs(dir)
         if verb : print('Directory created: %s' % dir)
 
-#------------------------------
+
 
 def create_directory(dir, mode=0o775):
     #print 'create_directory: %s' % dir
@@ -158,7 +160,7 @@ def create_directory(dir, mode=0o775):
         #os.system(cmd)
         log.info('Directory created: %s' % dir, __name__) 
 
-#------------------------------
+
 
 def create_path(path, depth=2, mode=0o775):
     # Creates missing path for /reg/d/psdm/<INS>/<EXP>/calib/<dtype> beginning from calib
@@ -174,7 +176,7 @@ def create_path(path, depth=2, mode=0o775):
 
     return os.path.exists(cpath)
 
-#------------------------------
+
 
 def save_string_as_dset(grp, name, s):
     """Creates and returns the h5py dataset object with name for single string s
@@ -186,7 +188,7 @@ def save_string_as_dset(grp, name, s):
     dset[0] = s
     return dset
 
-#------------------------------
+
 
 def source_full_name(env, src):
     """Returns full name like 'DetInfo(XppGon.0:Cspad2x2.0)' of the brief source or its alias
@@ -198,7 +200,7 @@ def source_full_name(env, src):
         or str_src == str(k.alias()): return k.src()
     return None
 
-#------------------------------
+
 
 def dettype_from_str_source(src):
     """Returns the detector type from full psana source name (Ex.: Cspad2x2 from DetInfo(XppGon.0:Cspad2x2.0) 
@@ -209,7 +211,7 @@ def dettype_from_str_source(src):
     #return detname[0] if len(detname)>1 else None
     return None if detname is None else detname[0] if len(detname)>1 else None
 
-#------------------------------
+
 
 def string_from_source(source):
   """Returns string like 'CxiDs2.0:Cspad.0' from 'DetInfo(CxiDs2.0:Cspad.0)'
@@ -220,7 +222,7 @@ def string_from_source(source):
   str_split = str_src.rsplit('(',1) 
   return str_split[1].split(')',1)[0] if len(str_split)>1 else str_src
 
-#------------------------------
+
 
 def detector_full_name(env, src):
     """Returns full detector name like 'XppGon.0:Cspad2x2.0' for short src, alias src, or psana.Source.
@@ -232,7 +234,7 @@ def detector_full_name(env, src):
     if str_src is None: return None
     return string_from_source(str_src)
 
-##------------------------------
+
 
 def psana_source(env, srcpar):
     """returns psana.Source(src) from other psana.Source brief src or alias.
@@ -254,7 +256,7 @@ def psana_source(env, srcpar):
     if not isinstance(source, psana.Source): source = psana.Source(source)
     return source
  
-#------------------------------
+
 
 def get_subgroup(grp, subgr_name):
     """For hdf5:
@@ -264,7 +266,7 @@ def get_subgroup(grp, subgr_name):
     if subgr_name in grp: return grp[subgr_name]
     return grp.create_group(subgr_name)
 
-#------------------------------
+
 
 def delete_object(grp, oname):
     """For hdf5: removes object from group.
@@ -274,7 +276,7 @@ def delete_object(grp, oname):
     if oname in grp: del grp[oname]
     #print 'TTT %s: time (sec) = %.6f' % (sys._getframe().f_code.co_name, time()-t0_sec)
 
-#------------------------------
+
 
 def save_object_as_dset(grp, name, shape=None, dtype=None, data=0):
     """Saves object as h5py dataset
@@ -304,7 +306,7 @@ def save_object_as_dset(grp, name, shape=None, dtype=None, data=0):
 
     log.warning("Can't save parameter: %s of %s in the h5py group: %s" % (name, str(dtype), grp.name), 'DCUtils.save_object_as_dset')
 
-#------------------------------
+
 
 def evt_time(evt):
     """Returns event (double) time for input psana.Event object.
@@ -314,7 +316,7 @@ def evt_time(evt):
     #print 'XXX time:',  ttuple
     return float(ttuple[0]) + float(ttuple[1])*1e-9
 
-#------------------------------
+
 
 def env_time(env):
     """Returns event (double) time for input psana.Env object.
@@ -324,7 +326,7 @@ def env_time(env):
     #print 'XXX time:',  ttuple
     return float(ttuple[0]) + float(ttuple[1])*1e-9
 
-#------------------------------
+
 
 def dataset_time(dsname):
     """Returns event (double) time for input dsname "exp=xcsx35617:run=6".
@@ -332,7 +334,7 @@ def dataset_time(dsname):
     ds = psana.DataSource(dsname)
     return env_time(ds.env())
 
-#------------------------------
+
 
 def evt_fiducials(evt):
     """Returns event fiducials.
@@ -340,7 +342,7 @@ def evt_fiducials(evt):
     evid = evt.get(psana.EventId)
     return evid.fiducials()
 
-#------------------------------
+
 
 def par_to_tsec(par):
     """Checks if par is float or assumes that it is psana.Event and returns event time in (float) sec or None.
@@ -358,11 +360,23 @@ def par_to_tsec(par):
            env_time(par) if isinstance(par, psana.Env) else\
            None
 
-#------------------------------
-#------------------------------
-#------------------------------
-#------------------------------
-#------------------------------
+
+
+def str_pro(s):
+    """Converts input bytes to str, pass other objects
+
+    Parameters
+
+    - s : bytes | other - input string-like object
+
+    Returns
+
+    str for bytes
+    """
+    return s.decode('UTF-8','ignore') if isinstance(s, bytes) else s
+
+
+#---
 
 def test_source_full_name():
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
@@ -373,7 +387,7 @@ def test_source_full_name():
     print('src="Cspad"   :', source_full_name(env, 'Cspad'))
     print('src="cs140_0" :', source_full_name(env, 'cs140_0'))
 
-#------------------------------
+
 
 def test_string_from_source():
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
@@ -383,7 +397,7 @@ def test_string_from_source():
     print('source', source)
     print('string_from_source', string_from_source(source))
 
-#------------------------------
+
 
 def test_psana_source():
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
@@ -394,7 +408,7 @@ def test_psana_source():
     print('psana_source(env, "Cspad")   :', psana_source(env, 'Cspad'))
     print('psana_source(env, "cs140_0") :', psana_source(env, 'cs140_0'))
 
-#------------------------------
+
 
 def test_detector_full_name():
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
@@ -405,7 +419,7 @@ def test_detector_full_name():
     print('src="DetInfo(NoDetector.0:Epix100a.0)":', detector_full_name(env, 'DetInfo(NoDetector.0:Epix100a.0)'))
     print('for alias src="cs140_0"               :', detector_full_name(env, 'cs140_0'))
 
-#------------------------------
+
 
 def test_evt_time():
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
@@ -414,7 +428,7 @@ def test_evt_time():
     t=evt_time(evt)
     print('evt_time(evt) : %.9f' % t)
 
-#------------------------------
+
 
 def test_env_time():
     ds = psana.DataSource('/reg/g/psdm/detector/data_test/types/0007-NoDetector.0-Epix100a.0.xtc')
@@ -423,7 +437,7 @@ def test_env_time():
     t=env_time(env)
     print('env_time(evt) : %.9f' % t)
 
-#------------------------------
+
 
 def test_misc():
     print(20*'_', '\n%s:' % sys._getframe().f_code.co_name)
@@ -432,7 +446,7 @@ def test_misc():
     print('get_hostname()       : %s' % get_hostname())
     print('get_cwd()            : %s' % get_cwd())
 
-#------------------------------
+
 
 def do_test():
     import sys; global sys
@@ -449,9 +463,9 @@ def do_test():
     else: print('Not-recognized test name: %s' % tname)
     sys.exit('End of test %s' % tname)
  
-#------------------------------
+
 
 if __name__ == "__main__":
     do_test()
 
-#------------------------------
+# EOF
