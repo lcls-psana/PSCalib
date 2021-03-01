@@ -1,5 +1,5 @@
 ####!/usr/bin/env python
-#------------------------------
+
 """
 Class :py:class:`DCBase` is a base class for the Detector Calibration (DC) project
 ==================================================================================
@@ -70,14 +70,14 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Author: Mikhail Dubrovin
 """
 from __future__ import print_function
-#------------------------------
+
 
 from time import time, sleep, localtime, gmtime, strftime, strptime, mktime
 from math import floor
 from PSCalib.DCLogger import log
-from PSCalib.DCUtils import get_subgroup, save_object_as_dset
+from PSCalib.DCUtils import get_subgroup, save_object_as_dset, str_pro
 
-#------------------------------
+#---
 
 #class DCBase() :
 class DCBase(object) :
@@ -259,7 +259,7 @@ class DCBase(object) :
         self.clear_pars()
         for k,v in dict(grp).items() :
             log.debug('par: %s = %s' % (k, str(v[0])), self._name)
-            self.add_par(k, v[0])
+            self.add_par(k, str_pro(v[0]))
 
 
     def _load_hystory_dict(self, grp) :
@@ -269,7 +269,7 @@ class DCBase(object) :
         for k,v in zip(grp.keys(), grp.values()) :
             #print '             YYY:k,v:', k,v 
             tsec = float(k)
-            rec = 'None' if v is None else v[0]
+            rec = 'None' if v is None else str_pro(v[0])
             log.debug('t: %.6f rec: %s' % (tsec, rec), self._name)
             self.add_history_record(rec, tsec) # tsec=self.tstr_to_tsec(k)
 
@@ -305,7 +305,7 @@ class DCBase(object) :
             #print '%s t[sec]: %d: %s rec: %s' % (offset, floor(k), self.tsec_to_tstr(k), str(v))
             print('  %s %s %s' % (offset, self.tsec_to_tstr(k, addfsec=False), str(v)))
 
-#------------------------------
+
 
     def make_record(self, action='', key='', cmt=False) :
         """Returns string record combined with comment.
@@ -319,7 +319,7 @@ class DCBase(object) :
         if cmt is None or cmt is False : return '%s %s' % (action, key)
         return '%s %s: %s' % (action, key, cmt)
 
-#------------------------------
+#---
 
 def test_pars() :
     o = DCBase()
@@ -330,7 +330,7 @@ def test_pars() :
     print('\nAfter del_par(2): %s' % o.pars_text())
     print('\npar(3): %s' % o.par(3))
 
-#------------------------------
+
 
 def test_history() :
     o = DCBase()
@@ -347,7 +347,7 @@ def test_history() :
     o.load_history_file('history-test.txt', verb=True)
     print('\nTest history records:\n%s' % o.history_text())
 
-#------------------------------
+
 
 def test_time_converters() :
     o = DCBase()
@@ -357,7 +357,7 @@ def test_time_converters() :
     print('convert time     %.6f to time stamp: %s' % (t_sec,  t_str))
     print('and back to time %.6f' % (t_sec2))
 
-#------------------------------
+
 
 def test_make_record() :
     o = DCBase()
@@ -365,7 +365,7 @@ def test_make_record() :
     print(o.make_record(action='test make_record for cmt=None', key='keyword', cmt=None))
     print(o.make_record(action='test make_record for cmt="my comment"', key='keyword', cmt="my comment"))
 
-#------------------------------
+
 
 if __name__ == "__main__" :
     import sys
@@ -375,4 +375,4 @@ if __name__ == "__main__" :
     test_make_record()
     sys.exit('End of %s test.' % sys.argv[0])
 
-#------------------------------
+# EOF

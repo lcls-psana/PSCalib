@@ -66,7 +66,7 @@ from math import floor, ceil
 from PSCalib.DCInterface import DCRangeI
 from PSCalib.DCLogger import log
 from PSCalib.DCVersion import DCVersion, version_int_to_str
-from PSCalib.DCUtils import sp, evt_time, get_subgroup, save_object_as_dset, delete_object
+from PSCalib.DCUtils import sp, evt_time, get_subgroup, save_object_as_dset, delete_object, str_pro
 
 #------------------------------
 
@@ -101,11 +101,11 @@ class DCRange(DCRangeI) :
         self._str_range = key(begin, end)
         log.debug('In c-tor for range: %s' % self._str_range, self._name)
 
-    def range(self)                : return self._str_range
+    def range(self)                : return str_pro(self._str_range)
 
     def begin(self)                : return self._begin
 
-    def end(self)                  : return self._end
+    def end(self)                  : return str_pro(self._end)
 
     def versions(self)             : return self._dicvers
 
@@ -292,7 +292,7 @@ class DCRange(DCRangeI) :
         print('%s begin     %s' % (offset, self.begin()), end=' ')
         print(': %s'            % self.tsec_to_tstr(self.begin()))
         print('%s end       %s' % (offset, self.end()), end=' ')
-        print(' %s'             % ('' if (self.end() in (None,'end')) else self.tsec_to_tstr(self.end())))
+        print(' %s'             % ('' if (self.end() in (None,'end',b'end')) else self.tsec_to_tstr(self.end())))
         print('%s range     %s' % (offset, self.range()))
         print('%s versdef   %s' % (offset, self.vnum_def()))
         print('%s N vers    %s' % (offset, len(self.versions())))

@@ -286,7 +286,7 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
     #ct.print_obj()
 
     tsec = dcu.par_to_tsec(par)
-    #print 'XXX: get DCRange object for time = %.3f' % tsec
+    #print('XXX: get DCRange object for time = %.3f' % tsec)
     cr = ct.range_for_tsec(tsec)
     #cr = ct.range_for_evt(evt)
 
@@ -298,7 +298,7 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
     if cv is None : return None
     #cv.print_obj()
 
-    return cv.data()
+    return dcu.str_pro(cv.data())
 
 #------------------------------
 

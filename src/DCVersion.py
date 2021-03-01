@@ -56,7 +56,7 @@ import numpy as np
 from math import floor
 from PSCalib.DCInterface import DCVersionI
 from PSCalib.DCLogger import log
-from PSCalib.DCUtils import sp, get_subgroup, save_object_as_dset
+from PSCalib.DCUtils import sp, get_subgroup, save_object_as_dset, str_pro
 
 #------------------------------
 
@@ -155,7 +155,7 @@ class DCVersion(DCVersionI) :
            print('%s data.shape %s  dtype %s' % (offset, str(data.shape), str(data.dtype)))
         else :
            print('%s data' % (offset))
-           for s in data.split('\n') : print('%s     %s' % (offset, s))
+           for s in str_pro(data).split('\n') : print('%s     %s' % (offset, s))
 
         #for k,v in self.versions().iteritems() :
         #    v.print_obj()
