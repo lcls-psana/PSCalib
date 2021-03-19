@@ -8,6 +8,13 @@ Package author: Mikhail S. Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-06
+2021-03-18 Daniel Damiani
+- add support for iStar detector
+	modified:   include/CalibParsStore.h
+	modified:   src/CalibParsStore.py
+	modified:   src/GlobalUtils.py
+
 Tag: V02-00-05
 2021-03-01 Mikhail Dubrovin
 - define and use str_pro to check and convert bytes to str object

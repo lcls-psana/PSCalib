@@ -151,6 +151,7 @@ class CalibParsStore(object) :
                          gu.TIMEPIX,\
                          gu.FLI,\
                          gu.ZYLA,\
+                         gu.ISTAR,\
                          gu.PIXIS,\
                          gu.EPICSCAM,\
                          gu.PIMAX,\
