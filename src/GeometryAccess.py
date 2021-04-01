@@ -121,8 +121,9 @@ logger = logging.getLogger(__name__)
 def divide_protected(num, den, vsub_zero=0):
     """Returns result of devision of numpy arrays num/den with substitution of value vsub_zero for zero den elements.
     """
-    pro_num = np.select((den!=0,), (num,), default=vsub_zero)
-    pro_den = np.select((den!=0,), (den,), default=1)
+    cond_list = (den!=0,)
+    pro_num = np.select(cond_list, (num,), default=vsub_zero)
+    pro_den = np.select(cond_list, (den,), default=1)
     return pro_num / pro_den
 
 #------------------------------
@@ -442,6 +443,11 @@ class GeometryAccess:
         if X is None: return None, None
         Z0 = Z.mean() if zplane is None else zplane
         if fabs(Z0) < 1000: return X, Y
+
+        #from Detector.GlobalUtils import info_ndarr
+        #logger.debug(info_ndarr(Z, 'get_pixel_xy_at_z Z'))
+        logger.debug('get_pixel_xy_at_z Z.shape %s' % str(Z.shape))
+        logger.debug('Z plane %f' % Z0)
 
         XatZ = Z0 * divide_protected(X,Z)
         YatZ = Z0 * divide_protected(Y,Z)
