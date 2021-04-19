@@ -8,8 +8,14 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-08
+2021-04-19 Mikhail Dubrovin
+- code refactoring for Detector/app/jungfrau_dark_proc
+modified: GlobalUtils.py - upgrade methods create_directory
+new file: UtilsPanelAlias.py - move to this module a couple of generic methods
+	alias_for_id and id_for_alias from Detector/src/UtilsEpix
+
 Tag: V02-00-07
-2021-04-01 Mikhail Dubrovin
 - GeometryAccess - add info messages for debugging
 - app/geometry_image - add multiple parameters, add r-phi projection
 

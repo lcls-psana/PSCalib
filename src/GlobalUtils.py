@@ -74,8 +74,10 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Created: 2013-03-08 by Mikhail Dubrovin
 """
 from __future__ import print_function
-from __future__ import division
+#from __future__ import division
 #--------------------------------
+import logging
+logger = logging.getLogger(__name__)
 
 import sys
 import os
@@ -642,15 +644,28 @@ def file_mode(fname) :
     """
     return os.stat(fname)[ST_MODE]
 
+
+def set_file_access_mode(fname, mode=0o777):
+    os.chmod(fname, mode)
+
 #------------------------------
 
-def create_directory(dir, verb=False) : 
-    if os.path.exists(dir) :
-        pass
-        #if verb : print 'Directory exists: %s' % dir
-    else :
+#def create_directory(dir, verb=False) : 
+#    if os.path.exists(dir) :
+#        pass
+#        #if verb : print 'Directory exists: %s' % dir
+#    else :
+#        os.makedirs(dir)
+#        if verb : print('Directory created: %s' % dir)
+
+def create_directory(dir, mode=0o777, **kwa):
+    """Creates directory and sets its mode"""
+    if os.path.exists(dir):
+        logger.debug('Exists: %s mode(oct): %s' % (dir, oct(file_mode(dir))))
+    else:
         os.makedirs(dir)
-        if verb : print('Directory created: %s' % dir)
+        os.chmod(dir, mode)
+        logger.debug('Created:%s, mode(oct)=%s' % (dir, oct(mode)))
 
 #------------------------------
 
