@@ -8,6 +8,10 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-09
+2021-04-23 Mikhail Dubrovin
+- src/UtilsPanelAlias.py - add metadata (exp, run, login) to alias file
+
 Tag: V02-00-08
 2021-04-19 Mikhail Dubrovin
 - code refactoring for Detector/app/jungfrau_dark_proc
