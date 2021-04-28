@@ -8,6 +8,11 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-10
+2021-04-28 Mikhail Dubrovin
+- GeometryAccess.load_pars_from_str(s) - begin to receive expected str s as unicode
+	          at loading constants from h5 file. Fix -> s.encode('utf-8')
+
 Tag: V02-00-09
 2021-04-23 Mikhail Dubrovin
 - src/UtilsPanelAlias.py - add metadata (exp, run, login) to alias file

@@ -146,6 +146,8 @@ class GeometryAccess:
         self.use_wide_pix_center = kwargs.get('use_wide_pix_center', False) # optional only
         self.valid = False
 
+        self.list_of_geos = []
+
         if self.path is None or not os.path.exists(self.path):
             logger.debug('%s: geometry file "%s" does not exist' % (self.__class__.__name__, self.path))
             return
@@ -219,8 +221,11 @@ class GeometryAccess:
         """Reads input geometry from str, discards empty lines and comments, fills the list of geometry objects for data lines.
         """        
         self.valid = False
+
+        if isinstance(s, unicode): s = s.encode('utf-8') #str(s)
+
         if not isinstance(s, str):
-            logger.debug('%s.load_pars_from_str input parameter is not a str, s: %s' % (self.__class__.__name__, str(s)))
+            logger.debug('%s.load_pars_from_str input parameter is not a str, but %s s: %s' % (self.__class__.__name__, type(s), str(s)))
             return
             
         self.reset_cash()
