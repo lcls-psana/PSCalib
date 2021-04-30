@@ -8,6 +8,12 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-11
+2021-04-30 Mikhail Dubrovin
+- add SegGeometryMatrixV2.py - with matrix for cartesian x-y frame, segment type MTRX:V2:512:512:54:54
+- SegGeometryMatrixV1.py - cosmetics, move imports to speed-up tests
+- SegGeometryStore.py - add MTRX:V2
+
 Tag: V02-00-10
 2021-04-28 Mikhail Dubrovin
 - GeometryAccess.load_pars_from_str(s) - begin to receive expected str s as unicode
