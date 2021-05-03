@@ -222,7 +222,8 @@ class GeometryAccess:
         """        
         self.valid = False
 
-        if isinstance(s, unicode): s = s.encode('utf-8') #str(s)
+        #if isinstance(s, unicode): s = s.encode('utf-8') #str(s) # unicode is unknown in py3
+        s = str(s)
 
         if not isinstance(s, str):
             logger.debug('%s.load_pars_from_str input parameter is not a str, but %s s: %s' % (self.__class__.__name__, type(s), str(s)))

@@ -8,6 +8,10 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-12
+2021-05-03 Mikhail Dubrovin
+- GeometryAccess - fix issue with unknown type "unicode" for py3
+
 Tag: V02-00-11
 2021-04-30 Mikhail Dubrovin
 - add SegGeometryMatrixV2.py - with matrix for cartesian x-y frame, segment type MTRX:V2:512:512:54:54
