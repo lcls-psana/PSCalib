@@ -47,7 +47,7 @@ def argument_parser():
     parser.add_argument('-g', '--geofname',  type=str,   default=d_geofname,  help='geometry constants file name, default: %s'%d_geofname)
     parser.add_argument('-a', '--ndafname',  type=str,   default=d_ndafname,  help='text ndarray file name, default: %s'%d_ndafname)
     parser.add_argument('-o', '--prefix',    type=str,   default=d_prefix,    help='file name prefix for output image, default: %s'%d_prefix)
-    parser.add_argument('-s', '--suffix',    type=str,   default=d_suffix,    help='file name suffix for output image, default: %s'%d_prefix)
+    parser.add_argument('-s', '--suffix',    type=str,   default=d_suffix,    help='file name suffix for output image, default: %s'%d_suffix)
     parser.add_argument('-p', '--nrmspos',   type=float, default=d_nrmspos,   help='number of rms positive for intensity range, default: %s'%d_nrmspos)
     parser.add_argument('-n', '--nrmsneg',   type=float, default=d_nrmsneg,   help='number of rms negative for intensity range, default: %s'%d_nrmsneg)
     parser.add_argument('-i', '--segzero',   type=int,   default=d_segzero,   help='segment index to redefine intensity, default: %s'%d_segzero)
@@ -170,6 +170,7 @@ def geometry_image():
 
     nda = X if show=='x' else\
           Y if show=='y' else\
+          np.load(fname_nda) if '.npy' in fname_nda else\
           np.loadtxt(fname_nda) #if show=='image'
 
     #rows, cols = geo.get_pixel_coord_indexes(xy0_off_pix=(500,500), do_tilt=True, cframe=cframe)
