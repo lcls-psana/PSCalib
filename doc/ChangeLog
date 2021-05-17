@@ -8,6 +8,10 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-13
+2021-05-17 Mikhail Dubrovin
+app/geometry_image - beside txt data file add option to load data array from *.npy
+
 Tag: V02-00-12
 2021-05-03 Mikhail Dubrovin
 - GeometryAccess - fix issue with unknown type "unicode" for py3
