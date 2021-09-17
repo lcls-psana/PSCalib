@@ -203,7 +203,7 @@ class DCType(DCTypeI):
                     print('ERROR:', self._name, msg)
                     continue
 
-                end = v.get('end')
+                end = v.get('end','end')
 
                 str_end = end[0].decode('utf-8') if isinstance(end[0], np.bytes_) else str(end[0])
                 if end is None or str_end!='end':
