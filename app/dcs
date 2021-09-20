@@ -220,7 +220,11 @@ class DCS_CLI(object):
         evt = None
         dsname = self.dsname()
         if dsname is not None:
-            ds = psana.DataSource(dsname)
+            try:
+              ds = psana.DataSource(dsname)
+            except Exception as e:
+              print('WARNING: psana.DataSource("%s") err: %s' % (dsname,e))
+              sys.exit('  XTC file for %s should be in xtc directory.\n  Deployment terminated...' % dsname)
             env=ds.env()
             evt=next(ds.events())
         #if self.verbos:
