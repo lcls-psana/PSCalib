@@ -1,12 +1,16 @@
-#--------------------------------------------------------------------------
+#------------------------------------
 # Description:
 #  ChangeLog file for package PSCalib
-#------------------------------------------------------------------------
+#------------------------------------
 
 Package author: Mikhail Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+
+Tag: V02-00-14
+2021-09-20 Mikhail Dubrovin
+- add crash protection in a few methods
 
 Tag: V02-00-13
 2021-05-17 Mikhail Dubrovin
@@ -573,7 +577,7 @@ Tag: V00-03-09
 - app/dcs - set cdir_def = None
 - DCFileName.py - add methods *_repo, calibdir check for None and 'None'
 - update doc in a few modules.
-	
+
 Tag: V00-03-08
 2016-10-17 Mikhail S. Dubrovin
 - app/dcs - hide test print messages
@@ -766,7 +770,7 @@ Tag: V00-02-59
 Tag: V00-02-58
 2015-12-16 Mikhail S. Dubrovin
 - GeometryAccess.py - change dictionary of comments key to integer index (to order comments) (PSAS-11)
-- GeometryObject.py - change format for output geo string 
+- GeometryObject.py - change format for output geo string
 
 Tag: V00-02-57
 2015-12-07 Mikhail S. Dubrovin
