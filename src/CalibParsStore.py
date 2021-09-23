@@ -157,7 +157,8 @@ class CalibParsStore(object) :
                          gu.PIMAX,\
                          gu.PIXIS,\
                          gu.STREAK,\
-                         gu.ARCHON\
+                         gu.ARCHON,\
+                         gu.ALVIUM\
                          ) : cbase = CalibParsBaseCameraV1()
 
         else :

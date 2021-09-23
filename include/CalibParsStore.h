@@ -227,6 +227,7 @@ public:
 	v_camera_names.push_back(":Zyla.");
   v_camera_names.push_back(":iStar.");
 	v_camera_names.push_back(":ControlsCamera.");
+  v_camera_names.push_back(":Alvium.");
 
         prbits = (print_bits & 8) ? 255 : 0;
 

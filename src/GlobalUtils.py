@@ -177,6 +177,7 @@ EPIX10KAQUAD= 33
 STREAK      = 34
 ARCHON      = 35
 ISTAR       = 36
+ALVIUM      = 37
 
 #XAMPS    # N/A data
 #FEXAMP   # N/A data
@@ -190,7 +191,7 @@ list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740,\
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000,\
                     ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX,\
                     EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU, ZYLA, EPICSCAM, EPIX10KA, UXI, PIXIS,\
-                    EPIX10KA2M, EPIX10KAQUAD, STREAK, ARCHON, ISTAR)
+                    EPIX10KA2M, EPIX10KAQUAD, STREAK, ARCHON, ISTAR, ALVIUM)
 
 """ List of enumetated detector types"""
 
@@ -198,7 +199,7 @@ list_of_det_names = ('UNDEFINED', 'Cspad', 'Cspad2x2', 'Princeton', 'pnCCD', 'Tm
                      'Opal1000', 'Opal2000', 'Opal4000', 'Opal8000', \
                      'OrcaFl40', 'Epix', 'Epix10k', 'Epix100a', 'Fccd960', 'Andor', 'Acqiris', 'Imp', 'Quartz4A150', 'Rayonix',\
                      'Evr', 'Fccd', 'Timepix', 'Fli', 'Pimax', 'Andor3d', 'Jungfrau', 'Zyla', 'ControlsCamera', 'Epix10ka',\
-                     'Uxi', 'Pixis', 'Epix10ka2M', 'Epix10kaQuad', 'Streak', 'Archon', 'iStar')
+                     'Uxi', 'Pixis', 'Epix10ka2M', 'Epix10kaQuad', 'Streak', 'Archon', 'iStar', 'Alvium')
 
 """ List of enumetated detector names"""
 
@@ -236,6 +237,7 @@ list_of_calib_groups = ('UNDEFINED',
                         'Pixis::CalibV1',
                         'Epix10ka2M::CalibV1',
                         'Epix10kaQuad::CalibV1',
+                        'Camera::CalibV1',
                         'Camera::CalibV1',
                         'Camera::CalibV1',
                         'Camera::CalibV1',
@@ -355,6 +357,7 @@ def det_type_from_source(source) :
     elif ':StreakC7700.'    in str_src : return STREAK
     elif ':Archon.'         in str_src : return ARCHON
     elif ':iStar.'          in str_src : return ISTAR
+    elif ':Alvium.'         in str_src : return ALVIUM
     else                               : return UNDEFINED
 
 #------------------------------
