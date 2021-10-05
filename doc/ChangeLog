@@ -1,4 +1,4 @@
-q
+
 #------------------------------------
 # Description:
 #  ChangeLog file for package PSCalib
@@ -8,6 +8,11 @@ Package author: Mikhail Dubrovin
 
 Please describe any modifications that you made to the package in the
 reverse time order.
+
+Tag: V02-00-16
+2021-10-05 Mikhail Dubrovin
+- add SegGeometryEpix10kaV2.py with correct wide pixel size 225um (250um in V1)
+- add panel name EPIX10KA:V2 in SegGeometryStore
 
 Tag: V02-00-15
 2021-09-22 Daniel Damiani
@@ -984,8 +989,8 @@ Tag: V00-02-17
 
 Tag: V00-02-16
 2014-09-30 Mikhail S. Dubrovin
-- In SegGeometry.(py,h), SegGeometryCspad2x1V1.(py,h,cpp) add method pixel_mask_array(mbits=0377), update example in *.py 
-- In GeometryObject, GeometryAccess.(py,h,cpp) add methods get_pixel_mask(...), set_geo_pars(...), move_geo(...), tilt_geo(...) 
+- In SegGeometry.(py,h), SegGeometryCspad2x1V1.(py,h,cpp) add method pixel_mask_array(mbits=0377), update example in *.py
+- In GeometryObject, GeometryAccess.(py,h,cpp) add methods get_pixel_mask(...), set_geo_pars(...), move_geo(...), tilt_geo(...)
 - GeometryAccess.py add method get_psf()
 - update examples in test/ex_geometry_access.cpp and GeometryAccess.py
 
@@ -1045,7 +1050,7 @@ Tag: V00-02-06
 
 Tag: V00-02-05
 2014-07-03 Mikhail S. Dubrovin
-- in CalibParsStore.h, GenericCalibPars.h, GenericCalibPars.cpp - add calibration for variable size ndarrays 
+- in CalibParsStore.h, GenericCalibPars.h, GenericCalibPars.cpp - add calibration for variable size ndarrays
 
 Tag: V00-02-04
 2014-06-26 Mikhail S. Dubrovin
