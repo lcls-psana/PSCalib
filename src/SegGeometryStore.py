@@ -13,6 +13,7 @@ Usage::
     sg = sgs.Create(segname='SENS2X1:V1')
     sg = sgs.Create(segname='EPIX100:V1')
     sg = sgs.Create(segname='EPIX10KA:V1')
+    sg = sgs.Create(segname='EPIX10KA:V2')
     sg = sgs.Create(segname='PNCCD:V1')
     sg = sgs.Create(segname='JUNGFRAU:V1')
     sg = sgs.Create(segname='JUNGFRAU:V2')
@@ -43,6 +44,7 @@ See:
  * :py:class:`SegGeometryCspad2x1V1`,
  * :py:class:`SegGeometryEpix100V1`,
  * :py:class:`SegGeometryEpix10kaV1`,
+ * :py:class:`SegGeometryEpix10kaV2`,
  * :py:class:`SegGeometryJungfrauV1`,
  * :py:class:`SegGeometryJungfrauV2`,
  * :py:class:`SegGeometryMatrixV1`,
@@ -65,6 +67,7 @@ logger = logging.getLogger(__name__)
 from PSCalib.SegGeometryCspad2x1V1 import cspad2x1_one, cspad2x1_wpc
 from PSCalib.SegGeometryEpix100V1  import epix2x2_one, epix2x2_wpc
 from PSCalib.SegGeometryEpix10kaV1 import epix10ka_one, epix10ka_wpc
+from PSCalib.SegGeometryEpix10kaV2 import epix10kav2_one, epix10kav2_wpc
 from PSCalib.SegGeometryMatrixV1   import SegGeometryMatrixV1, segment_one, matrix_pars
 from PSCalib.SegGeometryMatrixV2   import SegGeometryMatrixV2, matrix_pars_v2
 from PSCalib.SegGeometryJungfrauV1 import jungfrau_one
@@ -80,7 +83,7 @@ class SegGeometryStore(object):
 
 
     def Create(sp, **kwa):
-        """ Factory method returns device dependent SINGLETON object with interface implementation  
+        """ Factory method returns device dependent SINGLETON object with interface implementation
         """
         segname = kwa.get('segname', 'SENS2X1:V1')
         wpc     = kwa.get('use_wide_pix_center', False)
@@ -88,6 +91,7 @@ class SegGeometryStore(object):
         if segname=='SENS2X1:V1' : return cspad2x1_wpc if wpc else cspad2x1_one # SegGeometryCspad2x1V1(use_wide_pix_center=False)
         if segname=='EPIX100:V1' : return epix2x2_wpc  if wpc else epix2x2_one  # SegGeometryEpix100V1 (use_wide_pix_center=False)
         if segname=='EPIX10KA:V1': return epix10ka_wpc if wpc else epix10ka_one # SegGeometryEpix10kaV1(use_wide_pix_center=False)
+        if segname=='EPIX10KA:V2': return epix10kav2_wpc if wpc else epix10kav2_one # SegGeometryEpix10kaV2
         if segname=='PNCCD:V1'   : return segment_one  # SegGeometryMatrixV1()
         if segname[:7]=='MTRX:V2':
             rows, cols, psize_row, psize_col = matrix_pars_v2(segname)
@@ -107,9 +111,7 @@ class SegGeometryStore(object):
 
 sgs = SegGeometryStore()
 
-#------------------------------
 #----------- TEST -------------
-#------------------------------
 
 if __name__ == "__main__":
 
@@ -129,7 +131,8 @@ if __name__ == "__main__":
     if tname in ('0','6'): s+='\n 6 - JUNGFRAU:V2'
     if tname in ('0','7'): s+='\n 7 - MTRX:512:512:54:54'
     if tname in ('0','8'): s+='\n 8 - MTRX:V2:512:512:54:54'
-    if tname in ('0','9'): s+='\n 9 - ABRACADABRA:V1'
+    if tname in ('0','9'): s+='\n 9 - EPIX10KA:V2'
+    if tname in ('0','99'): s+='\n 99 - ABRACADABRA:V1'
     return s
 
 
@@ -153,7 +156,8 @@ if __name__ == "__main__":
     elif(tname=='6'): sg = test_segname('JUNGFRAU:V2')
     elif(tname=='7'): sg = test_segname('MTRX:512:512:54:54')
     elif(tname=='8'): sg = test_segname('MTRX:V2:512:512:54:54')
-    elif(tname=='9'):
+    elif(tname=='9'): sg = test_segname('EPIX10KA:V2')
+    elif(tname=='99'):
         sg = sgs.Create(segname='ABRACADABRA:V1')
         logger.info('Return for non-existent segment name: %s' % sg)
     else: logger.warning('NON-EXPECTED TEST NAME: %s\n\n%s' % (tname, usage()))
