@@ -47,7 +47,7 @@ Usage::
     exists = gu.create_path(path, depth=6, mode=0o777, verb=True)
 
     arr  = gu.load_textfile(path)
-    gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append 
+    gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append
 
     path = gu.replace('/path/#YYYY-MM/fname.txt', '#YYYY-MM', gu.str_tstamp(fmt='%Y/%m'))
 
@@ -141,15 +141,15 @@ dic_calib_status_name_to_value = dict(zip(calib_statnames,  calib_statvalues))
 #------------------------------
 
 UNDEFINED   = 0
-CSPAD       = 1 
-CSPAD2X2    = 2 
-PRINCETON   = 3 
-PNCCD       = 4 
-TM6740      = 5 
-OPAL1000    = 6 
-OPAL2000    = 7 
-OPAL4000    = 8 
-OPAL8000    = 9 
+CSPAD       = 1
+CSPAD2X2    = 2
+PRINCETON   = 3
+PNCCD       = 4
+TM6740      = 5
+OPAL1000    = 6
+OPAL2000    = 7
+OPAL4000    = 8
+OPAL8000    = 9
 ORCAFL40    = 10
 EPIX        = 11
 EPIX10K     = 12
@@ -375,7 +375,7 @@ def dict_alias_detinfo(env) :
 #------------------------------
 
 def complete_detname_from_detinfo(o) :
-    """Returns complete detector name from psana.DetInfo object, i.e. XcsEndstation.0:Jungfrau.0""" 
+    """Returns complete detector name from psana.DetInfo object, i.e. XcsEndstation.0:Jungfrau.0"""
     import psana
     if not isinstance(o, psana.DetInfo) : return None
     return '%s.%d:%s.%d' % (o.detName(), o.detId(), o.devName(), o.devId())
@@ -383,9 +383,9 @@ def complete_detname_from_detinfo(o) :
 #------------------------------
 
 def complete_detname(env, pattern='Jungfrau.0') : # or alias like 'jungfrau1M'
-    """Returns complete detector name like "XcsEndstation.0:Jungfrau.0" using its fraction or alias""" 
+    """Returns complete detector name like "XcsEndstation.0:Jungfrau.0" using its fraction or alias"""
     import psana
-    for k in env.configStore().keys() : 
+    for k in env.configStore().keys() :
         detinfo = k.src()
         if not isinstance(detinfo, psana.DetInfo) : continue
         dname = complete_detname_from_detinfo(detinfo)
@@ -400,7 +400,7 @@ def string_from_source(source) :
   """Returns string like "CxiDs2.0:Cspad.0" from "Source('DetInfo(CxiDs2.0:Cspad.0)')" or "Source('DsaCsPad')"
   """
   str_in_quots = str(source).split('"')[1]
-  str_split = str_in_quots.split('(') 
+  str_split = str_in_quots.split('(')
   return str_split[1].rstrip(')') if len(str_split)>1 else str_in_quots
 
 ##-----------------------------
@@ -444,7 +444,7 @@ def reshape_nda_to_3d(arr) :
 #------------------------------
 
 def merge_masks(mask1=None, mask2=None, dtype=np.uint8) :
-    """Merging masks using np.logical_and rule: (0,1,0,1)^(0,0,1,1) = (0,0,0,1) 
+    """Merging masks using np.logical_and rule: (0,1,0,1)^(0,0,1,1) = (0,0,0,1)
     """
     if mask1 is None : return mask2
     if mask2 is None : return mask1
@@ -462,7 +462,7 @@ def merge_masks(mask1=None, mask2=None, dtype=np.uint8) :
 #------------------------------
 
 def merge_status(stnda, **kwargs) :
-    """Merges status bits. 
+    """Merges status bits.
        Originaly intended for epix10ka2m status array stnda.shape=(7, 16, 352, 384) merging to (16, 352, 384)
        Also can be used with Jungfrau status array stnda.shape=(7, 16, 352, 384) merging to (16, 352, 384)
        option "indexes" contains a list of stnda[i,:] indexes to combine status
@@ -488,7 +488,7 @@ def mask_neighbors(mask, allnbrs=True, dtype=np.uint8) :
     if len(shape_in) < 2 :
         raise ValueError('Input mask has less then 2-d, shape = %s' % str(shape_in))
 
-    mask_out = np.copy(mask, dtype) # np.asarray(mask, dtype)
+    mask_out = np.copy(mask.astype(dtype)) # np.asarray(mask, dtype)
 
     if len(shape_in) == 2 :
         # mask nearest neighbors
@@ -505,7 +505,7 @@ def mask_neighbors(mask, allnbrs=True, dtype=np.uint8) :
 
     else : # shape>2
 
-        mask_out.shape = mask.shape = shape_nda_to_3d(mask)       
+        mask_out.shape = mask.shape = shape_nda_to_3d(mask)
 
         # mask nearest neighbors
         mask_out[:, 0:-1,:] = np.logical_and(mask_out[:, 0:-1,:], mask[:, 1:,  :])
@@ -542,10 +542,10 @@ def mask_edges(mask, mrows=1, mcols=1, dtype=np.uint8) :
     if len(sh) == 2 :
         rows, cols = sh
 
-        if mrows > rows : 
+        if mrows > rows :
           raise ValueError('Requested number of edge rows=%d to mask exceeds 2-d, shape=%s' % (mrows, str(sh)))
 
-        if mcols > cols : 
+        if mcols > cols :
           raise ValueError('Requested number of edge columns=%d to mask exceeds 2-d, shape=%s' % (mcols, str(sh)))
 
         if mrows>0 :
@@ -561,14 +561,14 @@ def mask_edges(mask, mrows=1, mcols=1, dtype=np.uint8) :
           mask_out[:,-mcols:] = mask_cols
 
     else : # shape>2
-        mask_out.shape = shape_nda_to_3d(mask)       
+        mask_out.shape = shape_nda_to_3d(mask)
 
         segs, rows, cols = mask_out.shape
 
-        if mrows > rows : 
+        if mrows > rows :
           raise ValueError('Requested number of edge rows=%d to mask exceeds 2-d, shape=%s' % (mrows, str(sh)))
 
-        if mcols > cols : 
+        if mcols > cols :
           raise ValueError('Requested number of edge columns=%d to mask exceeds 2-d, shape=%s' % (mcols, str(sh)))
 
         if mrows>0 :
@@ -643,7 +643,7 @@ def get_cwd() :
 #------------------------------
 
 def file_mode(fname) :
-    """Returns file mode 
+    """Returns file mode
     """
     return os.stat(fname)[ST_MODE]
 
@@ -653,7 +653,7 @@ def set_file_access_mode(fname, mode=0o777):
 
 #------------------------------
 
-#def create_directory(dir, verb=False) : 
+#def create_directory(dir, verb=False) :
 #    if os.path.exists(dir) :
 #        pass
 #        #if verb : print 'Directory exists: %s' % dir
@@ -685,7 +685,7 @@ def create_directory_with_mode(dir, mode=0o777, verb=False) :
 
 #------------------------------
 
-def create_path(path, depth=6, mode=0o777, verb=False) : 
+def create_path(path, depth=6, mode=0o777, verb=False) :
     """Creates missing path of specified depth from the beginning
        e.g. for '/reg/g/psdm/logs/calibman/2016/07/log-file-name.txt'
        or '/reg/d/psdm/cxi/cxi11216/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data'
@@ -698,7 +698,7 @@ def create_path(path, depth=6, mode=0o777, verb=False) :
     subdirs = path.split('/')
     cpath = subdirs[0]
     for i,sd in enumerate(subdirs[:-1]) :
-        if i>0 : cpath += '/%s'% sd 
+        if i>0 : cpath += '/%s'% sd
         if i<depth : continue
         if cpath=='' : continue
         create_directory_with_mode(cpath, mode, verb)
@@ -708,11 +708,11 @@ def create_path(path, depth=6, mode=0o777, verb=False) :
 #------------------------------
 
 def save_textfile(text, path, mode='w') :
-    """Saves text in file specified by path. mode: 'w'-write, 'a'-append 
+    """Saves text in file specified by path. mode: 'w'-write, 'a'-append
     """
     f=open(path, mode)
     f.write(text)
-    f.close() 
+    f.close()
 
 #------------------------------
 
@@ -721,7 +721,7 @@ def load_textfile(path) :
     """
     f=open(path, 'r')
     recs = f.read() # f.readlines()
-    f.close() 
+    f.close()
     return recs
 
 #------------------------------
@@ -787,9 +787,9 @@ def alias_for_src_name(env) :
 
 def replace(template, pattern, subst) :
     """If pattern in the template replaces it with subst.
-       Returns str object template with replaced patterns. 
+       Returns str object template with replaced patterns.
     """
-    fields = template.split(pattern, 1) 
+    fields = template.split(pattern, 1)
     if len(fields) > 1 :
         return '%s%s%s' % (fields[0], subst, fields[1])
     else :
@@ -928,11 +928,11 @@ def test_mask_neighbors_2d(allnbrs=True) :
     mask_nbrs = mask_neighbors(mask, allnbrs)
     img1 = mask # mask # randexp
     img2 = mask_nbrs # mask # randexp
-    
+
     imsh1, cbar1 = gr.imshow_cbar(fig, axim1, axcb1, img1, amin=0, amax=10, orientation='vertical')
     imsh2, cbar2 = gr.imshow_cbar(fig, axim2, axcb2, img2,  amin=0, amax=10, orientation='vertical')
     gr.show(mode=None)
-    
+
 #------------------------------
 
 def test_mask_neighbors_3d(allnbrs=True) :
@@ -954,11 +954,11 @@ def test_mask_neighbors_3d(allnbrs=True) :
 
     img1 = reshape_nda_to_2d(mask)
     img2 = reshape_nda_to_2d(mask_nbrs)
-    
+
     imsh1, cbar1 = gr.imshow_cbar(fig, axim1, axcb1, img1, amin=0, amax=10, orientation='vertical')
     imsh2, cbar2 = gr.imshow_cbar(fig, axim2, axcb2, img2, amin=0, amax=10, orientation='vertical')
     gr.show(mode=None)
-    
+
 #------------------------------
 
 def test_mask_edges_2d(mrows=1, mcols=1) :
@@ -975,7 +975,7 @@ def test_mask_edges_2d(mrows=1, mcols=1) :
     img1 = mask_out
     imsh1, cbar1 = gr.imshow_cbar(fig, axim1, axcb1, img1, amin=0, amax=10, orientation='vertical')
     gr.show(mode=None)
-    
+
 #------------------------------
 
 def test_mask_edges_3d(mrows=1, mcols=1) :
@@ -993,7 +993,7 @@ def test_mask_edges_3d(mrows=1, mcols=1) :
     img1 = reshape_nda_to_2d(mask_out)
     imsh1, cbar1 = gr.imshow_cbar(fig, axim1, axcb1, img1, amin=0, amax=10, orientation='vertical')
     gr.show(mode=None)
-    
+
 #------------------------------
 
 #def src_name_from_alias(env, alias='') :
@@ -1016,7 +1016,7 @@ def do_test() :
     print('get_login()           : %s' % get_login())
     print('get_hostname()        : %s' % get_hostname())
     print('get_cwd()             : %s' % get_cwd())
-    #print ': %s' % 
+    #print ': %s' %
 
     if len(sys.argv) > 1 :
 

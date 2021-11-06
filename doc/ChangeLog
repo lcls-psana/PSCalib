@@ -9,6 +9,12 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-17
+2021-11-05 Mikhail Dubrovin
+- src/GlobalUtils.py
+  - fix issue reported by Valerio. np.copy does not accept dtype...
+  - remove blanks
+
 Tag: V02-00-16
 2021-10-05 Mikhail Dubrovin
 - add SegGeometryEpix10kaV2.py with correct wide pixel size 225um (250um in V1)
