@@ -8,10 +8,6 @@ STR_LEVEL_NAMES = ', '.join(LEVEL_NAMES)
 
 import argparse
 
-from PSCalib.UtilsConvert import convert_detector_any
-
-#----------
-
 if __name__ == "__main__":
 
     scrname = sys.argv[0].rsplit('/')[-1]
@@ -26,29 +22,42 @@ if __name__ == "__main__":
     d_fname   = fname_epix10ka2m_16
     d_ofname  = 'geo-crystfel.txt'
     d_loglev  ='INFO'
-    usage = '\nE.g.: %s' % scrname\
-      + '\n  or: %s -d epix10ka -f %s -o geo_crystfel.txt -l DEBUG' % (scrname, d_fname)
+    d_cframe  = 1
 
-    parser = argparse.ArgumentParser(usage=usage)
-    parser.add_argument('-t', '--tname',   default='0',       type=str, help='test number: 1/2/3/4/5 = epix10ka/jungfrau/cspad/epix10ka/pnccd-default')
-    parser.add_argument('-d', '--dettype', default=d_dettype, type=str, help='detector type, i.e. epix10ka, jungfrau, cspad, pnccd, def=%s' % d_dettype)
-    parser.add_argument('-f', '--fname',   default=d_fname,   type=str, help='input geometry file name, def=%s' % d_fname)
+    usage = '\n  %s -h' % scrname\
+      + '\n  %s -d epix10ka -f %s -o geo_crystfel.geom -l DEBUG' % (scrname, d_fname)\
+      + '\n  cp /reg/g/psdm/detector/data2_test/geometry/geo-cspad-xpp.data .'\
+      + '\n  %s -d cspad -f geo-cspad-xpp.data -o geo-cspad-xpp-crystfel.geom    # conversion from psana to crystfel' % scrname\
+      + '\n  %s -d cspadv2 -f geo-cspad-xpp-crystfel.geom -o geo-cspad-xpp-back.data # conversion from crystfel to psana' % scrname\
+      + '\n'\
+      + '\n  %s -d epix10ka -f geo-epix10ka2m-test.txt -o geo-epix10ka2m-test-cframe-psana.geom --cframe 0' % scrname\
+      + '\n  %s -d epix10ka -f geo-epix10ka2m-test-cframe-psana.geom -o geo-epix10ka2m-test-back.txt' % scrname\
+
+
+
+    parser = argparse.ArgumentParser(usage=usage, description='Converts geometry constants from psana to CrystFEL format and backward (see --fname).')
+    parser.add_argument('-d', '--dettype', default=d_dettype, type=str, help='detector type, one of epix10ka, jungfrau, cspad, pnccd, def=%s' % d_dettype)
+    parser.add_argument('-f', '--fname',   default=d_fname,   type=str, help='input geometry file name. File name extention *.geom envoke converter from CrystFEL to psana, def=%s' % d_fname)
     parser.add_argument('-o', '--ofname',  default=d_ofname,  type=str, help='output file name, def=%s' % d_ofname)
     parser.add_argument('-l', '--loglev',  default=d_loglev,  type=str, help='logging level name, one of %s, def=%s' % (STR_LEVEL_NAMES, d_loglev))
-    #parser.add_argument('exp', type=str, help='experiment name (e.g. amox23616)')
-    #parser.add_argument('run', type=int, help='run number') # 104
+    parser.add_argument('--cframe',        default=d_cframe,  type=int, help='FOR TEST OF PSANA->CRYSTFEL->PSANA - coordinate frame 0/1 for psana/LAB, def=%s' % d_cframe)
 
     args = parser.parse_args()
-    print('Arguments:') #%s\n' % str(args))
+    print('Arguments:')
     for k,v in vars(args).items(): print('  %12s : %s' % (k, str(v)))
 
-    logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d : %(message)s', datefmt='%Y-%m-%dT%H:%M:%S', level=DICT_NAME_TO_LEVEL[args.loglev])
+    logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d: %(message)s', datefmt='%Y-%m-%dT%H:%M:%S', level=DICT_NAME_TO_LEVEL[args.loglev])
     logging.debug('Logger is initialized for level %s' % args.loglev)
 
-    tname = args.tname
-
-    convert_detector_any(args)
+    extent = args.fname.rsplit('.',1)[-1]
+    logging.info('input file name extension %s' % extent)
+    if extent == 'geom':
+        from PSCalib.UtilsConvertCrystFEL import convert_crystfel_to_geometry
+        convert_crystfel_to_geometry(args)
+    else:
+        from PSCalib.UtilsConvert import convert_geometry_to_crystfel
+        convert_geometry_to_crystfel(args)
 
     sys.exit('END OF %s' % scrname)
 
-#----------
+# EOF
