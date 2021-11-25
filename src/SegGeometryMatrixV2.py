@@ -13,7 +13,7 @@ In this class V2 pixel matrix row an column indices mapped to stndard Cartesian 
 \n ::
 
   MatrixV2 sensor coordinate frame has a Cartesian frame:
- 
+
   @code
     (Xmin,Ymax)  ^ Y   (Xmax,Ymax)
     (0,0)        |     (0,511)
@@ -67,11 +67,11 @@ Usage of interface methods::
     ...
 
 See:
- * :py:class:`GeometryObject`, 
- * :py:class:`SegGeometry`, 
- * :py:class:`SegGeometryCspad2x1V1`, 
- * :py:class:`SegGeometryEpix100V1`, 
- * :py:class:`SegGeometryMatrixV1`, 
+ * :py:class:`GeometryObject`,
+ * :py:class:`SegGeometry`,
+ * :py:class:`SegGeometryCspad2x1V1`,
+ * :py:class:`SegGeometryEpix100V1`,
+ * :py:class:`SegGeometryMatrixV1`,
  * :py:class:`SegGeometryStore`
 
 For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
@@ -83,9 +83,6 @@ Created: 2013-03-08 by Mikhail Dubrovin
 2020-09-04 - converted to py3
 2021-04-30 - V2 uses Cartesian frame for matrix in stead of "natural" matrix frame in V1
 """
-#from __future__ import print_function
-#from __future__ import division
-
 
 from PSCalib.SegGeometry import *
 logger = logging.getLogger(__name__)
@@ -110,18 +107,11 @@ class SegGeometryMatrixV2(SegGeometry):
 
     _name = 'SegGeometryMatrixV2'
 
-    #_rows  = 512    # Number of rows in panel at rotation 0
-    #_cols  = 512    # Number of cols in panel at rotation 0
-    #_pixs  = 75.00  # Pixel size in um (micrometer)
-    #_pixd  = 400.00 # Pixel depth in um (micrometer)
-
     _asic0indices = ((0, 0),)
     _nasics_in_rows = 1
     _nasics_in_cols = 1
 
 
-    #def __init__(sp, rows=10, cols=20, pix_size_rows=75, pix_size_cols=75, pix_size_depth=400, pix_scale_size=75):
-    #def __init__(sp, rows=512, cols=1024, pix_size_rows=75, pix_size_cols=75, pix_size_depth=400, pix_scale_size=75):
     def __init__(sp, rows=512, cols=512, pix_size_rows=75, pix_size_cols=75, pix_size_depth=400, pix_scale_size=75):
 
         SegGeometry.__init__(sp)
@@ -141,7 +131,7 @@ class SegGeometryMatrixV2(SegGeometry):
 
     def make_pixel_coord_arrs(sp):
         """Makes maps of x, y, and z of segment pixel coordinates
-        """        
+        """
         sp.x_arr_um = (np.arange(sp._cols)-float(sp._cols-1)/2)*sp._pix_size_cols
         sp.y_arr_um = (np.arange(sp._rows)-float(sp._rows-1)/2)*(-sp._pix_size_rows)
 
@@ -150,8 +140,8 @@ class SegGeometryMatrixV2(SegGeometry):
 
 
     def make_pixel_size_arrs(sp):
-        """Makes maps of x, y, and z segment pixel size 
-        """        
+        """Makes maps of x, y, and z segment pixel size
+        """
         if sp.pix_area_arr is not None: return
 
         x_arr_size_um = np.ones(sp._cols) * sp._pix_size_cols
@@ -159,7 +149,7 @@ class SegGeometryMatrixV2(SegGeometry):
 
         sp.x_pix_size_um, sp.y_pix_size_um = np.meshgrid(x_arr_size_um, y_arr_size_um)
         sp.z_pix_size_um = np.ones((sp._rows, sp._cols)) * sp._pix_size_depth
- 
+
         sp.pix_area_arr = np.ones((sp._rows, sp._cols))
 
 
@@ -218,23 +208,23 @@ class SegGeometryMatrixV2(SegGeometry):
         logger.info(s)
 
 
-    def get_xyz_min_um(sp): 
+    def get_xyz_min_um(sp):
         return sp.x_arr_um[0], sp.y_arr_um[-1], 0
 
 
-    def get_xyz_max_um(sp): 
+    def get_xyz_max_um(sp):
         return sp.x_arr_um[-1], sp.y_arr_um[0], 0
 
 
-    def get_seg_xy_maps_um(sp): 
+    def get_seg_xy_maps_um(sp):
         return sp.x_pix_arr_um, sp.y_pix_arr_um
 
 
-    def get_seg_xyz_maps_um(sp): 
+    def get_seg_xyz_maps_um(sp):
         return sp.x_pix_arr_um, sp.y_pix_arr_um, sp.z_pix_arr_um
 
 
-    def get_seg_xy_maps_um_with_offset(sp): 
+    def get_seg_xy_maps_um_with_offset(sp):
         if  sp.x_pix_arr_um_offset is None:
             x_min_um, y_min_um, z_min_um = sp.get_xyz_min_um()
             sp.x_pix_arr_um_offset = sp.x_pix_arr_um - x_min_um
@@ -242,7 +232,7 @@ class SegGeometryMatrixV2(SegGeometry):
         return sp.x_pix_arr_um_offset, sp.y_pix_arr_um_offset
 
 
-    def get_seg_xyz_maps_um_with_offset(sp): 
+    def get_seg_xyz_maps_um_with_offset(sp):
         if  sp.x_pix_arr_um_offset is None:
             x_min_um, y_min_um, z_min_um = sp.get_xyz_min_um()
             sp.x_pix_arr_um_offset = sp.x_pix_arr_um - x_min_um
@@ -251,7 +241,7 @@ class SegGeometryMatrixV2(SegGeometry):
         return sp.x_pix_arr_um_offset, sp.y_pix_arr_um_offset, sp.z_pix_arr_um_offset
 
 
-    def get_pix_size_um(sp): 
+    def get_pix_size_um(sp):
         return sp._pixs
 
 
@@ -278,7 +268,6 @@ class SegGeometryMatrixV2(SegGeometry):
 
 
 # INTERFACE METHODS
-#------------------------------
 
     def print_seg_info(sp, pbits=0):
         """ Prints segment info for selected bits
@@ -357,7 +346,7 @@ class SegGeometryMatrixV2(SegGeometry):
     def pixel_mask_array(sp, mbits=0o377, width=1, **kwa):
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
         mbits=1 - mask edges,
-        +2 - mask two central columns, 
+        +2 - mask two central columns,
         +4 - mask non-bonded pixels,
         +8 - mask nearest neighbours of nonbonded pixels.
         """
@@ -366,7 +355,7 @@ class SegGeometryMatrixV2(SegGeometry):
         zero_row = np.zeros((w,sp._cols),dtype=np.uint8)
         mask     = np.ones((sp._rows,sp._cols),dtype=np.uint8)
 
-        if mbits & 1: 
+        if mbits & 1:
         # mask edges
             mask[0:w,:] = zero_row # mask top    edge
             mask[-w:,:] = zero_row # mask bottom edge
@@ -375,11 +364,10 @@ class SegGeometryMatrixV2(SegGeometry):
 
         return mask
 
-#----------
 # 2020-08 added for converter
 
     def asic0indices(sp):
-        """ Returns list of ASIC (0,0)-corner indices in panel daq array. 
+        """ Returns list of ASIC (0,0)-corner indices in panel daq array.
         """
         return sp._asic0indices
 
@@ -403,9 +391,7 @@ segment_one_v2 = SegGeometryMatrixV2()
 #seg_andor3d = SegGeometryMatrixV2(rows=2048, cols=2048, pix_size_rows=13.5,\
 #                pix_size_cols=13.5, pix_size_depth=50, pix_scale_size=13.5)
 
-#------------------------------
 #----------- TEST -------------
-#------------------------------
 
 if __name__ == "__main__":
 
@@ -413,7 +399,7 @@ if __name__ == "__main__":
 
   def test_xyz_min_max():
     w = segment_one_v2
-    w.print_xyz_min_max_um() 
+    w.print_xyz_min_max_um()
 
     s = 'test_xyz_min_max [um]'\
       + '\n  Xmin = %.1f' % w.pixel_coord_min('X')\
@@ -423,11 +409,6 @@ if __name__ == "__main__":
       + '\n  Zmin = %.1f' % w.pixel_coord_min('Z')\
       + '    Zmax = %.1f' % w.pixel_coord_max('Z')
     logger.info(s)
-
-    #xmin, ymin, zmin = w.get_xyz_min_um()
-    #xmax, ymax, zmax = w.get_xyz_max_um()
-    #print('XXX xmin, ymin, zmin', xmin, ymin, zmin)
-    #print('XXX xmax, ymax, zmax', xmax, ymax, zmax)
 
 
   def test_xyz_maps():
@@ -463,7 +444,7 @@ if __name__ == "__main__":
     ysize = ymax - ymin + 1
 
     H, Xedges, Yedges = np.histogram2d(X.flatten(), Y.flatten(), bins=[xsize,ysize],\
-       range=[[xmin, xmax], [ymin, ymax]], normed=False, weights=X.flatten()+Y.flatten()) 
+       range=[[xmin, xmax], [ymin, ymax]], normed=False, weights=X.flatten()+Y.flatten())
 
     s = 'test_img'\
       + '\n  X.shape:' + str(X.shape)\

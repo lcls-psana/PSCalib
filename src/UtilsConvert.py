@@ -10,7 +10,6 @@ from PSCalib.SegGeometryStore import sgs
 from Detector.GlobalUtils import print_ndarr, info_ndarr
 from PSCalib.GlobalUtils import CFRAME_LAB, CFRAME_PSANA
 
-#----------
 
 def header_crystfel():
     return\
@@ -29,8 +28,6 @@ def header_crystfel():
     '\n; mask = /entry_1/data_1/mask'\
     '\n; mask_good = 0x0000'\
     '\n; mask_bad = 0xffff'
-
-#----------
 
 """
 # per asic info:
@@ -99,9 +96,12 @@ def panel_constants_to_crystfel(seg, n, x, y, z):
 
     return txt
 
-#----------
 
-def geometry_to_crystfel(seg, valid_nsegs, fname, ofname=None):
+def geometry_to_crystfel(segname, valid_nsegs, fname, ofname, cframe=CFRAME_LAB):
+
+    logger.info('geometry_to_crystfel - converts geometry constants from psana to CrystFEL format')
+
+    seg = sgs.Create(segname=segname, pbits=0)
 
     asic0inds = seg.asic0indices()
     arows, acols = seg.asic_rows_cols()
@@ -119,7 +119,7 @@ def geometry_to_crystfel(seg, valid_nsegs, fname, ofname=None):
     print('nasics_in_rows, nasics_in_cols', nasics_in_rows, nasics_in_cols)
 
     geo = GeometryAccess(fname, 0, use_wide_pix_center=False)
-    x, y, z = geo.get_pixel_coords(oname=None, oindex=0, do_tilt=True, cframe=CFRAME_LAB)
+    x, y, z = geo.get_pixel_coords(oname=None, oindex=0, do_tilt=True, cframe=cframe)
     print_ndarr(x, name='x', first=0, last=10)
     print_ndarr(y, name='y', first=0, last=10)
 
@@ -146,35 +146,24 @@ def geometry_to_crystfel(seg, valid_nsegs, fname, ofname=None):
         f.close()
         logger.info('geometry constants in CrystFEL format saved in: %s' % ofname)
 
-#----------
 
-def convert_detector_any(args):
+DETTYPE_TO_PARS = {\
+  'epix10ka'  : ('EPIX10KA:V1', (1,4,16)),\
+  'jungfrau'  : ('JUNGFRAU:V1', (1,2,8)),\
+  'cspad'     : ('SENS2X1:V1', (1,8,32)),\
+  'pnccd'     : ('PNCCD:V1', (4,)),\
+  'pnccdv2'   : ('MTRX:V2:512:512:75:75', (4,)),\
+  'epix10kav2': ('EPIX10KA:V2', (1,4,16)),\
+}
 
-    dettype, fname, ofname = args.dettype, args.fname, args.ofname
 
-    if   'epix10ka' in dettype.lower(): geometry_to_crystfel(sgs.Create(segname='EPIX10KA:V1',pbits=0), (1,4,16), fname, ofname)
-    elif 'jungfrau' in dettype.lower(): geometry_to_crystfel(sgs.Create(segname='JUNGFRAU:V1',pbits=0), (1,2,8),  fname, ofname)
-    elif 'cspad'    in dettype.lower(): geometry_to_crystfel(sgs.Create(segname='SENS2X1:V1', pbits=0), (1,8,32), fname, ofname)
-    elif 'pnccd'    in dettype.lower(): geometry_to_crystfel(sgs.Create(segname='PNCCD:V1',   pbits=0), (4,),     fname, ofname)
-    else: logger.warning('NON_IMPLEMENTED DETECTOR TYPE: %s' % dettype)
+def convert_geometry_to_crystfel(args):
+    dettype, fname, ofname, cframe = args.dettype.lower(), args.fname, args.ofname, args.cframe
+    pars = DETTYPE_TO_PARS.get(dettype.lower(), None)
+    if pars is None: sys.exit('NON_IMPLEMENTED CONVERTER FOR DETECTOR TYPE: %s' % dettype)
+    pars+=(fname, ofname)
+    geometry_to_crystfel(*pars, cframe=cframe)
 
-#----------
-
-if __name__ == "__main__":
-
-    def test_epix10ka_any(fname, ofname='geo_epix10ka_crystfel.txt'):
-        geometry_to_crystfel(sgs.Create(segname='EPIX10KA:V1',pbits=0), (1,4,16), fname, ofname)
-
-    def test_jungfrau_any(fname, ofname='geo_jungfrau_crystfel.txt'):
-        geometry_to_crystfel(sgs.Create(segname='JUNGFRAU:V1',pbits=0), (1,2,8), fname, ofname)
-
-    def test_cspad_any(fname, ofname='geo_cspad_crystfel.txt'):
-        geometry_to_crystfel(sgs.Create(segname='SENS2X1:V1',pbits=0), (1,8,32), fname, ofname)
-
-    def test_pnccd_any(fname, ofname='geo_pnccd_crystfel.txt'):
-        geometry_to_crystfel(sgs.Create(segname='PNCCD:V1',pbits=0), (4,), fname, ofname)
-
-#----------
 
 if __name__ == "__main__":
 
@@ -193,6 +182,7 @@ if __name__ == "__main__":
     fname_epix10ka2m_def = '/reg/g/psdm/detector/data2_test/geometry/geo-epix10ka2m-default.data'
     fname_cspad_cxi      = '/reg/g/psdm/detector/data2_test/geometry/geo-cspad-cxi.data'
     fname_pnccd_amo      = '/reg/g/psdm/detector/data2_test/geometry/geo-pnccd-amo.data'
+    d_tname   = '0'
     d_dettype = 'epix10ka'
     d_fname   = fname_epix10ka2m_16
     d_ofname  = 'geo-crystfel.txt'
@@ -204,13 +194,11 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(usage=usage)
-    parser.add_argument('-t', '--tname',   default='0',       type=str, help='test number: 1/2/3/4/5 = epix10ka/jungfrau/cspad/epix10ka/pnccd-default')
+    parser.add_argument('-t', '--tname',   default=d_tname,   type=str, help='test number: 1/2/3/4/5 = epix10ka/jungfrau/cspad/epix10ka/pnccd, def=%s' % d_tname)
     parser.add_argument('-d', '--dettype', default=d_dettype, type=str, help='detector type, i.e. epix10ka, jungfrau, cspad, def=%s' % d_dettype)
     parser.add_argument('-f', '--fname',   default=d_fname,   type=str, help='input geometry file name, def=%s' % d_fname)
     parser.add_argument('-o', '--ofname',  default=d_ofname,  type=str, help='output file name, def=%s' % d_ofname)
     parser.add_argument('-l', '--loglev',  default=d_loglev,  type=str, help='logging level name, one of %s, def=%s' % (STR_LEVEL_NAMES, d_loglev))
-    #parser.add_argument('exp', type=str, help='experiment name (e.g. amox23616)')
-    #parser.add_argument('run', type=int, help='run number') # 104
 
     args = parser.parse_args()
     print('Arguments:') #%s\n' % str(args))
@@ -221,14 +209,14 @@ if __name__ == "__main__":
 
     tname = args.tname
 
-    if   tname=='0': convert_detector_any(args)
-    elif tname=='1': test_epix10ka_any(fname_epix10ka2m_16)
-    elif tname=='2': test_jungfrau_any(fname_jungfrau_8)
-    elif tname=='3': test_cspad_any(fname_cspad_cxi)
-    elif tname=='4': test_epix10ka_any(fname_epix10ka2m_def)
-    elif tname=='5': test_pnccd_any(fname_pnccd_amo)
+    if   tname=='0': convert_geometry_to_crystfel(args)
+    elif tname=='1': geometry_to_crystfel('EPIX10KA:V1', (1,4,16), fname_epix10ka2m_16,  'geo-epix10ka-crystfel.geom')
+    elif tname=='2': geometry_to_crystfel('JUNGFRAU:V1', (1,2,8),  fname_jungfrau_8,     'geo-jungfrau-crystfel.geom')
+    elif tname=='3': geometry_to_crystfel('SENS2X1:V1',  (1,8,32), fname_cspad_cxi,      'geo-cspad-crystfel.geom')
+    elif tname=='4': geometry_to_crystfel('EPIX10KA:V1', (1,4,16), fname_epix10ka2m_def, 'geo-epix10ka-crystfel.geom')
+    elif tname=='5': geometry_to_crystfel('PNCCD:V1',    (4,),     fname_pnccd_amo,      'geo-pnccd-crystfel.geom')
     else: logger.warning('NON-IMPLEMENTED TEST: %s' % tname)
 
     sys.exit('END OF %s' % scrname)
 
-#----------
+# EOF
