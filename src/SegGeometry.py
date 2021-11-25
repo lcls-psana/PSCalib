@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-#------------------------------
+
 """
 :py:class:`SegGeometry` - abstract class with interface description
 ===================================================================
 
-Methods of this class should be re-implemented in derived classes with name pattern SegGeometry<SensorVers> 
+Methods of this class should be re-implemented in derived classes with name pattern SegGeometry<SensorVers>
 for pixel geometry description of all sensors.
 For example, CSPAD 2x1 sensor is implemented in class :py:class:`PSCalib.SegGeometryCspad2x1V1`.
 Access to all implemented sensors is available through the factory method in class :py:class:`PSCalib.SegGeometryStore`.
@@ -38,11 +38,11 @@ Usage::
     print 'X.shape =', X.shape
 
 See:
- * :py:class:`GeometryObject`, 
- * :py:class:`SegGeometry`, 
- * :py:class:`SegGeometryCspad2x1V1`, 
- * :py:class:`SegGeometryEpix100V1`, 
- * :py:class:`SegGeometryMatrixV1`, 
+ * :py:class:`GeometryObject`,
+ * :py:class:`SegGeometry`,
+ * :py:class:`SegGeometryCspad2x1V1`,
+ * :py:class:`SegGeometryEpix100V1`,
+ * :py:class:`SegGeometryMatrixV1`,
  * :py:class:`SegGeometryStore`
 
 For more detail see `Detector Geometry <https://confluence.slac.stanford.edu/display/PSDM/Detector+Geometry>`_.
@@ -54,22 +54,19 @@ Created: 2013-03-08 by Mikhail Dubrovin
 2020-09-04 - converted to py3
 """
 from __future__ import print_function
-#------------------------------
 
 import logging
 logger = logging.getLogger(__name__)
 import numpy as np
 
-#------------------------------
 
 def rotation(X, Y, C, S):
     """For numpy arrays X and Y returns the numpy arrays of Xrot and Yrot
     """
-    Xrot = X*C - Y*S 
-    Yrot = Y*C + X*S 
+    Xrot = X*C - Y*S
+    Yrot = Y*C + X*S
     return Xrot, Yrot
 
-#------------------------------
 
 class SegGeometry(object):
 
@@ -80,7 +77,6 @@ class SegGeometry(object):
     def __init__(self):
         pass
 
-#------------------------------
 
     def print_warning(self, s):
         logger.warning(self.wmsg % s)
@@ -146,20 +142,18 @@ class SegGeometry(object):
         self.print_warning('pixel_mask_array(mask_bits)')
 
     def return_switch(self, meth, axis=None):
-        """ Returns three x,y,z arrays if axis=None, or single array for specified axis 
+        """ Returns three x,y,z arrays if axis=None, or single array for specified axis
         """
         if axis is None: return meth()
         else           : return dict(zip(self.AXIS, meth()))[axis]
 
-#----------
 # 2020-07 added for converter
 
     def asic0indices(self): self.print_warning('asic0indices')
     def asic_rows_cols(self): self.print_warning('asic_rows_cols')
     def number_of_asics_in_rows_cols(self): self.print_warning('number_of_asics_in_rows_cols')
     def name(self): self.print_warning('name')
-  
-#------------------------------
+
 
 if __name__ == "__main__":
 
@@ -172,5 +166,5 @@ if __name__ == "__main__":
     sg.size()
     sys.exit('End of %s' % sys.argv[0])
 
-#------------------------------
+# EOF
 
