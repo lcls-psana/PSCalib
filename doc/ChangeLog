@@ -9,6 +9,17 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-18
+2021-11-23 Mikhail Dubrovin
+- modified:
+   app/geometry_convert - add conversion from Crystfel to psana if -fname is *.geom
+   src/SegGeometry.py
+       SegGeometryCspad2x1V1.py
+       SegGeometryMatrixV1.py
+       SegGeometryMatrixV2.py - remove blanks and comments
+   src/UtilsConvert.py - change transition of parameters and self-tests
+   src/UtilsConvertCrystFEL.py - complete implementation of geometry converter from crystfel to psana
+
 Tag: V02-00-17
 2021-11-05 Mikhail Dubrovin
 - src/GlobalUtils.py
