@@ -9,6 +9,12 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-19
+2021-11-30 Mikhail Dubrovin
+- modified:
+  app/geometry_convert - add in -h more details about parameters and tests
+  src/UtilsConvertCrystFEL.py - fix signs of tilts around x and y
+
 Tag: V02-00-18
 2021-11-23 Mikhail Dubrovin
 - modified:
