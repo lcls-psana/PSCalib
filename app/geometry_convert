@@ -12,35 +12,57 @@ if __name__ == "__main__":
 
     scrname = sys.argv[0].rsplit('/')[-1]
 
-    fname_jungfrau_8     = '/reg/g/psdm/detector/data2_test/geometry/geo-jungfrau-8-segment.data'
-    fname_epix10ka2m_16  = '/reg/g/psdm/detector/data2_test/geometry/geo-epix10ka2m-16-segment.data'
-    fname_epix10ka2m_def = '/reg/g/psdm/detector/data2_test/geometry/geo-epix10ka2m-default.data'
-    fname_cspad_cxi      = '/reg/g/psdm/detector/data2_test/geometry/geo-cspad-cxi.data'
-    fname_pnccd_amo      = '/reg/g/psdm/detector/data2_test/geometry/geo-pnccd-amo.data'
+    fname_jungfrau_8     = '/reg/g/psdm/detector/data_test/geometry/geo-jungfrau-8-segment.data'
+    fname_epix10ka2m_16  = '/reg/g/psdm/detector/data_test/geometry/geo-epix10ka2m-16-segment.data'
+    fname_epix10ka2m_def = '/reg/g/psdm/detector/data_test/geometry/geo-epix10ka2m-default.data'
+    fname_cspad_cxi      = '/reg/g/psdm/detector/data_test/geometry/geo-cspad-cxi.data'
+    fname_pnccd_amo      = '/reg/g/psdm/detector/data_test/geometry/geo-pnccd-amo.data'
 
     d_dettype = 'epix10ka'
     d_fname   = fname_epix10ka2m_16
     d_ofname  = 'geo-crystfel.txt'
     d_loglev  ='INFO'
     d_cframe  = 1
+    h_cframe = 'coordinate frame 0/1 for psana/LAB, def=%s. Works for PSANA->CRYSTFEL conversion ONLY'% d_cframe\
+             + ' where it selects frame for pixel coordinates. Backward conversion CRYSTFEL->PSANA'\
+               ' does not change frame. For test perpose it is assumed that forth and back conversion'\
+               ' PSANA->CRYSTFEL->PSANA should not change constants in the geometry file (up to precision lose at conversion)'\
+               ' if they are defined for the same coordinate frame. For this type of test parameter should be set to 0 to keep psana frame unchanged.'
+    h_fname = 'input geometry file name. File name extention *.geom launches converter from CrystFEL to psana, def=%s' % d_fname
 
     usage = '\n  %s -h' % scrname\
       + '\n  %s -d epix10ka -f %s -o geo_crystfel.geom -l DEBUG' % (scrname, d_fname)\
-      + '\n  cp /reg/g/psdm/detector/data2_test/geometry/geo-cspad-xpp.data .'\
-      + '\n  %s -d cspad -f geo-cspad-xpp.data -o geo-cspad-xpp-crystfel.geom    # conversion from psana to crystfel' % scrname\
+      + '\n  cp /reg/g/psdm/detector/data_test/geometry/geo-cspad-xpp.data .'\
+      + '\n  %s -d cspad -f geo-cspad-xpp.data -o geo-cspad-xpp-crystfel.geom        # conversion from psana to crystfel' % scrname\
       + '\n  %s -d cspadv2 -f geo-cspad-xpp-crystfel.geom -o geo-cspad-xpp-back.data # conversion from crystfel to psana' % scrname\
       + '\n'\
+      + '\n== TEST epix10ka2m:'\
+      + '\n  cp /reg/g/psdm/detector/data_test/geometry/geo-epix10ka2m-test.txt .'\
       + '\n  %s -d epix10ka -f geo-epix10ka2m-test.txt -o geo-epix10ka2m-test-cframe-psana.geom --cframe 0' % scrname\
       + '\n  %s -d epix10ka -f geo-epix10ka2m-test-cframe-psana.geom -o geo-epix10ka2m-test-back.txt' % scrname\
-
+      + '\n  then see the minor difference between geo-epix10ka2m-test.txt and geo-epix10ka2m-test-back.txt'\
+      + '\n  or check image with each of geometry files:'\
+      + '\n  geometry_image -g geo-epix10ka2m-test-back.txt -a /reg/g/psdm/detector/data_test/npy/nda-mfxc00118-r0184-epix10ka2m-silver-behenate-max.txt -R10 -i0'\
+      + '\n'\
+      + '\n== TEST cspad (xpp for complete consistency between initial and final file):'\
+      + '\n  cp /reg/g/psdm/detector/data_test/geometry/geo-cspad-test.data .'\
+      + '\n  %s -d cspad -f geo-cspad-test.data -o geo-cspad-test-cframe-psana.geom --cframe 0' % scrname\
+      + '\n  %s -d cspadv2 -f geo-cspad-test-cframe-psana.geom -o geo-cspad-test-back.data' % scrname\
+      + '\n  geometry_image -g geo-cspad-test.data -a /reg/g/psdm/detector/data_test/npy/nda-mfx11116-r0624-e005365-MfxEndstation-0-Cspad-0-max.txt -R10 -i0'\
+      + '\n'\
+      + '\n== TEST jungfrau:'\
+      + '\n  cp /reg/g/psdm/detector/data_test/geometry/geo-jungfrau-8-test.data .'\
+      + '\n  %s -d jungfrau -f geo-jungfrau-8-test.data -o geo-jungfrau-8-test-cframe-psana.geom --cframe 0' % scrname\
+      + '\n  %s -d jungfrau -f geo-jungfrau-8-test-cframe-psana.geom -o geo-jungfrau-8-test-back.data' % scrname\
+      + '\n  geometry_image -g geo-jungfrau-8-test.data -a /reg/g/psdm/detector/data_test/npy/nda-cxilv9518-r0008-jungfrau-lysozyme-max.npy -R10 -i0'\
 
 
     parser = argparse.ArgumentParser(usage=usage, description='Converts geometry constants from psana to CrystFEL format and backward (see --fname).')
     parser.add_argument('-d', '--dettype', default=d_dettype, type=str, help='detector type, one of epix10ka, jungfrau, cspad, pnccd, def=%s' % d_dettype)
-    parser.add_argument('-f', '--fname',   default=d_fname,   type=str, help='input geometry file name. File name extention *.geom envoke converter from CrystFEL to psana, def=%s' % d_fname)
+    parser.add_argument('-f', '--fname',   default=d_fname,   type=str, help=h_fname)
     parser.add_argument('-o', '--ofname',  default=d_ofname,  type=str, help='output file name, def=%s' % d_ofname)
     parser.add_argument('-l', '--loglev',  default=d_loglev,  type=str, help='logging level name, one of %s, def=%s' % (STR_LEVEL_NAMES, d_loglev))
-    parser.add_argument('--cframe',        default=d_cframe,  type=int, help='FOR TEST OF PSANA->CRYSTFEL->PSANA - coordinate frame 0/1 for psana/LAB, def=%s' % d_cframe)
+    parser.add_argument('--cframe',        default=d_cframe,  type=int, help=h_cframe)
 
     args = parser.parse_args()
     print('Arguments:')
