@@ -78,7 +78,31 @@ def unit_vector_pitch_angle_max_ind(u):
     absu = np.absolute(u)
     imax = np.where(absu == np.amax(absu))[0]
     pitch = degrees(atan2(u[2],u[imax]))
-    return (-(pitch+180) if pitch<-90 else -(pitch-180) if pitch>90 else pitch, imax)
+    pitch = (pitch+180) if pitch<-90 else (pitch-180) if pitch>90 else pitch
+    return pitch, imax
+
+
+def vector_lab_to_psana(v):
+    """both-way conversion of vectors between LAB and PSANA coordinate frames
+    """
+    assert len(v)==3
+    return np.array((-v[1], -v[0], -v[2]))
+
+
+def tilt_xy(uf, us, i, k):
+
+    tilt_f, imaxf = unit_vector_pitch_angle_max_ind(uf)
+    tilt_s, imaxs = unit_vector_pitch_angle_max_ind(us)
+    vmaxf = uf[imaxf]
+    vmaxs = us[imaxs]
+
+    logger.debug('== panel %02d %s  tilts f:%.5f s:%.5f' % (i, k, tilt_f, tilt_s)\
+      + info_vector(uf, '\n  uf ', '%10.5f')\
+      + info_vector(us, '\n  us ', '%10.5f')\
+      + '\n  ** imax f:%d s:%d   vmax f:%.5f s:%.5f' % (imaxf, imaxs, vmaxf, vmaxs))
+
+    tilt_x, tilt_y = (tilt_s, tilt_f) if imaxf==0 else (tilt_f, tilt_s)
+    return tilt_x, -tilt_y
 
 
 def str_is_segment_and_asic(s):
@@ -116,7 +140,7 @@ def header_psana(list_of_cmts=[], dettype='N/A'):
 DETTYPE_TO_PARS = {\
   'epix10ka': ('EPIX10KA:V2','p0a0,p1a0,p2a0,p3a0,p4a0,p5a0,p6a0,p7a0,'\
                              'p8a0,p9a0,p10a0,p11a0,p12a0,p13a0,p14a0,p15a0'),\
-  'jungfrau': ('JUNGFRAU:V1','p0a0,p1a0,p2a0,p3a0,p4a0,p5a0,p6a0,p7a0,'),\
+  'jungfrau': ('JUNGFRAU:V2','p0a0,p1a0,p2a0,p3a0,p4a0,p5a0,p6a0,p7a0'),\
   'cspad'   : ('SENS2X1:V1', 'p0a0,p0a2,p0a4,p0a6,p0a8,p0a10,p0a12,p0a14,'\
                              'p1a0,p1a2,p1a4,p1a6,p1a8,p1a10,p1a12,p1a14,'\
                              'p2a0,p2a2,p2a4,p2a6,p2a8,p2a10,p2a12,p2a14,'\
@@ -270,7 +294,10 @@ class CrystFELGeometryParser:
         sg = sgs.Create(segname=segname, pbits=0)
         logger.warning('TBE crystfel_to_geometry with segshape: %s' % str(sg.shape())
                        +'\nstr of asics to reconstruct panels geometry:\n%s' % str(panasics))
+
         X,Y,Z = sg.pixel_coord_array()
+
+
         PIX_SIZE_UM = sg.get_pix_size_um()
         M_TO_UM = 1e6
         xc0, yc0, zc0 = X[0,0], Y[0,0], Z[0,0]
@@ -312,20 +339,8 @@ class CrystFELGeometryParser:
 
             angle_deg = degrees(atan2(uf[1],uf[0]))
             angle_z, tilt_z = angle_and_tilt(angle_deg)
-            tilt_f, imaxf = unit_vector_pitch_angle_max_ind(uf)
-            tilt_s, imaxs = unit_vector_pitch_angle_max_ind(us)
+            tilt_x, tilt_y = tilt_xy(uf,us,i,k)
 
-            tilt_x = tilt_s if imaxf==0 else tilt_f
-            tilt_y = tilt_f if imaxs==1 else tilt_s
-
-            logger.info('== panel %02d %s  tilts y:%.5f x:%.5f f:%.5f s:%.5f' % (i, k, tilt_y, tilt_x, tilt_f, tilt_s)\
-              + info_vector(uf, '\n  uf', '%10.5f')\
-              + info_vector(us, '\n  us', '%10.5f'))
-
-            #!!!!!!!!!
-            tilt_x = 0
-            tilt_y = 0
-            #!!!!!!!!!
             logger.warning('TBD signs of tilt_x, tilt_y')
 
             recs += '\nDET:VC         0  %12s  %2d' % (segname, i)\
@@ -380,9 +395,11 @@ if __name__ == "__main__":
 
     scrname = sys.argv[0].rsplit('/')[-1]
 
-    fname_epix10ka2m = '/reg/g/psdm/detector/data2_test/geometry/crystfel/geo-mfxc00318-epix10ka2m.1-0013-z0-mirror.geom'
-    fname_cspad      = '/reg/g/psdm/detector/data2_test/geometry/crystfel/geo-cxig0915-cspad-ds1-crystfel.geom'
-    fname_pnccd      = '/reg/g/psdm/detector/data2_test/geometry/crystfel/geo-amox26916-pnccd-front-108-psana-crystfel.geom'
+    fname_epix10ka2m = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-mfxc00318-epix10ka2m.1-0013-z0-mirror.geom'
+    fname_cspad      = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-cxig0915-cspad-ds1-crystfel.geom'
+    fname_cspadv2    = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-cspadv2-test-cframe-psana.geom'
+    fname_pnccd      = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-amox26916-pnccd-front-108-psana-crystfel.geom'
+    fname_jungfrau   = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-jungfrau-8-test-cframe-psana.geom'
 
     d_tname   = '0'
     d_dettype = 'cspad' # 'epix10ka' 'pnccd' 'jungfrau'
@@ -413,9 +430,9 @@ if __name__ == "__main__":
 
     if   tname=='0': convert_crystfel_to_geometry(args)
     elif tname=='1': test_converter(tname, 'epix10ka', fname_epix10ka2m, 'geo-epix10ka-psana-from-crystel.txt', args.loglev)
-    #elif tname=='2': test_converter(tname, 'jungfrau', fname_jungfrau,   args.ofname, args.loglev)
+    elif tname=='2': test_converter(tname, 'jungfrau', fname_jungfrau,   'geo-jungfrau-psana-from-crystel.txt', args.loglev)
     elif tname=='3': test_converter(tname, 'cspad',    fname_cspad,      'geo-cspad-psana-from-crystel.txt', args.loglev)
-    #elif tname=='4': test_converter(tname, 'cspadv2',  fname_cspad,      args.ofname, args.loglev)
+    elif tname=='4': test_converter(tname, 'cspadv2',  fname_cspadv2,    'geo-cspadv2-psana-from-crystel.txt', args.loglev)
     elif tname=='5': test_converter(tname, 'pnccd',    fname_pnccd,      'geo-pnccd-psana-from-crystel.txt', args.loglev)
     else: logger.warning('NON-IMPLEMENTED TEST: %s' % tname)
 
