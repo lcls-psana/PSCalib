@@ -42,7 +42,7 @@ Usage::
     cdir = gu.calib_dir(env)
     #### tsec, tnsec, fiducial, tsdate, tstime = gu.time_pars(evt) # needs in psana...
 
-    gu.create_directory(dir, verb=False)
+    gu.create_directory(dir)
     gu.create_directory_with_mode(dir, mode=0o777, verb=False)
     exists = gu.create_path(path, depth=6, mode=0o777, verb=True)
 
@@ -653,14 +653,6 @@ def set_file_access_mode(fname, mode=0o777):
 
 #------------------------------
 
-#def create_directory(dir, verb=False) :
-#    if os.path.exists(dir) :
-#        pass
-#        #if verb : print 'Directory exists: %s' % dir
-#    else :
-#        os.makedirs(dir)
-#        if verb : print('Directory created: %s' % dir)
-
 def create_directory(dir, mode=0o777, **kwa):
     """Creates directory and sets its mode"""
     if os.path.exists(dir):
@@ -668,7 +660,7 @@ def create_directory(dir, mode=0o777, **kwa):
     else:
         os.makedirs(dir)
         os.chmod(dir, mode)
-        logger.debug('Created:%s, mode(oct)=%s' % (dir, oct(mode)))
+        logger.debug('Created: %s, mode(oct)=%s' % (dir, oct(mode)))
 
 #------------------------------
 
@@ -694,13 +686,12 @@ def create_path(path, depth=6, mode=0o777, verb=False) :
     """
     if verb : print('create_path: %s' % path)
 
-    #subdirs = path.strip('/').split('/')
     subdirs = path.split('/')
     cpath = subdirs[0]
-    for i,sd in enumerate(subdirs[:-1]) :
-        if i>0 : cpath += '/%s'% sd
-        if i<depth : continue
-        if cpath=='' : continue
+    for i,sd in enumerate(subdirs[:-1]):
+        if i>0: cpath += '/%s'% sd
+        if i<depth: continue
+        if cpath=='': continue
         create_directory_with_mode(cpath, mode, verb)
 
     return os.path.exists(cpath)
@@ -770,7 +761,7 @@ def add_rec_to_log(lfname, rec, verbos=False) :
         if verbos : print('command: %s' % cmd)
         os.system(cmd)
         mode_log = 0o666
-        if (file_mode(path) & 0o777) == mode_log : return 
+        if (file_mode(path) & 0o777) == mode_log : return
         os.chmod(path, mode_log)
 
 #------------------------------
@@ -878,7 +869,7 @@ def command_add_record_to_file(rec, fname) :
 
 #------------------------------
 
-def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False) :
+def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, filemode=0o664):
     """Deploys file with calibration constants in the calib store, adds history record in file and in logfile.
 
     Parameters
@@ -900,11 +891,13 @@ def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False) :
         cmd = command_deploy_file(ifname, path_clb)
         if verbos : print('cmd: %s' % cmd)
         os.system(cmd)
+        os.chmod(path_clb, filemode)
 
         rec = history_record(ifname, ctypedir, ctype, ofname, comment='')
         cmd = command_add_record_to_file(rec, path_his)
         if verbos : print('cmd: %s' % cmd)
         os.system(cmd)
+        os.chmod(path_his, filemode)
         if lfname is not None : add_rec_to_log(lfname, '  %s' % rec, verbos)
 
 #------------------------------
