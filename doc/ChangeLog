@@ -9,6 +9,14 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-20
+2021-12-10 Mikhail Dubrovin
+- GeometryAccess.py, GeometryObject.py
+  - code cleaning - remove blanks and comments
+  - add method get_seg_geo to GeometryAccess.py
+- add UtilsPSF.py - development in progress
+- src/GlobalUtils.py - fix issue reported by Silke about file mode - add parameter filemode=0o664 to method deploy_file
+
 Tag: V02-00-19
 2021-11-30 Mikhail Dubrovin
 - modified:
