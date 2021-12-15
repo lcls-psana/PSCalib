@@ -9,6 +9,12 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-21
+2021-12-15 Mikhail Dubrovin
+- 1-st working version of UtilsPSF with separated testUtilsPSF.py
+	new file:   examples/testUtilsPSF.py
+	modified:   src/UtilsPSF.py
+
 Tag: V02-00-20
 2021-12-10 Mikhail Dubrovin
 - GeometryAccess.py, GeometryObject.py
