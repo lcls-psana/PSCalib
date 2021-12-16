@@ -6,9 +6,17 @@ logger = logging.getLogger(__name__)
 from PSCalib.GeometryAccess import GeometryAccess
 
 import numpy as np
-from PSCalib.SegGeometryStore import sgs
-from Detector.GlobalUtils import print_ndarr, info_ndarr
+from Detector.GlobalUtils import info_ndarr
 from PSCalib.GlobalUtils import CFRAME_LAB, CFRAME_PSANA
+
+SEGNAME_TO_PARS = {\
+  'EPIX10KA:V1': (1,4,16),\
+  'JUNGFRAU:V1': (1,2,8),\
+  'SENS2X1:V1' : (1,8,32),\
+  'PNCCD:V1'   : (4,),\
+  'MTRX:V2:512:512:75:75' : (4,),\
+  'EPIX10KA:V2': (1,4,16),\
+}
 
 
 def header_crystfel():
@@ -56,7 +64,7 @@ def panel_constants_to_crystfel(seg, n, x, y, z):
     """
 
     arows, acols = seg.asic_rows_cols()
-    ssize = seg.size()
+    #ssize = seg.size()
     srows, scols = seg.shape()
     pix_size = seg.pixel_scale_size()
     nasics_in_rows, nasics_in_cols = seg.number_of_asics_in_rows_cols()
@@ -97,38 +105,46 @@ def panel_constants_to_crystfel(seg, n, x, y, z):
     return txt
 
 
-def geometry_to_crystfel(segname, valid_nsegs, fname, ofname, cframe=CFRAME_LAB):
+def info_geo(geo):
+    """Returns (str) name and index info of the GeometryObject."""
+    return 'segment name: %s index: %d' % (geo.oname, geo.oindex)
+
+
+def info_seg_geo(seg):
+    """Returns (str) info of the SegGeometry object parameters."""
+    return 'per ASIC info'\
+      + '\n  SegGeometry implementation class: %s' % seg.name()\
+      + '\n  asic0ind: %s' % str(seg.asic0indices())\
+      + '\n  arows: %d acols: %d' % seg.asic_rows_cols()\
+      + '\n  ssize: %d' % seg.size()\
+      + '\n  seg.shape(): %s' % str(seg.shape())\
+      + '\n  pix_size, um: %f' % seg.pixel_scale_size()\
+      + '\n  nasics_in_rows: %d nasics_in_cols: %d' % seg.number_of_asics_in_rows_cols()
+
+
+def geometry_to_crystfel(fname, ofname, cframe=CFRAME_LAB):
 
     logger.info('geometry_to_crystfel - converts geometry constants from psana to CrystFEL format')
 
-    seg = sgs.Create(segname=segname, pbits=0)
-
-    asic0inds = seg.asic0indices()
-    arows, acols = seg.asic_rows_cols()
-    ssize = seg.size()
-    srows, scols = seg.shape()
-    pix_size = seg.pixel_scale_size()
-    nasics_in_rows, nasics_in_cols = seg.number_of_asics_in_rows_cols()
-
-    print('name', seg.name())
-    print('asic0ind', asic0inds)
-    print('arows, acols', arows, acols)
-    print('ssize', ssize)
-    print('seg.shape()', seg.shape())
-    print('pix_size', pix_size)
-    print('nasics_in_rows, nasics_in_cols', nasics_in_rows, nasics_in_cols)
-
     geo = GeometryAccess(fname, 0, use_wide_pix_center=False)
     x, y, z = geo.get_pixel_coords(oname=None, oindex=0, do_tilt=True, cframe=cframe)
-    print_ndarr(x, name='x', first=0, last=10)
-    print_ndarr(y, name='y', first=0, last=10)
+    logger.info(info_ndarr(x, name='x', first=0, last=10))
+    logger.info(info_ndarr(y, name='y', first=0, last=10))
+
+    geo1 = geo.get_seg_geo() # GeometryObject
+    seg = geo1.algo # object of the SegmentGeometry subclass
+    logger.info('%s\n%s' % (info_geo(geo1), info_seg_geo(seg)))
+
+    segname = geo1.oname
+    assert segname in SEGNAME_TO_PARS.keys(),\
+      'segment name %s is not found in the list of implemented detectors %s'%(segname, str(SEGNAME_TO_PARS.keys()))
+    valid_nsegs = SEGNAME_TO_PARS[segname]
 
     nsegs = x.size/seg.size()
-    print('nsegs in geometry', nsegs)
     assert nsegs in valid_nsegs, 'number of %s segments %d should be in %s' % (seg.name(), nsegs, str(valid_nsegs))
 
-    shape = (nsegs, srows, scols)
-    print('geo shape', shape)
+    shape = (nsegs,) + seg.shape() # (nsegs, srows, scols)
+    logger.info('geo shape %s' % str(shape))
 
     x.shape = shape
     y.shape = shape
@@ -138,7 +154,7 @@ def geometry_to_crystfel(segname, valid_nsegs, fname, ofname, cframe=CFRAME_LAB)
     for n in range(nsegs):
         txt += panel_constants_to_crystfel(seg, n, x[n,:], y[n,:], z[n,:])
 
-    logger.info(txt)
+    logger.info('Geometry constants in CrystFEL format:\n\n%s\n...\n' % txt[:1000])
 
     if ofname is not None:
         f = open(ofname,'w')
@@ -147,29 +163,12 @@ def geometry_to_crystfel(segname, valid_nsegs, fname, ofname, cframe=CFRAME_LAB)
         logger.info('geometry constants in CrystFEL format saved in: %s' % ofname)
 
 
-DETTYPE_TO_PARS = {\
-  'epix10ka'  : ('EPIX10KA:V1', (1,4,16)),\
-  'jungfrau'  : ('JUNGFRAU:V1', (1,2,8)),\
-  'cspad'     : ('SENS2X1:V1', (1,8,32)),\
-  'pnccd'     : ('PNCCD:V1', (4,)),\
-  'pnccdv2'   : ('MTRX:V2:512:512:75:75', (4,)),\
-  'epix10kav2': ('EPIX10KA:V2', (1,4,16)),\
-}
-
-
 def convert_geometry_to_crystfel(args):
-    dettype, fname, ofname, cframe = args.dettype.lower(), args.fname, args.ofname, args.cframe
-    pars = DETTYPE_TO_PARS.get(dettype.lower(), None)
-    if pars is None: sys.exit('NON_IMPLEMENTED CONVERTER FOR DETECTOR TYPE: %s' % dettype)
-    pars+=(fname, ofname)
-    geometry_to_crystfel(*pars, cframe=cframe)
+    geometry_to_crystfel(args.fname, args.ofname, cframe=args.cframe)
 
 
 if __name__ == "__main__":
 
-    #import pyimgalgos.GlobalGraphics as gg
-
-    #print dir(logging)
     #print logging._levelNames
     DICT_NAME_TO_LEVEL = logging._levelNames # logging._nameToLevel # {'INFO': 20, 'WARNING': 30, 'WARN': 30,...
     LEVEL_NAMES = [v for v in logging._levelNames.values() if isinstance(v,str)] #_levelToName
@@ -183,38 +182,39 @@ if __name__ == "__main__":
     fname_cspad_cxi      = '/reg/g/psdm/detector/data2_test/geometry/geo-cspad-cxi.data'
     fname_pnccd_amo      = '/reg/g/psdm/detector/data2_test/geometry/geo-pnccd-amo.data'
     d_tname   = '0'
-    d_dettype = 'epix10ka'
     d_fname   = fname_epix10ka2m_16
     d_ofname  = 'geo-crystfel.txt'
     d_loglev  ='INFO'
+    d_cframe  = 1
     usage = '\nE.g.: %s' % scrname\
       + '\n  or: %s -t <test-number: 1,2,3,4,5,...>' % (scrname)\
-      + '\n  or: %s -d epix10ka -f %s -o geo_crystfel.txt -l DEBUG' % (scrname, d_fname)
+      + '\n  or: %s -f %s -o geo_crystfel.txt -l DEBUG' % (scrname, d_fname)
 
     import argparse
 
     parser = argparse.ArgumentParser(usage=usage)
     parser.add_argument('-t', '--tname',   default=d_tname,   type=str, help='test number: 1/2/3/4/5 = epix10ka/jungfrau/cspad/epix10ka/pnccd, def=%s' % d_tname)
-    parser.add_argument('-d', '--dettype', default=d_dettype, type=str, help='detector type, i.e. epix10ka, jungfrau, cspad, def=%s' % d_dettype)
     parser.add_argument('-f', '--fname',   default=d_fname,   type=str, help='input geometry file name, def=%s' % d_fname)
     parser.add_argument('-o', '--ofname',  default=d_ofname,  type=str, help='output file name, def=%s' % d_ofname)
     parser.add_argument('-l', '--loglev',  default=d_loglev,  type=str, help='logging level name, one of %s, def=%s' % (STR_LEVEL_NAMES, d_loglev))
+    parser.add_argument('--cframe',        default=d_cframe,  type=int, help='coordinate frame 0/1 : psana/LAB, def=%s' % d_cframe)
 
     args = parser.parse_args()
-    print('Arguments:') #%s\n' % str(args))
-    for k,v in vars(args).items(): print('  %12s : %s' % (k, str(v)))
+    s = 'Arguments:'
+    for k,v in vars(args).items(): s += '  %12s : %s' % (k, str(v))
 
     logging.basicConfig(format='[%(levelname).1s] L%(lineno)04d : %(message)s', datefmt='%Y-%m-%dT%H:%M:%S', level=DICT_NAME_TO_LEVEL[args.loglev])
     logging.debug('Logger is initialized for level %s' % args.loglev)
+    logging.info(s)
 
     tname = args.tname
 
     if   tname=='0': convert_geometry_to_crystfel(args)
-    elif tname=='1': geometry_to_crystfel('EPIX10KA:V1', (1,4,16), fname_epix10ka2m_16,  'geo-epix10ka-crystfel.geom')
-    elif tname=='2': geometry_to_crystfel('JUNGFRAU:V1', (1,2,8),  fname_jungfrau_8,     'geo-jungfrau-crystfel.geom')
-    elif tname=='3': geometry_to_crystfel('SENS2X1:V1',  (1,8,32), fname_cspad_cxi,      'geo-cspad-crystfel.geom')
-    elif tname=='4': geometry_to_crystfel('EPIX10KA:V1', (1,4,16), fname_epix10ka2m_def, 'geo-epix10ka-crystfel.geom')
-    elif tname=='5': geometry_to_crystfel('PNCCD:V1',    (4,),     fname_pnccd_amo,      'geo-pnccd-crystfel.geom')
+    elif tname=='1': geometry_to_crystfel(fname_epix10ka2m_16,  'geo-epix10ka-crystfel.geom')
+    elif tname=='2': geometry_to_crystfel(fname_jungfrau_8,     'geo-jungfrau-crystfel.geom')
+    elif tname=='3': geometry_to_crystfel(fname_cspad_cxi,      'geo-cspad-crystfel.geom')
+    elif tname=='4': geometry_to_crystfel(fname_epix10ka2m_def, 'geo-epix10ka-crystfel.geom')
+    elif tname=='5': geometry_to_crystfel(fname_pnccd_amo,      'geo-pnccd-crystfel.geom')
     else: logger.warning('NON-IMPLEMENTED TEST: %s' % tname)
 
     sys.exit('END OF %s' % scrname)
