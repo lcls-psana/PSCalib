@@ -125,7 +125,7 @@ def psf_from_geo(geo, cframe=CFRAME_LAB):
     #logger.debug(info_ndarr(y, name='psana y', first=0, last=4))
     #logger.debug(info_ndarr(z, name='psana z', first=0, last=4))
 
-    nsegs = x.size/sego.size()
+    nsegs = int(x.size/sego.size())
     shape = (nsegs, srows, scols)
     logger.debug('geo shape: %s' % str(shape))
     x.shape = y.shape = z.shape = shape

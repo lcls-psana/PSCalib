@@ -9,6 +9,10 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-23
+2022-01-03 Mikhail Dubrovin
+- src/UtilsPSF.py - fix py3 issue - use int for devision
+
 Tag: V02-00-22
 2021-12-16 Mikhail Dubrovin
 - geometry_convert - get rid of parameter --dettype in psana to CrystFEL converter
