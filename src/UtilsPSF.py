@@ -182,7 +182,7 @@ def data_psf(sego, data):
     #logger.debug('data_psf - conversion of psana per-segmment data to psf per-asic data\n%s' % info_seg_geo(sego))
     shape0 = data.shape
     srows, scols = sego.shape()
-    nsegs = data.size/sego.size()
+    nsegs = int(data.size/sego.size())
     shape = (nsegs, srows, scols)
     logger.debug('nsegs in data: %d data shape: %s per-segment shape: %s' % (nsegs, str(shape0), str(shape)))
     data.shape = shape
