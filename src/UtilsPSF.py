@@ -14,7 +14,7 @@ USAGE::
     import PSCalib.UtilsPSF as ups
     # or from PSCalib.UtilsPSF import *
 
-    psf,sego,geo = ups.psf_from_geo(geo) # geo (GeometryObject) - detector (or its part) geometry description object.
+    psf,sego,geo = ups.psf_from_geo(geo) # geo (GeometryAccess) - detector (or its part) geometry description object.
 
     psf,sego,geo = ups.psf_from_file(fname_geometry) # fname_geometry (str) - psana geometry file name.
 
@@ -54,7 +54,7 @@ def info_geo(geo):
 
 def info_seg_geo(sego):
     """Returns (str) info of the SegGeometry object parameters."""
-    return 'per ASIC info'\
+    return 'per-ASIC info'\
       + '\n  SegGeometry implementation class: %s' % sego.name()\
       + '\n  asic0ind: %s' % str(sego.asic0indices())\
       + '\n  arows: %d acols: %d' % sego.asic_rows_cols()\
@@ -79,8 +79,8 @@ def info_psf(psf,\
 def panel_psf(sego, x, y, z):
     """Returns psf (list-of-tuples) vectors for ASICs of a single segment.
        Parameters:
-       - sego [SegGeometry] - segment description geometry object
-       - x, y, z [float] - segment pixel coordimane arrays (in the detector coordinate frame)
+       - sego (SegGeometry) - segment description geometry object
+       - x, y, z (float) - segment pixel coordimane arrays (in the detector coordinate frame)
     """
     return [((x[r0,c0], y[r0,c0], z[r0,c0]),\
             (x[r0+1,c0]-x[r0,c0],\
@@ -95,8 +95,8 @@ def psf_from_file(fname, cframe=CFRAME_LAB):
     """
     Parameters:
     -----------
-       - fname [str] - psana detector geometry file name.
-       - cframe [int] - 0/1 = CFRAME_PSANA/CFRAME_LAB - psana/LAB coordinate frame.
+       - fname (str) - psana detector geometry file name.
+       - cframe (int) - 0/1 = CFRAME_PSANA/CFRAME_LAB - psana/LAB coordinate frame.
     """
     logger.info('load geometry from file %s' % fname)
     from PSCalib.GeometryAccess import GeometryAccess
@@ -109,8 +109,8 @@ def psf_from_geo(geo, cframe=CFRAME_LAB):
     """
     Parameters:
     -----------
-       - geo [GeometryAccess] - psana geometry description object.
-       - cframe [int] - 0/1 = CFRAME_PSANA/CFRAME_LAB - psana/LAB coordinate frame.
+       - geo (GeometryAccess) - psana geometry description object.
+       - cframe (int) - 0/1 = CFRAME_PSANA/CFRAME_LAB - psana/LAB coordinate frame.
     """
     logger.info('psf_from_geo - converts geometry constants from psana to psf format')
 
@@ -180,7 +180,6 @@ def data_psf(sego, data):
        - data [np.array] - psana data shaped per-segment, shape=(<number-of-segments>, <segment-rows>, <segment-cols>).
     """
     #logger.debug('data_psf - conversion of psana per-segmment data to psf per-asic data\n%s' % info_seg_geo(sego))
-
     shape0 = data.shape
     srows, scols = sego.shape()
     nsegs = data.size/sego.size()
@@ -192,10 +191,6 @@ def data_psf(sego, data):
     list_asic_data = [] # list of per ASIC 2-d arrays of the detector data
     for n in range(nsegs):
         list_asic_data += list_of_panel_asic_data(sego, data[n,:]) #90us
-
-    #list_asic_data = [list_of_panel_asic_data(sego, data[n,:]) for n in range(nsegs)] #90us
-    #then it needs to be converted to np.array and re-shaped, e.g. shape:(32, 2, 185, 194)  =======>>>>>> (64, 185, 194)
-
     #logger.debug(info_ndarr(list_asic_data,'data_psf.list_asic_data consumed time=%.6fs:' % (time()-t0_sec)))
 
     data.shape = shape0
@@ -215,17 +210,17 @@ def pixel_coords_psf_direct(psf, shape_asic):
     return coords[:,0], coords[:,1], coords[:,2]
 
 
-def coords_1d(cp, cs, cf, ashape):
+def coords_1d(cp, cs, cf, shape_asic):
     """evaluation of ASIC pixel coordinates for 1-d specified by vector commponents cp, cs, cf"""
-    ccols = np.arange(ashape[1])*cf
-    crows = np.arange(ashape[0])*cs
+    ccols = np.arange(shape_asic[1])*cf
+    crows = np.arange(shape_asic[0])*cs
     grid = np.meshgrid(ccols,crows)
     return grid[0] + grid[1] + cp
 
 
-def pixel_coords_psf(psf, ashape):
+def pixel_coords_psf(psf, shape_asic):
     """returns pixel coordinate arrays for x, y and z. It takes ~70ms for cspad"""
-    return [np.array([coords_1d(vp[i], vs[i], vf[i], ashape) for vp,vs,vf in psf]) for i in range(3)]
+    return [np.array([coords_1d(vp[i], vs[i], vf[i], shape_asic) for vp,vs,vf in psf]) for i in range(3)]
 
 
 def indices(values, bin_size, offset=None):
@@ -240,6 +235,8 @@ def indices(values, bin_size, offset=None):
 
 if __name__ == "__main__":
   import sys
-  sys.exit('Tests moved to PSCalib/examples/testUtilsPSF.py')
+  sys.exit('Tests moved to PSCalib/examples/testUtilsPSF.py'\
+           '\nUsed in PSCalib/GeometryAccess.py and Detector/AreaDetector.py'\
+           '\nexamples in Detector/examples/test-issues-2022.py 3')
 
 # EOF

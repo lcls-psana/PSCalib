@@ -9,6 +9,12 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-24
+2022-01-06 Mikhail Dubrovin
+	modified:   examples/testUtilsPSF.py - add tests *6 for rayonix_1920
+	modified:   src/GeometryAccess.py - add *psf methods, update docsring
+	modified:   src/UtilsPSF.py - improve docsring, rename parameters for readability
+
 Tag: V02-00-23
 2022-01-03 Mikhail Dubrovin
 - src/UtilsPSF.py - fix py3 issue - use int for devision

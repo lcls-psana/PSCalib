@@ -87,9 +87,13 @@ Usage::
     # DEPRECATED change verbosity bit-control word; to print everythisg use pbits = 0xffff
     geometry.set_print_bits(pbits=0o377)
 
-    # return geometry parameters in "psf" format as a tuple psf[32][3][3]
-    psf = geometry.get_psf()
-    geometry.print_psf()
+    # return geometry parameters in "psf" format as a tuple psf[<number-of-asics>][3][3]
+    psf = geometry.psf(cframe=1) # by default cframe=CFRAME_LAB
+    s = geometry.info_psf(cframe=1)
+
+    # converts psana data formatted for panels to psf data formatted per asic with shape=(<n-asics>, arows, acols)
+    datapsf = geometry.data_psf(data)
+    xarr, yarr, zarr = geometry.pixel_coords_psf(cframe=1) # returns pixel coordinate arrays generated from psf vectors.
 
 See:
  * :py:class:`GeometryObject`,
@@ -117,6 +121,11 @@ from PSCalib.GeometryObject import GeometryObject
 
 import logging
 logger = logging.getLogger(__name__)
+
+ups=None
+def import_ups():
+    global ups
+    if ups is None: import PSCalib.UtilsPSF as ups
 
 
 def divide_protected(num, den, vsub_zero=0):
@@ -176,6 +185,7 @@ class GeometryAccess:
         self.p_um_old   = None
         self.cframe_old = None
         self.fract_old  = None
+        self.sego       = None
 
 
     def is_valid(self):
@@ -667,7 +677,8 @@ class GeometryAccess:
 
 
     def get_psf(self):
-        """Returns array of vectors in CrystFEL format (psf stands for position-slow-fast vectors).
+        """DEPRECATED BECAUSE WORKS FOR CSPAD PANELS ONLY.
+           Returns array of vectors in PSF format for 32 CSPAD panels (psf stands for position-slow-fast vectors).
         """
         if not self.valid: return None
         X, Y, Z = self.get_pixel_coords() # pixel positions for top level object
@@ -695,7 +706,8 @@ class GeometryAccess:
 
 
     def print_psf(self):
-        """ Gets and prints psf array for test purpose.
+        """ DEPRECATED BECAUSE WORKS FOR CSPAD PANELS ONLY.
+        Gets and prints psf array for test purpose.
         """
         if not self.valid: return None
         psf = np.array(self.get_psf())
@@ -704,6 +716,41 @@ class GeometryAccess:
             s += '\n    p=(%12.2f, %12.2f, %12.2f),    s=(%8.2f, %8.2f, %8.2f)   f=(%8.2f, %8.2f, %8.2f)' \
                   % (px,py,pz,  sx,xy,xz,  fx,fy,fz)
         logger.info(s)
+
+
+    def psf(self, cframe=1):
+        """Returns array of vectors in PSF format (psf stands for position-slow-fast vectors).
+        """
+        if not self.valid:
+            logger.debug('GeometryAccess object is not valid... it needs in correct initialization from geometry file.')
+            return None
+        import_ups()
+        psf, self.sego, _geo = ups.psf_from_geo(self, cframe=cframe)
+        logger.debug('self.sego: %s' % str(self.sego))
+        return psf
+
+
+    def info_psf(self, cframe=1):
+        """Returns (str) formatted info with psf vectors.
+        """
+        psf = self.psf(cframe)
+        return ups.info_psf(psf)
+
+
+    def data_psf(self, data):
+        """Converts psana data formatted for panels to psf data formatted per asic (<n-asics>, arows, acols).
+        """
+        if self.sego is None: return None
+        import_ups()
+        return ups.data_psf(self.sego, data)
+
+
+    def pixel_coords_psf(self, cframe=1):
+        """Returns pixel coordinate arrays for x, y and z generated from psf vectors.
+        """
+        psf = self.psf(cframe)
+        if psf is None: return None
+        return ups.pixel_coords_psf(psf, self.sego.asic_rows_cols())
 
 
 #------ Global Method(s) ------

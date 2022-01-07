@@ -16,15 +16,17 @@ if __name__ == "__main__":
   fn_geo_cspadv1        = '/reg/d/psdm/CXI/cxitut13/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
   fn_geo_cspad_cxi      = '/reg/g/psdm/detector/data2_test/geometry/geo-cspad-cxi.data'
   fn_geo_cspad_xpp      = '/reg/g/psdm/detector/data2_test/geometry/geo-cspad-xpp.data'
-  fn_geo_epix10ka2m  = '/reg/g/psdm/detector/data2_test/geometry/geo-epix10ka2m-mfxc00118-r0183.data'
+  fn_geo_epix10ka2m     = '/reg/g/psdm/detector/data2_test/geometry/geo-epix10ka2m-mfxc00118-r0183.data'
   fn_geo_epix10ka2m_def = '/reg/g/psdm/detector/data2_test/geometry/geo-epix10ka2m-default.data'
   fn_geo_jungfrau_8     = '/reg/g/psdm/detector/data2_test/geometry/geo-jungfrau-8-segment-cxilv9518.data'
   fn_geo_pnccd_amo      = '/reg/g/psdm/detector/data2_test/geometry/geo-pnccd-amo.data'
+  fn_geo_rayonix_1920   = '/reg/g/psdm/detector/data2_test/geometry/geo-rayonix-nbins1920-1920.data'
 
-  fn_data_epix10ka2m = '/reg/g/psdm/detector/data_test/npy/nda-mfxc00118-r0184-epix10ka2m-silver-behenate-max.txt'
-  fn_data_cspad      = '/reg/g/psdm/detector/data_test/npy/nda-mfx11116-r0624-e005365-MfxEndstation-0-Cspad-0-max.txt'
-  fn_data_jungfrau   = '/reg/g/psdm/detector/data_test/npy/nda-cxilv9518-r0008-jungfrau-lysozyme-max.npy'
-  fn_data_pnccd      = '/reg/g/psdm/detector/data_test/npy/nda-amo86615-r0159-Camp-0-pnCCD-1-evt-w-rings.txt'
+  fn_data_epix10ka2m   = '/reg/g/psdm/detector/data_test/npy/nda-mfxc00118-r0184-epix10ka2m-silver-behenate-max.txt'
+  fn_data_cspad        = '/reg/g/psdm/detector/data_test/npy/nda-mfx11116-r0624-e005365-MfxEndstation-0-Cspad-0-max.txt'
+  fn_data_jungfrau     = '/reg/g/psdm/detector/data_test/npy/nda-cxilv9518-r0008-jungfrau-lysozyme-max.npy'
+  fn_data_pnccd        = '/reg/g/psdm/detector/data_test/npy/nda-amo86615-r0159-Camp-0-pnCCD-1-evt-w-rings.txt'
+  fn_data_rayonix_1920 = '/reg/g/psdm/detector/data_test/npy/nda-mfxlw7519-r0070-rayonix-max.npy'
 
   def load_data_from_file(fname):
     assert isinstance(fname, str), 'file name is not a str'
@@ -62,7 +64,7 @@ if __name__ == "__main__":
     logger.info(info_ndarr(data, name='data', first=0, last=10))
 
 
-  def test_psf_all(fname_geo, fname_data):
+  def test_psf_methods(fname_geo, fname_data):
     psf, sego, geo = psf_from_file(fname_geo)
     logger.info(type(sego))
     #logger.info(info_seg_geo(sego))
@@ -166,22 +168,26 @@ if __name__ == "__main__":
     '\n 3 : test_psf_from_file(fn_geo_epix10ka2m)'\
     '\n 4 : test_psf_from_file(fn_geo_jungfrau_8)'\
     '\n 5 : test_psf_from_file(fn_geo_pnccd_amo)'\
+    '\n 6 : test_psf_from_file(fn_geo_rayonix_1920)'\
+    '\n 10: test_load_psf() - uses file psf-test.npy generated after any test_psf_from_file(...)'\
     '\n'\
-    '\n 11: test_load_psf()'\
     '\n 12: test_load_data_from_file(fn_data_cspad)'\
     '\n 13: test_load_data_from_file(fn_data_epix10ka2m)'\
     '\n 14: test_load_data_from_file(fn_data_jungfrau)'\
     '\n 15: test_load_data_from_file(fn_data_pnccd)'\
+    '\n 16: test_load_data_from_file(fn_data_rayonix_1920)'\
     '\n'\
-    '\n 22: test_psf_all(fn_geo_cspad_xpp,  fn_data_cspad)'\
-    '\n 23: test_psf_all(fn_geo_epix10ka2m, fn_data_epix10ka2m)'\
-    '\n 24: test_psf_all(fn_geo_jungfrau_8, fn_data_jungfrau)'\
-    '\n 25: test_psf_all(fn_geo_pnccd_amo,  fn_data_pnccd)'\
+    '\n 22: test_psf_methods(fn_geo_cspad_xpp,    fn_data_cspad)'\
+    '\n 23: test_psf_methods(fn_geo_epix10ka2m,   fn_data_epix10ka2m)'\
+    '\n 24: test_psf_methods(fn_geo_jungfrau_8,   fn_data_jungfrau)'\
+    '\n 25: test_psf_methods(fn_geo_pnccd_amo,    fn_data_pnccd)'\
+    '\n 26: test_psf_methods(fn_geo_rayonix_1920, fn_data_rayonix_1920)'\
     '\n'\
-    '\n 32: test_psf_graph(fn_geo_cspad_xpp,  fn_data_cspad)'\
-    '\n 33: test_psf_graph(fn_geo_epix10ka2m, fn_data_epix10ka2m)'\
-    '\n 34: test_psf_graph(fn_geo_jungfrau_8, fn_data_jungfrau)'\
-    '\n 35: test_psf_graph(fn_geo_pnccd_amo,  fn_data_pnccd)'\
+    '\n 32: test_psf_graph(fn_geo_cspad_xpp,    fn_data_cspad)'\
+    '\n 33: test_psf_graph(fn_geo_epix10ka2m,   fn_data_epix10ka2m)'\
+    '\n 34: test_psf_graph(fn_geo_jungfrau_8,   fn_data_jungfrau)'\
+    '\n 35: test_psf_graph(fn_geo_pnccd_amo,    fn_data_pnccd)'\
+    '\n 36: test_psf_graph(fn_geo_rayonix_1920, fn_data_rayonix_1920)'\
     '\n'
 
 
@@ -191,22 +197,26 @@ if __name__ == "__main__":
   elif tname=='3': test_psf_from_file(fn_geo_epix10ka2m)
   elif tname=='4': test_psf_from_file(fn_geo_jungfrau_8)
   elif tname=='5': test_psf_from_file(fn_geo_pnccd_amo)
+  elif tname=='6': test_psf_from_file(fn_geo_rayonix_1920)
+  elif tname=='10': test_load_psf()
 
-  elif tname=='11': test_load_psf()
   elif tname=='12': test_load_data_from_file(fn_data_cspad)
   elif tname=='13': test_load_data_from_file(fn_data_epix10ka2m)
   elif tname=='14': test_load_data_from_file(fn_data_jungfrau)
   elif tname=='15': test_load_data_from_file(fn_data_pnccd)
+  elif tname=='16': test_load_data_from_file(fn_data_rayonix_1920)
 
-  elif tname=='22': test_psf_all(fn_geo_cspad_xpp,  fn_data_cspad)
-  elif tname=='23': test_psf_all(fn_geo_epix10ka2m, fn_data_epix10ka2m)
-  elif tname=='24': test_psf_all(fn_geo_jungfrau_8, fn_data_jungfrau)
-  elif tname=='25': test_psf_all(fn_geo_pnccd_amo,  fn_data_pnccd)
+  elif tname=='22': test_psf_methods(fn_geo_cspad_xpp,    fn_data_cspad)
+  elif tname=='23': test_psf_methods(fn_geo_epix10ka2m,   fn_data_epix10ka2m)
+  elif tname=='24': test_psf_methods(fn_geo_jungfrau_8,   fn_data_jungfrau)
+  elif tname=='25': test_psf_methods(fn_geo_pnccd_amo,    fn_data_pnccd)
+  elif tname=='26': test_psf_methods(fn_geo_rayonix_1920, fn_data_rayonix_1920)
 
-  elif tname=='32': test_psf_graph(fn_geo_cspad_xpp,  fn_data_cspad)
-  elif tname=='33': test_psf_graph(fn_geo_epix10ka2m, fn_data_epix10ka2m)
-  elif tname=='34': test_psf_graph(fn_geo_jungfrau_8, fn_data_jungfrau)
-  elif tname=='35': test_psf_graph(fn_geo_pnccd_amo,  fn_data_pnccd)
+  elif tname=='32': test_psf_graph(fn_geo_cspad_xpp,    fn_data_cspad)
+  elif tname=='33': test_psf_graph(fn_geo_epix10ka2m,   fn_data_epix10ka2m)
+  elif tname=='34': test_psf_graph(fn_geo_jungfrau_8,   fn_data_jungfrau)
+  elif tname=='35': test_psf_graph(fn_geo_pnccd_amo,    fn_data_pnccd)
+  elif tname=='36': test_psf_graph(fn_geo_rayonix_1920, fn_data_rayonix_1920)
 
   else: logger.warning('NON-IMPLEMENTED TEST: %s' % tname)
 
