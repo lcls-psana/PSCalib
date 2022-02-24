@@ -9,6 +9,21 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-27
+2022-02-24 Mikhail Dubrovin
+- GlobalUtils.py - replace len(a.shape) with a.ndim
+- CalibParsBaseCSPad2x2V1.py - code cleaning
+- CalibParsBaseEpix100aV1.py - code cleaning
+- CalibParsBaseEpix10kaV1.py - code cleaning
+- Use universal parameters in
+	pixel_mask_array(sp, mbits=0o377, width=1, wcentral=1, **kwa)
+  - SegGeometryCspad2x1V1.py
+  - SegGeometryEpix100V1.py
+  - SegGeometryEpix10kaV1.py
+  - SegGeometryEpix10kaV2.py
+  - SegGeometryJungfrauV1.py
+  - SegGeometryJungfrauV2.py
+
 Tag: V02-00-26
 2022-01-25 Mikhail Dubrovin
 - src/GlobalUtils.py - change default chmod parameters, add os.umask(0o0)
