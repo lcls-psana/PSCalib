@@ -348,7 +348,15 @@ class SegGeometryEpix10kaV1(SegGeometry):
 
     def pixel_mask_array(sp, mbits=0o377, width=1, wcentral=1, **kwa):
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
-        mbits: +1 - mask edges, +2 - mask two central columns
+
+        Parameters
+
+        mbits:
+            +1 - mask edges,
+            +2 - mask central columns
+
+        width (uint) - width in pixels of masked edge
+        wcentral (uint) - width in pixels of masked central rows and columns
         """
         w = width    # kwargs.get('width', 1)
         u = wcentral # kwargs.get('wcentral', 1)
@@ -494,7 +502,7 @@ if __name__ == "__main__":
   def test_2x2_mask(mbits=0o377):
     pc2x2 = SegGeometryEpix10kaV1(use_wide_pix_center=False)
     X, Y = pc2x2.get_seg_xy_maps_pix_with_offset()
-    mask = pc2x2.pixel_mask_array(mbits, width=5, wcentral=5)
+    mask = pc2x2.pixel_mask_array(mbits, width=10, wcentral=5)
     mask[mask==0]=3
     iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
     img = gg.getImageFromIndexArrays(iX,iY,mask)

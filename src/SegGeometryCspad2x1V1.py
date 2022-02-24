@@ -338,37 +338,47 @@ class SegGeometryCspad2x1V1(SegGeometry):
         return sp.return_switch(sp.get_xyz_max_um, axis)
 
 
-    def pixel_mask_array(sp, mbits=0o377, **kwa):
+    def pixel_mask_array(sp, mbits=0o377, width=1, wcentral=1, **kwa):
         """ Returns numpy array of pixel mask: 1/0 = ok/masked,
+
+        Parameters
+
         mbits=1 - mask edges,
-        +2 - mask two central columns,
-        +4 - mask non-bonded pixels,
-        +8 - mask nearest four neighbours of nonbonded pixels,
-        +16- mask eight neighbours of nonbonded pixels.
+             +2 - mask two central columns,
+             +4 - mask non-bonded pixels,
+             +8 - mask nearest four neighbours of nonbonded pixels,
+             +16- mask eight neighbours of nonbonded pixels.
+
+        width (uint) - width in pixels of masked edge
+        wcentral (uint) - width in pixels of masked central columns
         """
-        zero_col = np.zeros(sp._rows,dtype=np.uint8)
-        zero_row = np.zeros(sp._cols,dtype=np.uint8)
-        mask     = np.ones((sp._rows,sp._cols),dtype=np.uint8)
+        mask = np.ones((sp._rows,sp._cols),dtype=np.uint8)
+        w = width    # kwargs.get('width', 1)
+        u = wcentral # kwargs.get('wcentral', 1)
+        h = sp._colsh
 
         if mbits & 1:
-        # mask edges
-            mask[0,:] = zero_row # mask top    edge
-            mask[-1,:] = zero_row # mask bottom edge
-            mask[:, 0] = zero_col # mask left   edge
-            mask[:,-1] = zero_col # mask right  edge
+            # mask edges with "width"
+            zero_col = np.zeros((sp._rows,w),dtype=np.uint8)
+            zero_row = np.zeros((w,sp._cols),dtype=np.uint8)
+
+            mask[0:w,:] = zero_row # mask top    edge
+            mask[-w:,:] = zero_row # mask bottom edge
+            mask[:,0:w] = zero_col # mask left   edge
+            mask[:,-w:] = zero_col # mask right  edge
 
         if mbits & 2:
-        # mask two central columns
-            mask[:,sp._colsh-1] = zero_col # mask central-left  column
-            mask[:,sp._colsh]   = zero_col # mask central-right column
+            # mask wcentral central columns for each ASIC
+            zero_cols = np.zeros((sp._rows, u),dtype=np.uint8)
+            mask[:,h-u:h] = zero_cols # mask central-left columns
+            mask[:,h:h+u] = zero_cols # mask central-right columns
 
         if mbits & 4 or mbits & 8 or mbits & 16:
-        # mask non-bonded pixels
+            # mask non-bonded pixels
             for p in range(0, sp._rows, 10):
-                h = sp._colsh
 
                 if mbits & 16:
-                # mask eight neighbours of nonbonded pixels
+                    # mask eight neighbours of nonbonded pixels
                     if p==0:
                         mask[0:2,0:2] = 0
                         mask[0:2,h:2+h] = 0
@@ -377,7 +387,7 @@ class SegGeometryCspad2x1V1(SegGeometry):
                         mask[p-1:p+2,p-1+h:p+2+h] = 0
 
                 elif mbits & 8:
-                # mask nearest four neighbours of nonbonded pixels
+                    # mask nearest four neighbours of nonbonded pixels
                     if p==0:
                         mask[1,0] = 0
                         mask[0,1] = 0
@@ -506,10 +516,10 @@ if __name__ == "__main__":
     logger.info(s)
 
 
-  def test_2x1_mask(mbits=0o377):
+  def test_2x1_mask(mbits=0o377, width=5, wcentral=10):
     pc2x1 = SegGeometryCspad2x1V1(use_wide_pix_center=False)
     X, Y = pc2x1.get_seg_xy_maps_pix_with_offset()
-    mask = pc2x1.pixel_mask_array(mbits)
+    mask = pc2x1.pixel_mask_array(mbits, width=width, wcentral=wcentral)
     s = '\n  mask:\n%s' % str(mask)\
       + '\n  mask.shape: %s' % str(mask.shape)
     logger.info(s)
@@ -527,8 +537,8 @@ if __name__ == "__main__":
     if tname in ('0','3'): s+='\n 3 - test_img()'
     if tname in ('0','4'): s+='\n 4 - test_img_easy()'
     if tname in ('0','5'): s+='\n 5 - test_pix_sizes()'
-    if tname in ('0','6'): s+='\n 6 - test_mask(mbits=1+2+4+8)'
-    if tname in ('0','7'): s+='\n 7 - test_mask(mbits=16)'
+    if tname in ('0','6'): s+='\n 6 - test_mask(mbits=1+2)'
+    if tname in ('0','7'): s+='\n 7 - test_mask(mbits=4+8+16)'
     return s
 
 
@@ -541,8 +551,8 @@ if __name__ == "__main__":
     elif tname=='3': test_2x1_img()
     elif tname=='4': test_2x1_img_easy()
     elif tname=='5': test_pix_sizes()
-    elif tname=='6': test_2x1_mask(mbits=1+2+4+8)
-    elif tname=='7': test_2x1_mask(mbits=16)
+    elif tname=='6': test_2x1_mask(mbits=1+2)
+    elif tname=='7': test_2x1_mask(mbits=4+8+16)
     else: logger.warning('NON-EXPECTED TEST NAME: %s\n\n%s' % (tname, usage()))
     if len(sys.argv)>1: logger.info(usage(tname))
     sys.exit('END OF TEST')

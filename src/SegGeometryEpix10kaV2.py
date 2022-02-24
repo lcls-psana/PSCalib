@@ -137,7 +137,7 @@ if __name__ == "__main__":
   def test_2x2_mask(mbits=0o377):
     pc2x2 = SegGeometryEpix10kaV2(use_wide_pix_center=False)
     X, Y = pc2x2.get_seg_xy_maps_pix_with_offset()
-    mask = pc2x2.pixel_mask_array(mbits, width=5, wcentral=5)
+    mask = pc2x2.pixel_mask_array(mbits, width=10, wcentral=5)
     mask[mask==0]=3
     iX, iY = (X+0.25).astype(int), (Y+0.25).astype(int)
     img = gg.getImageFromIndexArrays(iX,iY,mask)
