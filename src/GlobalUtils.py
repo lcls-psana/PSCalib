@@ -22,6 +22,7 @@ Usage::
 
     mmask = gu.merge_masks(mask1=None, mask2=None, dtype=np.uint8)
     mask  = gu.mask_neighbors(mask_in, allnbrs=True, dtype=np.uint8)
+    mask  = gu.mask_neighbors_in_radius(mask1, rad=5, ptrn='r')
     lo,hi = gu.evaluate_limits(arr, nneg=5, npos=5, lim_lo=1, lim_hi=1000, verbos=1, cmt='')
 
     arr2d = gu.reshape_nda_to_2d(nda)
@@ -392,7 +393,7 @@ def shape_nda_to_2d(arr):
     """Return shape of np.array to reshape to 2-d
     """
     sh = arr.shape
-    if len(sh)<3: return sh
+    if arr.ndim<3: return sh
     return (arr.size//sh[-1], sh[-1])
 
 
@@ -400,7 +401,7 @@ def shape_nda_to_3d(arr):
     """Return shape of np.array to reshape to 3-d
     """
     sh = arr.shape
-    if len(sh)<4: return sh
+    if arr.ndim<4: return sh
     return (arr.size//sh[-1]//sh[-2], sh[-2], sh[-1])
 
 
@@ -408,7 +409,7 @@ def reshape_nda_to_2d(arr):
     """Reshape np.array to 2-d
     """
     sh = arr.shape
-    if len(sh)<3: return arr
+    if arr.ndim<3: return arr
     arr.shape = (arr.size//sh[-1], sh[-1])
     return arr
 
@@ -417,7 +418,7 @@ def reshape_nda_to_3d(arr):
     """Reshape np.array to 3-d
     """
     sh = arr.shape
-    if len(sh)<4: return arr
+    if arr.ndim<4: return arr
     arr.shape = (arr.size//sh[-1]//sh[-2], sh[-2], sh[-1])
     return arr
 
@@ -432,8 +433,8 @@ def merge_masks(mask1=None, mask2=None, dtype=np.uint8):
     shape2 = mask2.shape
 
     if shape1 != shape2:
-        if len(shape1) > len(shape2): mask2.shape = shape1
-        else                        : mask1.shape = shape2
+        if mask1.ndim > mask2.ndim: mask2.shape = shape1
+        else                      : mask1.shape = shape2
 
     mask = np.logical_and(mask1, mask2)
     return mask if dtype==np.bool else np.asarray(mask, dtype)
@@ -462,12 +463,11 @@ def mask_neighbors(mask, allnbrs=True, dtype=np.uint8):
        allnbrs: bool - False/True - masks 4/8 neighbor pixels.
     """
     shape_in = mask.shape
-    if len(shape_in) < 2:
-        raise ValueError('Input mask has less then 2-d, shape = %s' % str(shape_in))
+    assert mask.ndim >1
 
     mask_out = np.copy(mask.astype(dtype)) # np.asarray(mask, dtype)
 
-    if len(shape_in) == 2:
+    if mask.ndim == 2:
         # mask nearest neighbors
         mask_out[0:-1,:] = np.logical_and(mask_out[0:-1,:], mask[1:,  :])
         mask_out[1:,  :] = np.logical_and(mask_out[1:,  :], mask[0:-1,:])
@@ -501,21 +501,53 @@ def mask_neighbors(mask, allnbrs=True, dtype=np.uint8):
     return mask_out
 
 
+def mask_neighbors_in_radius(mask, rad=5, ptrn='r'):
+    """In mask array increase region of masked pixels around bad by radial paramerer rad.
+       Parameters:
+       -----------
+       - mask (np.ndarray) - input mask array ndim >=2
+       - rad (int) - radial parameter of masked region
+       - ptrn (char) - pattern of the masked region, for now ptrn='r'-rhombus, ptrn='c'-circle,
+                       othervise square [-rad,+rad] in rows and columns.
+
+       Time on psanagpu109 for img shape:(2203, 2299)
+       rad=4: 0.5s
+       rad=9: 2.5s
+    """
+    #t0_sec = time()
+    assert isinstance(mask, np.ndarray)
+    assert mask.ndim>1
+    mmask = np.array(mask)
+    rows, cols = mask.shape[-2],mask.shape[-1]
+    for dr in range(-rad, rad+1):
+      r1b, r1e = max(dr, 0), min(rows, rows+dr)
+      r2b, r2e = max(-dr, 0), min(rows, rows-dr)
+      for dc in range(-rad, rad+1):
+        if ptrn=='r' and (abs(dr)+abs(dc) > rad): continue
+        elif ptrn=='c' and (dr*dr + dc*dc > rad*rad ): continue
+        c1b, c1e = max(dc, 0), min(cols, cols+dc)
+        c2b, c2e = max(-dc, 0), min(cols, cols-dc)
+        if mask.ndim==2:
+          mmask[r1b:r1e,c1b:c1e] = merge_masks(mmask[r1b:r1e,c1b:c1e], mask[r2b:r2e,c2b:c2e])
+        else:
+          mmask[:,r1b:r1e,c1b:c1e] = merge_masks(mmask[:,r1b:r1e,c1b:c1e], mask[:,r2b:r2e,c2b:c2e])
+    #logger.info('mask_neighbors(rad=%d) time = %.3f sec' % (rad, time()-t0_sec))
+    return mmask
+
+
 def mask_edges(mask, mrows=1, mcols=1, dtype=np.uint8):
     """Return mask with a requested number of row and column pixels masked - set to 0.
        mask : int - n-dimensional (n>1) array with input mask
        mrows: int - number of edge rows to mask
        mcols: int - number of edge columns to mask
     """
+    assert isinstance(mask, np.ndarray)
     sh = mask.shape
-    if len(sh) < 2:
-        raise ValueError('Input mask has less then 2-d, shape = %s' % str(sh))
+    assert mask.ndim>1
 
     mask_out = np.asarray(mask, dtype)
 
-    # print 'shape:', sh
-
-    if len(sh) == 2:
+    if mask.ndim == 2:
         rows, cols = sh
 
         if mrows > rows:
