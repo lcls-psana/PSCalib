@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#------------------------------
 """
 :py:class:`CalibPars` - abstract interface for access to calibration parameters
 ===============================================================================
@@ -54,7 +53,7 @@ See classes:
   -  :py:class:`GenericCalibPars`
   -  :py:class:`GlobalUtils`
   -  :py:class:`CalibPars`
-  -  :py:class:`CalibParsStore` 
+  -  :py:class:`CalibParsStore`
   -  :py:class:`CalibParsBaseAndorV1`
   -  :py:class:`CalibParsBaseAndor3dV1`
   -  :py:class:`CalibParsBaseCameraV1`
@@ -72,131 +71,106 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Author: Mikhail Dubrovin
 """
 from __future__ import print_function
-#------------------------------
 
 import sys
 import PSCalib.GlobalUtils as gu
 
-#------------------------------
 
-class CalibPars(object) :
+class CalibPars(object):
 
-#------------------------------
-
-    def __init__(self) : 
+    def __init__(self):
         """ Constructor
         """
         self.wmsg = 'WARNING! %s.%s' % (self.__class__.__name__,\
                     '%s - interface method from the base class needs to be re-implemented in the derived class.')
         pass
 
-#------------------------------
 
-    def print_attrs(self) :
+    def print_attrs(self):
         """ Prints attributes
         """
         print(self.wmsg % 'print_attrs()')
 
-#------------------------------
 
-    def pedestals(self) :
+    def pedestals(self):
         """ Returns pedestals
         """
         print(self.wmsg % 'pedestals()')
 
-#------------------------------
 
-    def pixel_status(self) :
+    def pixel_status(self):
         """ Returns pixel_status
         """
         print(self.wmsg % 'pixel_status()')
 
-#------------------------------
 
-    def pixel_datast(self) :
+    def pixel_datast(self):
         """ Returns pixel_datast
         """
         print(self.wmsg % 'pixel_datast()')
 
-#------------------------------
 
-    def pixel_rms(self) :
+    def pixel_rms(self):
         """ Returns pixel_rms
         """
         print(self.wmsg % 'pixel_rms()')
 
-#------------------------------
 
-    def pixel_gain(self) :
+    def pixel_gain(self):
         """ Returns pixel_gain
         """
         print(self.wmsg % 'pixel_gain()')
 
-#------------------------------
 
-    def pixel_offset(self) :
+    def pixel_offset(self):
         """ Returns pixel_offset
         """
         print(self.wmsg % 'pixel_offset()')
 
-#------------------------------
 
-    def pixel_mask(self) :
+    def pixel_mask(self):
         """ Returns pixel_mask
         """
         print(self.wmsg % 'pixel_mask()')
 
-#------------------------------
 
-    def pixel_bkgd(self) :
+    def pixel_bkgd(self):
         """ Returns pixel_bkgd
         """
         print(self.wmsg % 'pixel_bkgd()')
 
-#------------------------------
 
-    def common_mode(self) :
+    def common_mode(self):
         """ Returns common_mode
         """
         print(self.wmsg % 'common_mode()')
 
-#------------------------------
-#------------------------------
-#------------------------------
-#------------------------------
 
-    def ndim(self, ctype=gu.PEDESTALS) :
+    def ndim(self, ctype=gu.PEDESTALS):
         """ Returns ndim
         """
         print(self.wmsg % 'ndim(ctype)')
 
-#------------------------------
 
-    def shape(self, ctype=gu.PEDESTALS) :
+    def shape(self, ctype=gu.PEDESTALS):
         """ Returns shape
         """
         print(self.wmsg % 'shape(ctype)')
 
-#------------------------------
 
-    def size(self, ctype=gu.PEDESTALS) :
+    def size(self, ctype=gu.PEDESTALS):
         """ Returns size
         """
         print(self.wmsg % 'size(ctype)')
 
-#------------------------------
 
-    def status(self, ctype=gu.PEDESTALS) :
+    def status(self, ctype=gu.PEDESTALS):
         """ Returns status
         """
         print(self.wmsg % 'size(status)')
 
-#------------------------------
-#------------------------------
-#------------------------------
-#------------------------------
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     print('Module %s describes interface methods to access calibration parameters' % sys.argv[0])
 
     cp = CalibPars()
@@ -206,9 +180,6 @@ if __name__ == "__main__" :
     size = cp.status()
     sys.exit ('End of %s' % sys.argv[0])
 
-#------------------------------
-#------------------------------
-#------------------------------
-#------------------------------
+# EOF
 
 
