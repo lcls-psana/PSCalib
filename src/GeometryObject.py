@@ -16,6 +16,7 @@ Usage::
     geo = GeometryObject(**d)
 
     # test print methods:
+    s = geo.info_geo()
     geo.print_geo()
     geo.print_geo_children()
 
@@ -145,13 +146,19 @@ class GeometryObject(object):
         self.tilt_x += dt_x
 
 
-    def print_geo(self):
+    def info_geo(self):
         """ Print info about self geometry object.
         """
-        logger.info('parent:%10s %2d   geo: %10s %2d' % (self.pname, self.pindex, self.oname, self.oindex) + \
+        return ('parent:%10s %2d   geo: %10s %2d' % (self.pname, self.pindex, self.oname, self.oindex) + \
               '  x0:%8.0f  y0:%8.0f  z0:%8.0f' % (self.x0, self.y0, self.z0) + \
               '  rot_z:%8.3f  rot_y:%8.3f  rot_x:%8.3f' % (self.rot_z, self.rot_y, self.rot_x) + \
               '  tilt_z:%8.5f  tilt_y:%8.5f  tilt_x:%8.5f' % (self.tilt_z, self.tilt_y, self.tilt_x))
+
+
+    def print_geo(self):
+        """ Print info about self geometry object.
+        """
+        logger.info(self.info_geo())
 
 
     def str_data(self):
