@@ -527,6 +527,15 @@ class GeometryAccess:
         return geo.tilt_geo(dt_x, dt_y, dt_z)
 
 
+    def info_list_of_geos(self, cmt='info_list_of_geos():\n'):
+        s = cmt
+        if len(self.list_of_geos) == 0:  s += ' List_of_geos is empty...'
+        #logger.info(s)
+        if not self.valid: return s
+        list_info_geo = [geo.info_geo() for geo in self.list_of_geos]
+        return s + '\n'.join(list_info_geo)
+
+
     def print_list_of_geos(self):
         s = 'print_list_of_geos():'
         if len(self.list_of_geos) == 0:  s += ' List_of_geos is empty...'
