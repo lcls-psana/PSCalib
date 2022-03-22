@@ -195,6 +195,8 @@ list_of_det_names = ('UNDEFINED', 'Cspad', 'Cspad2x2', 'Princeton', 'pnCCD', 'Tm
 
 """ List of enumetated detector names"""
 
+list_of_det_names_lower = [v.lower() for v in list_of_det_names]
+
 list_of_calib_groups = ('UNDEFINED',
                         'CsPad::CalibV1',
                         'CsPad2x2::CalibV1',
@@ -239,8 +241,15 @@ list_of_calib_groups = ('UNDEFINED',
 dic_det_type_to_name = dict(zip(list_of_det_type, list_of_det_names))
 """ Dictionary for detector type : name"""
 
+dic_det_name_to_type = dict(zip(list_of_det_names, list_of_det_type))
+""" Dictionary for detector name : type"""
+
 dic_det_type_to_calib_group = dict(zip(list_of_det_type, list_of_calib_groups))
 """ Dictionary for detector type : group"""
+
+dic_det_tname_lower_to_calib_group = dict(zip(list_of_det_names_lower, list_of_calib_groups))
+""" Dictionary for <detector type name in lower case> : group"""
+
 
 bld_names = \
 ['EBeam',
@@ -732,8 +741,16 @@ def exp_name(env):
     return exp
 
 
-def log_rec_on_start():
+def log_rec_at_start(tsfmt='%Y-%m-%dT%H:%M:%S%z', **kwa):
     """Returns (str) record containing timestamp, login, host, cwd, and command line
+    """
+    s_kwa = ' '.join(['%s:%s'%(k,str(v)) for k,v in kwa.items()])
+    return '\n%s user:%s@%s cwd:%s rel:%s %s command:%s'%\
+           (str_tstamp(fmt=tsfmt), get_login(), get_hostname(), get_cwd(), get_enviroment('CONDA_DEFAULT_ENV'), s_kwa, ' '.join(sys.argv))
+
+
+def log_rec_on_start():
+    """DEPRECATED Returns (str) record containing timestamp, login, host, cwd, and command line
     """
     return '%s user:%s@%s cwd:%s rel:%s cmd:%s\n'%\
            (str_tstamp(fmt='%Y-%m-%dT%H:%M:%S'), get_login(), get_hostname(), get_cwd(), get_enviroment('CONDA_DEFAULT_ENV'), ' '.join(sys.argv))
