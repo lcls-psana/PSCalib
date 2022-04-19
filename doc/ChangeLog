@@ -14,7 +14,7 @@ Tag: V02-00-28
    src/CalibPars.py - code cleaning
    src/GeometryAccess.py - add method info_list_of_geos
    src/GeometryObject.py - add metho info_geo
-   src/GlobalUtils.py - add list_of_det_names_lower, dic_det_name_to_type,
+   src/GlobalUtils.py - Add list_of_det_names_lower, dic_det_name_to_type,
 	dic_det_tname_lower_to_calib_group, log_rec_at_start
 
 Tag: V02-00-27
