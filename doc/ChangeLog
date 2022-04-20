@@ -9,6 +9,10 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-29
+2022-04-20 Mikhail Dubrovin
+- src/GenericCalibPars.py - set default epix100a gain 0.06 keV/ADU since evt time 1650524400 sec for 2022-04-21 00:00
+
 Tag: V02-00-28
 2022-03-22 Mikhail Dubrovin
    src/CalibPars.py - code cleaning
