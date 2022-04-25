@@ -1,5 +1,4 @@
 ####!/usr/bin/env python
-#------------------------------
 """
 :py:class:`DCInterface` - abstract interface for the Detector Calibration (DC) project
 ======================================================================================
@@ -25,22 +24,19 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Author: Mikhail Dubrovin
 """
 from __future__ import print_function
-#------------------------------
 
 import sys
 from PSCalib.DCBase import DCBase
 
-#------------------------------
 
-def print_warning(obj, metframe) :
+def print_warning(obj, metframe):
     wng = 'WARNING: %s.%16s - abstract interface method needs to be re-implemented in derived class.' \
           % (obj.__class__.__name__, metframe.f_code.co_name)
     print(wng)
     #raise NotImplementedError(wng)
 
-#------------------------------
 
-class DCStoreI(DCBase) :
+class DCStoreI(DCBase):
     """Abstract interface class for the Detector Calibration (DC) project
 
        cs = DCStoreI(fname)
@@ -54,7 +50,7 @@ class DCStoreI(DCBase) :
        ctypes      = cs.ctypes()                # (list) calibration types in the file
        cto         = cs.ctypeobj(ctype)         # (DCType ~ h5py.Group) calibration type object
 
-       cs.set_tscfile(ts)                       # set (int) time stamp of the file creation 
+       cs.set_tscfile(ts)                       # set (int) time stamp of the file creation
        cs.set_dettype(dettype)                  # set (str) detector type
        cs.set_detid(detid)                      # set (str) detector id
        cs.set_detname(detname)                  # set (str) detector name of self object
@@ -68,7 +64,7 @@ class DCStoreI(DCBase) :
        cs.load(path)                            # load content of the file in DCStore object
     """
 
-    def __init__(self, fname, cmt=None) :
+    def __init__(self, fname, cmt=None):
         DCBase.__init__(self, cmt)
         #super(DCStoreI, self).__init__()
         self._name = self.__class__.__name__
@@ -95,9 +91,8 @@ class DCStoreI(DCBase) :
     def load(self, path)            : print_warning(self, sys._getframe())
     def print_obj(self, offset)     : print_warning(self, sys._getframe())
 
-#------------------------------
 
-class DCTypeI(DCBase) :
+class DCTypeI(DCBase):
     """Abstract interface class for the Detector Calibration (DC) project
 
        cto = DCTypeI(type)
@@ -106,15 +101,15 @@ class DCTypeI(DCBase) :
        ranges      = cto.ranges()               # (list) of time ranges for ctype
        ro          = cto.rangeobj(begin, end)   # (DCRange ~ h5py.Group) time stamp validity range object
        ro          = cto.range_for_tsec(tsec)   # (DCRange) range object for time stamp in (double) sec
-       ro          = cto.range_for_evt(evt)     # (DCRange) range object for psana.Evt object 
+       ro          = cto.range_for_evt(evt)     # (DCRange) range object for psana.Evt object
        cto.add_range(tsr)                       # add (str) of time ranges for ctype
        keyr = cto.mark_range(begin, end)        # mark range from the DCType object
        keyr = cto.mark_range_for_key(keyr)      # mark range from the DCType object
        cto.mark_ranges(tsr)                     # mark all ranges from the DCType object
        cto.print_obj()
     """
- 
-    def __init__(self, ctype, cmt=None) :
+
+    def __init__(self, ctype, cmt=None):
         DCBase.__init__(self, cmt)
         self._name = self.__class__.__name__
 
@@ -132,9 +127,8 @@ class DCTypeI(DCBase) :
     def load(self, path)             : print_warning(self, sys._getframe())
     def print_obj(self)              : print_warning(self, sys._getframe())
 
-#------------------------------
 
-class DCRangeI(DCBase) :
+class DCRangeI(DCBase):
     """Abstract interface class for the Detector Calibration (DC) project
 
        o = DCRangeI(begin, end)
@@ -150,11 +144,11 @@ class DCRangeI(DCBase) :
        o.set_end(tsend)                      # set (int) time stamp ending validity range
        o.add_version(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
        o.set_versdef(vers)                   # set (DCVersion ~ h5py.Group) versions of calibrations
-       vnum = o.mark_version(vers)           # del version 
+       vnum = o.mark_version(vers)           # del version
        o.mark_versions()                     # del all registered versions
     """
 
-    def __init__(self, begin, end, cmt=None) :
+    def __init__(self, begin, end, cmt=None):
         DCBase.__init__(self, cmt)
         self._name = self.__class__.__name__
 
@@ -177,25 +171,24 @@ class DCRangeI(DCBase) :
     def load(self, group)          : print_warning(self, sys._getframe())
     def print_obj(self)            : print_warning(self, sys._getframe())
 
-#------------------------------
 
-class DCVersionI(DCBase) :
+class DCVersionI(DCBase):
     """Abstract interface class for the Detector Calibration (DC) project
 
        o = DCVersionI(vnum, tsprod=None, arr=None)
 
-       o.set_vnum(vnum)            # sets (int) version 
+       o.set_vnum(vnum)            # sets (int) version
        o.set_tsprod(tsprod)        # sets (double) time stamp of the version production
        o.add_data(nda)             # sets (np.array) calibration array
        vnum   = o.vnum()           # returns (int) version number
        s_vnum = o.str_vnum()       # returns (str) version number
        tsvers = o.tsprod()         # returns (double) time stamp of the version production
        nda    = o.data()           # returns (np.array) calibration array
-       o.save(group)               # saves object content under h5py.group in the hdf5 file. 
-       o.load(group)               # loads object content from the h5py.group of hdf5 file. 
+       o.save(group)               # saves object content under h5py.group in the hdf5 file.
+       o.load(group)               # loads object content from the h5py.group of hdf5 file.
     """
 
-    def __init__(self, vnum, tsprod=None, arr=None, cmt=None) :
+    def __init__(self, vnum, tsprod=None, arr=None, cmt=None):
         DCBase.__init__(self, cmt)
         self._name = self.__class__.__name__
 
@@ -210,13 +203,10 @@ class DCVersionI(DCBase) :
     def load(self, group)          : print_warning(self, sys._getframe())
     def print_obj(self)            : print_warning(self, sys._getframe())
 
-#------------------------------
-#------------------------------
-#----------- TEST -------------
-#------------------------------
-#------------------------------
 
-def test_DCStoreI() :
+#----------- TEST -------------
+
+def test_DCStoreI():
 
     o = DCStoreI(None)  # 'cfname.hdf5'
 
@@ -241,9 +231,8 @@ def test_DCStoreI() :
     o.save(None)
     o.load(None)
 
-#------------------------------
 
-def test_DCTypeI() :
+def test_DCTypeI():
 
     o = DCTypeI(None)
 
@@ -257,9 +246,8 @@ def test_DCTypeI() :
     o.save(None)
     o.load(None)
 
-#------------------------------
 
-def test_DCRangeI() :
+def test_DCRangeI():
 
     o = DCRangeI(None, None)
 
@@ -277,9 +265,8 @@ def test_DCRangeI() :
     o.save(None)
     o.load(None)
 
-#------------------------------
 
-def test_DCVersionI() :
+def test_DCVersionI():
 
     o = DCVersionI(None)
 
@@ -293,20 +280,18 @@ def test_DCVersionI() :
     o.save(None)
     o.load(None)
 
-#------------------------------
 
-def test() :
-    if len(sys.argv)==1 : print('For test(s) use command: python %s <test-number=1-4>' % sys.argv[0])
-    elif(sys.argv[1]=='1') : test_DCStoreI()        
-    elif(sys.argv[1]=='2') : test_DCTypeI()        
-    elif(sys.argv[1]=='3') : test_DCRangeI()        
-    elif(sys.argv[1]=='4') : test_DCVersionI()        
-    else : print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
+def test():
+    if len(sys.argv)==1: print('For test(s) use command: python %s <test-number=1-4>' % sys.argv[0])
+    elif(sys.argv[1]=='1'): test_DCStoreI()
+    elif(sys.argv[1]=='2'): test_DCTypeI()
+    elif(sys.argv[1]=='3'): test_DCRangeI()
+    elif(sys.argv[1]=='4'): test_DCVersionI()
+    else: print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
 
-#------------------------------
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     test()
     sys.exit( 'End of %s test.' % sys.argv[0])
 
-#------------------------------
+# EOF
