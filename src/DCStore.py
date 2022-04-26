@@ -21,7 +21,7 @@ Usage::
     successor   = o.successor()             # (str) detname of successor or None
     ctypes      = o.ctypes()                # (list) calibration types in the file
     cto         = o.ctypeobj(ctype)         # (DCType ~ h5py.Group) calibration type object
-    o.set_tscfile(tsec)                     # set (double) time stamp of the file creation 
+    o.set_tscfile(tsec)                     # set (double) time stamp of the file creation
     o.set_dettype(dettype)                  # set (str) detector type
     o.set_detid(detid)                      # set (str) detector id
     o.set_detname(detname)                  # set (str) detector name of self object
@@ -33,7 +33,7 @@ Usage::
     o.clear_ctype()                         # clear all ctypes (str) from the DCStore object dictionary
 
     o.save(group, mode='r+')                # saves object in hdf5 file. mode='r+'/'w' update/rewrite file.
-    o.load(group)                           # loads object content from the hdf5 file. 
+    o.load(group)                           # loads object content from the hdf5 file.
     o.print_obj()                           # print info about this object and its children
 
 See:

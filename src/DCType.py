@@ -93,6 +93,8 @@ class DCType(DCTypeI):
             return self._dicranges[keyrng]
         o = self._dicranges[keyrng] = DCRange(begin, end)
 
+        #print('XXX add_range self._dicranges', self._dicranges)
+
         rec = self.make_record('add range', keyrng, cmt)
         if cmt is not False: self.add_history_record(rec)
         log.info(rec, self.__class__.__name__)
@@ -142,7 +144,7 @@ class DCType(DCTypeI):
         """Return DCRange object from all available which range validity is matched to tsec.
         """
         ranges = sorted(self.ranges().values())
-        #print 'XXX tsec, ranges:', tsec, ranges
+        #print('XXX tsec, ranges:', tsec, ranges)
         for ro in ranges[::-1]:
             if ro.tsec_in_range(tsec): return ro
         return None
@@ -179,7 +181,7 @@ class DCType(DCTypeI):
         msg = '== load data from group %s and fill object %s' % (grp.name, self._name)
         log.debug(msg, self._name)
 
-        #print 'XXX DCType.load group file name: "%s"' % grp.file.name
+        #print('XXX DCType.load group file name: "%s"' % grp.file.name)
 
         for k,v in dict(grp).items():
             #subgrp = v
@@ -203,20 +205,30 @@ class DCType(DCTypeI):
                     print('ERROR:', self._name, msg)
                     continue
 
-                end = v.get('end','end')
+                end = v.get('end', None)
 
-                str_end = end[0].decode('utf-8') if isinstance(end[0], np.bytes_) else str(end[0])
-                if end is None or str_end!='end':
-                    msg = 'File: "%s"\n       has structure - group "%s" does not contain key "end", keys: "%s"'%\
-                          (grp.file.name, v.name, list(v.keys()))
-                    log.error(msg, self._name)
-                    print('ERROR:', self._name, msg)
-                    continue
+                #print('YYYY DCType end', end)
+                #str_end = end[0].decode('utf-8') if isinstance(end[0], np.bytes_) else str(end[0])
+                #print('YYYY DCType end, str_end', end, str_end)
 
-                #print 'ZZZ: name, k, v', v.name, v.keys(), v.values()
-                #print "XXX:v['begin'][0], v['end'][0]", v['begin'][0], v['end'][0]
-                o = self.add_range(begin[0], end[0], cmt=False)
+                #if end is None or str_end!='end':
+                #    msg = 'File: "%s"\n       has structure - group "%s" does not contain key "end", keys: "%s"'%\
+                #          (grp.file.name, v.name, list(v.keys()))
+                #    log.error(msg, self._name)
+                #    print('ERROR:', self._name, msg)
+                #    continue
+
+                #print('ZZZ: name, k, v', v.name, v.keys(), v.values())
+                #print("XXX:v['begin'][0], v['end'][0]", v['begin'][0], v['end'][0])
+                #print("YYY: begin, end", begin, end)
+                #print("YYY: begin, end", begin[0], end)
+
+                end = 'end' if end is None else end[0]
+
+                o = self.add_range(begin[0], end, cmt=False)
                 o.load(v)
+
+                #sys.exit('TEST EXIT')
 
 
     def print_obj(self):

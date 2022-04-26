@@ -237,8 +237,6 @@ class DCRange(DCRangeI):
         msg = '=== save(), group %s object for %s' % (grp.name, self.range())
         log.debug(msg, self._name)
 
-        #print 'ZZZ: self.versions()', self.versions()
-
         # save/delete objects in/from hdf5 file
         for k,v in self._dicvers.items():
             if k in self._lst_del_keys: delete_object(grp, version_int_to_str(k))
