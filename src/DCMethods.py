@@ -84,10 +84,7 @@ from __future__ import print_function
 
 import sys
 import os
-#import numpy as np
-#import h5py
 from time import time #localtime, strftime
-
 from PSCalib.DCLogger import log
 from PSCalib.DCFileName import DCFileName
 import PSCalib.DCUtils as dcu
@@ -274,6 +271,7 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
 
     str_ctype = gu.dic_calib_type_to_name[ctype]
     ct = cs.ctypeobj(str_ctype)
+    #print('XXX cs.ctypeobj', str_ctype, ct)
     if ct is None: return None
     #ct.print_obj()
 
@@ -281,19 +279,19 @@ def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=Fal
     #print('XXX: get DCRange object for time = %.3f' % tsec)
     cr = ct.range_for_tsec(tsec)
     #cr = ct.range_for_evt(evt)
-
-
+    #print('XXX cr', cr)
     if cr is None: return None
     #cr.print_obj()
 
     cv = cr.version(vnum=vers)
+    #print('XXX cv', cv)
     if cv is None: return None
     #cv.print_obj()
 
     return dcu.str_pro(cv.data())
 
 
-def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False, use_repo=False):
+def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False):
     """
     Returns specified array of calibration constants.
 
@@ -321,10 +319,16 @@ def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
     ofn = DCFileName(env, src, calibdir)
     if verb: ofn.print_attrs()
 
-    fname = ofn.calib_file_path_repo() if use_repo else\
-            ofn.calib_file_path()
+    for fname in (ofn.calib_file_path(), ofn.calib_file_path_repo()):
+      if os.path.exists(fname):
+          cons = get_constants_from_file(fname, par, ctype, vers, verb)
+          if cons is not None: return cons
+          else: print('%s WARNING: constants of ctype=%s are None' % (metname, str_ctype))
+      else:
+          print('%s WARNING: FILE DOES NOT EXIST %s' % (metname, fname))
 
-    return get_constants_from_file(fname, par, ctype, vers, verb)
+    print('%s WARNING: constants or *.h files not found, return None' % metname)
+    return None
 
 
 def delete_version_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False):
@@ -563,11 +567,10 @@ def print_content_from_file(fname):
     t0_sec = time()
     cs.load()
     print('File content loading time (sec) = %.6f' % (time()-t0_sec))
-    
-    print(50*'_','\nDCStore.print_obj()') 
+
+    print(50*'_','\nDCStore.print_obj()')
     cs.print_obj()
 
-#------------------------------
 
 def print_content(env, src='Epix100a.', calibdir=None):
     """Defines the file name and prints file content.
@@ -732,7 +735,6 @@ def test_delete_version_from_file():
 
     print('%s: deleted version %s' % (metname, str(vdel)))
 
-#------------------------------
 
 def test_delete_range():
     metname = sys._getframe().f_code.co_name
