@@ -141,18 +141,18 @@ def create_directory_v0(dir, verb=False):
         if verb : print('Directory created: %s' % dir)
 
 
-def create_directory(dir, mode=0o775):
+def create_directory(dir, mode=0o775, umask=0o0):
     #print 'create_directory: %s' % dir
+    os.umask(umask)
     if os.path.exists(dir):
         log.debug('Directory exists: %s' % dir, __name__)
     else:
         os.makedirs(dir, mode)
-        #os.chmod(dir, mode)
-        #os.system(cmd)
+        os.chmod(dir, mode)
         log.info('Directory created: %s' % dir, __name__)
 
 
-def create_path(path, depth=2, mode=0o775):
+def create_path(path, depth=2, mode=0o775, umask=0o0):
     # Creates missing path for /reg/d/psdm/<INS>/<EXP>/calib/<dtype> beginning from calib
     subdirs = path.rstrip('/').rsplit('/', depth)
     log.debug('subdirs: %s' % str(subdirs), __name__)
@@ -161,7 +161,7 @@ def create_path(path, depth=2, mode=0o775):
     for i,sd in enumerate(subdirs[1:]):
         cpath += '/%s'% sd
         #if i<length-depth: continue
-        create_directory(cpath, mode)
+        create_directory(cpath, mode, umask)
         #print 'create_path: %s' % cpath
 
     return os.path.exists(cpath)
@@ -218,7 +218,6 @@ def detector_full_name(env, src):
     str_src = source_full_name(env, str_src)
     if str_src is None: return None
     return string_from_source(str_src)
-
 
 
 def psana_source(env, srcpar):
@@ -420,7 +419,7 @@ def do_test():
     tname = sys.argv[1] if len(sys.argv) > 1 else '0'
     print(50*'_', '\nTest %s:' % tname)
     if   tname == '0': test_misc(); test_source_full_name(); test_string_from_source();\
-                        test_psana_source(); test_detector_full_name()
+                       test_psana_source(); test_detector_full_name()
     elif tname == '1': test_source_full_name()
     elif tname == '2': test_string_from_source()
     elif tname == '3': test_psana_source()
