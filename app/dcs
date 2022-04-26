@@ -4,10 +4,22 @@ from __future__ import print_function
 import os
 import sys
 from time import time
+#import PSCalib.DCMethods as dcm
 from PSCalib.DCMethods import add_constants, get_constants, delete_version, delete_range, delete_ctype, print_content,\
      add_constants_to_file, get_constants_from_file, delete_version_from_file, delete_range_from_file,\
      delete_ctype_from_file, print_content_from_file
 import PSCalib.DCUtils as dcu
+import Detector.UtilsCalib as uc
+
+DIR_REPO = '/reg/d/psdm/detector/calib/'
+DIR_LOG_AT_START = '/reg/g/psdm/logs/atstart/'
+SCRNAME = sys.argv[0].split('/')[-1]
+
+
+def is_none(data, msg='WARNING: data is None'):
+    status = data is None
+    if status: print(msg)
+    return status
 
 
 class DCS_CLI(object):
@@ -23,6 +35,14 @@ class DCS_CLI(object):
         self.verbos = opts.verbos
         #if self.verbos: self.print_raw()
         if self.verbos: self.print_pars()
+
+        repoman = uc.RepoManager(DIR_REPO, dirmode=0o775, filemode=0o666, dir_log_at_start=DIR_LOG_AT_START)
+        #logname = repoman.logname('%s_%s' % (SCRNAME, gu.get_login()))
+        #init_logger(loglevel=args.loglev, logfname=logname, fmt='[%(levelname).1s] %(filename)s L%(lineno)04d %(message)s')
+        #logger.info('log file: %s' % logname)
+
+        print('save_record_at_start under %s' % DIR_LOG_AT_START)
+        repoman.save_record_at_start(SCRNAME)
 
         self.command_dispatcher()
 
@@ -128,8 +148,11 @@ class DCS_CLI(object):
             dcu.np.save(cfname, data)
         else: # save as text file
             from PSCalib.NDArrIO import save_txt
-            #rms = data.std()
-            fmt = '%.1f' # if rms>10 else '%.3f' if rms>0.1 else '%.6f'
+            ct = dcu.gu
+            fmt = '%2d'  if ctype in (ct.PIXEL_MASK,) else\
+                  '%5d'  if ctype in (ct.PIXEL_STATUS,) else\
+                  '%.2f' if ctype in (ct.PEDESTALS,) else\
+                  '%.6f'
             save_txt(cfname, data, cmts=(), fmt=fmt)
         if verb: print('Array of constants for vers=%s is saved in file: %s' % (vers, cfname))
 
@@ -151,7 +174,8 @@ class DCS_CLI(object):
         """
         if verb: print('In %s' % sys._getframe().f_code.co_name)
         data = self.load_data_file(ctype, verb)
-        if data is None: return
+        if is_none(data, 'WARNING %s constants not available and not saved' % sys._getframe().f_code.co_name):\
+            return
         add_constants(data, par, env, src, ctype, cdir, vers, pred, succ, 'CLI %s'%msg, verb)
 
 
@@ -161,6 +185,8 @@ class DCS_CLI(object):
         """
         if verb: print('In %s' % sys._getframe().f_code.co_name)
         data = get_constants(par, env, src, ctype, cdir, vers, verb)
+        if is_none(data, 'WARNING %s constants not available' % sys._getframe().f_code.co_name):\
+            return
         cfname = self.fname_nda(env, src, cdir)
         self.save_data_file(cfname, data, ctype, vers, verb)
 
@@ -171,7 +197,8 @@ class DCS_CLI(object):
         """
         if verb: print('In %s' % sys._getframe().f_code.co_name)
         data = self.load_data_file(ctype, verb)
-        if data is None: return
+        if is_none(data, 'WARNING %s constants not available' % sys._getframe().f_code.co_name):\
+            return
         env = None # is used to comment experiment name
         add_constants_to_file(data, fname, par, env, ctype, vers, pred, succ, msg, verb)
 
@@ -182,6 +209,8 @@ class DCS_CLI(object):
         """
         if verb: print('In %s' % sys._getframe().f_code.co_name)
         data = get_constants_from_file(fname, par, ctype, vers, verb)
+        if is_none(data, 'WARNING %s constants not available' % sys._getframe().f_code.co_name):\
+            return
         cfname = self.fname_nda_from_fnameh5(fname)
         self.save_data_file(cfname, data, ctype, vers, verb)
 
@@ -284,6 +313,7 @@ def usage():
            '\n  %prog add        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -f my-nda.txt'+\
            '\n  %prog add        -e mfxn8316 -r 11 -d Epix100a -t geometry     -f geo.txt -m "my geo" -c ./calib\n'+\
            '\n  %prog add        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -f my-nda.txt -m "my comment" -c ./calib -v 4'+\
+           '\n  %prog add        -e xcsly9620 -r 9 -d Epix100a.3 -t pixel_gain -f nda3.txt -c /reg/d/psdm/detector/calib # add constants to global repository'+\
            '\n  %prog print      -e mfxn8316 -r 11 -d Epix100a -c ./calib'+\
            '\n  %prog print      -e mfxn8316 -r 11 -d Epix100a\n'+\
            '\n  %prog get        -e mfxn8316 -r 11 -d Epix100a -t pixel_status -f my-nda.txt -c ./calib -v 3'+\
