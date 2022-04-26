@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#------------------------------
 """
 Class :py:class:`DCVersion` for the Detector Calibration (DC) project
 =====================================================================
@@ -13,15 +12,15 @@ Usage::
     o = DCVersion(vnum, tsprod=None, arr=None, cmt=None)
 
     # Methods
-    o.set_vnum(vnum)            # sets (int) version 
+    o.set_vnum(vnum)            # sets (int) version
     o.set_tsprod(tsprod)        # sets (double) time stamp of the version production
     o.add_data(data)            # sets (str or np.array) calibration data
     vnum   = o.vnum()           # returns (int) version number
     s_vnum = o.str_vnum()       # returns (str) version number
     tsvers = o.tsprod()         # returns (double) time stamp of the version production
     data   = o.data()           # returns (np.array) calibration array
-    o.save(group)               # saves object content under h5py.group in the hdf5 file. 
-    o.load(group)               # loads object content from the h5py.group of hdf5 file. 
+    o.save(group)               # saves object content under h5py.group in the hdf5 file.
+    o.load(group)               # loads object content from the h5py.group of hdf5 file.
     o.print_obj()               # print info about this object.
 
     # and all methods inherited from PSCalib.DCBase
@@ -47,7 +46,6 @@ If you use all or part of it, please give an appropriate acknowledgment.
 Created: 2016 by Mikhail Dubrovin
 """
 from __future__ import print_function
-#------------------------------
 
 import os
 import sys
@@ -58,13 +56,11 @@ from PSCalib.DCInterface import DCVersionI
 from PSCalib.DCLogger import log
 from PSCalib.DCUtils import sp, get_subgroup, save_object_as_dset, str_pro
 
-#------------------------------
+def version_int_to_str(vnum): return ('v%04d' % vnum) if vnum is not None else 'None'
 
-def version_int_to_str(vnum) : return ('v%04d' % vnum) if vnum is not None else 'None'
+def version_str_to_int(vstr): return int(vstr.lstrip('v').lstrip('0'))
 
-def version_str_to_int(vstr) : return int(vstr.lstrip('v').lstrip('0'))    
-
-class DCVersion(DCVersionI) :
+class DCVersion(DCVersionI):
 
     """Class for the Detector Calibration (DC) project
 
@@ -75,7 +71,7 @@ class DCVersion(DCVersionI) :
     \n cmt : str - comment
     """
 
-    def __init__(self, vnum, tsprod=None, arr=None, cmt=None) : # int, double, np.array
+    def __init__(self, vnum, tsprod=None, arr=None, cmt=None): # int, double, np.array
         DCVersionI.__init__(self, vnum, tsprod, arr, cmt)
         self._name = self.__class__.__name__
 
@@ -96,9 +92,9 @@ class DCVersion(DCVersionI) :
 
     def tsprod(self)               : return self._tsprod   # double
 
-    def data(self)                 : return self._data      # np.array
+    def data(self)                 : return self._data     # np.array
 
-    def save(self, group) :
+    def save(self, group):
         grp = get_subgroup(group, self.str_vnum())                      # (str)
         ds1 = save_object_as_dset(grp, 'version', data=self.vnum())     # dtype='int'
         ds2 = save_object_as_dset(grp, 'tsprod',  data=self.tsprod())   # dtype='double'
@@ -110,38 +106,38 @@ class DCVersion(DCVersionI) :
         self.save_base(grp)
 
 
-    def load(self, grp) :
+    def load(self, grp):
         msg = '==== load data from group %s and fill object %s' % (grp.name, self._name)
         log.debug(msg, self._name)
 
-        for k,v in dict(grp).items() :
+        for k,v in dict(grp).items():
             #subgrp = v
             #print '    ', k , v
 
-            if isinstance(v, sp.dataset_t) :                    
+            if isinstance(v, sp.dataset_t):
                 log.debug('load dataset "%s"' % k, self._name)
                 #t0_sec = time()
                 if   k == 'version': self.set_vnum(v[0])
                 elif k == 'tsprod' : self.set_tsprod(v[0])
                 elif k == 'data'   :
                     d = v[()] #v.value - depricated
-                    if str(d.dtype)[:2] == '|S' :
+                    if str(d.dtype)[:2] == '|S':
                         d=d.tostring() # .split('\n')
                         #print 'XXX: d, type(d): %s'%d, type(d)
                     self.add_data(d)
 
-                else : log.warning('group "%s" has unrecognized dataset "%s"' % (grp.name, k), self._name)
+                else: log.warning('group "%s" has unrecognized dataset "%s"' % (grp.name, k), self._name)
                 #print 'TTT %s dataset "%s" time (sec) = %.6f' % (sys._getframe().f_code.co_name, k, time()-t0_sec)
 
-            elif isinstance(v, sp.group_t) :
-                if self.is_base_group(k,v) : continue
+            elif isinstance(v, sp.group_t):
+                if self.is_base_group(k,v): continue
             #    print 'XXX: ', self._name, k,v
             #    log.debug('load group "%s"' % k, self._name)
             #    o = self.add_version(v['version'][0])
             #    o.load(v)
 
 
-    def print_obj(self) :
+    def print_obj(self):
         offset = 4 * self._offspace
         self.print_base(offset)
         print('%s version    %s' % (offset, self.vnum()))
@@ -151,25 +147,21 @@ class DCVersion(DCVersionI) :
         print('%s tsprod     %s' % (offset, msg))
 
         data = self.data()
-        if isinstance(data, np.ndarray) :
+        if isinstance(data, np.ndarray):
            print('%s data.shape %s  dtype %s' % (offset, str(data.shape), str(data.dtype)))
-        else :
+           #print('XXX data:\n', data)
+        else:
            print('%s data' % (offset))
-           for s in str_pro(data).split('\n') : print('%s     %s' % (offset, s))
+           for s in str_pro(data).split('\n'): print('%s     %s' % (offset, s))
 
-        #for k,v in self.versions().iteritems() :
+        #for k,v in self.versions().iteritems():
         #    v.print_obj()
 
-    def __del__(self) :
+    def __del__(self):
         pass
 
-#---- TO-DO
 
-#    def get(self, p1, p2, p3)  : return None
-
-#------------------------------
-
-def test_DCVersion() :
+def test_DCVersion():
 
     o = DCVersion(None)
 
@@ -185,23 +177,21 @@ def test_DCVersion() :
     #o.save(None)
     #o.load(None)
 
-    r = o.get(None, None, None)    
+    r = o.get(None, None, None)
 
-#------------------------------
 
-def test() :
-    log.setPrintBits(0o377) 
+def test():
+    log.setPrintBits(0o377)
 
-    if len(sys.argv)==1 :
+    if len(sys.argv)==1:
         print('For test(s) use command: python %s <test-number=1-4>' % sys.argv[0])
         test_DCVersion()
-    elif(sys.argv[1]=='1') : test_DCVersion()        
-    else : print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
+    elif(sys.argv[1]=='1'): test_DCVersion()
+    else: print('Non-expected arguments: sys.argv = %s use 1,2,...' % sys.argv)
 
-#------------------------------
 
-if __name__ == "__main__" :
+if __name__ == "__main__":
     test()
     sys.exit( 'End of %s test.' % sys.argv[0])
 
-#------------------------------
+# EOF
