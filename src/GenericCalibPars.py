@@ -67,9 +67,10 @@ from PSCalib.NDArrIO import load_txt # save_txt, list_of_comments
 
 from pyimgalgos.GlobalUtils import print_ndarr
 
-GAIN_FACTOR_DEFAULT = 0.06 # keV/ADU on 2022/0/03 epix100 gain factor(Philip) = 60 eV/ADU, gain(Conny) = 16.4 ADU/keV
+#GAIN_FACTOR_DEFAULT = 0.06 # keV/ADU on 2022-04-26 epix100 gain factor(Philip) = 60 eV/ADU, gain(Conny) = 16.4 ADU/keV
+GAIN_FACTOR_DEFAULT = 1 # on 2022-05-09 because of users' complain return default gain factor to 1
 GAIN_DEFAULT = 1./GAIN_FACTOR_DEFAULT # ADU/keV
-TIME_SEC_NEW_GAIN = 1650524400 # sec for 2022-04-21 00:00
+#TIME_SEC_NEW_GAIN = 1650524400 # sec for 2022-04-21 00:00
 #TIME_SEC_NEW_GAIN = 1649908620 # test minimal event time for mecly4720 epix100a run=834
 
 class GenericCalibPars(CalibPars) :
@@ -185,13 +186,14 @@ class GenericCalibPars(CalibPars) :
         if ctype in (gu.PEDESTALS, gu.PIXEL_STATUS, gu.PIXEL_BKGD, gu.PIXEL_DATAST, gu.PIXEL_OFFSET):
             return np.zeros(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
 
-        elif ctype == gu.PIXEL_GAIN and self.group == 'Epix100a::CalibV1':
-            if self.pbits: print('INFO %s: set DEFAULT PIXEL_GAIN constants for %s GAIN_FACTOR_DEFAULT %f evt time(s) %.2f'%\
-                                 (self.msgh(3), self.group, GAIN_FACTOR_DEFAULT, self.tsec))
-            ones = np.ones(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
-            return GAIN_FACTOR_DEFAULT * ones if self.tsec is not None and int(self.tsec) > TIME_SEC_NEW_GAIN else ones
+# 2022-05-09 M.D. - remove this advanced "invention" because of users' complaints
+#        elif ctype == gu.PIXEL_GAIN and self.group == 'Epix100a::CalibV1':
+#            if self.pbits: print('INFO %s: set DEFAULT PIXEL_GAIN constants for %s GAIN_FACTOR_DEFAULT %f evt time(s) %.2f'%\
+#                                 (self.msgh(3), self.group, GAIN_FACTOR_DEFAULT, self.tsec))
+#            ones = np.ones(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
+#            return GAIN_FACTOR_DEFAULT * ones if self.tsec is not None and int(self.tsec) > TIME_SEC_NEW_GAIN else ones
 
-        else: # for PIXEL_RMS, PIXEL_MASK, etc
+        else: # for PIXEL_RMS, PIXEL_MASK, PIXEL_GAIN, etc
             return np.ones(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
 
 

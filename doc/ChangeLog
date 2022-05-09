@@ -9,6 +9,13 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-31
+2022-05-09 Mikhail Dubrovin
+modified:
+- src/UtilsPanelAlias.py - code cleaning
+- src/GenericCalibPars.py - return default epix100a gain fron 0.06 keV/ADU to 1.
+  - test: python Detector/examples/test-issues-2022.py 5
+
 Tag: V02-00-30
 2022-04-26 Mikhail Dubrovin
 modified:
