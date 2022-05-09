@@ -18,7 +18,7 @@ from PSCalib.GlobalUtils import load_textfile, save_textfile, get_login, str_tst
 FNAME_PANEL_ID_ALIASES = '.aliases.txt'
 
 def alias_for_id(panel_id, fname=FNAME_PANEL_ID_ALIASES, exp=None, run=None):
-    """Returns Epix100a/10ka panel short alias for long panel_id, 
+    """Returns Epix100a/10ka panel short alias for long panel_id,
        e.g., for panel_id = 3925999616-0996663297-3791650826-1232098304-0953206283-2655595777-0520093719
        returns 0001
     """
@@ -29,7 +29,7 @@ def alias_for_id(panel_id, fname=FNAME_PANEL_ID_ALIASES, exp=None, run=None):
       for r in recs:
         if not r: continue # skip empty records
         fields = r.strip('\n').split(' ')
-        if fields[1] == panel_id: 
+        if fields[1] == panel_id:
             logger.debug('found alias %s for panel_id %s in %s' % (fields[0], panel_id, fname))
             return fields[0]
         ialias = int(fields[0])
@@ -46,7 +46,7 @@ def alias_for_id(panel_id, fname=FNAME_PANEL_ID_ALIASES, exp=None, run=None):
 
 
 def id_for_alias(alias, fname=FNAME_PANEL_ID_ALIASES):
-    """Returns Jungfrau/Epix100a/10ka panel panel_id for specified alias, 
+    """Returns Jungfrau/Epix100a/10ka panel panel_id for specified alias,
        e.g., for alias = 0001
        returns 3925999616-0996663297-3791650826-1232098304-0953206283-2655595777-0520093719
     """
@@ -54,7 +54,7 @@ def id_for_alias(alias, fname=FNAME_PANEL_ID_ALIASES):
     recs = load_textfile(fname).strip('\n').split('\n')
     for r in recs:
         fields = r.strip('\n').split(' ')
-        if fields[0] == alias: 
+        if fields[0] == alias:
             logger.debug('found panel id %s' % (fields[1]))
             return fields[1]
 
@@ -66,7 +66,7 @@ if __name__ == "__main__":
         panel_id = '-'.join(ranlst)
         alias = alias_for_id(panel_id, fname='./aliases-test.txt')
         print('alias:', alias)
-  
+
     import sys
     print(80*'_')
     logging.basicConfig(format='[%(levelname).1s] %(filename)s L%(lineno)04d: %(message)s', level=logging.DEBUG)
