@@ -676,11 +676,11 @@ def create_directory_with_mode(dir, mode=0o777, verb=False):
     """Creates directory and sets its mode"""
 
     if os.path.exists(dir):
-        if verb: print('Directory exists: %s' % dir)
+        if verb: logger.debug('Directory exists: %s' % dir)
     else:
         os.makedirs(dir)
         os.chmod(dir, mode)
-        if verb: print('Directory created: %s, mode(oct)=%s' % (dir, oct(mode)))
+        if verb: logger.debug('Directory created: %s, mode(oct)=%s' % (dir, oct(mode)))
 
 
 def create_path(path, depth=6, mode=0o777, verb=False):
