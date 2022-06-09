@@ -17,7 +17,7 @@ from PSCalib.GlobalUtils import load_textfile, save_textfile, get_login, str_tst
 
 FNAME_PANEL_ID_ALIASES = '.aliases.txt'
 
-def alias_for_id(panel_id, fname=FNAME_PANEL_ID_ALIASES, exp=None, run=None):
+def alias_for_id(panel_id, fname=FNAME_PANEL_ID_ALIASES, exp=None, run=None, **kwa):
     """Returns Epix100a/10ka panel short alias for long panel_id,
        e.g., for panel_id = 3925999616-0996663297-3791650826-1232098304-0953206283-2655595777-0520093719
        returns 0001
@@ -39,6 +39,7 @@ def alias_for_id(panel_id, fname=FNAME_PANEL_ID_ALIASES, exp=None, run=None):
     rec = '%04d %s %s' % (alias_max+1, panel_id, str_tstamp())
     if exp is not None: rec += ' %10s' %  exp
     if run is not None: rec += ' r%04d' %  run
+    if len(kwa)>0: rec += ' '+' '.join([str(v) for k,v in kwa.items()])
     rec += ' %s\n' % get_login()
     logger.debug('file "%s" is appended with record:\n%s' % (fname, rec))
     save_textfile(rec, fname, mode='a')

@@ -9,6 +9,11 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-32
+2022-06-09 Mikhail Dubrovin
+	modified:   src/GlobalUtils.py - use logger.debug instead of print
+	modified:   src/UtilsPanelAlias.py - extend alias records with kwargs values
+
 Tag: V02-00-31
 2022-05-09 Mikhail Dubrovin
 modified:
