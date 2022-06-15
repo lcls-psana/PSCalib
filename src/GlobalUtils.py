@@ -900,6 +900,23 @@ def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, file
         if lfname is not None: add_rec_to_log(lfname, '  %s' % rec, verbos)
 
 
+def dict_of_object_metadata(o):
+    """returns dict of metadata and non-parametric method results.
+    """
+    if o is None: return None
+    d = {}
+    for name in [n for n in dir(o) if n[0] != '_']:
+        v = getattr(o, str(name), None)
+        if isinstance(v, (float, int, str, list, dict, tuple)):
+           d[name] = v
+        else:
+           try:
+               d[name] = v()
+           except:
+               d[name] = None
+    return d
+
+
 if __name__ == "__main__":
 
   def test_mask_neighbors_2d(allnbrs=True):
