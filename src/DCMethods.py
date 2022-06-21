@@ -323,11 +323,12 @@ def get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,
       if os.path.exists(fname):
           cons = get_constants_from_file(fname, par, ctype, vers, verb)
           if cons is not None: return cons
-          else: print('%s WARNING: constants of ctype=%s are None' % (metname, str_ctype))
+          else:
+            if verb: print('%s WARNING: constants of ctype=%s are None' % (metname, str_ctype))
       else:
-          print('%s WARNING: FILE DOES NOT EXIST %s' % (metname, fname))
+          if verb: print('%s WARNING: FILE DOES NOT EXIST %s' % (metname, fname))
 
-    print('%s WARNING: constants or *.h files not found, return None' % metname)
+    if verb: print('%s WARNING: constants or *.h files not found, return None' % metname)
     return None
 
 
