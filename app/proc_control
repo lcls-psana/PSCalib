@@ -53,16 +53,16 @@ def proc_control(parser) :
     logfname = '%s-%s.txt' % (logpref, tstamp)
 
     for i in range(10) :
-        if gu.create_path(logfname, depth=6, mode=0o774, verb=False) : continue
+        if gu.create_path(logfname, depth=6, mode=0o2774, verb=False) : continue
 
     gu.save_textfile('\nCreated path: %s' % logfname, logfname, mode='a')
-    os.chmod(logfname, 0o664)    
+    os.chmod(logfname, 0o2664)
 
     ofprefix='%s/nda-#exp-#run-#src-#evts-#type.txt' % rpu.work_dir(exp, procname)
     gu.save_textfile('\nOutput work files: %s' % ofprefix, logfname, mode='a')
 
     for i in range(5) :
-        if gu.create_path(ofprefix, depth=8, mode=0o774, verb=False) : continue
+        if gu.create_path(ofprefix, depth=8, mode=0o2774, verb=False) : continue
 
     msg = '\nproc_control exp: %s run: %s procname: %s qname: %s logfname %s'%\
           (exp, str(run), procname, qname, logfname)
@@ -76,7 +76,7 @@ def proc_control(parser) :
     msg = 'bsub subproc time dt=%7.3f sec' % (time()-t0_sec)
     gu.save_textfile(msg, logfname, mode='a')
 
-    #if 'submitted without an AFS token' in err : 
+    #if 'submitted without an AFS token' in err :
     #    print '  Tip: to get rid of error message use commands: kinit; aklog'
 
     rec   = gu.log_rec_on_start()
@@ -99,7 +99,7 @@ def proc_control(parser) :
         sleep(dt_sec)
 
     # change log file name in case of bad status
-    if status != 'DONE' : 
+    if status != 'DONE' :
         logfname_bad = '%s-%s' % (logfname, str(status))
         #cmd = 'mv %s %s' % (logfname, logfname_bad)
         #os.system(cmd)
@@ -107,7 +107,7 @@ def proc_control(parser) :
 
 #------------------------------
 
-def usage() : 
+def usage() :
     return "\n%prog -e <experiment> -r <run-number> [-p <process-name> -q <queue-name> -t <wait-sec> -s <sources>]"\
            "\n  Ex.: %prog -e xpptut15 -r 0260 -p pixel_status -q psnehq -t 5 -s cspad,pnccd"
 
@@ -139,14 +139,14 @@ def input_option_parser() :
     parser.add_option('-s', '--srs', default=d_srs, action='store', type='string', help=h_srs)
 
     return parser #, parser.parse_args()
-  
+
 #------------------------------
 
 if __name__ == "__main__" :
 
     parser = input_option_parser()
 
-    if len(sys.argv) < 5 : 
+    if len(sys.argv) < 5 :
         parser.print_help()
         sys.exit('WARNING: check input parameters')
 
