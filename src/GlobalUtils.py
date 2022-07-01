@@ -44,8 +44,8 @@ Usage::
     #### tsec, tnsec, fiducial, tsdate, tstime = gu.time_pars(evt) # needs in psana...
 
     gu.create_directory(dir)
-    gu.create_directory_with_mode(dir, mode=0o777, verb=False)
-    exists = gu.create_path(path, depth=6, mode=0o777, verb=True)
+    gu.create_directory_with_mode(dir, mode=0o2777, verb=False)
+    exists = gu.create_path(path, depth=6, mode=0o2777, verb=True)
 
     arr  = gu.load_textfile(path)
     gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append
@@ -658,12 +658,13 @@ def file_mode(fname):
     return os.stat(fname)[ST_MODE]
 
 
-def set_file_access_mode(fname, mode=0o777):
+def set_file_access_mode(fname, mode=0o2777):
     os.chmod(fname, mode)
 
 
-def create_directory(dir, mode=0o777, **kwa):
+def create_directory(dir, mode=0o2777, **kwa):
     """Creates directory and sets its mode"""
+    os.umask(0o0)
     if os.path.exists(dir):
         logger.debug('Exists: %s mode(oct): %s' % (dir, oct(file_mode(dir))))
     else:
@@ -672,9 +673,9 @@ def create_directory(dir, mode=0o777, **kwa):
         logger.debug('Created: %s, mode(oct)=%s' % (dir, oct(mode)))
 
 
-def create_directory_with_mode(dir, mode=0o777, verb=False):
+def create_directory_with_mode(dir, mode=0o2777, verb=False):
     """Creates directory and sets its mode"""
-
+    os.umask(0o0)
     if os.path.exists(dir):
         if verb: logger.debug('Directory exists: %s' % dir)
     else:
@@ -683,7 +684,7 @@ def create_directory_with_mode(dir, mode=0o777, verb=False):
         if verb: logger.debug('Directory created: %s, mode(oct)=%s' % (dir, oct(mode)))
 
 
-def create_path(path, depth=6, mode=0o777, verb=False):
+def create_path(path, depth=6, mode=0o2777, verb=False):
     """Creates missing path of specified depth from the beginning
        e.g. for '/reg/g/psdm/logs/calibman/2016/07/log-file-name.txt'
        or '/reg/d/psdm/cxi/cxi11216/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data'
@@ -761,12 +762,12 @@ def add_rec_to_log(lfname, rec, verbos=False):
     """
     path = replace(lfname, '#YYYY-MM', str_tstamp(fmt='%Y/%m'))
     os.umask(0o0)
-    if create_path(path, depth=6, mode=0o777, verb=verbos):
+    if create_path(path, depth=6, mode=0o2777, verb=verbos):
         cmd = 'echo "%s" >> %s' % (rec, path)
         if verbos: print('command: %s' % cmd)
         os.system(cmd)
-        mode_log = 0o666
-        if (file_mode(path) & 0o777) == mode_log: return
+        mode_log = 0o2666
+        if (file_mode(path) & 0o2777) == mode_log: return
         os.chmod(path, mode_log)
 
 
@@ -865,7 +866,7 @@ def command_add_record_to_file(rec, fname):
     return 'echo "%s" >> %s' % (rec, fname) # >> stands for append
 
 
-def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, filemode=0o666):
+def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, filemode=0o2666):
     """Deploys file with calibration constants in the calib store, adds history record in file and in logfile.
 
     Parameters
