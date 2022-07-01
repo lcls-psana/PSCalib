@@ -17,8 +17,8 @@ Usage::
     usr   = gu.get_login()
     host  = gu.get_hostname()
     cwd   = gu.get_cwd()
-    gu.create_directory(dir, mode=0o775)
-    gu.create_path(path, depth=2, mode=0o775)
+    gu.create_directory(dir, mode=0o2775)
+    gu.create_path(path, depth=2, mode=0o2775)
     gu.save_string_as_dset(grp, name, s)
     src   = gu.source_full_name(env, src)
     dtype = gu.dettype_from_str_source(src)
@@ -141,7 +141,7 @@ def create_directory_v0(dir, verb=False):
         if verb : print('Directory created: %s' % dir)
 
 
-def create_directory(dir, mode=0o775, umask=0o0):
+def create_directory(dir, mode=0o2775, umask=0o0):
     #print 'create_directory: %s' % dir
     os.umask(umask)
     if os.path.exists(dir):
@@ -152,7 +152,7 @@ def create_directory(dir, mode=0o775, umask=0o0):
         log.info('Directory created: %s' % dir, __name__)
 
 
-def create_path(path, depth=2, mode=0o775, umask=0o0):
+def create_path(path, depth=2, mode=0o2775, umask=0o0):
     # Creates missing path for /reg/d/psdm/<INS>/<EXP>/calib/<dtype> beginning from calib
     subdirs = path.rstrip('/').rsplit('/', depth)
     log.debug('subdirs: %s' % str(subdirs), __name__)
