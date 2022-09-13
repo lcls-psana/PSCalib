@@ -11,8 +11,11 @@ from PSCalib.DCMethods import add_constants, get_constants, delete_version, dele
 import PSCalib.DCUtils as dcu
 import Detector.UtilsCalib as uc
 
-DIR_REPO = '/reg/d/psdm/detector/calib/'
-DIR_LOG_AT_START = '/reg/g/psdm/logs/atstart/'
+from Detector.dir_root import DIR_ROOT_DATA, DIR_LOG_AT_START
+
+DIR_REPO = os.path.join(DIR_ROOT_DATA, 'detector/calib/')
+#DIR_REPO = '/reg/d/psdm/detector/calib/'
+#DIR_LOG_AT_START = '/reg/g/psdm/logs/atstart/'
 SCRNAME = sys.argv[0].split('/')[-1]
 
 
@@ -36,7 +39,7 @@ class DCS_CLI(object):
         #if self.verbos: self.print_raw()
         if self.verbos: self.print_pars()
 
-        repoman = uc.RepoManager(DIR_REPO, dirmode=0o2775, filemode=0o2666, dir_log_at_start=DIR_LOG_AT_START)
+        repoman = uc.RepoManager(DIR_REPO, dirmode=0o2775, filemode=0o666, dir_log_at_start=DIR_LOG_AT_START)
         #logname = repoman.logname('%s_%s' % (SCRNAME, gu.get_login()))
         #init_logger(loglevel=args.loglev, logfname=logname, fmt='[%(levelname).1s] %(filename)s L%(lineno)04d %(message)s')
         #logger.info('log file: %s' % logname)
@@ -325,6 +328,10 @@ def usage():
            '\n  %prog delrange   -e mfxn8316 -r 11 -d Epix100a -t pixel_status -g 1474587520-end\n'+\
            '\n  %prog delctype   -e mfxn8316 -r 11 -d Epix100a -t pixel_status -m "my comment" -c ./calib'+\
            '\n  %prog delctype   -e mfxn8316 -r 11 -d Epix100a -t pixel_status'+\
+           '\n\n  Test:'+\
+           '\n  %prog print      -e xpptut15 -r 260 -d XcsEndstation.0:Epix100a.1'+\
+           '\n  %prog get        -e xpptut15 -r 260 -d XcsEndstation.0:Epix100a.1 -t pixel_gain -f epix100a-pixel-gain.npy'+\
+           '\n  %prog add        -e xpptut15 -r 260 -d XcsEndstation.0:Epix100a.1 -t pixel_gain -f epix100a-pixel-gain.npy -c ./calib'+\
            '\n\n  Commands using implicit hdf5 file name'+\
            '\n  %prog print      path-to-file.h5'+\
            '\n  %prog add        path-to-file.h5 -t geometry     -f geo.txt    -m "my geo"'+\
