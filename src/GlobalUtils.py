@@ -614,7 +614,7 @@ def evaluate_limits(arr, nneg=5, npos=5, lim_lo=1, lim_hi=1000, verbos=1, cmt=''
     lo, hi = max(lo, lim_lo), min(hi, lim_hi)
 
     if verbos & 1:
-        print('  %s: %s ave, std = %.3f, %.3f  low, high limits = %.3f, %.3f'%\
+        logger.info('  %s: %s ave, std = %.3f, %.3f  low, high limits = %.3f, %.3f'%\
               (sys._getframe().f_code.co_name, cmt, ave, std, lo, hi))
 
     return lo, hi
@@ -658,30 +658,32 @@ def file_mode(fname):
     return os.stat(fname)[ST_MODE]
 
 
-def set_file_access_mode(fname, mode=0o2777):
+def set_file_access_mode(fname, mode=0o666):
     os.chmod(fname, mode)
 
 
-def create_directory(dir, mode=0o2777, **kwa):
+def create_directory(d, mode=0o2777, **kwa):
     """Creates directory and sets its mode"""
     os.umask(0o0)
-    if os.path.exists(dir):
-        logger.debug('Exists: %s mode(oct): %s' % (dir, oct(file_mode(dir))))
+    if os.path.exists(d):
+        logger.debug('exists: %s mode(oct): %s' % (d, oct(file_mode(d))))
     else:
-        os.makedirs(dir)
-        os.chmod(dir, mode)
-        logger.debug('Created: %s, mode(oct)=%s' % (dir, oct(mode)))
+        os.makedirs(d)
+        os.chmod(d, mode)
+        logger.debug('created: %s, mode(oct)=%s' % (d, oct(mode)))
 
 
-def create_directory_with_mode(dir, mode=0o2777, verb=False):
-    """Creates directory and sets its mode"""
-    os.umask(0o0)
-    if os.path.exists(dir):
-        if verb: logger.debug('Directory exists: %s' % dir)
-    else:
-        os.makedirs(dir)
-        os.chmod(dir, mode)
-        if verb: logger.debug('Directory created: %s, mode(oct)=%s' % (dir, oct(mode)))
+def create_directory_with_mode(d, mode=0o2777, verb=False):
+    create_directory(d, mode=mode)
+
+#    """Creates directory and sets its mode"""
+#    os.umask(0o0)
+#    if os.path.exists(dir):
+#        logger.debug('exists: %s mode(oct): %s' % (dir, oct(file_mode(dir))))
+#    else:
+#        os.makedirs(dir)
+#        os.chmod(dir, mode)
+#        logger.debug('created: %s, mode(oct)=%s' % (dir, oct(mode)))
 
 
 def create_path(path, depth=6, mode=0o2777, verb=False):
@@ -691,7 +693,8 @@ def create_path(path, depth=6, mode=0o2777, verb=False):
 
        Returns True if path to file exists, False othervise
     """
-    if verb: print('create_path: %s' % path)
+    #if verb: print('create_path: %s' % path)
+    logger.debug('create_path: %s' % path)
 
     subdirs = path.split('/')
     cpath = subdirs[0]
@@ -764,10 +767,10 @@ def add_rec_to_log(lfname, rec, verbos=False):
     os.umask(0o0)
     if create_path(path, depth=6, mode=0o2777, verb=verbos):
         cmd = 'echo "%s" >> %s' % (rec, path)
-        if verbos: print('command: %s' % cmd)
+        if verbos: logger.info('command: %s' % cmd)
         os.system(cmd)
-        mode_log = 0o2666
-        if (file_mode(path) & 0o2777) == mode_log: return
+        mode_log = 0o666
+        if (file_mode(path) & 0o666) == mode_log: return
         os.chmod(path, mode_log)
 
 
@@ -776,7 +779,7 @@ def alias_for_src_name(env):
     srcs  = [k.src()   for k in ckeys]
     alias = [k.alias() for k in ckeys]
     d = dict(list(zip(srcs, alias)))
-    for s,a in d.items(): print('src: %40s   alias: %s' % (s, a))
+    for s,a in d.items(): logger.info('src: %40s   alias: %s' % (s, a))
     #print keysalias
 
 
@@ -866,7 +869,7 @@ def command_add_record_to_file(rec, fname):
     return 'echo "%s" >> %s' % (rec, fname) # >> stands for append
 
 
-def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, filemode=0o2666):
+def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, filemode=0o666, dirmode=0o2777):
     """Deploys file with calibration constants in the calib store, adds history record in file and in logfile.
 
     Parameters
@@ -884,18 +887,20 @@ def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, file
     dep = 6 if '/reg/d/psdm/' in path_clb else 0
     os.umask(0o0)
 
-    if create_path(path_clb, depth=dep, mode=0o2777, verb=verbos): # mode=0o2770 makes drwxrwsrws+
+    if create_path(path_clb, depth=dep, mode=dirmode, verb=verbos): # mode=0o2770 makes drwxrwsrws+
 
         fexists = os.path.exists(path_clb)
         cmd = command_deploy_file(ifname, path_clb)
-        if verbos: print('cmd: %s' % cmd)
+        #if verbos: print('cmd: %s' % cmd)
+        logger.info('cmd: %s' % cmd)
         os.system(cmd)
         if not fexists: os.chmod(path_clb, filemode)
 
         fexists = os.path.exists(path_his)
         rec = history_record(ifname, ctypedir, ctype, ofname, comment='')
         cmd = command_add_record_to_file(rec, path_his)
-        if verbos: print('cmd: %s' % cmd)
+        #if verbos: print('cmd: %s' % cmd)
+        logger.info('cmd: %s' % cmd)
         os.system(cmd)
         if not fexists: os.chmod(path_his, filemode)
         if lfname is not None: add_rec_to_log(lfname, '  %s' % rec, verbos)
