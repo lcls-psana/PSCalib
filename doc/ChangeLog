@@ -9,6 +9,15 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-38
+2022-09-14 Mikhail Dubrovin
+- rename depreceted modules to *-dep
+  include/CSPad2x2CalibIntensity.h, CSPadCalibIntensity.h, PnccdCalibPars.h
+  src/CSPad2x2CalibIntensity.cpp, CSPadCalibIntensity.cpp, PnccdCalibPars.cpp
+- include/CalibParsStore.h - cosmetic - remove blanks
+
+Tag: V02-00-37
+- fix for wrong order of git push and tag commands
 Tag: V02-00-36
 2022-09-13 Mikhail Dubrovin
   app/dcs - change filemode to 0o666 from 0o2666, define repositorie through the DIR_ROOT from dir_root.py
