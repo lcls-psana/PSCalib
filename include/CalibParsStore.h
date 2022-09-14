@@ -63,7 +63,7 @@ namespace PSCalib {
  *
  *  @brief class CalibParsStore has a static factory method Create for CalibPars
  *
- *  This software was developed for the LCLS project. If you use all or 
+ *  This software was developed for the LCLS project. If you use all or
  *  part of it, please give an appropriate acknowledgment.
  *
  *  @version $Id$
@@ -74,7 +74,7 @@ namespace PSCalib {
  *
  *  @anchor interface
  *  @par<interface> Interface Description
- * 
+ *
  *  @li  Includes
  *  @code
  *  #include "psana/Module.h" // for evt, env, get,  etc.
@@ -119,13 +119,13 @@ public:
 
   /**
    *  @brief Regular constructor, which use const std::string& str_src
-   *  
+   *
    *  @param[in] calibdir       Calibration directory for current experiment.
    *  @param[in] group          Data type and group names.
    *  @param[in] str_src        The data source name, ex.: Camp.0:pnCCD.0
    *  @param[in] runnum         Run number to search the valid file name.
    *  @param[in] print_bits     Print control bit-word.
-   */ 
+   */
   static PSCalib::CalibPars*
   Create ( const std::string&   calibdir,     //  /reg/d/psdm/AMO/amoa1214/calib
            const std::string&   group,        //  PNCCD::CalibV1
@@ -165,7 +165,7 @@ public:
 	}
 	*/
 
-	// Generic approach to calibration 
+	// Generic approach to calibration
 
         if ( str_src.find(":Cspad.") != std::string::npos ) {
            if (print_bits & 1) MsgLog("CalibParsStore", info, "Get access to calibration store for Cspad source: " << str_src);
@@ -242,7 +242,7 @@ public:
 	}
 
 	std::string msg = "Calibration parameters for source: " + str_src + " are not implemented yet...";
-        MsgLog("CalibParsStore", error, msg);  
+        MsgLog("CalibParsStore", error, msg);
 
         abort();
 
@@ -253,13 +253,13 @@ public:
 
   /**
    *  @brief Regular constructor, which use Pds::Src& src
-   *  
+   *
    *  @param[in] calibdir       Calibration directory for current experiment.
    *  @param[in] group          Data type and group names.
    *  @param[in] src            The data source object, for example Pds::Src m_src; defined in the env.get(...,&m_src)
    *  @param[in] runnum         Run number to search the valid file name.
    *  @param[in] print_bits     Print control bit-word.
-   */ 
+   */
   static PSCalib::CalibPars*
   Create ( const std::string&   calibdir,     //  /reg/d/psdm/mec/mec73313/calib
            const std::string&   group,        //  CsPad2x2::CalibV1
