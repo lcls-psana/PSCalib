@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-import logging
+from Detector.UtilsLogging import logging, DICT_NAME_TO_LEVEL, STR_LEVEL_NAMES
+#import logging
 logger = logging.getLogger(__name__)
 from PSCalib.GeometryAccess import GeometryAccess
 
@@ -140,7 +141,7 @@ def geometry_to_crystfel(fname, ofname, cframe=CFRAME_LAB):
       'segment name %s is not found in the list of implemented detectors %s'%(segname, str(SEGNAME_TO_PARS.keys()))
     valid_nsegs = SEGNAME_TO_PARS[segname]
 
-    nsegs = x.size/seg.size()
+    nsegs = int(x.size/seg.size())
     assert nsegs in valid_nsegs, 'number of %s segments %d should be in %s' % (seg.name(), nsegs, str(valid_nsegs))
 
     shape = (nsegs,) + seg.shape() # (nsegs, srows, scols)
@@ -168,11 +169,6 @@ def convert_geometry_to_crystfel(args):
 
 
 if __name__ == "__main__":
-
-    #print logging._levelNames
-    DICT_NAME_TO_LEVEL = logging._levelNames # logging._nameToLevel # {'INFO': 20, 'WARNING': 30, 'WARN': 30,...
-    LEVEL_NAMES = [v for v in logging._levelNames.values() if isinstance(v,str)] #_levelToName
-    STR_LEVEL_NAMES = ', '.join(LEVEL_NAMES)
 
     scrname = sys.argv[0].rsplit('/')[-1]
 

@@ -30,10 +30,9 @@ import os
 import sys
 import numpy as np
 from math import atan2, degrees, sqrt
-
-import logging
+from Detector.UtilsLogging import logging, DICT_NAME_TO_LEVEL, STR_LEVEL_NAMES
+#import logging
 logger = logging.getLogger(__name__)
-DICT_NAME_TO_LEVEL = logging._levelNames # logging._nameToLevel # {'INFO': 20, 'WARNING': 30, 'WARN': 30,...
 
 from PSCalib.SegGeometryStore import sgs
 import PSCalib.GlobalUtils as gu

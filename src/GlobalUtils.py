@@ -66,6 +66,7 @@ Usage::
     tpl = gu.calib_fname_template(exp, runnum, tsec, tnsec, fid, tsdate, tstime, src, nevts, ofname)
 
     gu.deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False)
+    int_version = python_version_major()  # returns (int) 2 or 3
 
 See: other methods in :py:class:`CalibPars`, :py:class:`CalibParsStore`
 
@@ -921,6 +922,11 @@ def dict_of_object_metadata(o):
            except:
                d[name] = None
     return d
+
+
+def python_version_major():
+    """ returns (int) 2 or 3"""
+    return sys.version_info.major
 
 
 if __name__ == "__main__":
