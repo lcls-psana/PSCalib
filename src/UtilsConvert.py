@@ -123,7 +123,7 @@ def info_seg_geo(seg):
       + '\n  nasics_in_rows: %d nasics_in_cols: %d' % seg.number_of_asics_in_rows_cols()
 
 
-def geometry_to_crystfel(fname, ofname, cframe=CFRAME_LAB):
+def geometry_to_crystfel(fname, ofname, cframe=CFRAME_LAB, zcorr_um=None):
 
     logger.info('geometry_to_crystfel - converts geometry constants from psana to CrystFEL format')
 
@@ -153,7 +153,9 @@ def geometry_to_crystfel(fname, ofname, cframe=CFRAME_LAB):
 
     txt = header_crystfel()
     for n in range(nsegs):
-        txt += panel_constants_to_crystfel(seg, n, x[n,:], y[n,:], z[n,:])
+        z_um = z[n,:]
+        if zcorr_um is not None: z_um -= zcorr_um
+        txt += panel_constants_to_crystfel(seg, n, x[n,:], y[n,:], z_um)
 
     logger.info('Geometry constants in CrystFEL format:\n\n%s\n...\n' % txt[:1000])
 
@@ -165,7 +167,57 @@ def geometry_to_crystfel(fname, ofname, cframe=CFRAME_LAB):
 
 
 def convert_geometry_to_crystfel(args):
-    geometry_to_crystfel(args.fname, args.ofname, cframe=args.cframe)
+    zcorr = z_correction_from_data(args)
+    if zcorr is not None: zcorr *= args.f_um
+    geometry_to_crystfel(args.fname, args.ofname, cframe=args.cframe, zcorr_um=zcorr)
+
+
+def z_correction_from_data(args):
+    dsname, zpvname = args.dsname, args.zpvname
+    logger.info('z_correction_from_data for dsname: %s  zpvname: %s  f_um: %s' % (dsname, zpvname, str(args.f_um)))
+    if dsname is None: return None
+
+    import psana
+    ds = psana.DataSource(dsname)
+    epics = ds.env().epicsStore()
+    zpvnames = ['CXI:DS1:MMS:06.RBV', 'CXI:DS2:MMS:06.RBV', 'MFX:DET:MMS:04.RBV',
+                'XPP:ROB:POS:Z', 'AMO:LMP:MMS:10.RBV']
+
+    #epics methods: 'alias', 'aliases', 'getPV', 'names', 'pvName', 'pvNames', 'status', 'value'
+    #print('epics.value("DscCsPad_z"):', epics.value('DscCsPad_z'))  # -424.9936
+    #print('epics.value("CXI:DS1:MMS:06.RBV"):', epics.value('CXI:DS1:MMS:06.RBV'))  # -424.9936
+    #logger.debug('epics.names(): %s' % str(epics.names()))
+    #logger.debug('epics.pvNames(): %s' % str(epics.pvNames()))
+
+    if zpvname is None: # use automatic search for z-correction
+        logger.info('known z-correction pv names: %s' % ', '.join(zpvnames) )
+        foundpvs = [pvname for pvname in zpvnames if pvname in epics.pvNames()]
+        nfoundpvs = len(foundpvs)
+
+        if nfoundpvs == 1:
+            zpvname = foundpvs[0]
+            zcorr = epics.value(zpvname)
+            logger.info('AUTO-FOUND z correction(%s) = %f mm' % (zpvname, zcorr))
+            return zcorr
+        elif nfoundpvs == 0:
+            logger.info('pv names: %s' % str(epics.pvNames()))
+            logger.info('aliases: %s' % str(epics.aliases()))
+            logger.warning('known z-correction variable is NOT FOUND.\nIf you know the pv name, try to use parameter --zpvname for one of pvs of the list above.')
+            return None
+        else: # nfoundpvs > 1
+            logger.warning('MORE THAN ONE known z-correction variable is found: %s' % ', '.join(foundpvs))
+            logger.info('Use parameter --zpvname <pv-name> to specify one of them')
+            return None
+
+    if zpvname in epics.names():
+        zcorr = epics.value(zpvname)
+        logger.info('z correction(%s) = %f mm' % (zpvname, zcorr))
+        return zcorr
+    else:
+        logger.info('pv names: %s' % str(epics.pvNames()))
+        logger.info('aliases: %s' % str(epics.aliases()))
+        logger.warning('z correction pv name %s is UNKNOWN' % zpvname)
+        return None
 
 
 if __name__ == "__main__":
