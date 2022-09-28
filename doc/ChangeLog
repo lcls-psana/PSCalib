@@ -9,6 +9,11 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-40
+2022-09-28 Mikhail Dubrovin
+  app/geometry_convert - add optional parameters --dsname, --zpvname, --f_um
+  src/UtilsConvert.py - by Chuck's request add/use method z_correction_from_data(args)
+
 Tag: V02-00-39
 2022-09-19 Mikhail Dubrovin
 - src/GlobalUtils.py - add method python_version_major
