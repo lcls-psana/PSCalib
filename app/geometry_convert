@@ -44,6 +44,10 @@ if __name__ == "__main__":
     d_ofname  = 'geo-crystfel.geom'
     d_loglev  ='INFO'
     d_cframe  = 1
+    d_dsname  = None
+    d_zpvname = None
+    d_f_um    = 1000.
+
     h_cframe = 'coordinate frame 0/1 for psana/LAB, def=%s. Works for PSANA->CRYSTFEL conversion ONLY'% d_cframe\
              + ' where it selects frame for pixel coordinates. Backward conversion CRYSTFEL->PSANA'\
                ' does not change frame. For test perpose it is assumed that forth and back conversion'\
@@ -58,6 +62,10 @@ if __name__ == "__main__":
       + '\n  cp /reg/g/psdm/detector/data_test/geometry/geo-cspad-xpp.data .'\
       + '\n  %s -f geo-cspad-xpp.data -o geo-cspad-xpp-crystfel.geom                 # conversion from psana to crystfel' % scrname\
       + '\n  %s -d cspadv2 -f geo-cspad-xpp-crystfel.geom -o geo-cspad-xpp-back.data # conversion from crystfel to psana' % scrname\
+      + '\n'\
+      + '\n  cp /reg/g/psdm/detector/data_test/geometry/geo-jungfrau-8-segment.data .'\
+      + '\n  %s -f geo-jungfrau-8-segment.data -o geo-jungfrau-8-segment.geom        # conversion from psana to crystfel' % scrname\
+      + '\n  %s -f geo-jungfrau-8-segment.data -o geo-jungfrau-8-segment.geom --dsname exp=cxic00318:run=123:smd --zpvname CXI:DS1:MMS:06.RBV' % scrname\
       + '\n'
 
     parser = argparse.ArgumentParser(usage=usage, description='Converts geometry constants from psana to CrystFEL format and backward (see --fname).')
@@ -66,6 +74,9 @@ if __name__ == "__main__":
     parser.add_argument('-l', '--loglev',  default=d_loglev,  type=str, help='logging level name, one of %s, def=%s' % (STR_LEVEL_NAMES, d_loglev))
     parser.add_argument('--cframe',        default=d_cframe,  type=int, help=h_cframe)
     parser.add_argument('-d', '--dettype', default=d_dettype, type=str, help=h_dettype)
+    parser.add_argument('--dsname',        default=d_dsname,  type=str, help='FOR Z CORRECTION FROM DATA - dataset (str) like exp=<experiment>:run=<run-number>:smd:..., def=%s' % d_dsname)
+    parser.add_argument('--zpvname',       default=d_zpvname, type=str, help='FOR Z CORRECTION FROM DATA - z-correction variable name ex: CXI:DS1:MMS:06.RBV or alias ex: DscCsPad_z, def=%s' % d_zpvname)
+    parser.add_argument('--f_um',          default=d_f_um, type=float, help='FOR Z CORRECTION FROM DATA - factor for conversion PV value to um, def=%f' % d_f_um)
 
     args = parser.parse_args()
     s = 'Arguments:'
