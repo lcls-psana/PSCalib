@@ -132,7 +132,7 @@ class DCFileName(object):
             self._calibdir = calibdir
             return
 
-        cdir = env.calibDir()
+        cdir = env.calibDir().replace('//','/')
         self._calibdir = None if '///' in cdir else cdir # /reg/d/psdm///calib
 
 
