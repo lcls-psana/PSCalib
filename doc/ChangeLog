@@ -9,6 +9,12 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-41
+2022-10-14 Mikhail Dubrovin
+  app/dcs - dirmode=0o2774, filemode=0o664
+  src/DCFileName.py - env.calibDir().replace('//','/')
+  src/GlobalUtils.py - use DIR_ROOT_DATA
+
 Tag: V02-00-40
 2022-09-28 Mikhail Dubrovin
   app/geometry_convert - add optional parameters --dsname, --zpvname, --f_um
