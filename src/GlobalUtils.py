@@ -89,8 +89,8 @@ import socket
 import numpy as np
 from time import localtime, strftime
 
-
-DIR_INS = '/reg/d/psdm'
+from Detector.dir_root import DIR_ROOT_DATA
+DIR_INS = DIR_ROOT_DATA # '/reg/d/psdm'
 
 CFRAME_PSANA   = 0 # default psana frame for image-matrix from open panel side x-rows, y-columns, z-along the beam
 CFRAME_LAB     = 1 # LAB frame - Y-top (-g - opposite to gravity) Z-along the beam, X=[YxZ]
@@ -733,7 +733,7 @@ def calib_dir_for_exp(exp):
 
 
 def calib_dir(env):
-    cdir = env.calibDir()
+    cdir = env.calibDir().replace('//','/')
     #if cdir == '/reg/d/psdm///calib':
     #    return None
     if os.path.exists(cdir):
