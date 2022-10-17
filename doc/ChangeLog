@@ -9,6 +9,11 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-42
+2022-10-17 Mikhail Dubrovin
+ - src/CalibParsStore.py - code cleaning, env.calibDir().replace('//','/')
+
+
 Tag: V02-00-41
 2022-10-14 Mikhail Dubrovin
   app/dcs - dirmode=0o2774, filemode=0o664
