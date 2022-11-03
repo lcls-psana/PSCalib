@@ -26,25 +26,29 @@ Usage::
     pred     = 'CxiDs2.0:Cspad.0'
     succ     = 'CxiDs2.0:Cspad.0'
     range    = '1474587520-end'
-
+    dirmode  = 0o2775
+    filemode = 0o664
+    group    = 'ps-users'
     par      = evt # psana.Event | float - tsec event time
     parts    = env # psana.Env | psana.Event | float - tsec event time
 
     # Methods with dynamically-reconstructed calib file name
-    dcm.add_constants(nda, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, pred=None, succ=None, cmt=None, verb=False)
+    dcm.add_constants(nda, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, pred=None,\
+                      succ=None, cmt=None, verb=False, dirmode=dirmode, filemode=filemode, group=group)
     dcm.print_content(env, src='Epix100a.', calibdir=None)
     nda = dcm.get_constants(par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, verb=False)
     dcm.delete_version(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, vers=None, cmt=None, verb=False)
-    dcm.delete_range  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False)
-    dcm.delete_ctype  (evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False)
+    dcm.delete_range(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, range=None, cmt=None, verb=False)
+    dcm.delete_ctype(evt, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None, cmt=None, verb=False)
 
     # Methods using fname
-    dcm.add_constants_to_file(data, fname, parts, env, ctype=gu.PIXEL_MASK, vers=None, pred=None, succ=None, cmt=None, verb=False)
+    dcm.add_constants_to_file(data, fname, parts, env, ctype=gu.PIXEL_MASK, vers=None, pred=None,\
+                              succ=None, cmt=None, verb=False, dirmode=dirmode, filemode=filemode, group=group)
     dcm.print_content_from_file(fname)
     nda = dcm.get_constants_from_file(fname, parts, ctype=gu.PIXEL_MASK, vers=None, verb=False)
     dcm.delete_version_from_file(fname, parts, ctype=gu.PIXEL_MASK, vers=None, cmt=None, verb=False)
-    dcm.delete_range_from_file  (fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)
-    dcm.delete_ctype_from_file  (fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)
+    dcm.delete_range_from_file(fname, ctype=gu.PIXEL_MASK, range=None, cmt=None, verb=False)
+    dcm.delete_ctype_from_file(fname, ctype=gu.PIXEL_MASK, cmt=None, verb=False)
 
 Methods
     * :meth:`add_constants`,
@@ -128,7 +132,7 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
                           pred=None,\
                           succ=None,\
                           cmt=None,\
-                          verb=False):
+                          verb=False, dirmode=0o2775, filemode=0o664, group='ps-users'):
     """Adds specified numpy array to the hdf5 file.
 
     Parameters
@@ -156,6 +160,8 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
     if fname is None:
         if verb: print('WARNING: file name is not defined - return None')
         return
+
+    fexists = os.path.exists(fname)
 
     tsec_ev = dcu.par_to_tsec(par)
 
@@ -204,13 +210,17 @@ def add_constants_to_file(data, fname, par, env=None, ctype=gu.PIXEL_MASK,\
 
     cs.save()
 
+    if not fexists:
+        os.chmod(fname, filemode)
+        gu.change_file_ownership(fname, user=None, group=group)
+
 
 def add_constants(data, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir=None,\
                   vers=None,\
                   pred=None,\
                   succ=None,\
                   cmt=None,\
-                  verb=False):
+                  verb=False, dirmode=0o2775, filemode=0o664, group='ps-users'):
     """Adds specified numpy array to the hdf5 file.
 
     Parameters
@@ -236,13 +246,13 @@ def add_constants(data, par, env, src='Epix100a.', ctype=gu.PIXEL_MASK, calibdir
     if verb: print('  %s.add_constants  src: %s\n  ctype: %s\n  vers: %s\n  calibdir:%s'%\
                     (metname, src, str_ctype, vers, calibdir))
 
-    ofn = DCFileName(env, src, calibdir)
+    ofn = DCFileName(env, src, calibdir, dirmode, filemode, group)
     if verb: ofn.print_attrs()
-    ofn.make_path_to_calib_file() # depth=2, mode=0o775)
+    ofn.make_path_to_calib_file(dirmode=dirmode, filemode=filemode, group=group)
 
     fname = ofn.calib_file_path()
 
-    add_constants_to_file(data, fname, par, env, ctype, vers, pred, succ, cmt, verb)
+    add_constants_to_file(data, fname, par, env, ctype, vers, pred, succ, cmt, verb, dirmode, filemode, group)
 
 
 def get_constants_from_file(fname, par, ctype=gu.PIXEL_MASK, vers=None, verb=False):

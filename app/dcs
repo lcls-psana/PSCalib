@@ -39,7 +39,8 @@ class DCS_CLI(object):
         #if self.verbos: self.print_raw()
         if self.verbos: self.print_pars()
 
-        repoman = uc.RepoManager(DIR_REPO, dirmode=0o2774, filemode=0o664, dir_log_at_start=DIR_LOG_AT_START)
+        repoman = uc.RepoManager(DIR_REPO, dir_log_at_start=DIR_LOG_AT_START,\
+                                 dirmode=opts.dirmode, filemode=opts.filemode, group=opts.group)
         #logname = repoman.logname('%s_%s' % (SCRNAME, gu.get_login()))
         #init_logger(loglevel=args.loglev, logfname=logname, fmt='[%(levelname).1s] %(filename)s L%(lineno)04d %(message)s')
         #logger.info('log file: %s' % logname)
@@ -172,14 +173,14 @@ class DCS_CLI(object):
         delete_ctype(evt, env, src, ctype, cdir, 'CLI %s'%msg, verb)
 
 
-    def add_constants(self, par, env, src, ctype, cdir, vers, pred, succ, msg, verb):
+    def add_constants(self, par, env, src, ctype, cdir, vers, pred, succ, msg, verb, dirmode, filemode, group):
         """Add constants from file specified in option -f to the hdf5 file
         """
         if verb: print('In %s' % sys._getframe().f_code.co_name)
         data = self.load_data_file(ctype, verb)
         if is_none(data, 'WARNING %s constants not available and not saved' % sys._getframe().f_code.co_name):\
             return
-        add_constants(data, par, env, src, ctype, cdir, vers, pred, succ, 'CLI %s'%msg, verb)
+        add_constants(data, par, env, src, ctype, cdir, vers, pred, succ, 'CLI %s'%msg, verb, dirmode, filemode, group)
 
 
     def get_constants(self, par, env, src, ctype, cdir, vers, verb):
@@ -194,7 +195,7 @@ class DCS_CLI(object):
         self.save_data_file(cfname, data, ctype, vers, verb)
 
 
-    def add_constants_to_file(self, fname, par, ctype, vers, pred, succ, msg, verb):
+    def add_constants_to_file(self, fname, par, ctype, vers, pred, succ, msg, verb, dirmode, filemode, group):
         """Add constants from file specified in option -f to the hdf5 file fname
            par : psana.Event | float - tsec event time
         """
@@ -203,7 +204,7 @@ class DCS_CLI(object):
         if is_none(data, 'WARNING %s constants not available' % sys._getframe().f_code.co_name):\
             return
         env = None # is used to comment experiment name
-        add_constants_to_file(data, fname, par, env, ctype, vers, pred, succ, msg, verb)
+        add_constants_to_file(data, fname, par, env, ctype, vers, pred, succ, msg, verb, dirmode, filemode, group)
 
 
     def get_constants_from_file(self, fname, par, ctype, vers, verb):
@@ -272,6 +273,9 @@ class DCS_CLI(object):
         verb   = self.opts['verbos']
         tsec   = self.opts['tsec']
         ctype  = self.calib_type()
+        dirmode  = self.opts['dirmode']
+        filemode = self.opts['filemode']
+        group    = self.opts['group']
 
         # parameters to get time in sec
         par = tsec if tsec is not None else evt if evt is not None else 0.
@@ -282,7 +286,7 @@ class DCS_CLI(object):
 
         if fname is not None: # work with specified hdf5 file
             if   action=='p'   : print_content_from_file(fname)
-            elif action=='a'   : self.add_constants_to_file   (fname, par, ctype, vers, pred, succ, msg, verb)
+            elif action=='a'   : self.add_constants_to_file   (fname, par, ctype, vers, pred, succ, msg, verb, dirmode, filemode, group)
             elif action=='g'   : self.get_constants_from_file (fname, par, ctype, vers, verb)
             elif 'delv' in mode: self.delete_version_from_file(fname, par, ctype, vers, msg, verb)
             elif 'delr' in mode: self.delete_range_from_file  (fname, ctype, rng, msg, verb)
@@ -294,7 +298,7 @@ class DCS_CLI(object):
 
         else:
             if   action=='p'   : print_content(env, src, cdir)
-            elif action=='a'   : self.add_constants (evt, env, src, ctype, cdir, vers, pred, succ, msg, verb)
+            elif action=='a'   : self.add_constants (evt, env, src, ctype, cdir, vers, pred, succ, msg, verb, dirmode, filemode, group)
             elif action=='g'   : self.get_constants (evt, env, src, ctype, cdir, vers, verb)
             elif 'delv' in mode: self.delete_version(evt, env, src, ctype, cdir, vers, msg, verb)
             elif 'delr' in mode: self.delete_range  (evt, env, src, ctype, cdir, rng, msg, verb)
@@ -363,6 +367,9 @@ def input_option_parser():
     cfname_def = None # 'ndarray.txt'
     verbos_def = True
     tsec_def   = None
+    d_dirmode  = 0o2775
+    d_filemode = 0o664
+    d_group    = 'ps-users'
 
     h_mode   = 'command mode: print/get/add/delete, default = %s' % mode_def
     h_exp    = 'experiment, e.g., cxi43210, default = %s' % exp_def
@@ -378,6 +385,9 @@ def input_option_parser():
     h_cfname = 'i/o file name for constants, default = %s' % str(cfname_def)
     h_verbos = 'verbosity, default = %s' % str(verbos_def)
     h_tsec   = 'time[sec] for constants timestamp to save or retreive, default = %s' % str(tsec_def)
+    h_dirmode = 'mode for all mkdir, default = %s' % oct(d_dirmode)
+    h_filemode= 'mode for all saved files, default = %s' % oct(d_filemode)
+    h_group = 'group ownership for all files, default = %s' % d_group
 
     parser = OptionParser(description='Command line parameters', usage ='usage: %prog <arg> <opts>' + usage())
     parser.add_option('-e', '--exp',    default=exp_def,    action='store', type='string', help=h_exp   )
@@ -393,6 +403,9 @@ def input_option_parser():
     parser.add_option('-f', '--cfname', default=cfname_def, action='store', type='string', help=h_cfname)
     parser.add_option('-i', '--verbos', default=verbos_def, action='store_false',          help=h_verbos)
     parser.add_option('-T', '--tsec',   default=tsec_def,   action='store', type='float',  help=h_tsec  )
+    parser.add_option('--dirmode',      default=d_dirmode,  action='store', type='int',    help=h_dirmode)
+    parser.add_option('--filemode',     default=d_filemode, action='store', type='int',    help=h_filemode)
+    parser.add_option('--group',        default=d_group,    action='store', type='string', help=h_group )
 
     return parser #, parser.parse_args()
 

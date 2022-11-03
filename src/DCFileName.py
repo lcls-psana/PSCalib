@@ -14,7 +14,7 @@ Usage::
     # Methods
     o.set_dettype(env, src)
     o.set_detid(env, src)
-    status = o.make_path_to_calib_file(mode=0o2770)
+    status = o.make_path_to_calib_file(dirmode=0o2775)
 
     dt    = o.dettype()              # e.g., epix100a
     did   = o.detid()                # e.g., 3925868555
@@ -71,7 +71,7 @@ class DCFileName(object):
     notype    = 'notype'
     noid      = 'noid'
 
-    def __init__(self, env, src, calibdir=None):
+    def __init__(self, env, src, calibdir=None, dirmode=0o2775, filemode=0o664, group='ps-users'):
         self._name = self.__class__.__name__
         log.debug('c-tor', self._name)
         self._env = env
@@ -188,14 +188,13 @@ class DCFileName(object):
         return '%s/%s' % (self.calib_file_dir_repo(), self.calib_file_name())
 
 
-    def make_path_to_calib_file(self, depth=2, mode=0o2775):
+    def make_path_to_calib_file(self, depth=2, dirmode=0o2775, filemode=0o664, group='ps-users'):
         """Creates path beginning from calib directory, e.g.: .../calib/epix100a/
         Returns True if path created and exists.
         """
         os.umask(0o0)
         fdir = self.calib_file_dir()
-        #print 'XXX:fdir', fdir
-        return gu.create_path(fdir, depth, mode)
+        return gu.create_path(fdir, depth, dirmode)
 
 
     def _parse_path_to_file(self, pathf):
@@ -250,7 +249,7 @@ def test_make_path_to_calib_file():
     ofn = DCFileName(ds.env(), 'Epix', calibdir='%s/calib' % gu.get_cwd())
     #ofn = DCFileName(ds.env(), 'Epix', calibdir='./calib')
     ofn.print_attrs()
-    ofn.make_path_to_calib_file(mode=0o2770)
+    ofn.make_path_to_calib_file(dirmode=0o2775)
 
 
 def do_test():

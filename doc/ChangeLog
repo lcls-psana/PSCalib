@@ -9,10 +9,23 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-??
+
+
+2022-11-03 Mikhail Dubrovin
+- COMMON ISSUES:
+        - add/use parameter group='ps-users' for dir/file ownership
+        - change dirmode=2775, filemode=664
+  app/dcs
+  src/DCFileName.py
+  src/DCMethods.py
+  src/DCUtils.py
+  src/GlobalUtils.py
+  src/NDArrIO.py - common + cosmetic remove spaces, comments etc.
+
 Tag: V02-00-42
 2022-10-17 Mikhail Dubrovin
  - src/CalibParsStore.py - code cleaning, env.calibDir().replace('//','/')
-
 
 Tag: V02-00-41
 2022-10-14 Mikhail Dubrovin

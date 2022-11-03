@@ -44,8 +44,8 @@ Usage::
     #### tsec, tnsec, fiducial, tsdate, tstime = gu.time_pars(evt) # needs in psana...
 
     gu.create_directory(dir)
-    gu.create_directory_with_mode(dir, mode=0o2777, verb=False)
-    exists = gu.create_path(path, depth=6, mode=0o2777, verb=True)
+    gu.create_directory_with_mode(dir, mode=0o2775, verb=False)
+    exists = gu.create_path(path, depth=6, mode=0o2775, verb=True)
 
     arr  = gu.load_textfile(path)
     gu.save_textfile(text, path, mode='w') # mode: 'w'-write, 'a'-append
@@ -659,11 +659,21 @@ def file_mode(fname):
     return os.stat(fname)[ST_MODE]
 
 
-def set_file_access_mode(fname, mode=0o666):
+def set_file_access_mode(fname, mode=0o664):
     os.chmod(fname, mode)
 
 
-def create_directory(d, mode=0o2777, **kwa):
+def change_file_ownership(fname, user=None, group='ps-users'):
+    """change file ownership. The same as Detector.UtilsCalib"""
+    import grp
+    import pwd
+    gid = os.getgid() if group is None else grp.getgrnam(group).gr_gid
+    uid = os.getuid() if user is None else pwd.getpwnam(user).pw_uid
+    logger.debug('change_file_ownership uid:%d gid:%d' % (uid, gid)) # uid:5269 gid:10000
+    os.chown(fname, uid, gid) # for non-default user - OSError: [Errno 1] Operation not permitted
+
+
+def create_directory(d, mode=0o2775, group='ps-users', **kwa):
     """Creates directory and sets its mode"""
     os.umask(0o0)
     if os.path.exists(d):
@@ -671,23 +681,15 @@ def create_directory(d, mode=0o2777, **kwa):
     else:
         os.makedirs(d)
         os.chmod(d, mode)
+        change_file_ownership(d, user=None, group=group)
         logger.debug('created: %s, mode(oct)=%s' % (d, oct(mode)))
 
 
-def create_directory_with_mode(d, mode=0o2777, verb=False):
-    create_directory(d, mode=mode)
-
-#    """Creates directory and sets its mode"""
-#    os.umask(0o0)
-#    if os.path.exists(dir):
-#        logger.debug('exists: %s mode(oct): %s' % (dir, oct(file_mode(dir))))
-#    else:
-#        os.makedirs(dir)
-#        os.chmod(dir, mode)
-#        logger.debug('created: %s, mode(oct)=%s' % (dir, oct(mode)))
+def create_directory_with_mode(d, mode=0o2775, verb=False, group='ps-users'):
+    create_directory(d, mode=mode, group=group)
 
 
-def create_path(path, depth=6, mode=0o2777, verb=False):
+def create_path(path, depth=6, mode=0o2775, verb=False, group='ps-users'):
     """Creates missing path of specified depth from the beginning
        e.g. for '/reg/g/psdm/logs/calibman/2016/07/log-file-name.txt'
        or '/reg/d/psdm/cxi/cxi11216/calib/Jungfrau::CalibV1/CxiEndstation.0:Jungfrau.0/pedestals/9-end.data'
@@ -703,7 +705,7 @@ def create_path(path, depth=6, mode=0o2777, verb=False):
         if i>0: cpath += '/%s'% sd
         if i<depth: continue
         if cpath=='': continue
-        create_directory_with_mode(cpath, mode, verb)
+        create_directory_with_mode(cpath, mode, verb, group)
 
     return os.path.exists(cpath)
 
@@ -766,12 +768,12 @@ def add_rec_to_log(lfname, rec, verbos=False):
     """
     path = replace(lfname, '#YYYY-MM', str_tstamp(fmt='%Y/%m'))
     os.umask(0o0)
-    if create_path(path, depth=6, mode=0o2777, verb=verbos):
+    if create_path(path, depth=6, mode=0o2775, verb=verbos):
         cmd = 'echo "%s" >> %s' % (rec, path)
         if verbos: logger.info('command: %s' % cmd)
         os.system(cmd)
-        mode_log = 0o666
-        if (file_mode(path) & 0o666) == mode_log: return
+        mode_log = 0o664
+        if (file_mode(path) & 0o664) == mode_log: return
         os.chmod(path, mode_log)
 
 
@@ -870,7 +872,7 @@ def command_add_record_to_file(rec, fname):
     return 'echo "%s" >> %s' % (rec, fname) # >> stands for append
 
 
-def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, filemode=0o666, dirmode=0o2777):
+def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, filemode=0o664, dirmode=0o2775, group='ps-users'):
     """Deploys file with calibration constants in the calib store, adds history record in file and in logfile.
 
     Parameters
@@ -888,14 +890,16 @@ def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, file
     dep = 6 if '/reg/d/psdm/' in path_clb else 0
     os.umask(0o0)
 
-    if create_path(path_clb, depth=dep, mode=dirmode, verb=verbos): # mode=0o2770 makes drwxrwsrws+
+    if create_path(path_clb, depth=dep, mode=dirmode, verb=verbos, group=group): # mode=0o2775 makes drwxrwsr-s+
 
         fexists = os.path.exists(path_clb)
         cmd = command_deploy_file(ifname, path_clb)
         #if verbos: print('cmd: %s' % cmd)
         logger.info('cmd: %s' % cmd)
         os.system(cmd)
-        if not fexists: os.chmod(path_clb, filemode)
+        if not fexists:
+            os.chmod(path_clb, filemode)
+            change_file_ownership(path_clb, user=None, group=group)
 
         fexists = os.path.exists(path_his)
         rec = history_record(ifname, ctypedir, ctype, ofname, comment='')
@@ -903,7 +907,10 @@ def deploy_file(ifname, ctypedir, ctype, ofname, lfname=None, verbos=False, file
         #if verbos: print('cmd: %s' % cmd)
         logger.info('cmd: %s' % cmd)
         os.system(cmd)
-        if not fexists: os.chmod(path_his, filemode)
+        if not fexists:
+            os.chmod(path_his, filemode)
+            change_file_ownership(path_his, user=None, group=group)
+
         if lfname is not None: add_rec_to_log(lfname, '  %s' % rec, verbos)
 
 

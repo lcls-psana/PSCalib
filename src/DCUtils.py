@@ -17,8 +17,8 @@ Usage::
     usr   = gu.get_login()
     host  = gu.get_hostname()
     cwd   = gu.get_cwd()
-    gu.create_directory(dir, mode=0o2775)
-    gu.create_path(path, depth=2, mode=0o2775)
+    gu.create_directory(d, mode=0o2775, umask=0o0, group='ps-users')
+    gu.create_path(path, depth=2, mode=0o2775, umask=0o0, group='ps-users')
     gu.save_string_as_dset(grp, name, s)
     src   = gu.source_full_name(env, src)
     dtype = gu.dettype_from_str_source(src)
@@ -132,27 +132,28 @@ def get_cwd():
     return os.getcwd()
 
 
-def create_directory_v0(dir, verb=False):
-    if os.path.exists(dir):
+def create_directory_v0(d, verb=False):
+    if os.path.exists(d):
         pass
-        #if verb: print 'Directory exists: %s' % dir
+        #if verb: print 'Directory exists: %s' % d
     else:
-        os.makedirs(dir)
-        if verb : print('Directory created: %s' % dir)
+        os.makedirs(d)
+        if verb : print('Directory created: %s' % d)
 
 
-def create_directory(dir, mode=0o2775, umask=0o0):
-    #print 'create_directory: %s' % dir
+def create_directory(d, mode=0o2775, umask=0o0, group='ps-users'):
+    #print 'create_directory: %s' % d
     os.umask(umask)
-    if os.path.exists(dir):
-        log.debug('Directory exists: %s' % dir, __name__)
+    if os.path.exists(d):
+        log.debug('Directory exists: %s' % d, __name__)
     else:
-        os.makedirs(dir, mode)
-        os.chmod(dir, mode)
-        log.info('Directory created: %s' % dir, __name__)
+        os.makedirs(d, mode)
+        os.chmod(d, mode)
+        gu.change_file_ownership(d, user=None, group=group)
+        log.info('Directory created: %s' % d, __name__)
 
 
-def create_path(path, depth=2, mode=0o2775, umask=0o0):
+def create_path(path, depth=2, mode=0o2775, umask=0o0, group='ps-users'):
     # Creates missing path for /reg/d/psdm/<INS>/<EXP>/calib/<dtype> beginning from calib
     subdirs = path.rstrip('/').rsplit('/', depth)
     log.debug('subdirs: %s' % str(subdirs), __name__)
@@ -161,7 +162,7 @@ def create_path(path, depth=2, mode=0o2775, umask=0o0):
     for i,sd in enumerate(subdirs[1:]):
         cpath += '/%s'% sd
         #if i<length-depth: continue
-        create_directory(cpath, mode, umask)
+        create_directory(cpath, mode, umask, group)
         #print 'create_path: %s' % cpath
 
     return os.path.exists(cpath)
