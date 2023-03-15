@@ -17,26 +17,28 @@ Usage of (implemented) interface methods::
     cp = CalibPars()
     cp.print_attrs()
 
-    size = cp.pedestals()
-    size = cp.pixel_status()
-    size = cp.pixel_datast()
-    size = cp.pixel_rms()
-    size = cp.pixel_gain()
-    size = cp.pixel_offset()
-    size = cp.pixel_mask()
-    size = cp.pixel_bkgd()
-    size = cp.common_mode()
+    a = cp.pedestals()
+    a = cp.pixel_status()
+    a = cp.pixel_status_extra()
+    a = cp.pixel_datast()
+    a = cp.pixel_rms()
+    a = cp.pixel_gain()
+    a = cp.pixel_offset()
+    a = cp.pixel_mask()
+    a = cp.pixel_bkgd()
+    a = cp.common_mode()
 
     ctype = gu.PEDESTALS # ex.: gu.PIXEL_STATUS, gu.PIXEL_RMS, gu.PIXEL_MASK, etc.
-    size = cp.ndim(ctype)
-    size = cp.size(ctype)
-    size = cp.shape(ctype)
-    size = cp.status(ctype)
+    v = cp.ndim(ctype)
+    v = cp.size(ctype)
+    a = cp.shape(ctype)
+    a = cp.status(ctype)
 
 Methods:
   -  :py:meth:`print_attrs`
   -  :py:meth:`pedestals`
   -  :py:meth:`pixel_status`
+  -  :py:meth:`pixel_status_extra`
   -  :py:meth:`pixel_datast`
   -  :py:meth:`pixel_rms`
   -  :py:meth:`pixel_gain`
@@ -79,94 +81,69 @@ import PSCalib.GlobalUtils as gu
 class CalibPars(object):
 
     def __init__(self):
-        """ Constructor
-        """
+        """ Constructor"""
         self.wmsg = 'WARNING! %s.%s' % (self.__class__.__name__,\
                     '%s - interface method from the base class needs to be re-implemented in the derived class.')
         pass
 
-
     def print_attrs(self):
-        """ Prints attributes
-        """
+        """ Prints attributes"""
         print(self.wmsg % 'print_attrs()')
 
-
     def pedestals(self):
-        """ Returns pedestals
-        """
+        """ Returns pedestals"""
         print(self.wmsg % 'pedestals()')
 
-
     def pixel_status(self):
-        """ Returns pixel_status
-        """
+        """ Returns pixel_status"""
         print(self.wmsg % 'pixel_status()')
 
+    def pixel_status_extra(self):
+        """ Returns pixel_status_extra"""
+        print(self.wmsg % 'pixel_status_extra()')
 
     def pixel_datast(self):
-        """ Returns pixel_datast
-        """
+        """ Returns pixel_datast"""
         print(self.wmsg % 'pixel_datast()')
 
-
     def pixel_rms(self):
-        """ Returns pixel_rms
-        """
+        """ Returns pixel_rms"""
         print(self.wmsg % 'pixel_rms()')
 
-
     def pixel_gain(self):
-        """ Returns pixel_gain
-        """
+        """ Returns pixel_gain"""
         print(self.wmsg % 'pixel_gain()')
 
-
     def pixel_offset(self):
-        """ Returns pixel_offset
-        """
+        """ Returns pixel_offset"""
         print(self.wmsg % 'pixel_offset()')
 
-
     def pixel_mask(self):
-        """ Returns pixel_mask
-        """
+        """ Returns pixel_mask"""
         print(self.wmsg % 'pixel_mask()')
 
-
     def pixel_bkgd(self):
-        """ Returns pixel_bkgd
-        """
+        """ Returns pixel_bkgd"""
         print(self.wmsg % 'pixel_bkgd()')
 
-
     def common_mode(self):
-        """ Returns common_mode
-        """
+        """ Returns common_mode"""
         print(self.wmsg % 'common_mode()')
 
-
     def ndim(self, ctype=gu.PEDESTALS):
-        """ Returns ndim
-        """
+        """ Returns ndim"""
         print(self.wmsg % 'ndim(ctype)')
 
-
     def shape(self, ctype=gu.PEDESTALS):
-        """ Returns shape
-        """
+        """ Returns shape"""
         print(self.wmsg % 'shape(ctype)')
 
-
     def size(self, ctype=gu.PEDESTALS):
-        """ Returns size
-        """
+        """ Returns size"""
         print(self.wmsg % 'size(ctype)')
 
-
     def status(self, ctype=gu.PEDESTALS):
-        """ Returns status
-        """
+        """ Returns status"""
         print(self.wmsg % 'size(status)')
 
 
@@ -176,8 +153,8 @@ if __name__ == "__main__":
     cp = CalibPars()
     cp.print_attrs()
     size = cp.size()
-    size = cp.shape()
-    size = cp.status()
+    shape = cp.shape()
+    status = cp.status()
     sys.exit ('End of %s' % sys.argv[0])
 
 # EOF
