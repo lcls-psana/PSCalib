@@ -26,6 +26,7 @@ Usage::
     # Access methods
     nda = o.pedestals()
     nda = o.pixel_status()
+    nda = o.pixel_status_extra()
     nda = o.pixel_datast()
     nda = o.pixel_rms()
     nda = o.pixel_mask()
@@ -231,6 +232,7 @@ def test_Create(tname='0'):
         print_nda(o.pixel_rms(),    'pixel_rms')
         print_nda(o.pixel_mask(),   'pixel_mask')
         print_nda(o.pixel_status(), 'pixel_status')
+        print_nda(o.pixel_status_extra(), 'pixel_status_extra')
         print_nda(o.pixel_gain(),   'pixel_gain')
         print_nda(o.common_mode(),  'common_mode')
         print_nda(o.pixel_bkgd(),   'pixel_bkgd')
