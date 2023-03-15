@@ -32,6 +32,7 @@ Usage::
     nda = gcp.pixel_mask()
     nda = gcp.pixel_bkgd()
     nda = gcp.pixel_status()
+    nda = gcp.pixel_status_extra()
     nda = gcp.pixel_datast()
     nda = gcp.pixel_gain()
     nda = gcp.pixel_offset()
@@ -75,7 +76,6 @@ GAIN_DEFAULT = 1./GAIN_FACTOR_DEFAULT # ADU/keV
 
 class GenericCalibPars(CalibPars) :
 
-
     def __init__(self, cbase, calibdir, group, source, runnum, pbits=255, fnexpc=None, fnrepo=None, tsec=None):
         """:py:class:`GenericCalibPars` constructor
 
@@ -112,22 +112,17 @@ class GenericCalibPars(CalibPars) :
         self._size  = None if self.cbase is None else cbase.size
         self._shape = None if self.cbase is None else cbase.shape
 
-
     def reset_dicts(self):
-        """Re-sets dictionaries with status and constants for cash
-        """
+        """Re-sets dictionaries with status and constants for cash"""
         self.dic_constants = dict([(k, None) for k in gu.calib_types])
         self.dic_status    = dict([(k, gu.UNDEFINED) for k in gu.calib_types])
-
 
     def set_print_bits(self, pbits=0):
         self.pbits  = pbits
         if self.cff is not None: self.cff.pbits=0o377 if pbits else 0
 
-
     def print_attrs(self):
-        """Prints attributes
-        """
+        """Prints attributes"""
         inf = '\nAttributes of %s object:' % self.name \
             + '\n  base object: %s' % self.cbase.__class__.__name__ \
             + '\n  calibdir   : %s' % self.calibdir \
@@ -140,18 +135,14 @@ class GenericCalibPars(CalibPars) :
             + '\n  pbits      : %s' % self.pbits
         print(inf)
 
-
     def msgh(self, i=3):
-        """Returns message header
-        """
+        """Returns message header"""
         if   i==3: return '%s: source %s run=%d' % (self.name, self.source, self.runnum)
         elif i==2: return '%s: source %s' % (self.name, self.source)
         else     : return '%s:' % (self.name)
 
-
     def msgw(self):
         return '%s: %s' % (self.name, 'implementation of method %s')
-
 
     def constants_default(self, ctype):
         """Returns numpy array with default constants
@@ -162,7 +153,7 @@ class GenericCalibPars(CalibPars) :
         - 1) if constants for common mode - return default numpy array
         - 2) if base size of calibration constants is 0 (for variable image size cameras)
            - return None (they can be loaded from file only!
-        - 3) for PEDESTALS, PIXEL_STATUS, PIXEL_BKGD return numpy array of **zeros** for base shape and dtype
+        - 3) for PEDESTALS, PIXEL_STATUS, PIXEL_STATUS_EXTRA, PIXEL_BKGD return numpy array of **zeros** for base shape and dtype
         - 4) for all other calibration types return numpy array of **ones** for base shape and dtype
         """
 
@@ -183,7 +174,7 @@ class GenericCalibPars(CalibPars) :
 
         self.dic_status[ctype] = gu.DEFAULT
 
-        if ctype in (gu.PEDESTALS, gu.PIXEL_STATUS, gu.PIXEL_BKGD, gu.PIXEL_DATAST, gu.PIXEL_OFFSET):
+        if ctype in (gu.PEDESTALS, gu.PIXEL_STATUS, gu.PIXEL_STATUS_EXTRA, gu.PIXEL_BKGD, gu.PIXEL_DATAST, gu.PIXEL_OFFSET):
             return np.zeros(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
 
 # 2022-05-09 M.D. - remove this advanced "invention" because of users' complaints
@@ -195,7 +186,6 @@ class GenericCalibPars(CalibPars) :
 
         else: # for PIXEL_RMS, PIXEL_MASK, PIXEL_GAIN, etc
             return np.ones(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
-
 
     def constants_calib(self, ctype):
         """Returns numpy array with calibration constants for specified type
@@ -270,7 +260,6 @@ class GenericCalibPars(CalibPars) :
         self.dic_constants[ctype] = nda
         return nda
 
-
     def constants_dcs(self, ctype=gu.PEDESTALS, vers=None):
         """Returns numpy array with calibration constants of specified type from DCS
 
@@ -292,7 +281,6 @@ class GenericCalibPars(CalibPars) :
 
         #return get_constants_from_file(self.fnexpc, self.tsec, ctype, vers, verb) if is_good_fname(self.fnexpc) else\
         #       get_constants_from_file(self.fnrepo, self.tsec, ctype, vers, verb)
-
 
     def constants(self, ctype, vers=None):
         """Returns numpy array with calibration constants of specified type
@@ -324,64 +312,48 @@ class GenericCalibPars(CalibPars) :
 
         return arr
 
-
     def pedestals(self, vers=None):
-        """Returns pedestals
-        """
+        """Returns pedestals"""
         return self.constants(gu.PEDESTALS, vers)
 
-
     def pixel_status(self, vers=None):
-        """Returns pixel_status
-        """
+        """Returns pixel_status"""
         return self.constants(gu.PIXEL_STATUS, vers)
 
+    def pixel_status_extra(self, vers=None):
+        """Returns pixel_status_extra"""
+        return self.constants(gu.PIXEL_STATUS_EXTRA, vers)
 
     def pixel_datast(self, vers=None):
-        """Returns pixel_datast
-        """
+        """Returns pixel_datast"""
         return self.constants(gu.PIXEL_DATAST, vers)
 
-
     def pixel_rms(self, vers=None):
-        """Returns pixel_rms
-        """
+        """Returns pixel_rms"""
         return self.constants(gu.PIXEL_RMS, vers)
 
-
     def pixel_gain(self, vers=None):
-        """Returns pixel_gain
-        """
+        """Returns pixel_gain"""
         return self.constants(gu.PIXEL_GAIN, vers)
 
-
     def pixel_offset(self, vers=None):
-        """Returns pixel_offset
-        """
+        """Returns pixel_offset"""
         return self.constants(gu.PIXEL_OFFSET, vers)
 
-
     def pixel_mask(self, vers=None):
-        """Returns pixel_mask
-        """
+        """Returns pixel_mask"""
         return self.constants(gu.PIXEL_MASK, vers)
 
-
     def pixel_bkgd(self, vers=None):
-        """Returns pixel_bkgd
-        """
+        """Returns pixel_bkgd"""
         return self.constants(gu.PIXEL_BKGD, vers)
 
-
     def common_mode(self, vers=None):
-        """Returns common_mode
-        """
+        """Returns common_mode"""
         return self.constants(gu.COMMON_MODE, vers)
 
-
     def retrieve_shape(self):
-        """Retrieve shape, size, and ndim parameters and set them as member data
-        """
+        """Retrieve shape, size, and ndim parameters and set them as member data"""
         # if parameters are already set from base class or at file loading
         if self._size>0: return
         for ctype in gu.calib_types[:-1]: # loop over all types except the last - common_mode
@@ -389,43 +361,34 @@ class GenericCalibPars(CalibPars) :
             if arr is None: continue
             if arr.size>0 : break         # check if shape parameters defined
 
-
     def ndim(self, ctype=gu.PEDESTALS):
-        """Returns ndim
-        """
+        """Returns ndim"""
         if self.pbits & 128: print(self.msgw() % 'ndim  (%s)' % gu.dic_calib_type_to_name[ctype])
         if ctype == gu.COMMON_MODE: return 1
         else:
             self.retrieve_shape()
             return self._ndim
 
-
     def shape(self, ctype=gu.PEDESTALS):
-        """Returns shape
-        """
+        """Returns shape"""
         if self.pbits & 128: print(self.msgw() % 'shape (%s)' % gu.dic_calib_type_to_name[ctype])
         if ctype == gu.COMMON_MODE: return self.cbase.shape_cm
         else:
             self.retrieve_shape()
             return self._shape
 
-
     def size(self, ctype=gu.PEDESTALS):
-        """Returns size
-        """
+        """Returns size"""
         if self.pbits & 128: print(self.msgw() % 'size  (%s)' % gu.dic_calib_type_to_name[ctype])
         if ctype == gu.COMMON_MODE: return self.cbase.size_cm
         else:
             self.retrieve_shape()
             return self._size
 
-
     def status(self, ctype=gu.PEDESTALS):
-        """Returns status
-        """
+        """Returns status"""
         if self.pbits & 128: print(self.msgw() % 'status(%s)' % gu.dic_calib_type_to_name[ctype])
         return self.dic_status[ctype]
-
 
 if __name__ == "__main__":
     sys.exit ('Test of %s is not implemented.' % sys.argv[0])
