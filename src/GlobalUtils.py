@@ -75,7 +75,7 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Created: 2013-03-08 by Mikhail Dubrovin
 """
-from __future__ import print_function
+#from __future__ import print_function
 #from __future__ import division
 
 import logging
@@ -109,10 +109,11 @@ COMMON_MODE  = 6
 GEOMETRY     = 7
 PIXEL_OFFSET = 8
 PIXEL_DATAST = 9
+PIXEL_STATUS_EXTRA = 10
 
-calib_types  = ( PEDESTALS,   PIXEL_STATUS,   PIXEL_RMS,   PIXEL_GAIN,   PIXEL_MASK,   PIXEL_BKGD,   COMMON_MODE,   GEOMETRY,   PIXEL_OFFSET,   PIXEL_DATAST)
-calib_names  = ('pedestals', 'pixel_status', 'pixel_rms', 'pixel_gain', 'pixel_mask', 'pixel_bkgd', 'common_mode', 'geometry', 'pixel_offset', 'pixel_datast')
-calib_dtypes = ( np.float32,  np.uint16,      np.float32,  np.float32,   np.uint8,     np.float32,   np.double,     str,        np.float32,     np.uint16)
+calib_types  = ( PEDESTALS,   PIXEL_STATUS,   PIXEL_RMS,   PIXEL_GAIN,   PIXEL_MASK,   PIXEL_BKGD,   COMMON_MODE,   GEOMETRY,   PIXEL_OFFSET,   PIXEL_DATAST,   PIXEL_STATUS_EXTRA)
+calib_names  = ('pedestals', 'pixel_status', 'pixel_rms', 'pixel_gain', 'pixel_mask', 'pixel_bkgd', 'common_mode', 'geometry', 'pixel_offset', 'pixel_datast', 'pixel_status_extra')
+calib_dtypes = ( np.float32,  np.uint16,      np.float32,  np.float32,   np.uint8,     np.float32,   np.double,     str,        np.float32,     np.uint16,      np.uint64)
 
 dic_calib_type_to_name  = dict(zip(calib_types, calib_names))
 dic_calib_name_to_type  = dict(zip(calib_names, calib_types))
@@ -452,7 +453,8 @@ def merge_masks(mask1=None, mask2=None, dtype=np.uint8):
 
 def merge_status(stnda, **kwargs):
     """Merges status bits.
-       Originaly intended for epix10ka2m status array stnda.shape=(7, 16, 352, 384) merging to (16, 352, 384)
+       Originaly intended for epix10ka2m status array stnda.shape=(7, 16, 352, 384)
+       to merge all gain modes to (16, 352, 384)
        Also can be used with Jungfrau status array stnda.shape=(7, 16, 352, 384) merging to (16, 352, 384)
        option "indexes" contains a list of stnda[i,:] indexes to combine status
     """
