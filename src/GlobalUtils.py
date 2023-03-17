@@ -108,12 +108,12 @@ PIXEL_BKGD   = 5
 COMMON_MODE  = 6
 GEOMETRY     = 7
 PIXEL_OFFSET = 8
-PIXEL_DATAST = 9
-PIXEL_STATUS_EXTRA = 10
+STATUS_DATA  = 9
+STATUS_EXTRA = 10
 
-calib_types  = ( PEDESTALS,   PIXEL_STATUS,   PIXEL_RMS,   PIXEL_GAIN,   PIXEL_MASK,   PIXEL_BKGD,   COMMON_MODE,   GEOMETRY,   PIXEL_OFFSET,   PIXEL_DATAST,   PIXEL_STATUS_EXTRA)
-calib_names  = ('pedestals', 'pixel_status', 'pixel_rms', 'pixel_gain', 'pixel_mask', 'pixel_bkgd', 'common_mode', 'geometry', 'pixel_offset', 'pixel_datast', 'pixel_status_extra')
-calib_dtypes = ( np.float32,  np.uint16,      np.float32,  np.float32,   np.uint8,     np.float32,   np.double,     str,        np.float32,     np.uint16,      np.uint64)
+calib_types  = ( PEDESTALS,   PIXEL_STATUS,   PIXEL_RMS,   PIXEL_GAIN,   PIXEL_MASK,   PIXEL_BKGD,   COMMON_MODE,   GEOMETRY,   PIXEL_OFFSET,   STATUS_DATA,   STATUS_EXTRA)
+calib_names  = ('pedestals', 'pixel_status', 'pixel_rms', 'pixel_gain', 'pixel_mask', 'pixel_bkgd', 'common_mode', 'geometry', 'pixel_offset', 'status_data', 'status_extra')
+calib_dtypes = ( np.float32,  np.uint16,      np.float32,  np.float32,   np.uint8,     np.float32,   np.double,     str,        np.float32,     np.uint16,     np.uint64)
 
 dic_calib_type_to_name  = dict(zip(calib_types, calib_names))
 dic_calib_name_to_type  = dict(zip(calib_names, calib_types))
