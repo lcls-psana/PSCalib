@@ -330,7 +330,7 @@ def test_DCStore_save():
 
     o.add_ctype('pixel_rms')
     o.add_ctype('pixel_status')
-    o.add_ctype('pixel_status_extra')
+    o.add_ctype('status_extra')
     o.add_ctype('pixel_mask')
     o.add_ctype('pixel_gain')
     o.add_ctype('geometry')
