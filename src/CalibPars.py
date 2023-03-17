@@ -19,8 +19,8 @@ Usage of (implemented) interface methods::
 
     a = cp.pedestals()
     a = cp.pixel_status()
-    a = cp.pixel_status_extra()
-    a = cp.pixel_datast()
+    a = cp.status_extra()
+    a = cp.status_data()
     a = cp.pixel_rms()
     a = cp.pixel_gain()
     a = cp.pixel_offset()
@@ -38,8 +38,8 @@ Methods:
   -  :py:meth:`print_attrs`
   -  :py:meth:`pedestals`
   -  :py:meth:`pixel_status`
-  -  :py:meth:`pixel_status_extra`
-  -  :py:meth:`pixel_datast`
+  -  :py:meth:`status_extra`
+  -  :py:meth:`status_data`
   -  :py:meth:`pixel_rms`
   -  :py:meth:`pixel_gain`
   -  :py:meth:`pixel_offset`
@@ -98,13 +98,13 @@ class CalibPars(object):
         """ Returns pixel_status"""
         print(self.wmsg % 'pixel_status()')
 
-    def pixel_status_extra(self):
-        """ Returns pixel_status_extra"""
-        print(self.wmsg % 'pixel_status_extra()')
+    def status_extra(self):
+        """ Returns status_extra"""
+        print(self.wmsg % 'status_extra()')
 
-    def pixel_datast(self):
-        """ Returns pixel_datast"""
-        print(self.wmsg % 'pixel_datast()')
+    def status_data(self):
+        """ Returns status_data"""
+        print(self.wmsg % 'status_data()')
 
     def pixel_rms(self):
         """ Returns pixel_rms"""
