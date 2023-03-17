@@ -9,6 +9,15 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-46
+2023-03-17 Mikhail Dubrovin
+- rename pixel_status_extra > status_extra, pixel_datast > status_data
+  - src/CalibPars.py
+  - src/CalibParsStore.py
+  - src/DCStore.py
+  - src/GenericCalibPars.py
+  - src/GlobalUtils.py
+
 Tag: V02-00-45
 2023-03-14 Mikhail Dubrovin
 - src/CalibPars.py - add method pixel_status_extra, cosmetic improvements
