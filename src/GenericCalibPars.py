@@ -32,8 +32,8 @@ Usage::
     nda = gcp.pixel_mask()
     nda = gcp.pixel_bkgd()
     nda = gcp.pixel_status()
-    nda = gcp.pixel_status_extra()
-    nda = gcp.pixel_datast()
+    nda = gcp.status_extra()
+    nda = gcp.status_data()
     nda = gcp.pixel_gain()
     nda = gcp.pixel_offset()
     nda = gcp.common_mode()
@@ -153,7 +153,7 @@ class GenericCalibPars(CalibPars) :
         - 1) if constants for common mode - return default numpy array
         - 2) if base size of calibration constants is 0 (for variable image size cameras)
            - return None (they can be loaded from file only!
-        - 3) for PEDESTALS, PIXEL_STATUS, PIXEL_STATUS_EXTRA, PIXEL_BKGD return numpy array of **zeros** for base shape and dtype
+        - 3) for PEDESTALS, PIXEL_STATUS, STATUS_EXTRA, PIXEL_BKGD return numpy array of **zeros** for base shape and dtype
         - 4) for all other calibration types return numpy array of **ones** for base shape and dtype
         """
 
@@ -174,7 +174,7 @@ class GenericCalibPars(CalibPars) :
 
         self.dic_status[ctype] = gu.DEFAULT
 
-        if ctype in (gu.PEDESTALS, gu.PIXEL_STATUS, gu.PIXEL_STATUS_EXTRA, gu.PIXEL_BKGD, gu.PIXEL_DATAST, gu.PIXEL_OFFSET):
+        if ctype in (gu.PEDESTALS, gu.PIXEL_STATUS, gu.STATUS_EXTRA, gu.PIXEL_BKGD, gu.STATUS_DATA, gu.PIXEL_OFFSET):
             return np.zeros(self.cbase.shape, dtype = gu.dic_calib_type_to_dtype[ctype])
 
 # 2022-05-09 M.D. - remove this advanced "invention" because of users' complaints
@@ -320,13 +320,13 @@ class GenericCalibPars(CalibPars) :
         """Returns pixel_status"""
         return self.constants(gu.PIXEL_STATUS, vers)
 
-    def pixel_status_extra(self, vers=None):
-        """Returns pixel_status_extra"""
-        return self.constants(gu.PIXEL_STATUS_EXTRA, vers)
+    def status_extra(self, vers=None):
+        """Returns status_extra"""
+        return self.constants(gu.STATUS_EXTRA, vers)
 
-    def pixel_datast(self, vers=None):
-        """Returns pixel_datast"""
-        return self.constants(gu.PIXEL_DATAST, vers)
+    def status_data(self, vers=None):
+        """Returns status_data"""
+        return self.constants(gu.STATUS_DATA, vers)
 
     def pixel_rms(self, vers=None):
         """Returns pixel_rms"""
