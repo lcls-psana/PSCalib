@@ -39,7 +39,7 @@ class DCS_CLI(object):
         #if self.verbos: self.print_raw()
         if self.verbos: self.print_pars()
 
-        repoman = uc.RepoManager(DIR_REPO, dir_log_at_start=DIR_LOG_AT_START,\
+        repoman = uc.RepoManager(dirrepo=DIR_REPO, dir_log_at_start=DIR_LOG_AT_START,\
                                  dirmode=opts.dirmode, filemode=opts.filemode, group=opts.group)
         #logname = repoman.logname('%s_%s' % (SCRNAME, gu.get_login()))
         #init_logger(loglevel=args.loglev, logfname=logname, fmt='[%(levelname).1s] %(filename)s L%(lineno)04d %(message)s')
