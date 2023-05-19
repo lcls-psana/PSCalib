@@ -9,6 +9,10 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-47
+2023-05-19 Mikhail Dubrovin
+- app/dcs - use optional uc.RepoManager(dirrepo=DIR_REPO,...
+
 Tag: V02-00-46
 2023-03-17 Mikhail Dubrovin
 - rename pixel_status_extra > status_extra, pixel_datast > status_data
