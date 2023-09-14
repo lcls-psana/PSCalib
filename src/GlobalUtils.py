@@ -451,6 +451,23 @@ def merge_masks(mask1=None, mask2=None, dtype=np.uint8):
     return mask if dtype==np.bool else np.asarray(mask, dtype)
 
 
+def merge_masks_for_gain_index(mask, **kwargs):
+    """Merges masks for gain mode (0-th index).
+       Originaly intended for epix10ka2m mask array mask.shape=(7, 16, 352, 384)
+       to merge all gain modes to (16, 352, 384)
+       Also can be used with Jungfrau status array mask.shape=(7, 16, 352, 384) merging to (16, 352, 384)
+       option "indexes" contains a list of mask[i,:] indexes to combine in output mask
+    """
+    inds = kwargs.get('indexes', (0,1,2,3,4)) # indexes stand for 'FH','FM','FL','AHL-H','AML-M'
+
+    if mask.ndim < 2: return mask # ignore 1-d arrays
+    mask1 = np.copy(mask[inds[0],:])
+    for i in inds[1:]: # range(1,mask.shape[0]):
+        if i<mask.shape[0]: # boundary check for index
+            mask1 = merge_masks(mask[i,:], mask1)
+    return mask1
+
+
 def merge_status(stnda, **kwargs):
     """Merges status bits.
        Originaly intended for epix10ka2m status array stnda.shape=(7, 16, 352, 384)
@@ -464,7 +481,7 @@ def merge_status(stnda, **kwargs):
     st1 = np.copy(stnda[inds[0],:])
     for i in inds[1:]: # range(1,stnda.shape[0]):
         if i<stnda.shape[0]: # boundary check for index
-            st1 = np.bitwise_or(st1, stnda[i,:])
+            st1 = np.bitwise_or(st1, stnda[i,:]) # st1 |= stnda[i,:]
     return st1
 
 

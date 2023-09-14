@@ -9,6 +9,10 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-48
+2023-09-13 Mikhail Dubrovin
+- GlobalUtils.py - add method merge_masks_for_gain_index
+
 Tag: V02-00-47
 2023-05-19 Mikhail Dubrovin
 - app/dcs - use optional uc.RepoManager(dirrepo=DIR_REPO,...
