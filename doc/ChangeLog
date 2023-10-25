@@ -9,6 +9,10 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-49
+2023-09-25 Mikhail Dubrovin
+- src/GlobalUtils.py - replace deprecated np.bool > bool
+
 Tag: V02-00-48
 2023-09-13 Mikhail Dubrovin
 - GlobalUtils.py - add method merge_masks_for_gain_index

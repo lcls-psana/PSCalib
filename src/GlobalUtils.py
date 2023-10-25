@@ -448,7 +448,7 @@ def merge_masks(mask1=None, mask2=None, dtype=np.uint8):
         else                      : mask1.shape = shape2
 
     mask = np.logical_and(mask1, mask2)
-    return mask if dtype==np.bool else np.asarray(mask, dtype)
+    return mask if dtype==bool else np.asarray(mask, dtype)
 
 
 def merge_masks_for_gain_index(mask, **kwargs):
