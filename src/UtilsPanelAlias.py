@@ -59,6 +59,27 @@ def id_for_alias(alias, fname=FNAME_PANEL_ID_ALIASES):
             logger.debug('found panel id %s' % (fields[1]))
             return fields[1]
 
+
+def id_det_formatted(id_det, gap='\n    '):
+    return gap + gap.join(id_det.split('_'))
+
+
+def alias_file_formatted(fname):
+    """ """
+    assert isinstance(fname, str)
+    assert os.path.exists(fname), 'file "%s" DOES NOT EXIST' % str(fname)
+    #logger.debug('aliases file %s' % fname)
+    recs = load_textfile(fname).strip('\n').split('\n')
+    s = 'content of the file: %s\n' % fname
+    for r in recs:
+        fields = r.strip('\n').split(' ')
+        s += '\n  %s' % fields[0]
+        s += id_det_formatted(fields[1], gap='\n    ')
+        #s += '\n    ' + '\n    '.join(fields[1].split('_'))
+        s += '\n  ' + '\n  '.join(fields[2:])
+        s += '\n'
+    return s
+
 if __name__ == "__main__":
     def test_alias_for_id(tname):
         import random
