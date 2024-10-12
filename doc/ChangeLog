@@ -9,6 +9,11 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-50
+2024-10-11 Mikhail Dubrovin
+- src/GlobalUtils.py - change selection in det_type_from_source, add UNDEFDET
+- src/UtilsPanelAlias.py - add methods id_det_formatted, alias_file_formatted
+
 Tag: V02-00-49
 2023-09-25 Mikhail Dubrovin
 - src/GlobalUtils.py - replace deprecated np.bool > bool
