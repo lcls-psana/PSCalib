@@ -134,7 +134,7 @@ dic_calib_status_value_to_name = dict(zip(calib_statvalues, calib_statnames))
 dic_calib_status_name_to_value = dict(zip(calib_statnames,  calib_statvalues))
 
 
-UNDEFINED   = 0
+UNDEFDET    = 0
 CSPAD       = 1
 CSPAD2X2    = 2
 PRINCETON   = 3
@@ -181,7 +181,7 @@ ALVIUM      = 37
 #GOTTHARD # N/A data
 """ Enumetated detector types"""
 
-list_of_det_type = (UNDEFINED, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740,\
+list_of_det_type = (UNDEFDET, CSPAD, CSPAD2X2, PRINCETON, PNCCD, TM6740,\
                     OPAL1000, OPAL2000, OPAL4000, OPAL8000,\
                     ORCAFL40, EPIX, EPIX10K, EPIX100A, FCCD960, ANDOR, ACQIRIS, IMP, QUARTZ4A150, RAYONIX,\
                     EVR, FCCD, TIMEPIX, FLI, PIMAX, ANDOR3D, JUNGFRAU, ZYLA, EPICSCAM, EPIX10KA, UXI, PIXIS,\
@@ -322,44 +322,50 @@ def det_type_from_source(source):
     """ Returns enumerated detector type for string source
     """
     str_src = str(source)
-    if   ':Cspad.'          in str_src: return CSPAD
-    elif ':Cspad2x2.'       in str_src: return CSPAD2X2
-    elif ':pnCCD.'          in str_src: return PNCCD
-    elif ':Princeton.'      in str_src: return PRINCETON
-    elif ':Andor.'          in str_src: return ANDOR
-    elif ':Epix100a.'       in str_src: return EPIX100A
-    elif ':Epix10k.'        in str_src: return EPIX10K
-    elif ':Epix.'           in str_src: return EPIX
-    elif ':Opal1000.'       in str_src: return OPAL1000
-    elif ':Opal2000.'       in str_src: return OPAL2000
-    elif ':Opal4000.'       in str_src: return OPAL4000
-    elif ':Opal8000.'       in str_src: return OPAL8000
-    elif ':Tm6740.'         in str_src: return TM6740
-    elif ':OrcaFl40.'       in str_src: return ORCAFL40
-    elif ':Fccd960.'        in str_src: return FCCD960
-    elif ':Acqiris.'        in str_src: return ACQIRIS
-    elif ':Imp.'            in str_src: return IMP
-    elif ':Quartz4A150.'    in str_src: return QUARTZ4A150
-    elif ':Rayonix.'        in str_src: return RAYONIX
-    elif ':Evr.'            in str_src: return EVR
-    elif ':Fccd.'           in str_src: return FCCD
-    elif ':Timepix.'        in str_src: return TIMEPIX
-    elif ':Fli.'            in str_src: return FLI
-    elif ':Pimax.'          in str_src: return PIMAX
-    elif ':DualAndor.'      in str_src: return ANDOR3D
-    elif ':Jungfrau.'       in str_src: return JUNGFRAU
-    elif ':Zyla.'           in str_src: return ZYLA
-    elif ':ControlsCamera.' in str_src: return EPICSCAM
-    elif ':Epix10ka.'       in str_src: return EPIX10KA
-    elif ':Uxi.'            in str_src: return UXI
-    elif ':Pixis.'          in str_src: return PIXIS
-    elif ':Epix10ka2M.'     in str_src: return EPIX10KA2M
-    elif ':Epix10kaQuad.'   in str_src: return EPIX10KAQUAD
-    elif ':StreakC7700.'    in str_src: return STREAK
-    elif ':Archon.'         in str_src: return ARCHON
-    elif ':iStar.'          in str_src: return ISTAR
-    elif ':Alvium.'         in str_src: return ALVIUM
-    else                              : return UNDEFINED
+
+    #print('XXX det_type_from_source: str_src', str_src)
+
+    dettype = \
+    CSPAD        if ':Cspad.'          in str_src else\
+    CSPAD2X2     if ':Cspad2x2.'       in str_src else\
+    PNCCD        if ':pnCCD.'          in str_src else\
+    PRINCETON    if ':Princeton.'      in str_src else\
+    ANDOR        if ':Andor.'          in str_src else\
+    EPIX100A     if ':Epix100a.'       in str_src else\
+    EPIX10K      if ':Epix10k.'        in str_src else\
+    EPIX         if ':Epix.'           in str_src else\
+    OPAL1000     if ':Opal1000.'       in str_src else\
+    OPAL2000     if ':Opal2000.'       in str_src else\
+    OPAL4000     if ':Opal4000.'       in str_src else\
+    OPAL8000     if ':Opal8000.'       in str_src else\
+    TM6740       if ':Tm6740.'         in str_src else\
+    ORCAFL40     if ':OrcaFl40.'       in str_src else\
+    FCCD960      if ':Fccd960.'        in str_src else\
+    ACQIRIS      if ':Acqiris.'        in str_src else\
+    IMP          if ':Imp.'            in str_src else\
+    QUARTZ4A150  if ':Quartz4A150.'    in str_src else\
+    RAYONIX      if ':Rayonix.'        in str_src else\
+    EVR          if ':Evr.'            in str_src else\
+    FCCD         if ':Fccd.'           in str_src else\
+    TIMEPIX      if ':Timepix.'        in str_src else\
+    FLI          if ':Fli.'            in str_src else\
+    PIMAX        if ':Pimax.'          in str_src else\
+    ANDOR3D      if ':DualAndor.'      in str_src else\
+    JUNGFRAU     if ':Jungfrau.'       in str_src else\
+    ZYLA         if ':Zyla.'           in str_src else\
+    EPICSCAM     if ':ControlsCamera.' in str_src else\
+    EPIX10KA     if ':Epix10ka.'       in str_src else\
+    UXI          if ':Uxi.'            in str_src else\
+    PIXIS        if ':Pixis.'          in str_src else\
+    EPIX10KA2M   if ':Epix10ka2M.'     in str_src else\
+    EPIX10KAQUAD if ':Epix10kaQuad.'   in str_src else\
+    STREAK       if ':StreakC7700.'    in str_src else\
+    ARCHON       if ':Archon.'         in str_src else\
+    ISTAR        if ':iStar.'          in str_src else\
+    ALVIUM       if ':Alvium.'         in str_src else\
+    UNDEFDET
+    #print('XXX dettype:', dettype)
+    return dettype
 
 
 def dict_detinfo_alias(env):
