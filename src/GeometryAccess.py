@@ -938,7 +938,7 @@ if __name__ == "__main__":
     logger.info('Detector origin indexes ixo:%d iyo:%d' % (ixo, iyo))
 
     root, ext = os.path.splitext(fname_data)
-    arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float)
+    arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float32)
     arr.shape= (4,8,185,388)
 
     logger.info('shapes rows: %s cols: %s weight: %s' % (str(rows.shape), str(cols.shape), str(arr.shape)))
@@ -993,7 +993,7 @@ if __name__ == "__main__":
   def test_cspad2x2():
     """ Test cspad2x2 geometry table.
     """
-    basedir = '/reg/g/psdm/detector/alignment/cspad2x2/calib-cspad2x2-01-2013-02-13/'
+    basedir = '/sdf/group/lcls/ds/ana/detector/alignment/cspad2x2/calib-cspad2x2-01-2013-02-13/'
     fname_geometry = basedir + 'calib/CsPad2x2::CalibV1/MecTargetChamber.0:Cspad2x2.1/geometry/0-end.data'
     fname_data     = basedir + 'cspad2x2.1-ndarr-ave-meca6113-r0028.dat'
 
@@ -1007,7 +1007,7 @@ if __name__ == "__main__":
     rows, cols = geometry.get_pixel_coord_indexes(do_tilt=True)
 
     root, ext = os.path.splitext(fname_data)
-    arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float)
+    arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float32)
     arr.shape= (185,388,2)
 
     logger.info('shapes rows: %s cols: %s weight: %s' % (str(rows.shape), str(cols.shape), str(arr.shape)))
@@ -1021,7 +1021,8 @@ if __name__ == "__main__":
   def test_epix100a():
     """ Test test_epix100a geometry table.
     """
-    basedir = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-05-15/'
+    #basedir = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-05-15/'
+    basedir = '/sdf/group/lcls/ds/ana/detector/alignment/cspad/calib-cxi-ds1-2014-05-15/'
     fname_geometry = basedir + 'calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/2-end.data'
     fname_data     = basedir + 'cspad-arr-cxid2714-r0023-lysozyme-rings.txt'
 
@@ -1035,7 +1036,7 @@ if __name__ == "__main__":
     rows, cols = geometry.get_pixel_coord_indexes()
 
     root, ext = os.path.splitext(fname_data)
-    arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float)
+    arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float32)
 
     logger.info('shapes rows: %s cols: %s weight: %s' % (str(rows.shape), str(cols.shape), str(arr.shape)))
     img = img_from_pixel_arrays(rows,cols,W=arr)
@@ -1049,7 +1050,8 @@ if __name__ == "__main__":
     """ Test cspad geometry table.
     """
     ## 'CxiDs1.0:Cspad.0)' or 'DscCsPad'
-    basedir = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-camera1-2014-09-24/'
+    #basedir = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-camera1-2014-09-24/'
+    basedir = '/sdf/group/lcls/ds/ana/detector/alignment/cspad/calib-cxi-camera1-2014-09-24/'
     fname_geometry = basedir + '2016-06-03-geometry-cxi06216-r25-camera1-z175mm.txt'
     fname_data     = basedir + '2016-06-03-chun-cxi06216-0025-DscCsPad-max.txt'
 
@@ -1063,7 +1065,7 @@ if __name__ == "__main__":
     rows, cols = geometry.get_pixel_xy_inds_at_z(zplane=150000)
 
     root, ext = os.path.splitext(fname_data)
-    arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float)
+    arr = np.load(fname_data) if ext == '.npy' else np.loadtxt(fname_data, dtype=np.float32)
 
     #logger.info('arr.shape=', arr.shape
     arr.shape= (32,185,388)
@@ -1112,7 +1114,8 @@ if __name__ == "__main__":
     #amp_range = (0,0.5)
 
     # CXI
-    basedir = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-03-19/'
+    #basedir = '/reg/g/psdm/detector/alignment/cspad/calib-cxi-ds1-2014-03-19/'
+    basedir = '/sdf/group/lcls/ds/ana/detector/alignment/cspad/calib-cxi-ds1-2014-03-19/'
     fname_data     = basedir + 'cspad-ndarr-ave-cxii0114-r0227.dat'
     fname_geometry = basedir + 'calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
     #fname_geometry = '/reg/d/psdm/CXI/cxitut13/calib/CsPad::CalibV1/CxiDs1.0:Cspad.0/geometry/0-end.data'
