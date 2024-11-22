@@ -9,6 +9,12 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-51
+2024-11-21 Mikhail Dubrovin
+- GeometryAccess.py,
+  UtilsConvertCrystFEL.py
+  - np.float > np.float32, use /sdf path to test files
+
 Tag: V02-00-50
 2024-10-11 Mikhail Dubrovin
 - src/GlobalUtils.py - change selection in det_type_from_source, add UNDEFDET
