@@ -316,8 +316,8 @@ class CrystFELGeometryParser:
 
         for i,k in enumerate(panasics.split(',')):
             dicasic = self.dict_of_pars[k]
-            uf = np.array(dicasic.get('fs', None), dtype=np.float) # unit vector f
-            us = np.array(dicasic.get('ss', None), dtype=np.float) # unit vector s
+            uf = np.array(dicasic.get('fs', None), dtype=np.float32) # unit vector f
+            us = np.array(dicasic.get('ss', None), dtype=np.float32) # unit vector s
             vf = uf*abs(xc0)
             vs = us*abs(yc0)
             x0pix = dicasic.get('corner_x', 0) # The units are pixel widths of the current panel
@@ -393,12 +393,13 @@ if __name__ == "__main__":
 
 
     scrname = sys.argv[0].rsplit('/')[-1]
-
-    fname_epix10ka2m = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-mfxc00318-epix10ka2m.1-0013-z0-mirror.geom'
-    fname_cspad      = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-cxig0915-cspad-ds1-crystfel.geom'
-    fname_cspadv2    = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-cspadv2-test-cframe-psana.geom'
-    fname_pnccd      = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-amox26916-pnccd-front-108-psana-crystfel.geom'
-    fname_jungfrau   = '/reg/g/psdm/detector/data_test/geometry/crystfel/geo-jungfrau-8-test-cframe-psana.geom'
+    #dirdt = '/reg/g/psdm/detector/data_test/'
+    dirdt = '/sdf/group/lcls/ds/ana/detector/data2_test/'
+    fname_epix10ka2m = dirdt + 'geometry/crystfel/geo-mfxc00318-epix10ka2m.1-0013-z0-mirror.geom'
+    fname_cspad      = dirdt + 'geometry/crystfel/geo-cxig0915-cspad-ds1-crystfel.geom'
+    fname_cspadv2    = dirdt + 'geometry/crystfel/geo-cspadv2-test-cframe-psana.geom'
+    fname_pnccd      = dirdt + 'geometry/crystfel/geo-amox26916-pnccd-front-108-psana-crystfel.geom'
+    fname_jungfrau   = dirdt + 'geometry/crystfel/geo-jungfrau-8-test-cframe-psana.geom'
 
     d_tname   = '0'
     d_dettype = 'cspad' # 'epix10ka' 'pnccd' 'jungfrau'
