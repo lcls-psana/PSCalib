@@ -110,7 +110,7 @@ if __name__ == "__main__":
     flims.save('fig-psana.png')
 
 
-  def ascending_nda(shape, amin=0, dtype=np.float):
+  def ascending_nda(shape, amin=0, dtype=np.float32):
     assert len(shape)==3
     nsegs, rows, cols = shape
     ash = (rows, cols)

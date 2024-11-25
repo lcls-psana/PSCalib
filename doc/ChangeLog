@@ -9,6 +9,11 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-52
+2024-11-25 Mikhail Dubrovin
+	modified:   examples/testUtilsPSF.py np.float > np.float32
+	modified:   src/NDArrIO.py np.int > np.int32
+
 Tag: V02-00-51
 2024-11-21 Mikhail Dubrovin
 - GeometryAccess.py,
