@@ -9,6 +9,11 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-53
+2025-01-29 Mikhail Dubrovin
+	- GenericCalibPars.py -	add stuff for debugging
+        - src/NDArrIO.py - use load_txt with np.loadtxt, add stuff for debugging
+
 Tag: V02-00-52
 2024-11-25 Mikhail Dubrovin
 	modified:   examples/testUtilsPSF.py np.float > np.float32
