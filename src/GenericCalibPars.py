@@ -56,7 +56,6 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
-from __future__ import print_function
 
 import sys
 import numpy as np
@@ -67,6 +66,9 @@ import PSCalib.GlobalUtils as gu
 from PSCalib.NDArrIO import load_txt # save_txt, list_of_comments
 
 from pyimgalgos.GlobalUtils import print_ndarr
+
+#from Detector.GlobalUtils import info_ndarr
+#from time import time
 
 #GAIN_FACTOR_DEFAULT = 0.06 # keV/ADU on 2022-04-26 epix100 gain factor(Philip) = 60 eV/ADU, gain(Conny) = 16.4 ADU/keV
 GAIN_FACTOR_DEFAULT = 1 # on 2022-05-09 because of users' complain return default gain factor to 1
@@ -226,8 +228,13 @@ class GenericCalibPars(CalibPars) :
 
         nda = None
         try:
+            #t0_sec = time()
             #nda = np.loadtxt(fname, dtype=gu.dic_calib_type_to_dtype[ctype])
-            nda = np.array(load_txt(fname), dtype=gu.dic_calib_type_to_dtype[ctype])
+            #nda = np.array(load_txt(fname), dtype=gu.dic_calib_type_to_dtype[ctype])
+            nda = load_txt(fname).astype(gu.dic_calib_type_to_dtype[ctype])
+            #dt_sec = time()-t0_sec
+            #print('XXX fname:%s' % fname)
+            #print('XXX %s load time %.3f s' % (tname, dt_sec), info_ndarr(nda, 'XXX nda', last=5))
         except:
             if self.pbits: print('WARNING %s: calibration file for type %s is unreadable.' % (self.msgh(3), tname))
             self.dic_status[ctype] = gu.UNREADABLE
