@@ -50,12 +50,10 @@ If you use all or part of it, please give an appropriate acknowledgment.
 
 Author: Mikhail Dubrovin
 """
-from __future__ import print_function
-
 import os
 import numpy as np
 import PSCalib.GlobalUtils as gu
-
+#from time import time
 
 def save_txt(fname='nda.txt', arr=None, cmts=(), fmt='%.1f', verbos=False, addmetad=True, group='ps-users', filemode=0o664):
     """Save n-dimensional numpy array to text file with metadata.
@@ -147,6 +145,8 @@ def list_of_comments(fname):
     f=open(fname,'r')
 
     cmts = []
+    #for i, rec in enumerate(f):
+    #    print('i:%04d rec:%s' % (i, str(rec)))
     for rec in f:
         if rec.isspace(): continue # ignore empty lines
         elif rec[0] == '#': cmts.append(rec.rstrip('\n'))
@@ -160,12 +160,18 @@ def list_of_comments(fname):
     return cmts
 
 
-def load_txt_v2(fname):
+def load_txt(fname):
     """Reads n-dimensional numpy array from text file with metadata.
        - fname - file name for text file.
+       ~1.5s works faster than manual parsing in load_txt_v0
     """
+    #t0_sec = time()
     cmts = list_of_comments(fname)
     ndim, shape, dtype = _metadata_from_comments(cmts)
+
+    #print('list_of_comments and _metadata_from_comments time: %.6f s' % (time()-t0_sec))
+    #print('cmts:%s' % str(cmts))
+    #print('ndim, shape, dtype', ndim, shape, dtype)
 
     nparr = np.loadtxt(fname, dtype=dtype, comments='#')
 
@@ -182,16 +188,19 @@ def load_txt_v2(fname):
     return nparr
 
 
-def load_txt(fname):
+def load_txt_v0(fname):
     """Reads n-dimensional numpy array from text file with metadata.
        - fname - file name for text file.
+       ~4s sloooow
     """
     #if not os.path.lexists(fname): raise IOError('File %s is not available' % fname)
 
     # Load all records from file
+    #t0_sec = time()
     f=open(fname,'r')
     recs = f.readlines()
     f.close()
+    #print('XXX load_txt time = %10.6f sec' % (time()-t0_sec))
 
     # Sort records for comments and data, discard empty records
     cmts = []
