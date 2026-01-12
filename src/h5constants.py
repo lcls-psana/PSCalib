@@ -1,4 +1,5 @@
-from __future__ import print_function
+
+#from __future__ import print_function
 import h5py
 import numpy
 import logging
@@ -12,10 +13,10 @@ class ConstantsStore(object):
             self.dispatch(subobj,str(k))
         self.f.close()
     def pushdir(self,dir):
-        '''move down a level and keep track of what hdf directory level we are in'''    
-        
+        '''move down a level and keep track of what hdf directory level we are in'''
+
         self.cwd += '/'+dir
-       
+
     def popdir(self):
         '''move up a level and keep track of what hdf directory level we are in'''
         self.cwd = self.cwd[:self.cwd.rfind('/')]
@@ -30,7 +31,7 @@ class ConstantsStore(object):
         '''called for every dictionary level to create a new hdf group name.
         it then looks into the dictionary to see if other groups need to
         be created'''
-        if self.cwd is '':
+        if self.cwd == '':
             self.f.create_group(name)
         self.pushdir(name)
         for k in d.keys():
@@ -63,7 +64,7 @@ class ConstantsLoad(object):
 
             if not dictname in obj:
                 obj[dictname]={}
-               
+
             self.setval(remainder,obj[dictname])
         else:
             obj[name]=self.f[self.fullname][()] # .value - deprecated
@@ -87,7 +88,7 @@ def save(file,obj):
     hdf5 supported types (int, float, numpy.ndarray, string).
     the hierarchy can be created by having one value of
     a dictionary itself be a dictionary.'''
-    
+
     c = ConstantsStore(obj,file)
 
 if __name__ == "__main__":
