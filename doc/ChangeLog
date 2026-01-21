@@ -9,6 +9,10 @@ Package author: Mikhail Dubrovin
 Please describe any modifications that you made to the package in the
 reverse time order.
 
+Tag: V02-00-55
+2026-01-21 Mikhail Dubrovin
+- PSCalib/src/GlobalUtils.py - add try-except and do os.makedirs(d) even if directory exists
+
 Tag: V02-00-54
 2026-01-12 Mikhail Dubrovin
 - h5constants.py - if self.cwd is '': > if self.cwd == '':

@@ -704,10 +704,13 @@ def create_directory(d, mode=0o2775, group='ps-users', **kwa):
     if os.path.exists(d):
         logger.debug('exists: %s mode(oct): %s' % (d, oct(file_mode(d))))
     else:
-        os.makedirs(d)
-        os.chmod(d, mode)
-        change_file_ownership(d, user=None, group=group)
-        logger.debug('created: %s, mode(oct)=%s' % (d, oct(mode)))
+        try: # works when two processes trys to create directory simultaneously, see https://jira.slac.stanford.edu/browse/ECS-9567
+            os.makedirs(d)
+            os.chmod(d, mode)
+            change_file_ownership(d, user=None, group=group)
+            logger.debug('created: %s, mode(oct)=%s' % (d, oct(mode)))
+        except Exception as e:
+            logger.warning('exception in create_directory("%s") err: %s' % (d,e))
 
 
 def create_directory_with_mode(d, mode=0o2775, verb=False, group='ps-users'):
